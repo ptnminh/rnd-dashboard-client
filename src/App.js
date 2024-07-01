@@ -33,7 +33,7 @@ function App() {
           path="/"
           element={
             <Page title="Campaigns">
-              <NewCampaigns />
+              <Shop />
             </Page>
           }
         />
@@ -41,7 +41,7 @@ function App() {
           path="/campaigns/dashboard"
           element={
             <Page title="Campaigns dashboard">
-              <NewCampaigns />
+              <Shop />
             </Page>
           }
         />
@@ -49,7 +49,7 @@ function App() {
           path="/campaigns/add"
           element={
             <Page title="Campaigns">
-              <NewCampaigns />
+              <Page />
             </Page>
           }
         />

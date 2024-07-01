@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import cn from "classnames";
 import styles from "./Shop.module.sass";
-import Profile from "./Profile";
 import Settings from "./Settings";
 import Card from "../../components/Card";
 import Dropdown from "../../components/Dropdown";
@@ -27,7 +26,6 @@ const Shop = () => {
           <img src="/images/content/bg-shop.jpg" alt="Background" />
         </div>
         <Card className={styles.card}>
-          <Profile />
           <div className={styles.control}>
             <div className={styles.nav}>
               {navigation.map((x, index) => (

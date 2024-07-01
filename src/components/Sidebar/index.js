@@ -15,20 +15,20 @@ const navigation = [
   //   url: "/",
   // },
   {
-    title: "Campaigns",
+    title: "Dashboard",
     slug: "campaigns",
     icon: "diamond",
-    add: true,
-    dropdown: [
-      {
-        title: "History",
-        url: "/campaigns/history",
-      },
-      {
-        title: "Template",
-        url: "/campaigns/template",
-      },
-    ],
+    // add: true,
+    // dropdown: [
+    //   {
+    //     title: "History",
+    //     url: "/campaigns/history",
+    //   },
+    //   {
+    //     title: "Template",
+    //     url: "/campaigns/template",
+    //   },
+    // ],
   },
   // {
   //   title: "Shop",
