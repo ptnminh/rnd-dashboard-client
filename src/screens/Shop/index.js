@@ -12,7 +12,7 @@ import Follower from "./Follower";
 import { products } from "../../mocks/products";
 import { followers } from "../../mocks/followers";
 
-const navigation = ["Products", "Followers", "Following"];
+const navigation = ["Boards", "Users"];
 const intervals = ["Most recent", "Most new", "Most popular"];
 
 const Shop = () => {

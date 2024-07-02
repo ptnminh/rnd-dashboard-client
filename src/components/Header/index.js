@@ -18,22 +18,22 @@ const Header = ({ onOpen }) => {
   return (
     <header className={styles.header}>
       <button className={styles.burger} onClick={() => handleClick()}></button>
-      <Search className={cn(styles.search, { [styles.visible]: visible })} />
+      {/* <Search className={cn(styles.search, { [styles.visible]: visible })} /> */}
       <button
         className={cn(styles.buttonSearch, { [styles.active]: visible })}
         onClick={() => setVisible(!visible)}
       >
         <Icon name="search" size="24" />
       </button>
-      {/* <div className={styles.control} onClick={() => setVisible(false)}>
-        <Link className={cn("button", styles.button)} to="/campaigns/add">
+      <div className={styles.control} onClick={() => setVisible(false)}>
+        {/* <Link className={cn("button", styles.button)} to="/campaigns/add">
           <Icon name="add" size="24" />
           <span>Create</span>
-        </Link>
-        <Messages className={styles.messages} />
+        </Link> */}
+        {/* <Messages className={styles.messages} /> */}
         <Notification className={styles.notification} />
         <User className={styles.user} />
-      </div> */}
+      </div>
       {/* <div className={styles.btns}>
         <Link className={styles.link} to="/sign-in">
           Sign in

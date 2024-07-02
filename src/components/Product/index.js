@@ -33,28 +33,13 @@ const Product = ({
             onChange={() => handleClick()}
           />
         )}
-        {/* <Control className={styles.control} /> */}
+        <Control className={styles.control} />
+        <img srcSet={`${item.image2x} 2x`} src={item.image} alt="Product" />
       </div>
       <div className={styles.line}>
         <div className={styles.title}>{item.product}</div>
         <div className={styles.price}>{item.skus}</div>
       </div>
-      {released ? (
-        <div className={styles.date}>
-          <Icon name="clock" size="24" /> {item.date}
-        </div>
-      ) : item.ratingValue ? (
-        <div className={styles.rating}>
-          <Icon name="star-fill" size="24" />
-          {item.ratingValue}{" "}
-          <span className={styles.counter}>({item.ratingCounter})</span>
-        </div>
-      ) : (
-        <div className={cn(styles.rating, styles.ratingEmpty)}>
-          <Icon name="star-stroke" size="24" />
-          No ratings
-        </div>
-      )}
     </div>
   );
 };

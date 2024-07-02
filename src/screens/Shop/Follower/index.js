@@ -1,13 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "./Follower.module.sass";
 import cn from "classnames";
-import { Link } from "react-router-dom";
-
-import { numberWithCommas } from "../../../utils.js";
 
 const Follower = ({ className, item, followers }) => {
-  const [visible, setVisible] = useState(false);
-
   return (
     <div className={cn(styles.follower, className)}>
       <div className={styles.details}>
@@ -20,11 +15,11 @@ const Follower = ({ className, item, followers }) => {
             <div className={styles.counter}>
               <span>{item.products}</span> products
             </div>
-            <div className={styles.counter}>
+            {/* <div className={styles.counter}>
               <span>{numberWithCommas(item.followers)}</span> followers
-            </div>
+            </div> */}
           </div>
-          <div className={styles.btns}>
+          {/* <div className={styles.btns}>
             {followers ? (
               <button
                 className={cn("button-stroke", styles.button, styles.follow, {
@@ -48,7 +43,7 @@ const Follower = ({ className, item, followers }) => {
                 Message
               </Link>
             )}
-          </div>
+          </div> */}
         </div>
       </div>
       <div className={styles.gallery}>
