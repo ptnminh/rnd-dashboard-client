@@ -38,7 +38,7 @@ export const CAMPAIGN_TYPES_OPTIONS = [
     title: "ASIN",
   },
 ];
-export const CAMP_TYPES = ["KEYWORD", "AUTO", "ASIN"];
+export const CAMP_TYPES = ["BD1", "BD2", "BD3"];
 export const CREATE_SKU_CAMP_METHOD = [
   {
     id: 1,

@@ -2,44 +2,30 @@ import React, { useEffect } from "react";
 import cn from "classnames";
 import styles from "./CampaignInfo.module.sass";
 import Card from "../../../components/Card";
-import Icon from "../../../components/Icon";
-import TextInput from "../../../components/TextInput";
 import Dropdown from "../../../components/Dropdown";
-import Checkbox from "../../../components/Checkbox";
-import {
-  CAMP_TYPES,
-  CHANNELS_OPTIONS,
-  CREATE_SKU_CAMP_METHOD,
-} from "../../../constant";
 import { isEmpty } from "lodash";
-import Loader from "../../../components/Loader";
-import MultiSelect from "../../../components/Multiselect";
-
+import TextInput from "../../../components/TextInput";
+import { Grid, Image, List, ThemeIcon, rem, Skeleton } from "@mantine/core";
+import { IconCircleCheck } from "@tabler/icons-react";
+import { BRIEF_TYPES, GROUP_WORKS, MEMBERS } from "../../../constant";
 const CampaignInfo = ({
   className,
-  campType,
-  setCampType,
-  selectedCreateCampMethod,
-  handleChange,
-  store,
-  setStore,
-  channel,
-  setChannel,
+  workGroup,
+  setWorkGroup,
   register,
   errors,
-  onSubmit,
   setVisibleReviewTable,
-  setReviewData,
-  handleResetData,
   previewData,
-  handlePreviewData,
-  setFormValue,
-  handleSKUsBlur,
-  availableStores,
-  setAvailableStores,
-  loadingAvailableStores,
-  selectAvailableStore,
-  setSelectAvailableStore,
+  openPreviewModal,
+  rndMember,
+  setRndMember,
+  briefType,
+  setBriefType,
+  search,
+  setSearch,
+  handleSearchSKU,
+  loadingSearchSKU,
+  SKU,
 }) => {
   useEffect(() => {
     if (!isEmpty(previewData)) setVisibleReviewTable(true);
@@ -48,171 +34,162 @@ const CampaignInfo = ({
     <>
       <Card
         className={cn(styles.card, className)}
-        title="1. Create Type"
-        classTitle="title-green"
+        title="Info của RnD"
+        classTitle="title-red"
         classCardHead={styles.classCardHead}
+        classSpanTitle={styles.classSpanTitle}
       >
         <div className={styles.description}>
           <div className={styles.campType}>
             <Dropdown
               className={styles.dropdown}
               classDropdownHead={styles.dropdownHead}
-              value={campType}
-              setValue={setCampType}
-              options={CAMP_TYPES}
+              value={workGroup}
+              setValue={setWorkGroup}
+              options={GROUP_WORKS}
+              classOutSideClick={styles.groupDropdown}
+            />{" "}
+            <Dropdown
+              className={styles.dropdown}
+              classDropdownHead={styles.dropdownHead}
+              value={rndMember}
+              setValue={setRndMember}
+              options={MEMBERS}
+              classOutSideClick={styles.memberDropdown}
             />{" "}
           </div>
         </div>
       </Card>
       <Card
         className={cn(styles.card, className)}
-        title="2. SKU"
+        title="1. Loại Brief"
         classTitle="title-green"
         classCardHead={styles.classCardHead}
+        classSpanTitle={styles.classSpanBriefTitle}
       >
         <div
           className={styles.group}
           style={{ width: "100%", marginBottom: 24 }}
         >
-          <TextInput
-            className={styles.textarea}
-            // label={"SKUs"}
-            name="SKUs"
-            type="text"
-            isTextArea={true}
-            placeholder={`GL-Q006 \nGL-MH002`}
-            register={register("SKUs", { required: true })}
-            error={errors.SKUs}
-            onBlur={handleSKUsBlur}
-          />
-          <div
-            style={{
-              display: "flex",
-              minWidth: "100%",
-              marginLeft: 6,
-            }}
-          >
-            {CREATE_SKU_CAMP_METHOD.map((x, index) => (
-              <Checkbox
-                className={styles.checkbox}
-                content={x.title}
-                value={selectedCreateCampMethod === x.id}
-                onChange={() => {
-                  if (x.id === 1 || x.id === 3)
-                    setFormValue("extendPrefix", "Gr");
-                  else setFormValue("extendPrefix", "");
-                  handleChange(x.id);
-                }}
-                key={index}
-              />
-            ))}
-          </div>
-          {selectedCreateCampMethod === 3 && (
-            <TextInput
-              className={styles.maximumCamp}
-              name="maximumSKUPerCampaign"
-              type="number"
-              placeholder="3"
-              tooltip="BT-P005_Gr_1kw"
-              error={errors.maximumSKUPerCampaign}
-              register={register("maximumSKUPerCampaign", {
-                required: true,
-                valueAsNumber: true,
-              })}
-            />
-          )}
+          <Dropdown
+            className={styles.dropdown}
+            classDropdownHead={styles.dropdownHead}
+            value={briefType}
+            setValue={setBriefType}
+            options={BRIEF_TYPES}
+          />{" "}
         </div>
       </Card>
       <Card
         className={cn(styles.card, className)}
-        title="4. Store"
+        title="2. Input Ref"
         classTitle="title-green"
         classCardHead={styles.classCardHead}
+        classSpanTitle={styles.classSpanBriefTitle}
         head={
-          <>
-            {loadingAvailableStores ? (
-              <Loader className={styles.loader} />
-            ) : !isEmpty(availableStores) ? (
-              <MultiSelect
-                className={styles.multiSelect}
-                values={selectAvailableStore}
-                setValues={setSelectAvailableStore}
-                options={availableStores}
-              />
-            ) : (
-              <p>
-                <span style={{ color: "red" }}>No available stores</span>
-              </p>
-            )}
-          </>
-        }
-      ></Card>
-      <Card
-        className={cn(styles.card, className)}
-        title="6. Prefix (Camp Name)"
-        classTitle="title-green"
-        classCardHead={styles.classCardHead}
-        head={
-          <>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "flex-end",
-                gap: "15px",
-              }}
-            >
-              {CHANNELS_OPTIONS.map((x, index) => (
-                <Checkbox
-                  className={styles.checkboxChannel}
-                  content={x.title}
-                  value={channel === x.title}
-                  onChange={() => setChannel(x.title)}
-                  key={index}
-                />
-              ))}
-            </div>
-          </>
+          <TextInput
+            className={styles.form}
+            placeholder="Search SKU"
+            type="text"
+            name="search"
+            icon="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onClickIcon={handleSearchSKU}
+          />
         }
       >
-        <TextInput
-          style={{ marginTop: "12px" }}
-          className={styles.field}
-          name="extendPrefix"
-          type="text"
-          placeholder="Occasions (Optional)"
-          tooltip="BT-P005_Gr_1kw"
-          register={register("extendPrefix", { required: false })}
-          error={errors.extendPrefix}
-        />
-        <div className={styles.actions}>
-          <div
-            className={cn("button-stroke-red button-small", styles.clearButton)}
-            style={{ cursor: "pointer" }}
-            onClick={handleResetData}
-          >
-            <Icon name="trash" size="16" />
-            <span>Clear</span>
-          </div>
-          <div
-            className={cn(
-              "button-stroke-purple button-small",
-              styles.clearButton
-            )}
-            style={{ cursor: "pointer" }}
-            onClick={handlePreviewData}
-          >
-            <Icon name="repeat" size="16" />
-            <span>Preview</span>
-          </div>
-          <button
-            className={cn("button-stroke button-small", styles.createButton)}
-            type="submit"
-          >
-            <Icon name="plus" size="16" />
-            <span>Tạo</span>
-          </button>
-        </div>
+        {SKU && !loadingSearchSKU && (
+          <Grid>
+            <Grid.Col span={6}>
+              <Image radius="md" src={SKU.image} />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <List
+                spacing="lg"
+                size="sm"
+                center
+                icon={
+                  <ThemeIcon color="teal" size={24} radius="xl">
+                    <IconCircleCheck
+                      style={{ width: rem(16), height: rem(16) }}
+                    />
+                  </ThemeIcon>
+                }
+              >
+                {SKU.pfhLink && (
+                  <List.Item>
+                    Link PFH:{" "}
+                    <a href={SKU.pfhLink} target="_blank">
+                      Click
+                    </a>
+                  </List.Item>
+                )}
+                {SKU.designLink && (
+                  <List.Item>
+                    Link Design:{" "}
+                    <a href={SKU.designLink} target="_blank">
+                      Click
+                    </a>
+                  </List.Item>
+                )}
+                {SKU.mockupLink && (
+                  <List.Item>
+                    Link Mockup:{" "}
+                    <a href={SKU.mockupLink} target="_blank">
+                      Click
+                    </a>
+                  </List.Item>
+                )}
+                {SKU.tibLink && (
+                  <List.Item>
+                    Link TIB:{" "}
+                    <a href={SKU.tibLink} target="_blank">
+                      Click
+                    </a>
+                  </List.Item>
+                )}
+              </List>
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <div
+                className={cn(
+                  "button-stroke-blue button-small",
+                  styles.createButton
+                )}
+                onClick={() => openPreviewModal()}
+                style={{
+                  marginTop: "24px",
+                  marginBottom: "12px",
+                  marginRight: "auto",
+                  width: "150px",
+                  borderRadius: "20px",
+                  borderColor: "#62D256",
+                  borderWidth: "2px",
+                  backgroundColor: "#D9F5D6",
+                  border: "1px solid #62D256",
+                  color: "#000000",
+                  cursor: "pointer",
+                }}
+              >
+                <span>Preview Brief</span>
+              </div>
+            </Grid.Col>
+          </Grid>
+        )}
+        {loadingSearchSKU && (
+          <Grid>
+            <Grid.Col span={6}>
+              <Skeleton height={260} radius="md" />
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <Skeleton height={50} mt={10} radius="md" />
+              <Skeleton height={50} mt={10} radius="md" />
+              <Skeleton height={50} mt={10} radius="md" />
+              <Skeleton height={50} mt={10} radius="md" />
+            </Grid.Col>
+          </Grid>
+        )}
       </Card>
     </>
   );

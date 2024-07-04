@@ -9,12 +9,17 @@ const Card = ({
   classCardHead,
   head,
   children,
+  classSpanTitle,
 }) => {
   return (
     <div className={cn(styles.card, className)}>
       {title && (
         <div className={cn(styles.head, classCardHead)}>
-          <div className={cn(classTitle, styles.title)}>{title}</div>
+          <div className={cn(classTitle, styles.title)}>
+            <span className={cn(styles.spanTitle, classSpanTitle)}>
+              {title}
+            </span>
+          </div>
           {head && head}
         </div>
       )}

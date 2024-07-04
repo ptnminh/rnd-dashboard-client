@@ -4,8 +4,9 @@ import cn from "classnames";
 import Checkbox from "../Checkbox";
 import Loader from "../Loader";
 import Row from "./Row";
+import { map, toUpper } from "lodash";
 
-const Table = ({ items, title }) => {
+const Table = ({ items, title, headers, isShowCheckbox = false }) => {
   const [chooseAll, setСhooseAll] = useState(false);
 
   const [selectedFilters, setSelectedFilters] = useState([]);
@@ -22,19 +23,11 @@ const Table = ({ items, title }) => {
     <div className={styles.wrapper}>
       <div className={styles.table}>
         <div className={styles.row}>
-          <div className={styles.col}>
-            <Checkbox
-              className={styles.checkbox}
-              value={chooseAll}
-              onChange={() => setСhooseAll(!chooseAll)}
-            />
-          </div>
-          <div className={styles.col}>Name</div>
-          <div className={styles.col}>SKUs</div>
-          <div className={styles.col}>KW/ASIN</div>
-          <div className={styles.col}>Budget</div>
-          <div className={styles.col}>Default Bid</div>
-          <div className={styles.col}>Bid</div>
+          {map(headers, (x, index) => (
+            <div className={styles.col} key={index}>
+              {x}
+            </div>
+          ))}
         </div>
         {items.map((x, index) => (
           <Row
@@ -43,6 +36,8 @@ const Table = ({ items, title }) => {
             index={index}
             value={selectedFilters.includes(x.id)}
             onChange={() => handleChange(x.id)}
+            headers={headers}
+            isShowCheckbox={isShowCheckbox}
           />
         ))}
       </div>

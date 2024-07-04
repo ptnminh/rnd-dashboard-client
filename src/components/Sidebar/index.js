@@ -15,20 +15,23 @@ const navigation = [
   //   url: "/",
   // },
   {
-    title: "Dashboard",
-    slug: "campaigns",
+    title: "RnD - Tạo Brief",
+    slug: "rnd",
     icon: "diamond",
-    // add: true,
-    // dropdown: [
-    //   {
-    //     title: "History",
-    //     url: "/campaigns/history",
-    //   },
-    //   {
-    //     title: "Template",
-    //     url: "/campaigns/template",
-    //   },
-    // ],
+    dropdown: [
+      {
+        title: "List - RnD",
+        url: "/rnd/list",
+      },
+      {
+        title: "List - Product Line",
+        url: "/rnd/product-line",
+      },
+      {
+        title: "List - Clipart",
+        url: "/rnd/clip-art",
+      },
+    ],
   },
   // {
   //   title: "Shop",

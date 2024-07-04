@@ -33,7 +33,7 @@ function App() {
           path="/"
           element={
             <Page title="Campaigns">
-              <Shop />
+              <NewCampaigns />
             </Page>
           }
         />

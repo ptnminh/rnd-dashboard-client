@@ -17,6 +17,7 @@ const TextInput = ({
   register,
   error, // Destructure the error prop
   isTextArea = false,
+  onClickIcon,
   ...props
 }) => {
   // Hàm tạo thông báo lỗi
@@ -76,7 +77,13 @@ const TextInput = ({
         )}
 
         {icon && (
-          <div className={styles.icon}>
+          <div
+            className={styles.icon}
+            onClick={onClickIcon}
+            style={{
+              cursor: "pointer",
+            }}
+          >
             <Icon name={icon} size="24" />{" "}
           </div>
         )}
