@@ -18,18 +18,19 @@ const navigation = [
     title: "RnD - Tạo Brief",
     slug: "rnd",
     icon: "diamond",
+    add: true,
     dropdown: [
-      {
-        title: "List - RnD",
-        url: "/rnd/list",
-      },
       {
         title: "List - Product Line",
         url: "/rnd/product-line",
       },
       {
-        title: "List - Clipart",
-        url: "/rnd/clip-art",
+        title: "List - Collection",
+        url: "/rnd/collection",
+      },
+      {
+        title: "List - Layout",
+        url: "/rnd/layout",
       },
     ],
   },

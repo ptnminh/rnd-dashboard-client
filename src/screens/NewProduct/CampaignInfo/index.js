@@ -8,6 +8,7 @@ import TextInput from "../../../components/TextInput";
 import { Grid, Image, List, ThemeIcon, rem, Skeleton } from "@mantine/core";
 import { IconCircleCheck } from "@tabler/icons-react";
 import { BRIEF_TYPES, GROUP_WORKS, MEMBERS } from "../../../constant";
+import { showNotification } from "../../../utils/index";
 const CampaignInfo = ({
   className,
   workGroup,
@@ -26,6 +27,7 @@ const CampaignInfo = ({
   handleSearchSKU,
   loadingSearchSKU,
   SKU,
+  selectedProductLines,
 }) => {
   useEffect(() => {
     if (!isEmpty(previewData)) setVisibleReviewTable(true);
@@ -102,7 +104,10 @@ const CampaignInfo = ({
         {SKU && !loadingSearchSKU && (
           <Grid>
             <Grid.Col span={6}>
-              <Image radius="md" src={SKU.image} />
+              <Image
+                radius="md"
+                src={SKU.image || "/images/content/not_found_2.jpg"}
+              />
             </Grid.Col>
             <Grid.Col span={6}>
               <List
@@ -157,7 +162,17 @@ const CampaignInfo = ({
                   "button-stroke-blue button-small",
                   styles.createButton
                 )}
-                onClick={() => openPreviewModal()}
+                onClick={() => {
+                  if (isEmpty(selectedProductLines)) {
+                    showNotification(
+                      "Thất bại",
+                      "Vui lòng chọn Product Line",
+                      "red"
+                    );
+                    return;
+                  }
+                  openPreviewModal();
+                }}
                 style={{
                   marginTop: "24px",
                   marginBottom: "12px",

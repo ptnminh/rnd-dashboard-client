@@ -12,7 +12,7 @@ const PageList = () => {
         <Link to="/products/dashboard">Products dashboard</Link>
       </p>
       <p style={{ marginBottom: 5 }}>
-        <Link to="/campaigns/add">New product</Link>
+        <Link to="/rnd/brief">New product</Link>
       </p>
       <p style={{ marginBottom: 5 }}>
         <Link to="/products/drafts">Drafts</Link>

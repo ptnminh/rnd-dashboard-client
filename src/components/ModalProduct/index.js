@@ -37,10 +37,7 @@ const ModalProduct = ({ visible, onClose }) => {
     visible && (
       <div id="modal-product" className={styles.modal}>
         <div className={styles.control}>
-          <Link
-            className={cn("button-white", styles.button)}
-            to="/campaigns/add"
-          >
+          <Link className={cn("button-white", styles.button)} to="/rnd/brief">
             Edit product
           </Link>
           <button className={styles.close} onClick={onClose}>

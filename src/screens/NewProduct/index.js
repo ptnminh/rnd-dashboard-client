@@ -5,11 +5,9 @@ import cn from "classnames";
 import Card from "../../components/Card";
 import {
   BRIEF_TYPES,
-  COLLECTIONS,
   GROUP_WORKS,
   LAYOUT_TYPES,
   MEMBERS,
-  SAMPLE_SKU,
 } from "../../constant";
 import Checkbox from "../../components/Checkbox";
 import { useForm } from "react-hook-form";
@@ -22,6 +20,7 @@ import {
   Image,
   Grid,
   Skeleton,
+  Badge,
 } from "@mantine/core";
 import { showNotification } from "../../utils/index";
 
@@ -30,15 +29,23 @@ import CustomTable from "../../components/Table";
 import { posts } from "../../mocks/posts";
 import {
   compact,
+  concat,
   difference,
+  differenceBy,
   filter,
   find,
+  flatMap,
   includes,
   intersection,
+  intersectionBy,
   isEmpty,
   map,
+  sortBy,
+  toLower,
   uniq,
+  uniqBy,
 } from "lodash";
+import { rndServices } from "../../services";
 
 const HoverInfo = ({ image }) => (
   <div className={styles.hoverInfo}>
@@ -46,36 +53,40 @@ const HoverInfo = ({ image }) => (
   </div>
 );
 
-const filterValidCollections = (collections, type, rootProductLine) => {
+const filterValidCollections = (collections, type, SKU) => {
   let validCollections = [];
+  if (!SKU) {
+    return [];
+  }
+  const { productLine: rootProductLine } = SKU;
+
   if (type === LAYOUT_TYPES[0]) {
     validCollections = filter(collections, (collection) =>
-      includes(collection.productLines, rootProductLine)
+      includes(map(collection.productLines, "name"), rootProductLine)
     );
   } else if (type === LAYOUT_TYPES[1]) {
     validCollections = filter(
       collections,
-      (collection) => !includes(collection.productLines, rootProductLine)
+      (collection) =>
+        !includes(map(collection.productLines, "name"), rootProductLine)
     );
   }
   return filter(
     map(validCollections, (collection) => {
       const { productLines: collectionProductLines } = collection;
       if (type === LAYOUT_TYPES[0]) {
-        const productLines = SAMPLE_SKU.sameProductLine.map((x) => x.name);
-        const intersectionProductLines = intersection(
+        const intersectionProductLines = intersectionBy(
           collectionProductLines,
-          productLines
+          SKU.sameProductLines
         );
         return {
           ...collection,
           validProductLines: intersectionProductLines,
         };
       } else if (type === LAYOUT_TYPES[1]) {
-        const productLines = SAMPLE_SKU.sameProductLine.map((x) => x.name);
-        const diffProductLines = difference(
+        const diffProductLines = differenceBy(
           collectionProductLines,
-          productLines
+          SKU.sameProductLines
         );
         return {
           ...collection,
@@ -84,6 +95,37 @@ const filterValidCollections = (collections, type, rootProductLine) => {
       }
     }),
     (x) => !isEmpty(x.validProductLines)
+  );
+};
+
+const generateScaleProductLinesTable = (
+  selectedProductLines,
+  SKU,
+  collections
+) => {
+  const allProductLines = compact(
+    concat(
+      SKU?.sameProductLines,
+      SKU?.diffProductLines,
+      flatMap(collections, "validProductLines")
+    )
+  );
+  return compact(
+    map(
+      sortBy(selectedProductLines, (productLine) => toLower(productLine)),
+      (x, index) => {
+        const foundProductLine = find(allProductLines, { name: x });
+        if (!foundProductLine) return null;
+        const name = foundProductLine?.skuPrefix
+          ? `${foundProductLine.skuPrefix}-NM001`
+          : `XX-NM001`;
+        return {
+          No: index + 1,
+          "Product Line": foundProductLine?.name,
+          SKU: name,
+        };
+      }
+    )
   );
 };
 
@@ -103,26 +145,40 @@ const NewCampaigns = () => {
 
   const handleSearchSKU = async () => {
     console.log(search);
+    if (isEmpty(search)) {
+      showNotification("Thất bại", "Vui lòng nhập SKU", "red");
+      return;
+    }
     setLoadingSearchSKU(true);
     setLoadingProductLines(true);
-    setSKU(SAMPLE_SKU);
-    setProductLines(SAMPLE_SKU.sameProductLine);
+    const product = await rndServices.searchProducts(search);
+    if (product) {
+      showNotification("Thành công", "Tìm thấy SKU", "green");
+      setSKU(product);
 
-    // filter collections
-    const validCollections = compact(
-      filterValidCollections(
-        collections,
-        LAYOUT_TYPES[0],
-        SAMPLE_SKU.productLine
-      )
-    );
-    setValidCollections(validCollections);
-
-    // TEST
-    setTimeout(() => {
-      setLoadingProductLines(false);
-      setLoadingSearchSKU(false);
-    }, 2000);
+      // filter collections
+      const validCollections = compact(
+        filterValidCollections(collections, layout, product)
+      );
+      setValidCollections(validCollections);
+      const newProductLines = sortBy(
+        compact(
+          uniqBy(
+            concat(
+              SKU?.diffProductLines,
+              flatMap(map(validCollections, "validProductLines"))
+            ),
+            "uid"
+          )
+        ),
+        (productLines) => toLower(productLines.name)
+      );
+      setProductLines(
+        layout === LAYOUT_TYPES[0] ? product.sameProductLines : newProductLines
+      );
+    }
+    setLoadingProductLines(false);
+    setLoadingSearchSKU(false);
   };
   const {
     register,
@@ -136,7 +192,8 @@ const NewCampaigns = () => {
 
   const onSubmit = async (data) => {};
   const fetchCollections = async () => {
-    setCollections(COLLECTIONS);
+    const collections = await rndServices.getCollections({});
+    setCollections(collections);
   };
   useEffect(() => {
     fetchCollections();
@@ -146,7 +203,16 @@ const NewCampaigns = () => {
   const [selectedCollection, setSelectedCollection] = useState([]);
   const handleChange = (name) => {
     if (selectedProductLines.includes(name)) {
-      setSelectedProductLines(selectedProductLines.filter((x) => x !== name));
+      const newProductLines = selectedProductLines.filter((x) => x !== name);
+      setSelectedProductLines(newProductLines);
+      for (const collection of validCollections) {
+        const { validProductLines, name } = collection;
+        if (
+          isEmpty(intersection(map(validProductLines, "name"), newProductLines))
+        ) {
+          setSelectedCollection(selectedCollection.filter((x) => x !== name));
+        }
+      }
     } else {
       setSelectedProductLines((selectedProductLines) => [
         ...selectedProductLines,
@@ -162,7 +228,9 @@ const NewCampaigns = () => {
     if (selectedCollection.includes(name)) {
       setSelectedCollection(selectedCollection.filter((x) => x !== name));
       setSelectedProductLines(
-        selectedProductLines.filter((x) => !productLineCollection.includes(x))
+        selectedProductLines.filter(
+          (x) => !includes(map(productLineCollection, "name"), x)
+        )
       );
     } else {
       setSelectedCollection((selectedCollection) => [
@@ -170,20 +238,33 @@ const NewCampaigns = () => {
         name,
       ]);
       setSelectedProductLines((selectedProductLines) =>
-        uniq([...selectedProductLines, ...productLineCollection])
+        uniq([...selectedProductLines, ...map(productLineCollection, "name")])
       );
     }
   };
 
   useEffect(() => {
+    const validCollections = filterValidCollections(collections, layout, SKU);
     if (layout === LAYOUT_TYPES[0]) {
-      setProductLines(SAMPLE_SKU.sameProductLine);
+      setProductLines(SKU?.sameProductLines || []);
     } else {
-      setProductLines(SAMPLE_SKU.diffProductLine);
+      const newProductLines = sortBy(
+        compact(
+          uniqBy(
+            concat(
+              SKU?.diffProductLines,
+              flatMap(map(validCollections, "validProductLines"))
+            ),
+            "uid"
+          )
+        ),
+        (productLines) => toLower(productLines.name)
+      );
+      setProductLines(newProductLines || []);
     }
-    setValidCollections(
-      filterValidCollections(collections, layout, SAMPLE_SKU.productLine)
-    );
+    setValidCollections(validCollections || []);
+    setSelectedCollection([]);
+    setSelectedProductLines([]);
   }, [layout]);
   return (
     <>
@@ -216,6 +297,7 @@ const NewCampaigns = () => {
               handleSearchSKU={handleSearchSKU}
               loadingSearchSKU={loadingSearchSKU}
               SKU={SKU}
+              selectedProductLines={selectedProductLines}
             />
           </div>
           <div className={styles.col}>
@@ -243,64 +325,64 @@ const NewCampaigns = () => {
                   />
                 }
               >
-                {!loadingProductLines &&
-                  !isEmpty(validCollections) &&
-                  !isEmpty(productLines) &&
-                  SKU && (
-                    <Grid>
-                      <Grid.Col span={6}>
-                        <ScrollArea
-                          h={350}
-                          style={{
-                            color: "#000",
-                            borderRadius: "10px",
-                            boxShadow:
-                              "0px 1px 1px 0px rgba(0,0,0,0.12),0px 2px 2px 0px rgba(0,0,0,0.12),0px 4px 4px 0px rgba(0,0,0,0.12),0px 8px 8px 0px rgba(0,0,0,0.12),0px 16px 16px 0px rgba(0,0,0,0.12)",
-                            backgroundColor: "rgba(255, 255, 255, 1)",
-                          }}
-                        >
-                          <div className={styles.list}>
-                            {map(validCollections, (x, index) => (
-                              <Checkbox
-                                className={styles.checkbox}
-                                content={`Collection - ${x.name} (${x.validProductLines.length})`}
-                                value={selectedCollection.includes(x.name)}
-                                onChange={() => handleChangeCollection(x.name)}
-                                key={index}
-                              />
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      </Grid.Col>
-                      <Grid.Col span={6}>
-                        <ScrollArea
-                          h={350}
-                          style={{
-                            color: "#000",
-                            borderRadius: "10px",
-                            boxShadow:
-                              "0px 1px 1px 0px rgba(0,0,0,0.12),0px 2px 2px 0px rgba(0,0,0,0.12),0px 4px 4px 0px rgba(0,0,0,0.12),0px 8px 8px 0px rgba(0,0,0,0.12),0px 16px 16px 0px rgba(0,0,0,0.12)",
-                            backgroundColor: "rgba(255, 255, 255, 1)",
-                          }}
-                        >
-                          <div className={styles.list}>
-                            {map(productLines, (x, index) => (
-                              <Checkbox
-                                key={index}
-                                className={styles.checkbox}
-                                content={x.name}
-                                value={selectedProductLines.includes(x.name)}
-                                onChange={() => handleChange(x.name)}
-                                showHover={true}
-                                HoverComponent={HoverInfo}
-                                hoverProps={{ image: x.image }}
-                              />
-                            ))}
-                          </div>
-                        </ScrollArea>
-                      </Grid.Col>
-                    </Grid>
-                  )}
+                {!loadingProductLines && !isEmpty(productLines) && SKU && (
+                  <Grid>
+                    <Grid.Col span={6}>
+                      <ScrollArea
+                        h={350}
+                        style={{
+                          color: "#000",
+                          borderRadius: "10px",
+                          boxShadow:
+                            "0px 1px 1px 0px rgba(0,0,0,0.12),0px 2px 2px 0px rgba(0,0,0,0.12),0px 4px 4px 0px rgba(0,0,0,0.12),0px 8px 8px 0px rgba(0,0,0,0.12),0px 16px 16px 0px rgba(0,0,0,0.12)",
+                          backgroundColor: "rgba(255, 255, 255, 1)",
+                        }}
+                      >
+                        <div className={styles.list}>
+                          {map(validCollections, (x, index) => (
+                            <Checkbox
+                              className={styles.checkbox}
+                              content={`Collection - ${x.name} (${x.validProductLines.length})`}
+                              value={selectedCollection.includes(x.name)}
+                              onChange={() => handleChangeCollection(x.name)}
+                              key={index}
+                            />
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </Grid.Col>
+                    <Grid.Col span={6}>
+                      <ScrollArea
+                        h={350}
+                        style={{
+                          color: "#000",
+                          borderRadius: "10px",
+                          boxShadow:
+                            "0px 1px 1px 0px rgba(0,0,0,0.12),0px 2px 2px 0px rgba(0,0,0,0.12),0px 4px 4px 0px rgba(0,0,0,0.12),0px 8px 8px 0px rgba(0,0,0,0.12),0px 16px 16px 0px rgba(0,0,0,0.12)",
+                          backgroundColor: "rgba(255, 255, 255, 1)",
+                        }}
+                      >
+                        <div className={styles.list}>
+                          {map(productLines, (x, index) => (
+                            <Checkbox
+                              key={index}
+                              className={styles.checkbox}
+                              content={x.name}
+                              value={selectedProductLines.includes(x.name)}
+                              onChange={() => handleChange(x.name)}
+                              showHover={true}
+                              HoverComponent={HoverInfo}
+                              hoverProps={{
+                                image:
+                                  x.image || "/images/content/not_found_2.jpg",
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </Grid.Col>
+                  </Grid>
+                )}
                 {loadingProductLines && (
                   <Grid>
                     <Grid.Col span={6}>
@@ -356,7 +438,19 @@ const NewCampaigns = () => {
                 fontSize: "18px",
               }}
             >
-              Scale Product Line chung Layout - từ MG-Q045
+              Scale{" "}
+              <Badge
+                size="md"
+                variant="gradient"
+                gradient={{ from: "blue", to: "cyan", deg: 90 }}
+                style={{ margin: "0 5px" }}
+              >
+                {layout}
+              </Badge>{" "}
+              từ{" "}
+              <Badge size="md" color="pink" style={{ marginLeft: "5px" }}>
+                {SKU?.sku}
+              </Badge>{" "}
             </div>
           </Grid.Col>
           <Grid.Col span={12}>
@@ -367,7 +461,7 @@ const NewCampaigns = () => {
                 justifyContent: "center",
               }}
             >
-              BD1 - Thảo Thảo
+              {workGroup} - {rndMember}
             </div>
           </Grid.Col>
           <Grid.Col span={5}>
@@ -384,7 +478,7 @@ const NewCampaigns = () => {
             </div>
             <Image
               radius="md"
-              src="https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-7.png"
+              src={SKU?.image || "/images/content/not_found_2.jpg"}
             />
             <div
               style={{
@@ -396,7 +490,7 @@ const NewCampaigns = () => {
                 marginTop: "10px",
               }}
             >
-              MG-Q045
+              {SKU?.sku}
             </div>
           </Grid.Col>
           <Grid.Col span={1}></Grid.Col>
@@ -413,7 +507,11 @@ const NewCampaigns = () => {
             </div>
             <ScrollArea h={300} scrollbars="y">
               <CustomTable
-                items={posts}
+                items={generateScaleProductLinesTable(
+                  selectedProductLines,
+                  SKU,
+                  validCollections
+                )}
                 headers={["No", "Product Line", "SKU"]}
               />
             </ScrollArea>

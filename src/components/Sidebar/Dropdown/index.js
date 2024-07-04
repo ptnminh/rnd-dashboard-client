@@ -48,15 +48,15 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
       {item.add ? (
         <div
           className={cn(styles.top, {
-            [styles.active]: pathname.startsWith("/campaigns/add"),
+            [styles.active]: pathname.startsWith("/rnd/brief"),
           })}
         >
           <Head />
           <Link
             className={cn(styles.add, {
-              [styles.active]: pathname.startsWith("/campaigns/add"),
+              [styles.active]: pathname.startsWith("/rnd/brief"),
             })}
-            to="/campaigns/add"
+            to="/rnd/brief"
             onClick={onClose}
           >
             <Icon name="plus" size="10" />

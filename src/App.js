@@ -32,32 +32,40 @@ function App() {
         <Route
           path="/"
           element={
-            <Page title="Campaigns">
+            <Page title="Board">
               <NewCampaigns />
             </Page>
           }
         />
         <Route
-          path="/campaigns/dashboard"
+          path="/rnd/brief"
+          element={
+            <Page title="Board">
+              <NewCampaigns />
+            </Page>
+          }
+        />
+        <Route
+          path="/rnd/product-line"
           element={
             <Page title="Campaigns dashboard">
-              <Shop />
+              <TemplateKW />
             </Page>
           }
         />
         <Route
-          path="/campaigns/add"
+          path="/rnd/collection"
           element={
             <Page title="Campaigns">
-              <Page />
+              <TemplateKW />
             </Page>
           }
         />
         <Route
-          path="/campaigns/history"
+          path="/rnd/layout"
           element={
             <Page title="Campaigns">
-              <Drafts />
+              <TemplateKW />
             </Page>
           }
         />
