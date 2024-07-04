@@ -77,20 +77,20 @@ const filterValidCollections = (collections, type, SKU) => {
       if (type === LAYOUT_TYPES[0]) {
         const intersectionProductLines = intersectionBy(
           collectionProductLines,
-          SKU.sameProductLines
+          SKU.sameLayouts
         );
         return {
           ...collection,
           validProductLines: intersectionProductLines,
         };
       } else if (type === LAYOUT_TYPES[1]) {
-        const diffProductLines = differenceBy(
+        const diffLayouts = differenceBy(
           collectionProductLines,
-          SKU.sameProductLines
+          SKU.sameLayouts
         );
         return {
           ...collection,
-          validProductLines: diffProductLines,
+          validProductLines: diffLayouts,
         };
       }
     }),
@@ -105,8 +105,8 @@ const generateScaleProductLinesTable = (
 ) => {
   const allProductLines = compact(
     concat(
-      SKU?.sameProductLines,
-      SKU?.diffProductLines,
+      SKU?.sameLayouts,
+      SKU?.diffLayouts,
       flatMap(collections, "validProductLines")
     )
   );
@@ -165,7 +165,7 @@ const NewCampaigns = () => {
         compact(
           uniqBy(
             concat(
-              SKU?.diffProductLines,
+              product?.diffLayouts,
               flatMap(map(validCollections, "validProductLines"))
             ),
             "uid"
@@ -174,7 +174,7 @@ const NewCampaigns = () => {
         (productLines) => toLower(productLines.name)
       );
       setProductLines(
-        layout === LAYOUT_TYPES[0] ? product.sameProductLines : newProductLines
+        layout === LAYOUT_TYPES[0] ? product.sameLayouts : newProductLines
       );
     }
     setLoadingProductLines(false);
@@ -246,13 +246,13 @@ const NewCampaigns = () => {
   useEffect(() => {
     const validCollections = filterValidCollections(collections, layout, SKU);
     if (layout === LAYOUT_TYPES[0]) {
-      setProductLines(SKU?.sameProductLines || []);
+      setProductLines(SKU?.sameLayouts || []);
     } else {
       const newProductLines = sortBy(
         compact(
           uniqBy(
             concat(
-              SKU?.diffProductLines,
+              SKU?.diffLayouts,
               flatMap(map(validCollections, "validProductLines"))
             ),
             "uid"
@@ -339,15 +339,27 @@ const NewCampaigns = () => {
                         }}
                       >
                         <div className={styles.list}>
-                          {map(validCollections, (x, index) => (
-                            <Checkbox
-                              className={styles.checkbox}
-                              content={`Collection - ${x.name} (${x.validProductLines.length})`}
-                              value={selectedCollection.includes(x.name)}
-                              onChange={() => handleChangeCollection(x.name)}
-                              key={index}
-                            />
-                          ))}
+                          {!isEmpty(validCollections) ? (
+                            map(validCollections, (x, index) => (
+                              <Checkbox
+                                className={styles.checkbox}
+                                content={`Collection - ${x.name} (${x.validProductLines.length})`}
+                                value={selectedCollection.includes(x.name)}
+                                onChange={() => handleChangeCollection(x.name)}
+                                key={index}
+                              />
+                            ))
+                          ) : (
+                            <p
+                              style={{
+                                textAlign: "center",
+                                color: "#FF6A55",
+                                marginTop: "10px",
+                              }}
+                            >
+                              Không có collection nào phù hợp
+                            </p>
+                          )}
                         </div>
                       </ScrollArea>
                     </Grid.Col>
