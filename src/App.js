@@ -24,6 +24,7 @@ import Payouts from "./screens/Payouts";
 import Statements from "./screens/Statements";
 import Shop from "./screens/Shop";
 import PageList from "./screens/PageList";
+import DesignerScreens from "./screens/Designer";
 
 function App() {
   return (
@@ -70,10 +71,10 @@ function App() {
           }
         />
         <Route
-          path="/campaigns/template"
+          path="/designer"
           element={
             <Page title="Campaigns">
-              <TemplateKW />
+              <DesignerScreens />
             </Page>
           }
         />

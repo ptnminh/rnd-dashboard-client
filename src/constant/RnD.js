@@ -3,6 +3,7 @@ export const DESIGNER_MEMBERS = ["Lợi Lợi", "Hợi Hợi"];
 export const GROUP_WORKS = ["BD1", "BD2", "BD3"];
 export const BRIEF_TYPES = ["Scale - Product Base", "Scale - Clipart"];
 export const BRIEF_VALUES = ["Small", "Medium", "Big"];
+export const RND_SIZES = ["Small", "Medium", "Big"];
 export const LAYOUT_TYPES = [
   "Product Base - Chung Layout",
   "Product Base - Khác Layout",
@@ -68,7 +69,7 @@ export const SAMPLE_SKU = {
         "https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/images/bg-7.png",
     },
   ],
-  pfhLink: "https://www.google.com",
+  productLink: "https://www.google.com",
   designLink: "https://www.google.com",
   mockupLink: "https://www.google.com",
   tibLink: "",

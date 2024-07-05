@@ -10,9 +10,11 @@ import {
   GROUP_WORKS,
   LAYOUT_TYPES,
   MEMBERS,
+  RND_SIZES,
 } from "../../constant";
 import Checkbox from "../../components/Checkbox";
 import Editor from "../../components/Editor";
+import SlateEditor from "../../components/SlateEditor";
 import { useForm } from "react-hook-form";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -81,7 +83,8 @@ const filterValidCollections = (collections, type, SKU) => {
       if (type === LAYOUT_TYPES[0]) {
         const intersectionProductLines = intersectionBy(
           collectionProductLines,
-          SKU.sameLayouts
+          SKU.sameLayouts,
+          "uid"
         );
         return {
           ...collection,
@@ -90,7 +93,8 @@ const filterValidCollections = (collections, type, SKU) => {
       } else if (type === LAYOUT_TYPES[1]) {
         const diffLayouts = differenceBy(
           collectionProductLines,
-          SKU.sameLayouts
+          SKU.sameLayouts,
+          "uid"
         );
         return {
           ...collection,
@@ -138,6 +142,7 @@ const NewCampaigns = () => {
   const [epmNote, setEPMNote] = useState("");
   const [mktNote, setMKTNote] = useState("");
   const [workGroup, setWorkGroup] = useState(GROUP_WORKS[0]);
+  const [rndSize, setRndSize] = useState(RND_SIZES[0]);
   const [designerMember, setDesignerMember] = useState(DESIGNER_MEMBERS[0]);
   const [briefValue, setBriefValue] = useState(BRIEF_VALUES[0]);
   const [rndMember, setRndMember] = useState(MEMBERS[0]);
@@ -161,6 +166,8 @@ const NewCampaigns = () => {
       showNotification("Thất bại", "Vui lòng nhập SKU", "red");
       return;
     }
+    setSelectedCollection([]);
+    setSelectedProductLines([]);
     setLoadingSearchSKU(true);
     setLoadingProductLines(true);
     await delayTime(2000);
@@ -375,6 +382,8 @@ const NewCampaigns = () => {
               setDesignerMember={setDesignerMember}
               briefValue={briefValue}
               setBriefValue={setBriefValue}
+              rndSize={rndSize}
+              setRndSize={setRndSize}
             />
           </div>
           <div className={styles.col}>
@@ -484,7 +493,8 @@ const NewCampaigns = () => {
                               HoverComponent={HoverInfo}
                               hoverProps={{
                                 image:
-                                  x.image || "/images/content/not_found_2.jpg",
+                                  x.productLineImage ||
+                                  "/images/content/not_found_2.jpg",
                               }}
                             />
                           ))}
@@ -536,6 +546,7 @@ const NewCampaigns = () => {
                   classEditor={styles.editor}
                   label="Designer Note"
                 />
+                {/* <SlateEditor /> */}
               </Grid.Col>
               <Grid.Col span={4}>
                 <Editor

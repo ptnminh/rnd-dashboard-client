@@ -34,11 +34,11 @@ const navigation = [
       },
     ],
   },
-  // {
-  //   title: "Shop",
-  //   icon: "store",
-  //   url: "/shop",
-  // },
+  {
+    title: "Designer - Task",
+    icon: "diamond",
+    url: "/designer",
+  },
   // {
   //   title: "Income",
   //   slug: "income",

@@ -23,6 +23,7 @@ import {
   DESIGNER_MEMBERS,
   GROUP_WORKS,
   MEMBERS,
+  RND_SIZES,
 } from "../../../constant";
 import { showNotification } from "../../../utils/index";
 import { Autocomplete } from "@mantine/core";
@@ -36,7 +37,6 @@ const CampaignInfo = ({
   errors,
   setVisibleReviewTable,
   previewData,
-  openPreviewModal,
   rndMember,
   setRndMember,
   briefType,
@@ -46,12 +46,13 @@ const CampaignInfo = ({
   handleSearchSKU,
   loadingSearchSKU,
   SKU,
-  selectedProductLines,
   products,
   designerMember,
   setDesignerMember,
   briefValue,
   setBriefValue,
+  rndSize,
+  setRndSize,
 }) => {
   useEffect(() => {
     if (!isEmpty(previewData)) setVisibleReviewTable(true);
@@ -69,12 +70,30 @@ const CampaignInfo = ({
         <div className={styles.description}>
           <div className={styles.campType}>
             <Dropdown
-              label={"Group"}
+              label={"Team"}
               className={styles.dropdown}
               classDropdownHead={styles.dropdownHead}
               value={workGroup}
               setValue={setWorkGroup}
               options={GROUP_WORKS}
+              classOutSideClick={styles.memberDropdown}
+            />{" "}
+            <Dropdown
+              label={"Value"}
+              className={styles.dropdown}
+              classDropdownHead={styles.dropdownHead}
+              value={briefValue}
+              setValue={setBriefValue}
+              options={BRIEF_VALUES}
+              classOutSideClick={styles.memberDropdown}
+            />{" "}
+            <Dropdown
+              label={"RND Size"}
+              className={styles.dropdown}
+              classDropdownHead={styles.dropdownHead}
+              value={rndSize}
+              setValue={setRndSize}
+              options={RND_SIZES}
               classOutSideClick={styles.memberDropdown}
             />{" "}
             <Dropdown
@@ -93,15 +112,6 @@ const CampaignInfo = ({
               value={designerMember}
               setValue={setDesignerMember}
               options={DESIGNER_MEMBERS}
-              classOutSideClick={styles.memberDropdown}
-            />{" "}
-            <Dropdown
-              label={"Value"}
-              className={styles.dropdown}
-              classDropdownHead={styles.dropdownHead}
-              value={briefValue}
-              setValue={setBriefValue}
-              options={BRIEF_VALUES}
               classOutSideClick={styles.memberDropdown}
             />{" "}
           </div>
@@ -176,10 +186,10 @@ const CampaignInfo = ({
                   </ThemeIcon>
                 }
               >
-                {SKU.pfhLink && (
+                {SKU.productLink && (
                   <List.Item>
-                    Link PFH:{" "}
-                    <a href={SKU.pfhLink} target="_blank">
+                    Link Product:{" "}
+                    <a href={SKU.productLink} target="_blank">
                       Click
                     </a>
                   </List.Item>
