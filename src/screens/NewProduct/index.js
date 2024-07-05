@@ -493,8 +493,7 @@ const NewCampaigns = () => {
                               HoverComponent={HoverInfo}
                               hoverProps={{
                                 image:
-                                  x.productLineImage ||
-                                  "/images/content/not_found_2.jpg",
+                                  x.image || "/images/content/not_found_2.jpg",
                               }}
                             />
                           ))}

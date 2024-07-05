@@ -1,0 +1,14 @@
+/* Example CSS Module */
+.head-cells {
+    font-weight: bold;
+    color: indigo;
+    width: 100%;
+  }
+  
+  /* Target an internal MRT class already defined */
+  .toolbar {
+    /* Use :global() to make sure this className does not get hashed */
+    :global(.mrt-toolbar-internal-buttons) {
+      gap: 0.5rem;
+    }
+  }

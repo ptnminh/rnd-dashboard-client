@@ -218,6 +218,9 @@ const CampaignInfo = ({
                     </a>
                   </List.Item>
                 )}
+                {SKU.productLine && (
+                  <List.Item>PL: {SKU.productLine}</List.Item>
+                )}
               </List>
             </Grid.Col>
           </Grid>

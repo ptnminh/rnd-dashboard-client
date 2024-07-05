@@ -26,6 +26,7 @@ import { compact, filter, includes, isEmpty, map, split, uniq } from "lodash";
 import { useEdit } from "../../../hooks";
 import { IconSearch } from "@tabler/icons-react";
 import DatePicker from "react-datepicker";
+import classes from "./MyTable.module.css";
 //CREATE hook (post new user to api)
 function useCreateKeyword(name, exKeywords, setKeywords) {
   return useMutation({
@@ -212,9 +213,9 @@ const KeywordTable = ({ productLines, name }) => {
           align: "right",
         },
         size: 50, //small column
-        header: "No",
+        header: "NO",
         Header: ({ column }) => (
-          <div style={{ backgroundColor: "#E0EAFF", padding: "20px" }}>
+          <div style={{ backgroundColor: "#E0EAFF", justifyContent: "center" }}>
             {column.columnDef.header}
           </div>
         ),
@@ -244,11 +245,14 @@ const KeywordTable = ({ productLines, name }) => {
       {
         accessorKey: "date",
         header: "DATE",
+        muiTableHeadCellProps: {
+          align: "right",
+        },
         Header: ({ column }) => (
           <div
             style={{
               backgroundColor: "#E0EAFF",
-
+              justifyContent: "center",
               width: "100%",
             }}
           >
@@ -500,21 +504,9 @@ const KeywordTable = ({ productLines, name }) => {
     getRowId: (row) => row.id,
     enableFilters: false,
     enableColumnActions: false,
-    mantineTableContainerProps: {
-      sx: {
-        minHeight: "500px",
-        borderRadius: "20px",
-      },
-    },
-    mantineTableHeadCellProps: {
-      sx: {
-        backgroundColor: "#3FA433", // Change this to your desired background color
-        color: "#ffffff", // Optional: change the text color if needed
-        fontSize: "20px",
-      },
-    },
+    mantineTableHeadCellProps: { className: classes["head-cells"] },
     enableSorting: false,
-    mantineTableProps: { striped: "even", borderColor: "#3FA433" },
+    mantineTableProps: { striped: "even" },
     onCreatingRowCancel: () => setValidationErrors({}),
     onCreatingRowSave: handleCreateKeyword,
     onEditingRowCancel: () => setValidationErrors({}),
