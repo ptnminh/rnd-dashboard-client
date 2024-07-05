@@ -74,4 +74,30 @@ export const rndServices = {
       return false;
     }
   },
+  getUsers: async ({ page, limit, search }) => {
+    try {
+      let query = "";
+      if (search) {
+        query = `&pageSize=${limit}`;
+      }
+      if (page) {
+        query = `${query}&page=${page}`;
+      }
+      if (limit) {
+        query = `${query}&search=${search}`;
+      }
+      const url = query ? `${hostAPI}/users?${query}` : `${hostAPI}/users`;
+      const response = await axios.get(url);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Không tìm thấy user", "red");
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at getUsers:", error);
+      showNotification("Thất bại", "Không tìm thấy user", "red");
+      return false;
+    }
+  },
 };

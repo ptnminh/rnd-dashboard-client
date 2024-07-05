@@ -141,6 +141,8 @@ const NewCampaigns = () => {
   const [designerNote, setDesignerNote] = useState("");
   const [epmNote, setEPMNote] = useState("");
   const [mktNote, setMKTNote] = useState("");
+  const [batch, setBatch] = useState("");
+  const [users, setUsers] = useState([]);
   const [workGroup, setWorkGroup] = useState(GROUP_WORKS[0]);
   const [rndSize, setRndSize] = useState(RND_SIZES[0]);
   const [designerMember, setDesignerMember] = useState(DESIGNER_MEMBERS[0]);
@@ -256,6 +258,17 @@ const NewCampaigns = () => {
     }
   };
   const onSubmit = async (data) => {};
+  const fetchUsers = async () => {
+    const { data } = await rndServices.getUsers({
+      limit: -1,
+    });
+    const designers = filter(data, { role: "designer" });
+    const rnds = filter(data, { role: "rnd" });
+    setRndMember(map(rnds, "name")[0]);
+    setDesignerMember(map(designers, "name")[0]);
+    setWorkGroup(uniq(map(data, "team"))[0]);
+    setUsers(data);
+  };
   const fetchCollections = async () => {
     const { data } = await rndServices.getCollections({});
     setCollections(data);
@@ -272,7 +285,12 @@ const NewCampaigns = () => {
   useEffect(() => {
     fetchCollections();
     fetchAllProducts();
+    fetchUsers();
   }, []);
+  useEffect(() => {
+    const batch = find(users, { name: rndMember, role: "rnd" })?.nextBatch;
+    setBatch(batch || "");
+  }, [rndMember]);
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedProductLines, setSelectedProductLines] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState([]);
@@ -384,6 +402,7 @@ const NewCampaigns = () => {
               setBriefValue={setBriefValue}
               rndSize={rndSize}
               setRndSize={setRndSize}
+              users={users}
             />
           </div>
           <div className={styles.col}>
@@ -654,6 +673,7 @@ const NewCampaigns = () => {
               <Badge size="md" color="pink" style={{ marginLeft: "5px" }}>
                 {SKU?.sku}
               </Badge>{" "}
+              - {batch}
             </div>
           </Grid.Col>
           <Grid.Col span={12}>

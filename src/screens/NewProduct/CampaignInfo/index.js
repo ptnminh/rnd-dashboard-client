@@ -3,7 +3,7 @@ import cn from "classnames";
 import styles from "./CampaignInfo.module.sass";
 import Card from "../../../components/Card";
 import Dropdown from "../../../components/Dropdown";
-import { find, isEmpty, map, uniq, uniqBy } from "lodash";
+import { filter, find, isEmpty, map, uniq, uniqBy } from "lodash";
 import TextInput from "../../../components/TextInput";
 import {
   Grid,
@@ -53,6 +53,7 @@ const CampaignInfo = ({
   setBriefValue,
   rndSize,
   setRndSize,
+  users,
 }) => {
   useEffect(() => {
     if (!isEmpty(previewData)) setVisibleReviewTable(true);
@@ -75,7 +76,7 @@ const CampaignInfo = ({
               classDropdownHead={styles.dropdownHead}
               value={workGroup}
               setValue={setWorkGroup}
-              options={GROUP_WORKS}
+              options={workGroup || []}
               classOutSideClick={styles.memberDropdown}
             />{" "}
             <Dropdown
@@ -102,7 +103,7 @@ const CampaignInfo = ({
               classDropdownHead={styles.dropdownHead}
               value={rndMember}
               setValue={setRndMember}
-              options={MEMBERS}
+              options={map(filter(users, { role: "rnd" }), "name") || []}
               classOutSideClick={styles.memberDropdown}
             />{" "}
             <Dropdown
@@ -111,7 +112,7 @@ const CampaignInfo = ({
               classDropdownHead={styles.dropdownHead}
               value={designerMember}
               setValue={setDesignerMember}
-              options={DESIGNER_MEMBERS}
+              options={map(filter(users, { role: "designer" }), "name") || []}
               classOutSideClick={styles.memberDropdown}
             />{" "}
           </div>

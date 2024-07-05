@@ -3,6 +3,7 @@ import cn from "classnames";
 import OutsideClickHandler from "react-outside-click-handler";
 import styles from "./Dropdown.module.sass";
 import Tooltip from "../Tooltip";
+import { map } from "lodash";
 
 const Dropdown = ({
   className,
@@ -58,7 +59,7 @@ const Dropdown = ({
               <div className={styles.selection}>{value}</div>
             </div>
             <div className={cn(styles.body, { [styles.bodyUp]: upBody })}>
-              {options.map((x, index) => (
+              {map(options, (x, index) => (
                 <div
                   className={cn(styles.option, {
                     [styles.selectioned]: x === value,
