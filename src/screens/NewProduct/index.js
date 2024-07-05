@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./NewCampaigns.module.sass";
 import CampaignInfo from "./CampaignInfo";
 import cn from "classnames";
@@ -26,11 +26,9 @@ import { showNotification } from "../../utils/index";
 
 import Dropdown from "../../components/Dropdown";
 import CustomTable from "../../components/Table";
-import { posts } from "../../mocks/posts";
 import {
   compact,
   concat,
-  difference,
   differenceBy,
   filter,
   find,
@@ -40,12 +38,15 @@ import {
   intersectionBy,
   isEmpty,
   map,
+  orderBy,
   sortBy,
   toLower,
   uniq,
   uniqBy,
 } from "lodash";
 import { rndServices } from "../../services";
+import TextInput from "../../components/TextInput";
+import Icon from "../../components/Icon";
 
 const HoverInfo = ({ image }) => (
   <div className={styles.hoverInfo}>
@@ -142,7 +143,10 @@ const NewCampaigns = () => {
   const [loadingProductLines, setLoadingProductLines] = useState(false);
   const [reviewData, setReviewData] = useState([]);
   const [validCollections, setValidCollections] = useState([]);
-
+  const [products, setProducts] = useState([]);
+  const [searchCollection, setSearchCollection] = useState("");
+  const [searchProductLine, setSearchProductLine] = useState("");
+  const topRef = useRef(null);
   const handleSearchSKU = async () => {
     console.log(search);
     if (isEmpty(search)) {
@@ -180,20 +184,78 @@ const NewCampaigns = () => {
     setLoadingProductLines(false);
     setLoadingSearchSKU(false);
   };
+  const handleFilterCollection = (event) => {
+    const value = event.target.value;
+    setSearchCollection(value);
+    if (!value) {
+      handleChangeLayout();
+      return;
+    }
+    const filterValidCollections = filter(validCollections, (collection) => {
+      return includes(toLower(collection.name), toLower(value));
+    });
+    if (isEmpty(filterValidCollections)) {
+      return;
+    }
+    setValidCollections(filterValidCollections);
+  };
+  const handleFilterProductLines = (event) => {
+    const value = event.target.value;
+    setSearchProductLine(value);
+    if (!value) {
+      setProductLines(
+        layout === LAYOUT_TYPES[0] ? SKU?.sameLayouts : SKU?.diffLayouts
+      );
+      return;
+    }
+    const filterProductLines = filter(productLines, (productLine) => {
+      return includes(toLower(productLine.name), toLower(value));
+    });
+    if (isEmpty(filterProductLines)) {
+      return;
+    }
+    setProductLines(filterProductLines);
+  };
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
   } = useForm();
-
+  const handleMouseLeave = () => {
+    // Custom sorting function
+    const sortedProductLines = orderBy(
+      productLines,
+      [
+        (product) => (includes(selectedProductLines, product.name) ? 0 : 1),
+        "name",
+      ],
+      ["asc", "asc"]
+    );
+    setProductLines(sortedProductLines);
+  };
+  const scrollToTheTop = () => {
+    if (topRef.current) {
+      topRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
   const onSubmit = async (data) => {};
   const fetchCollections = async () => {
     const { data } = await rndServices.getCollections({});
     setCollections(data);
   };
+  const fetchAllProducts = async () => {
+    const data = await rndServices.getAllProducts({ isTakeAll: true });
+    setProducts(
+      map(data, (x) => ({
+        SKU: x.sku,
+        image: x.imageSrc,
+      }))
+    );
+  };
   useEffect(() => {
     fetchCollections();
+    fetchAllProducts();
   }, []);
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedProductLines, setSelectedProductLines] = useState([]);
@@ -240,7 +302,7 @@ const NewCampaigns = () => {
     }
   };
 
-  useEffect(() => {
+  const handleChangeLayout = () => {
     const validCollections = filterValidCollections(collections, layout, SKU);
     if (layout === LAYOUT_TYPES[0]) {
       setProductLines(SKU?.sameLayouts || []);
@@ -260,6 +322,10 @@ const NewCampaigns = () => {
       setProductLines(newProductLines || []);
     }
     setValidCollections(validCollections || []);
+  };
+
+  useEffect(() => {
+    handleChangeLayout();
     setSelectedCollection([]);
     setSelectedProductLines([]);
   }, [layout]);
@@ -295,6 +361,7 @@ const NewCampaigns = () => {
               loadingSearchSKU={loadingSearchSKU}
               SKU={SKU}
               selectedProductLines={selectedProductLines}
+              products={products}
             />
           </div>
           <div className={styles.col}>
@@ -336,6 +403,14 @@ const NewCampaigns = () => {
                         }}
                       >
                         <div className={styles.list}>
+                          <TextInput
+                            placeholder="Search Collection"
+                            type="text"
+                            name="search"
+                            value={searchCollection}
+                            onChange={(e) => handleFilterCollection(e)}
+                            className={styles.searchCollection}
+                          />
                           {!isEmpty(validCollections) ? (
                             map(validCollections, (x, index) => (
                               <Checkbox
@@ -371,7 +446,20 @@ const NewCampaigns = () => {
                           backgroundColor: "rgba(255, 255, 255, 1)",
                         }}
                       >
-                        <div className={styles.list}>
+                        <div ref={topRef}></div>
+                        <div
+                          className={styles.list}
+                          onMouseLeave={handleMouseLeave}
+                          style={{ position: "relative" }}
+                        >
+                          <TextInput
+                            placeholder="Search Product Lines"
+                            type="text"
+                            name="search"
+                            value={searchProductLine}
+                            onChange={(e) => handleFilterProductLines(e)}
+                            className={styles.searchCollection}
+                          />
                           {map(productLines, (x, index) => (
                             <Checkbox
                               key={index}
@@ -388,6 +476,19 @@ const NewCampaigns = () => {
                             />
                           ))}
                         </div>
+                        <span
+                          style={{
+                            position: "absolute",
+                            bottom: "0",
+                            right: "0",
+                            cursor: "pointer",
+                            padding: "10px",
+                            borderRadius: "10px",
+                          }}
+                          onClick={scrollToTheTop}
+                        >
+                          <Icon name="arrow-top" size={24} fill="#83BF6E" />
+                        </span>
                       </ScrollArea>
                     </Grid.Col>
                   </Grid>

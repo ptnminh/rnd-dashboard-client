@@ -35,7 +35,14 @@ const CustomCheckbox = forwardRef(
           <span className={cn(styles.tick, classCheckboxTick)}></span>
           {content &&
             (showHover ? (
-              <HoverCard width={280} shadow="md" withArrow openDelay={500}>
+              <HoverCard
+                width={280}
+                shadow="md"
+                withArrow
+                openDelay={500}
+                position="left-end"
+                offset={50}
+              >
                 <HoverCard.Target>
                   <span
                     className={styles.text}

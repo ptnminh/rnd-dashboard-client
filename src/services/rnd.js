@@ -45,4 +45,33 @@ export const rndServices = {
       return false;
     }
   },
+  getAllProducts: async ({ page, limit, search, isTakeAll }) => {
+    try {
+      let query = "";
+      if (search) {
+        query = `&search=${search}`;
+      }
+      if (page) {
+        query = `${query}&page=${page}`;
+      }
+      if (limit) {
+        query = `${query}&pageSize=${limit}`;
+      }
+      let url = query ? `${hostAPI}/products?${query}` : `${hostAPI}/products`;
+      if (isTakeAll) {
+        url = `${hostAPI}/products?pageSize=-1`;
+      }
+      const response = await axios.get(url);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Không tìm thấy product", "red");
+        return false;
+      }
+      return result?.data;
+    } catch (error) {
+      console.log("Error at getAllProducts:", error);
+      showNotification("Thất bại", "Không tìm thấy product", "red");
+      return false;
+    }
+  },
 };

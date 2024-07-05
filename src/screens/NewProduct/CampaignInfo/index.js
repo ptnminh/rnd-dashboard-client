@@ -3,12 +3,25 @@ import cn from "classnames";
 import styles from "./CampaignInfo.module.sass";
 import Card from "../../../components/Card";
 import Dropdown from "../../../components/Dropdown";
-import { isEmpty } from "lodash";
+import { find, isEmpty, map, uniq, uniqBy } from "lodash";
 import TextInput from "../../../components/TextInput";
-import { Grid, Image, List, ThemeIcon, rem, Skeleton } from "@mantine/core";
+import {
+  Grid,
+  Image,
+  List,
+  ThemeIcon,
+  rem,
+  Skeleton,
+  Group,
+  Avatar,
+  Text,
+} from "@mantine/core";
 import { IconCircleCheck } from "@tabler/icons-react";
 import { BRIEF_TYPES, GROUP_WORKS, MEMBERS } from "../../../constant";
 import { showNotification } from "../../../utils/index";
+import { Autocomplete } from "@mantine/core";
+import Icon from "../../../components/Icon";
+
 const CampaignInfo = ({
   className,
   workGroup,
@@ -28,10 +41,12 @@ const CampaignInfo = ({
   loadingSearchSKU,
   SKU,
   selectedProductLines,
+  products,
 }) => {
   useEffect(() => {
     if (!isEmpty(previewData)) setVisibleReviewTable(true);
   }, [previewData]);
+
   return (
     <>
       <Card
@@ -89,15 +104,24 @@ const CampaignInfo = ({
         classCardHead={styles.classCardHead}
         classSpanTitle={styles.classSpanBriefTitle}
         head={
-          <TextInput
-            className={styles.form}
+          <Autocomplete
             placeholder="Search SKU"
-            type="text"
-            name="search"
-            icon="search"
+            data={uniq(map(products, "SKU"))}
+            withScrollArea={true}
+            defaultDropdownOpened={false}
+            maxDropdownHeight={100}
+            leftSection={
+              <span
+                onClick={handleSearchSKU}
+                style={{
+                  cursor: "pointer",
+                }}
+              >
+                <Icon name="search" size={18} />
+              </span>
+            }
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onClickIcon={handleSearchSKU}
+            onChange={(value) => setSearch(value)}
           />
         }
       >
