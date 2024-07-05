@@ -647,7 +647,7 @@ const NewCampaigns = () => {
                 borderRadius: "12px",
               }}
             >
-              PREVIEW BRIEF
+              PREVIEW BRIEF - {batch}
             </div>
           </Grid.Col>
           <Grid.Col span={12}>
@@ -673,7 +673,6 @@ const NewCampaigns = () => {
               <Badge size="md" color="pink" style={{ marginLeft: "5px" }}>
                 {SKU?.sku}
               </Badge>{" "}
-              - {batch}
             </div>
           </Grid.Col>
           <Grid.Col span={12}>
