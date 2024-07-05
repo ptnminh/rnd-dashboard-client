@@ -1,6 +1,8 @@
 export const MEMBERS = ["Thảo Thảo", "Lảo Đảo"];
+export const DESIGNER_MEMBERS = ["Lợi Lợi", "Hợi Hợi"];
 export const GROUP_WORKS = ["BD1", "BD2", "BD3"];
 export const BRIEF_TYPES = ["Scale - Product Base", "Scale - Clipart"];
+export const BRIEF_VALUES = ["Small", "Medium", "Big"];
 export const LAYOUT_TYPES = [
   "Product Base - Chung Layout",
   "Product Base - Khác Layout",

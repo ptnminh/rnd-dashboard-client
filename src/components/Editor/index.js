@@ -43,7 +43,21 @@ const Editor = ({
         editorClassName={styles.editorMain}
         onEditorStateChange={onChange}
         toolbar={{
-          options: ["inline", "emoji", "link", "list", "textAlign", "history"],
+          options: [
+            "inline",
+            "blockType",
+            "fontSize",
+            "fontFamily",
+            "list",
+            "textAlign",
+            "colorPicker",
+            "link",
+            "embedded",
+            "emoji",
+            "image",
+            "remove",
+            "history",
+          ],
           inline: {
             options: ["bold", "italic", "underline"],
           },
@@ -55,6 +69,32 @@ const Editor = ({
           },
           textAlign: {
             options: ["center"],
+          },
+          embedded: {
+            className: undefined,
+            component: undefined,
+            popupClassName: undefined,
+            embedCallback: undefined,
+            defaultSize: {
+              height: "100%",
+              width: "100%",
+            },
+          },
+          image: {
+            className: undefined,
+            component: undefined,
+            popupClassName: undefined,
+            urlEnabled: true,
+            uploadEnabled: true,
+            alignmentEnabled: true,
+            uploadCallback: undefined,
+            previewImage: false,
+            inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",
+            alt: { present: false, mandatory: false },
+            defaultSize: {
+              height: "90%",
+              width: "90%",
+            },
           },
         }}
       />

@@ -7,3 +7,11 @@ export const numberWithCommas = (x) => {
 export const progress = () => {
   return Math.floor(Math.random() * 90) + 10 + "%";
 };
+
+export const delayTime = (number) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, number);
+  });
+};

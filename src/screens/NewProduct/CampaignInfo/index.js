@@ -17,7 +17,13 @@ import {
   Text,
 } from "@mantine/core";
 import { IconCircleCheck } from "@tabler/icons-react";
-import { BRIEF_TYPES, GROUP_WORKS, MEMBERS } from "../../../constant";
+import {
+  BRIEF_TYPES,
+  BRIEF_VALUES,
+  DESIGNER_MEMBERS,
+  GROUP_WORKS,
+  MEMBERS,
+} from "../../../constant";
 import { showNotification } from "../../../utils/index";
 import { Autocomplete } from "@mantine/core";
 import Icon from "../../../components/Icon";
@@ -42,6 +48,10 @@ const CampaignInfo = ({
   SKU,
   selectedProductLines,
   products,
+  designerMember,
+  setDesignerMember,
+  briefValue,
+  setBriefValue,
 }) => {
   useEffect(() => {
     if (!isEmpty(previewData)) setVisibleReviewTable(true);
@@ -59,19 +69,39 @@ const CampaignInfo = ({
         <div className={styles.description}>
           <div className={styles.campType}>
             <Dropdown
+              label={"Group"}
               className={styles.dropdown}
               classDropdownHead={styles.dropdownHead}
               value={workGroup}
               setValue={setWorkGroup}
               options={GROUP_WORKS}
-              classOutSideClick={styles.groupDropdown}
+              classOutSideClick={styles.memberDropdown}
             />{" "}
             <Dropdown
               className={styles.dropdown}
+              label={"RND"}
               classDropdownHead={styles.dropdownHead}
               value={rndMember}
               setValue={setRndMember}
               options={MEMBERS}
+              classOutSideClick={styles.memberDropdown}
+            />{" "}
+            <Dropdown
+              className={styles.dropdown}
+              label={"Designer"}
+              classDropdownHead={styles.dropdownHead}
+              value={designerMember}
+              setValue={setDesignerMember}
+              options={DESIGNER_MEMBERS}
+              classOutSideClick={styles.memberDropdown}
+            />{" "}
+            <Dropdown
+              label={"Value"}
+              className={styles.dropdown}
+              classDropdownHead={styles.dropdownHead}
+              value={briefValue}
+              setValue={setBriefValue}
+              options={BRIEF_VALUES}
               classOutSideClick={styles.memberDropdown}
             />{" "}
           </div>
@@ -179,40 +209,6 @@ const CampaignInfo = ({
                   </List.Item>
                 )}
               </List>
-            </Grid.Col>
-            <Grid.Col span={12}>
-              <div
-                className={cn(
-                  "button-stroke-blue button-small",
-                  styles.createButton
-                )}
-                onClick={() => {
-                  if (isEmpty(selectedProductLines)) {
-                    showNotification(
-                      "Thất bại",
-                      "Vui lòng chọn Product Line",
-                      "red"
-                    );
-                    return;
-                  }
-                  openPreviewModal();
-                }}
-                style={{
-                  marginTop: "24px",
-                  marginBottom: "12px",
-                  marginRight: "auto",
-                  width: "150px",
-                  borderRadius: "20px",
-                  borderColor: "#62D256",
-                  borderWidth: "2px",
-                  backgroundColor: "#D9F5D6",
-                  border: "1px solid #62D256",
-                  color: "#000000",
-                  cursor: "pointer",
-                }}
-              >
-                <span>Preview Brief</span>
-              </div>
             </Grid.Col>
           </Grid>
         )}

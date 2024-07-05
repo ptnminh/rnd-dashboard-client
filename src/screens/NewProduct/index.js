@@ -5,11 +5,14 @@ import cn from "classnames";
 import Card from "../../components/Card";
 import {
   BRIEF_TYPES,
+  BRIEF_VALUES,
+  DESIGNER_MEMBERS,
   GROUP_WORKS,
   LAYOUT_TYPES,
   MEMBERS,
 } from "../../constant";
 import Checkbox from "../../components/Checkbox";
+import Editor from "../../components/Editor";
 import { useForm } from "react-hook-form";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -47,7 +50,7 @@ import {
 import { rndServices } from "../../services";
 import TextInput from "../../components/TextInput";
 import Icon from "../../components/Icon";
-
+import { delayTime } from "../../utils";
 const HoverInfo = ({ image }) => (
   <div className={styles.hoverInfo}>
     <Image radius="md" src={image} />
@@ -131,7 +134,12 @@ const generateScaleProductLinesTable = (
 };
 
 const NewCampaigns = () => {
+  const [designerNote, setDesignerNote] = useState("");
+  const [epmNote, setEPMNote] = useState("");
+  const [mktNote, setMKTNote] = useState("");
   const [workGroup, setWorkGroup] = useState(GROUP_WORKS[0]);
+  const [designerMember, setDesignerMember] = useState(DESIGNER_MEMBERS[0]);
+  const [briefValue, setBriefValue] = useState(BRIEF_VALUES[0]);
   const [rndMember, setRndMember] = useState(MEMBERS[0]);
   const [briefType, setBriefType] = useState(BRIEF_TYPES[0]);
   const [layout, setLayout] = useState(LAYOUT_TYPES[0]);
@@ -155,6 +163,7 @@ const NewCampaigns = () => {
     }
     setLoadingSearchSKU(true);
     setLoadingProductLines(true);
+    await delayTime(2000);
     const product = await rndServices.searchProducts(search);
     if (product) {
       showNotification("Thành công", "Tìm thấy SKU", "green");
@@ -362,6 +371,10 @@ const NewCampaigns = () => {
               SKU={SKU}
               selectedProductLines={selectedProductLines}
               products={products}
+              designerMember={designerMember}
+              setDesignerMember={setDesignerMember}
+              briefValue={briefValue}
+              setBriefValue={setBriefValue}
             />
           </div>
           <div className={styles.col}>
@@ -393,7 +406,7 @@ const NewCampaigns = () => {
                   <Grid>
                     <Grid.Col span={6}>
                       <ScrollArea
-                        h={350}
+                        h={500}
                         style={{
                           color: "#000",
                           borderRadius: "10px",
@@ -437,7 +450,7 @@ const NewCampaigns = () => {
                     </Grid.Col>
                     <Grid.Col span={6}>
                       <ScrollArea
-                        h={350}
+                        h={500}
                         style={{
                           color: "#000",
                           borderRadius: "10px",
@@ -506,6 +519,76 @@ const NewCampaigns = () => {
               </Card>
             </Box>
           </div>
+        </div>
+        <div className={styles.row}>
+          <Card
+            className={cn(styles.cardNote)}
+            title="4. Note"
+            classTitle="title-green"
+            classCardHead={styles.classCardHead}
+            classSpanTitle={styles.classScaleSpanTitle}
+          >
+            <Grid>
+              <Grid.Col span={4}>
+                <Editor
+                  state={designerNote}
+                  onChange={setDesignerNote}
+                  classEditor={styles.editor}
+                  label="Designer Note"
+                />
+              </Grid.Col>
+              <Grid.Col span={4}>
+                <Editor
+                  state={epmNote}
+                  onChange={setEPMNote}
+                  classEditor={styles.editor}
+                  label="EPM Note"
+                />
+              </Grid.Col>
+              <Grid.Col span={4}>
+                <Editor
+                  state={mktNote}
+                  onChange={setMKTNote}
+                  classEditor={styles.editor}
+                  label="MKT Note"
+                />
+              </Grid.Col>
+              <Grid.Col span={12}>
+                <div
+                  className={cn(
+                    "button-stroke-blue button-small",
+                    styles.createButton
+                  )}
+                  onClick={() => {
+                    if (isEmpty(selectedProductLines)) {
+                      showNotification(
+                        "Thất bại",
+                        "Vui lòng chọn Product Line",
+                        "red"
+                      );
+                      return;
+                    }
+                    open();
+                  }}
+                  style={{
+                    marginTop: "24px",
+                    marginBottom: "12px",
+                    marginRight: "auto",
+                    width: "150px",
+                    borderRadius: "20px",
+                    borderColor: "#62D256",
+                    borderWidth: "2px",
+                    backgroundColor: "#D9F5D6",
+                    border: "1px solid #62D256",
+                    color: "#000000",
+                    cursor: "pointer",
+                  }}
+                >
+                  <span>Preview Brief</span>
+                </div>
+              </Grid.Col>
+            </Grid>
+          </Card>
         </div>
       </form>
       <Modal
