@@ -23,14 +23,13 @@ import {
   Tooltip,
 } from "@mantine/core";
 import { useForm } from "react-hook-form";
-import { IconDownload } from "@tabler/icons-react";
-import { keywordServices } from "../../services";
+import { keywordServices, rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
 import { useLocation, useNavigate } from "react-router-dom";
 import Loader from "../../components/Loader";
 const navigation = ["Default", "New"];
 
-const TemplateKW = () => {
+const Collections = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,7 +38,7 @@ const TemplateKW = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
-  const [keywords, setKeywords] = useState([]);
+  const [productLines, setProductLines] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
 
   const [pagination, setPagination] = useState({
@@ -48,33 +47,33 @@ const TemplateKW = () => {
   });
   const [options, setOptions] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
-  const [selectedTemplate, setSelectedTemplate] = useState();
+  const [selectedCollection, setSelectedCollection] = useState();
   const [selectedFilters, setSelectedFilters] = useState([]);
-  const [nameTemplate, setNameTemplate] = useState("");
-  const [templateNameInput, setTemplateNameInput] = useState("");
-  const [loadingCreateTemplateKW, setLoadingCreateTemplateKW] = useState(false);
-  const [loadingUpdateTemplateKW, setLoadingUpdateTemplateKW] = useState(false);
-  const handleSelectAllKWs = () => {
+  const [collectionName, setCollectionName] = useState("");
+  const [collectionNameInput, setCollectionNameInput] = useState("");
+  const [loadingCreateCollection, setLoadingCreateCollection] = useState(false);
+  const [loadingUpdateCollection, setLoadingUpdateCollection] = useState(false);
+  const handleSelectAllCollections = () => {
     setSelectedFilters((prev) =>
-      isEmpty(prev) ? map(templatesKW, (x) => x.name) : []
+      isEmpty(prev) ? map(collections, (x) => x.name) : []
     );
   };
-  const handleChangeTemplateKW = (name) => {
+  const handleChangeCollection = (name) => {
     setSelectedFilters((prev) =>
       prev.includes(name) ? prev.filter((x) => x !== name) : [...prev, name]
     );
   };
-  const handleSelectTemplateKW = (name) => {
-    const foundTemplate = templatesKW.find((x) => x.name === name);
-    setKeywords(
-      map(foundTemplate.keywords, (x, index) => ({
-        id: index,
-        keyword: x.keyword,
+  const handleSelectCollection = (name) => {
+    const foundCollection = collections.find((x) => x.name === name);
+    setProductLines(
+      map(foundCollection.productLines, (x) => ({
+        id: x.uid,
+        productLine: x.name,
       }))
     );
-    setSelectedTemplate(foundTemplate);
+    setSelectedCollection(foundCollection);
   };
-  const [templatesKW, setTemplatesKW] = useState([]);
+  const [collections, setCollections] = useState([]);
   const {
     register,
     handleSubmit,
@@ -82,8 +81,8 @@ const TemplateKW = () => {
     getValues,
   } = useForm();
 
-  const onSubmitCreateTemplateKeyword = async (data) => {
-    setLoadingCreateTemplateKW(true);
+  const onSubmitCreateCollection = async (data) => {
+    setLoadingCreateCollection(true);
     const { name, keywords } = data;
     const transformedKeywords = uniq(split(keywords, "\n"));
     const createTemplateKeywordResponse =
@@ -97,7 +96,7 @@ const TemplateKW = () => {
         "Tạo template keyword thành công",
         "green"
       );
-      fetchTemplatesKW(1);
+      fetchCollections(1);
       close();
     } else {
       const message =
@@ -105,41 +104,41 @@ const TemplateKW = () => {
         "Tạo template keyword thất bại";
       showNotification("Lỗi", message, "red");
     }
-    setLoadingCreateTemplateKW(false);
+    setLoadingCreateCollection(false);
   };
 
-  const handleChangeNameTemplate = async () => {
-    setLoadingUpdateTemplateKW(true);
-    const allTemplateNames = map(templatesKW, (x) => x.name);
-    if (includes(allTemplateNames, templateNameInput)) {
+  const handleChangeCollectionName = async () => {
+    setLoadingUpdateCollection(true);
+    const allTemplateNames = map(collections, (x) => x.name);
+    if (includes(allTemplateNames, collectionNameInput)) {
       showNotification("Lỗi", "Tên template đã tồn tại", "red");
-      setLoadingUpdateTemplateKW(false);
+      setLoadingUpdateCollection(false);
       return;
     }
     const updateTemplateResponse =
       await keywordServices.createNewKeywordInTemplate({
-        name: selectedTemplate.name,
-        newName: templateNameInput,
+        name: selectedCollection.name,
+        newName: collectionNameInput,
       });
     if (updateTemplateResponse.data) {
       showNotification("Thành công", "Đổi tên template thành công", "green");
-      fetchTemplatesKW(1);
+      fetchCollections(1);
     } else {
       const message =
         updateTemplateResponse?.response?.data?.message ||
         "Tạo template keyword thất bại";
       showNotification("Lỗi", message, "red");
     }
-    setLoadingUpdateTemplateKW(false);
+    setLoadingUpdateCollection(false);
     return;
   };
-  const handleBlurKeywords = () => {
+  const handleBlurProductLines = () => {
     const { keywords } = getValues();
     setOptions(compact(uniq(split(keywords, "\n"))));
   };
 
-  const handleDeleteTemplateKeyword = async () => {
-    setLoadingCreateTemplateKW(true);
+  const handleDeleteCollections = async () => {
+    setLoadingCreateCollection(true);
     const deleteTemplateResponse = await keywordServices.deleteTemplateKeyword({
       names: selectedFilters,
     });
@@ -149,32 +148,32 @@ const TemplateKW = () => {
         "Xóa template keyword thành công",
         "green"
       );
-      fetchTemplatesKW(1);
+      fetchCollections(1);
     } else {
       const message =
         deleteTemplateResponse?.response?.data?.message ||
         "Xóa template keyword thất bại";
       showNotification("Lỗi", message, "red");
     }
-    setLoadingCreateTemplateKW(false);
+    setLoadingCreateCollection(false);
   };
 
-  const fetchTemplatesKW = async (page = 1) => {
-    const response = await keywordServices.getTemplatesKeyword({
+  const fetchCollections = async (page = 1) => {
+    const response = await rndServices.getCollections({
       search,
       page,
     });
-    const { data, pagination } = response;
+    const { data, metadata } = response;
     if (data) {
-      setTemplatesKW(data);
-      setKeywords(
-        map(data[0]?.keywords, (x, index) => ({
-          id: index,
-          keyword: x.keyword,
+      setCollections(data);
+      setProductLines(
+        map(data[0]?.productLines, (x) => ({
+          id: x.uid,
+          productLine: x.name,
         })) || []
       );
-      setPagination(pagination);
-      setSelectedTemplate(data[0]);
+      setPagination(metadata);
+      setSelectedCollection(data[0]);
     } else {
       showNotification("Lỗi", "Lấy dữ liệu thất bại", "red");
     }
@@ -183,7 +182,7 @@ const TemplateKW = () => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
   };
   useEffect(() => {
-    fetchTemplatesKW(pagination.currentPage);
+    fetchCollections(pagination.currentPage);
     setSelectedFilters([]);
   }, [search, pagination.currentPage]);
 
@@ -197,15 +196,15 @@ const TemplateKW = () => {
   }, [search, pagination.currentPage, navigate]);
 
   useEffect(() => {
-    if (selectedTemplate) {
-      setTemplateNameInput(selectedTemplate.name);
+    if (selectedCollection) {
+      setCollectionNameInput(selectedCollection.name);
     }
-  }, [selectedTemplate]);
+  }, [selectedCollection]);
   return (
     <>
       <Card
         className={styles.card}
-        title="Template"
+        title="Collections"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
         head={
@@ -214,7 +213,7 @@ const TemplateKW = () => {
               className={styles.form}
               value={search}
               setValue={setSearch}
-              placeholder="Search Templates"
+              placeholder="Search Collections"
               type="text"
               name="search"
               icon="search"
@@ -230,7 +229,7 @@ const TemplateKW = () => {
                     marginRight: "16px",
                   }}
                   onClick={() => {
-                    handleDeleteTemplateKeyword();
+                    handleDeleteCollections();
                   }}
                 >
                   <Icon name="trash" size="16" />
@@ -264,20 +263,20 @@ const TemplateKW = () => {
             className={styles.table}
             activeTable={visible}
             setActiveTable={setVisible}
-            setTemplatesKW={setTemplatesKW}
-            templatesKW={templatesKW}
+            setCollections={setCollections}
+            collections={collections}
             setSelectedFilters={setSelectedFilters}
             selectedFilters={selectedFilters}
-            handleSelectAllKWs={handleSelectAllKWs}
-            handleChangeTemplateKW={handleChangeTemplateKW}
-            handleSelectTemplateKW={handleSelectTemplateKW}
-            selectedTemplate={selectedTemplate}
-            nameTemplate={nameTemplate}
-            setNameTemplate={setNameTemplate}
+            handleSelectAllCollections={handleSelectAllCollections}
+            handleChangeCollection={handleChangeCollection}
+            handleSelectCollection={handleSelectCollection}
+            selectedCollection={selectedCollection}
+            collectionName={collectionName}
+            setCollectionName={setCollectionName}
           />
           <Card
             className={styles.card}
-            title="Danh sách KW"
+            title="Danh sách Product Lines"
             classTitle={cn("title-yellow", styles.title)}
             classCardHead={styles.head}
             head={
@@ -286,8 +285,8 @@ const TemplateKW = () => {
                   <TextInputComponent
                     className={styles.input}
                     placeholder="Search"
-                    value={templateNameInput}
-                    onChange={(e) => setTemplateNameInput(e.target.value)}
+                    value={collectionNameInput}
+                    onChange={(e) => setCollectionNameInput(e.target.value)}
                   />
                   <Tooltip label="Save">
                     <span
@@ -298,9 +297,9 @@ const TemplateKW = () => {
                         justifyContent: "center",
                         marginLeft: "20px",
                       }}
-                      onClick={() => handleChangeNameTemplate()}
+                      onClick={() => handleChangeCollectionName()}
                     >
-                      {loadingUpdateTemplateKW ? (
+                      {loadingUpdateCollection ? (
                         <Loader className={styles.loader} />
                       ) : (
                         <Icon name="arrow-right" size={18} fill="#2A85FF" />
@@ -325,8 +324,8 @@ const TemplateKW = () => {
               <Details
                 className={styles.details}
                 onClose={() => setVisible(false)}
-                keywords={keywords}
-                name={selectedTemplate?.name}
+                productLines={productLines}
+                name={selectedCollection?.name}
               />
             </ScrollArea>
           </Card>
@@ -342,19 +341,19 @@ const TemplateKW = () => {
       />
       <Modal opened={opened} onClose={close} size="lg">
         <LoadingOverlay
-          visible={loadingCreateTemplateKW}
+          visible={loadingCreateCollection}
           zIndex={1000}
           overlayProps={{ radius: "sm", blur: 2 }}
           loaderProps={{ color: "pink", type: "bars" }}
         />
         <form
-          onSubmit={handleSubmit(onSubmitCreateTemplateKeyword)}
+          onSubmit={handleSubmit(onSubmitCreateCollection)}
           style={{ position: "relative" }}
         >
           <Paper p="xl" radius="xl" withBorder>
             <Stack>
               <Group position="apart">
-                <Title order={2}>Create Your Keyword</Title>
+                <Title order={2}>Create Your Collection</Title>
               </Group>
 
               <TextInputComponent
@@ -371,10 +370,10 @@ const TemplateKW = () => {
                   size="md"
                   cols={16}
                   rows={5}
-                  label="Keywords"
+                  label="Product Lines"
                   name="keywords"
                   isTextArea={true}
-                  onBlur={handleBlurKeywords}
+                  onBlur={handleBlurProductLines}
                   register={register("keywords", {
                     required: true,
                   })}
@@ -422,4 +421,4 @@ const TemplateKW = () => {
   );
 };
 
-export default TemplateKW;
+export default Collections;

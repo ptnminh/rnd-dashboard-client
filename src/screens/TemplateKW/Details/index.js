@@ -178,20 +178,20 @@ function useDeleteKeyword(name, exKeywords, setKeywords) {
   });
 }
 
-const KeywordTable = ({ keywords, name }) => {
+const KeywordTable = ({ productLines, name }) => {
   const [validationErrors, setValidationErrors] = useState({});
-  const [data, setData] = useState(keywords || []);
+  const [data, setData] = useState(productLines || []);
   const [templateName, setTemplateName] = useState(name);
   const [rowSelection, setRowSelection] = useState({});
   useEffect(() => {
-    setData(keywords);
+    setData(productLines);
     setTemplateName(name);
-  }, [keywords, templateName]);
+  }, [productLines, templateName]);
   const columns = useMemo(
     () => [
       {
-        accessorKey: "keyword",
-        header: "Keyword",
+        accessorKey: "productLine",
+        header: "Product Line",
         mantineEditTextInputProps: {
           type: "text",
           required: true,
@@ -353,7 +353,7 @@ const KeywordTable = ({ keywords, name }) => {
           }}
           leftSection={<IconPlus />}
         >
-          Create New Keyword
+          Create New Product Line
         </Button>
         {(table.getIsSomeRowsSelected() || table.getIsAllRowsSelected()) && (
           <>

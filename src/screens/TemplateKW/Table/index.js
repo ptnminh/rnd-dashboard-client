@@ -9,14 +9,14 @@ import { isEmpty, map } from "lodash";
 const Table = ({
   className,
   activeTable,
-  templatesKW,
+  collections,
   selectedFilters,
-  handleSelectAllKWs,
-  handleChangeTemplateKW,
-  handleSelectTemplateKW,
-  selectedTemplate,
-  nameTemplate,
-  setNameTemplate,
+  handleSelectAllCollections,
+  handleChangeCollection,
+  handleSelectCollection,
+  selectedCollection,
+  collectionName,
+  setCollectionName,
 }) => {
   return (
     <div className={cn(styles.wrapper, className)}>
@@ -24,22 +24,22 @@ const Table = ({
         <div className={cn(styles.row, { [styles.active]: activeTable })}>
           <div className={styles.col}>
             <Checkbox
-              onChange={() => handleSelectAllKWs(templatesKW)}
+              onChange={() => handleSelectAllCollections(collections)}
               value={!isEmpty(selectedFilters)}
             />
           </div>
           <div className={styles.col}>Name</div>
         </div>
-        {map(templatesKW, (x, index) => (
+        {map(collections, (x, index) => (
           <Row
             item={x}
             key={index}
             value={selectedFilters.includes(x.name)}
-            onChange={() => handleChangeTemplateKW(x.name)}
-            handleClick={handleSelectTemplateKW}
-            selectedTemplate={selectedTemplate}
-            nameTemplate={nameTemplate}
-            onChangeNameTemplate={(value) => setNameTemplate(value)}
+            onChange={() => handleChangeCollection(x.name)}
+            handleClick={handleSelectCollection}
+            selectedCollection={selectedCollection}
+            collectionName={collectionName}
+            setCollectionName={(value) => setCollectionName(value)}
           />
         ))}
       </div>

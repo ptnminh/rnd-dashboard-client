@@ -185,15 +185,12 @@ const NewCampaigns = () => {
     handleSubmit,
     formState: { errors },
     setValue,
-    getValues,
-    setError,
-    clearErrors,
   } = useForm();
 
   const onSubmit = async (data) => {};
   const fetchCollections = async () => {
-    const collections = await rndServices.getCollections({});
-    setCollections(collections);
+    const { data } = await rndServices.getCollections({});
+    setCollections(data);
   };
   useEffect(() => {
     fetchCollections();
