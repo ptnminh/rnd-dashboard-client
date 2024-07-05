@@ -54,6 +54,7 @@ const CampaignInfo = ({
   rndSize,
   setRndSize,
   users,
+  teams,
 }) => {
   useEffect(() => {
     if (!isEmpty(previewData)) setVisibleReviewTable(true);
@@ -76,7 +77,7 @@ const CampaignInfo = ({
               classDropdownHead={styles.dropdownHead}
               value={workGroup}
               setValue={setWorkGroup}
-              options={workGroup || []}
+              options={teams || []}
               classOutSideClick={styles.memberDropdown}
             />{" "}
             <Dropdown

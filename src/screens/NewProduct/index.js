@@ -142,6 +142,7 @@ const NewCampaigns = () => {
   const [epmNote, setEPMNote] = useState("");
   const [mktNote, setMKTNote] = useState("");
   const [batch, setBatch] = useState("");
+  const [teams, setTeams] = useState([]);
   const [users, setUsers] = useState([]);
   const [workGroup, setWorkGroup] = useState(GROUP_WORKS[0]);
   const [rndSize, setRndSize] = useState(RND_SIZES[0]);
@@ -268,6 +269,7 @@ const NewCampaigns = () => {
     setDesignerMember(map(designers, "name")[0]);
     setWorkGroup(uniq(map(data, "team"))[0]);
     setUsers(data);
+    setTeams(uniq(map(data, "team")));
   };
   const fetchCollections = async () => {
     const { data } = await rndServices.getCollections({});
@@ -403,6 +405,7 @@ const NewCampaigns = () => {
               rndSize={rndSize}
               setRndSize={setRndSize}
               users={users}
+              teams={teams}
             />
           </div>
           <div className={styles.col}>
