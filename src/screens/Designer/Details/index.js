@@ -538,7 +538,7 @@ const KeywordTable = ({
             />
             <Select
               placeholder="RND"
-              data={["Thảo Thảo", "Lảo Đảo"]}
+              data={["Thảo Thảo", "Nhật Minh"]}
               styles={{
                 input: {
                   width: "150px",
@@ -547,7 +547,7 @@ const KeywordTable = ({
             />
             <Select
               placeholder="Designer"
-              data={["Lợi Lợi", "Hợi Hợi"]}
+              data={["Phương Duy"]}
               styles={{
                 input: {
                   width: "120px",
