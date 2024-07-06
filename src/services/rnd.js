@@ -100,4 +100,61 @@ export const rndServices = {
       return false;
     }
   },
+  createBriefs: async (data) => {
+    try {
+      const response = await axios.post(`${hostAPI}/briefs/create-batch`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Tạo brief thất bại", "red");
+        return false;
+      }
+      showNotification("Thành công", "Tạo brief thành công", "green");
+      return true;
+    } catch (error) {
+      console.log("Error at createBriefs:", error);
+      showNotification("Thất bại", "Tạo brief thất bại", "red");
+      return false;
+    }
+  },
+  fetchBriefs: async ({
+    page,
+    limit,
+    search,
+    batch,
+    sku,
+    briefType,
+    size,
+    rndTeam,
+    rnd,
+    designer,
+    status,
+  }) => {
+    try {
+      const response = await axios.get(`${hostAPI}/briefs`, {
+        params: {
+          ...(search && { search }),
+          ...(page && { page }),
+          ...(limit && { pageSize: limit }),
+          ...(batch && { batch }),
+          ...(sku && { sku }),
+          ...(briefType && { briefType }),
+          ...(size && { size }),
+          ...(rndTeam && { rndTeam }),
+          ...(rnd && { rnd }),
+          ...(designer && { designer }),
+          ...(status && { status }),
+        },
+      });
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Không tìm thấy brief", "red");
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at fetchBriefs:", error);
+      showNotification("Thất bại", "Không tìm thấy brief", "red");
+      return false;
+    }
+  },
 };

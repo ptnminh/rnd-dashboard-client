@@ -14,7 +14,6 @@ import {
 } from "../../constant";
 import Checkbox from "../../components/Checkbox";
 import Editor from "../../components/Editor";
-import SlateEditor from "../../components/SlateEditor";
 import { useForm } from "react-hook-form";
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -52,7 +51,8 @@ import {
 import { rndServices } from "../../services";
 import TextInput from "../../components/TextInput";
 import Icon from "../../components/Icon";
-import { delayTime } from "../../utils";
+import { delayTime, getEditorStateAsString } from "../../utils";
+import { convertToRaw } from "draft-js";
 const HoverInfo = ({ image }) => (
   <div className={styles.hoverInfo}>
     <Image radius="md" src={image} />
@@ -106,11 +106,12 @@ const filterValidCollections = (collections, type, SKU) => {
   );
 };
 
-const generateScaleProductLinesTable = (
+const generateScaleProductLinesTable = ({
   selectedProductLines,
   SKU,
-  collections
-) => {
+  collections,
+  rndSortName,
+}) => {
   const allProductLines = compact(
     concat(
       SKU?.sameLayouts,
@@ -125,8 +126,8 @@ const generateScaleProductLinesTable = (
         const foundProductLine = find(allProductLines, { name: x });
         if (!foundProductLine) return null;
         const name = foundProductLine?.skuPrefix
-          ? `${foundProductLine.skuPrefix}-NM001`
-          : `XX-NM001`;
+          ? `${foundProductLine.skuPrefix}-${rndSortName}001`
+          : `XX-${rndSortName}001`;
         return {
           No: index + 1,
           "Product Line": foundProductLine?.name,
@@ -162,6 +163,7 @@ const NewCampaigns = () => {
   const [products, setProducts] = useState([]);
   const [searchCollection, setSearchCollection] = useState("");
   const [searchProductLine, setSearchProductLine] = useState("");
+  const [createBriefLoading, setCreateBriefLoading] = useState(false);
   const topRef = useRef(null);
   const handleSearchSKU = async () => {
     console.log(search);
@@ -365,11 +367,64 @@ const NewCampaigns = () => {
     setSelectedCollection([]);
     setSelectedProductLines([]);
   }, [layout]);
+
+  const handleSubmitBrief = async () => {
+    setCreateBriefLoading(true);
+    const generatedSKUs = generateScaleProductLinesTable({
+      selectedProductLines,
+      SKU,
+      collections: validCollections,
+      rndSortName: find(users, { name: rndMember })?.shortName,
+    });
+    const data = map(generatedSKUs, (x) => {
+      const { SKU: sku } = x;
+      return {
+        skuRef: SKU.sku,
+        linkProductRef: SKU.productLink,
+        imageRef: SKU.image,
+        sku,
+        batch,
+        briefType,
+        rndTeam: workGroup,
+        size: {
+          rnd: rndSize,
+        },
+        value: {
+          rnd: briefValue,
+        },
+        rnd: {
+          uid: find(users, { name: rndMember })?.uid,
+          name: rndMember,
+        },
+        designer: {
+          uid: find(users, { name: designerMember })?.uid,
+          name: designerMember,
+        },
+        ...(epmNote || designerNote || mktNote
+          ? {
+              note: {
+                ...(epmNote && { epm: getEditorStateAsString(epmNote) }),
+                ...(designerNote && {
+                  designer: getEditorStateAsString((designerNote)),
+                }),
+                ...(mktNote && { mkt: getEditorStateAsString((mktNote)) }),
+              },
+            }
+          : {}),
+        status: 1,
+      };
+    });
+    console.log(data);
+    await rndServices.createBriefs({ payloads: data });
+    close();
+    setCreateBriefLoading(false);
+  };
+
   return (
     <>
-      <form onSubmit={handleSubmit(onSubmit)} style={{ position: "relative" }}>
+      <div style={{ position: "relative" }}>
         <LoadingOverlay
-          visible={false}
+          visible={createBriefLoading}
           zIndex={1000}
           overlayProps={{ radius: "sm", blur: 2 }}
         />
@@ -562,6 +617,7 @@ const NewCampaigns = () => {
             <Grid>
               <Grid.Col span={4}>
                 <Editor
+                  // state={test}
                   state={designerNote}
                   onChange={setDesignerNote}
                   classEditor={styles.editor}
@@ -622,7 +678,7 @@ const NewCampaigns = () => {
             </Grid>
           </Card>
         </div>
-      </form>
+      </div>
       <Modal
         opened={opened}
         onClose={close}
@@ -732,11 +788,12 @@ const NewCampaigns = () => {
             </div>
             <ScrollArea h={300} scrollbars="y">
               <CustomTable
-                items={generateScaleProductLinesTable(
+                items={generateScaleProductLinesTable({
                   selectedProductLines,
                   SKU,
-                  validCollections
-                )}
+                  collections: validCollections,
+                  rndSortName: find(users, { name: rndMember })?.shortName,
+                })}
                 headers={["No", "Product Line", "SKU"]}
               />
             </ScrollArea>
@@ -754,7 +811,7 @@ const NewCampaigns = () => {
                   "button-stroke-blue button-small",
                   styles.createButton
                 )}
-                type="submit"
+                onClick={handleSubmitBrief}
                 style={{
                   marginTop: "24px",
                   marginBottom: "12px",

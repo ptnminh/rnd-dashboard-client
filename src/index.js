@@ -9,6 +9,9 @@ import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { ModalsProvider } from "@mantine/modals";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { LicenseInfo } from "@mui/x-license";
+
+LicenseInfo.setLicenseKey(process.env.REACT_APP_MUIX_LISENCE_KEY);
 
 const container = document.getElementById("root");
 const queryClient = new QueryClient();

@@ -1,10 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import {
-  MantineReactTable,
-  MRT_GlobalFilterTextInput,
-  MRT_ToggleFiltersButton,
-  useMantineReactTable,
-} from "mantine-react-table";
+import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import {
   Badge,
   Box,
@@ -19,14 +14,15 @@ import {
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { useMutation } from "@tanstack/react-query";
-import Icon from "../../../components/Icon";
+import Checkbox from "../../../components/Checkbox";
 import { keywordServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 import { compact, filter, includes, isEmpty, map, split, uniq } from "lodash";
 import { useEdit } from "../../../hooks";
 import { IconSearch } from "@tabler/icons-react";
-import DatePicker from "react-datepicker";
 import classes from "./MyTable.module.css";
+import { IconCheck, IconX } from "@tabler/icons-react";
+import { BRIEF_TYPES } from "../../../constant";
 //CREATE hook (post new user to api)
 function useCreateKeyword(name, exKeywords, setKeywords) {
   return useMutation({
@@ -196,11 +192,17 @@ function useDeleteKeyword(name, exKeywords, setKeywords) {
   });
 }
 
-const KeywordTable = ({ productLines, name }) => {
+const KeywordTable = ({
+  productLines,
+  name,
+  query,
+  setQuery,
+  setSelectedSKU,
+  openModal,
+}) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(productLines || []);
   const [templateName, setTemplateName] = useState(name);
-  const [rowSelection, setRowSelection] = useState({});
   useEffect(() => {
     setData(productLines);
     setTemplateName(name);
@@ -208,219 +210,168 @@ const KeywordTable = ({ productLines, name }) => {
   const columns = useMemo(
     () => [
       {
-        accessorKey: "uid",
+        accessorKey: "id",
         mantineTableHeadCellProps: {
           align: "right",
         },
         size: 50, //small column
         header: "NO",
-        Header: ({ column }) => (
-          <div style={{ backgroundColor: "#E0EAFF", justifyContent: "center" }}>
-            {column.columnDef.header}
-          </div>
-        ),
-        mantineEditTextInputProps: {
-          type: "text",
-          required: true,
-          error: validationErrors?.data,
-          //remove any previous validation errors when user focuses on the input
-          onFocus: () =>
-            setValidationErrors({
-              ...validationErrors,
-              data: undefined,
-            }),
-        },
-        Edit: (props) => {
-          const { value, handleOnChange, handleBlur } = useEdit(props);
-          return (
-            <Textarea
-              data={data}
-              value={value}
-              onBlur={handleBlur}
-              onChange={(event) => handleOnChange(event.currentTarget.value)}
-            />
-          );
-        },
+        enableEditing: false,
       },
       {
         accessorKey: "date",
         header: "DATE",
-        muiTableHeadCellProps: {
-          align: "right",
-        },
-        Header: ({ column }) => (
-          <div
-            style={{
-              backgroundColor: "#E0EAFF",
-              justifyContent: "center",
-              width: "100%",
-            }}
-          >
-            {column.columnDef.header}
-          </div>
-        ),
+        size: 120,
+        enableEditing: false,
       },
       {
         accessorKey: "batch",
         header: "BATCH",
+        size: 100,
+        enableEditing: false,
+      },
+      {
+        accessorKey: "sku",
+        header: "SKU",
+        size: 100,
+        enableEditing: false,
         Header: ({ column }) => (
           <div
             style={{
-              backgroundColor: "#E0EAFF",
-
-              width: "100%",
+              color: "#ffffff",
             }}
           >
             {column.columnDef.header}
           </div>
         ),
-      },
-      {
-        accessorKey: "imageRef",
-        header: "SKU",
-        Header: ({ column }) => (
+        mantineTableHeadCellProps: { className: classes["SKU"] },
+        Cell: ({ row }) => (
           <div
             style={{
-              backgroundColor: "#E0EAFF",
-
-              width: "100%",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              setSelectedSKU(row.original);
+              openModal();
             }}
           >
-            {column.columnDef.header}
+            <Badge color="blue" variant="filled">
+              {" "}
+              <u>{row.original.sku}</u>{" "}
+            </Badge>
           </div>
         ),
       },
       {
         accessorKey: "briefType",
-        header: "Loại Brief",
-        Header: ({ column }) => (
-          <div
-            style={{
-              backgroundColor: "#E0EAFF",
-
-              width: "100%",
-            }}
-          >
-            {column.columnDef.header}
-          </div>
-        ),
+        header: "LOẠI BRIEF",
+        enableEditing: false,
       },
       {
-        accessorKey: "rndValue",
+        id: "value",
+        accessorFn: (row) => row?.value?.rnd,
         header: "VALUE",
-        Header: ({ column }) => (
-          <div
-            style={{
-              backgroundColor: "#E0EAFF",
-
-              width: "100%",
-            }}
-          >
-            {column.columnDef.header}
-          </div>
-        ),
+        size: 100,
+        enableEditing: false,
       },
       {
-        accessorKey: "size",
+        id: "size",
+        accessorFn: (row) => row?.size?.rnd,
         header: "SIZE",
-        Header: ({ column }) => (
-          <div
-            style={{
-              backgroundColor: "#E0EAFF",
-
-              width: "100%",
-            }}
-          >
-            {column.columnDef.header}
-          </div>
-        ),
+        size: 100,
+        enableEditing: false,
       },
       {
-        accessorKey: "size",
+        accessorKey: "rndTeam",
         header: "TEAM",
-        Header: ({ column }) => (
-          <div
-            style={{
-              backgroundColor: "#E0EAFF",
-
-              width: "100%",
-            }}
-          >
-            {column.columnDef.header}
-          </div>
-        ),
+        size: 100,
+        enableEditing: false,
       },
       {
-        accessorKey: "rnd",
+        id: "rndName",
+        accessorFn: (row) => row?.rnd?.name,
         header: "RND",
-        Header: ({ column }) => (
-          <div
-            style={{
-              backgroundColor: "#E0EAFF",
-
-              width: "100%",
-            }}
-          >
-            {column.columnDef.header}
-          </div>
-        ),
+        enableEditing: false,
+        size: 130,
       },
       {
-        accessorKey: "designer",
+        id: "designer",
+        accessorFn: (row) => row?.designer?.name,
         header: "DESIGNER",
-        Header: ({ column }) => (
-          <div
-            style={{
-              backgroundColor: "#E0EAFF",
-
-              width: "100%",
-            }}
-          >
-            {column.columnDef.header}
-          </div>
-        ),
+        enableEditing: false,
+        size: 130,
       },
       {
         accessorKey: "designLink",
         header: "LINK DESIGN",
-        Header: ({ column }) => (
-          <div
-            style={{
-              backgroundColor: "#E0EAFF",
-              width: "100%",
-            }}
-          >
-            {column.columnDef.header}
-          </div>
-        ),
+        mantineTableHeadCellProps: { className: classes["designLink"] },
+        size: 100,
       },
       {
         accessorKey: "status",
         header: "DONE",
-        Header: ({ column }) => (
-          <div
-            style={{
-              backgroundColor: "#E0EAFF",
-
-              width: "100%",
-            }}
-          >
-            {column.columnDef.header}
-          </div>
-        ),
+        size: 100,
+        mantineTableHeadCellProps: { className: classes["designLink"] },
+        Edit: (props) => {
+          const { value, handleOnChange, handleBlur } = useEdit(props);
+          return (
+            <Button
+              variant="filled"
+              color="#62d256"
+              leftSection={<IconCheck />}
+              disabled
+            >
+              Done
+            </Button>
+          );
+        },
+        mantineEditTextInputProps: ({ cell }) => ({
+          //onBlur is more efficient, but could use onChange instead
+          onBlur: (event) => {
+            console.log("onBlur", event.target.value);
+            // handleSaveCell(cell, event.target.value);
+          },
+          variant: "unstyled", //default for editDisplayMode="table"
+        }),
       },
       {
         accessorKey: "priority",
-        header: "DONE",
-        Header: ({ column }) => (
+        header: "Priority",
+        mantineTableHeadCellProps: { className: classes["designLink"] },
+        Edit: ({ cell }) => {
+          return (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Checkbox checked={true} />
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "time",
+        header: "Time",
+        mantineTableHeadCellProps: { className: classes["head-cells"] },
+        enableEditing: false,
+        size: 100,
+      },
+      {
+        accessorKey: "remove",
+        header: "REMOVE",
+        mantineTableHeadCellProps: { className: classes["remove"] },
+        Edit: ({ cell, column, table }) => (
           <div
             style={{
-              backgroundColor: "#E0EAFF",
-
-              width: "100%",
+              display: "flex",
+              justifyContent: "center",
             }}
           >
-            {column.columnDef.header}
+            <Button variant="filled" color="red">
+              <IconX />
+            </Button>
           </div>
         ),
       },
@@ -469,15 +420,6 @@ const KeywordTable = ({ productLines, name }) => {
       console.log(error);
     }
   };
-
-  const handleExportRows = (rows) => {
-    console.log(rows);
-  };
-
-  const handleDeleteSelectedRows = async ({ rows }) => {
-    await deleteKeyword({ ids: map(rows, "id") });
-  };
-
   //DELETE action
   const openDeleteConfirmModal = (row) =>
     modals.openConfirmModal({
@@ -497,13 +439,16 @@ const KeywordTable = ({ productLines, name }) => {
   const table = useMantineReactTable({
     columns,
     data,
-    createDisplayMode: "row", // ('modal', and 'custom' are also available)
-    editDisplayMode: "row", // ('modal', 'cell', 'table', and 'custom' are also available)
-    // enableEditing: true,
-    enablePagination: true,
+    editDisplayMode: "table", // ('modal', 'cell', 'table', and 'custom' are also available)
+    enableEditing: true,
+    enablePagination: false,
     getRowId: (row) => row.id,
+    enableRowSelection: false,
     enableFilters: false,
     enableColumnActions: false,
+    mantinePaperProps: {
+      style: { "--mrt-striped-row-background-color": "#eff0f1" },
+    },
     mantineTableHeadCellProps: { className: classes["head-cells"] },
     enableSorting: false,
     mantineTableProps: { striped: "even" },
@@ -512,26 +457,7 @@ const KeywordTable = ({ productLines, name }) => {
     onEditingRowCancel: () => setValidationErrors({}),
     onEditingRowSave: handleSaveKeyword,
     enableDensityToggle: false,
-    positionActionsColumn: "last",
     renderTopToolbar: ({ table }) => {
-      const handleDeactivate = () => {
-        table.getSelectedRowModel().flatRows.map((row) => {
-          alert("deactivating " + row.getValue("name"));
-        });
-      };
-
-      const handleActivate = () => {
-        table.getSelectedRowModel().flatRows.map((row) => {
-          alert("activating " + row.getValue("name"));
-        });
-      };
-
-      const handleContact = () => {
-        table.getSelectedRowModel().flatRows.map((row) => {
-          alert("contact " + row.getValue("name"));
-        });
-      };
-
       return (
         <div
           style={{
@@ -561,6 +487,8 @@ const KeywordTable = ({ productLines, name }) => {
                   width: "100px",
                 },
               }}
+              value={query?.batch}
+              onChange={(e) => setQuery({ ...query, batch: e.target.value })}
             />
             <TextInput
               placeholder="SKU"
@@ -572,15 +500,19 @@ const KeywordTable = ({ productLines, name }) => {
                   width: "100px",
                 },
               }}
+              value={query?.sku}
+              onChange={(e) => setQuery({ ...query, sku: e.target.value })}
             />
             <Select
               placeholder="Loại Brief"
-              data={["React", "Angular", "Vue", "Svelte"]}
+              data={BRIEF_TYPES}
               styles={{
                 input: {
                   width: "150px",
                 },
               }}
+              value={query?.briefType}
+              onChange={(value) => setQuery({ ...query, briefType: value })}
             />
             <Select
               placeholder="Size"
@@ -590,6 +522,8 @@ const KeywordTable = ({ productLines, name }) => {
                   width: "100px",
                 },
               }}
+              value={query?.size}
+              onChange={(value) => setQuery({ ...query, size: value })}
             />
             <Select
               placeholder="Team"
@@ -599,6 +533,8 @@ const KeywordTable = ({ productLines, name }) => {
                   width: "100px",
                 },
               }}
+              value={query?.rndTeam}
+              onChange={(value) => setQuery({ ...query, rndTeam: value })}
             />
             <Select
               placeholder="RND"

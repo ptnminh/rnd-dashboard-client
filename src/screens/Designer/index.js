@@ -9,6 +9,7 @@ import { compact, includes, isEmpty, map, split, uniq } from "lodash";
 import TextInputComponent from "../../components/TextInput";
 import Icon from "../../components/Icon";
 import { useDisclosure } from "@mantine/hooks";
+import { IconCircleCheck } from "@tabler/icons-react";
 import {
   Button,
   Group,
@@ -21,12 +22,22 @@ import {
   LoadingOverlay,
   Pagination,
   Tooltip,
+  Grid,
+  Badge,
+  Image,
+  List,
+  ThemeIcon,
+  rem,
 } from "@mantine/core";
 import { useForm } from "react-hook-form";
 import { keywordServices, rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
 import { useLocation, useNavigate } from "react-router-dom";
 import Loader from "../../components/Loader";
+import moment from "moment-timezone";
+import Editor from "../../components/Editor";
+import { convertFromRaw, EditorState } from "draft-js";
+import { getStringAsEditorState } from "../../utils";
 const navigation = ["Default", "New"];
 
 const DesignerScreens = () => {
@@ -35,7 +46,6 @@ const DesignerScreens = () => {
 
   const queryParams = new URLSearchParams(location.search);
   const initialSearch = queryParams.get("search") || "";
-  const [activeIndex, setActiveIndex] = useState(0);
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
   const [productLines, setProductLines] = useState([]);
@@ -46,33 +56,16 @@ const DesignerScreens = () => {
     totalPages: 1,
   });
   const [options, setOptions] = useState([]);
+  const [query, setQuery] = useState({});
   const [opened, { open, close }] = useDisclosure(false);
+  const [selectedSKU, setSelectedSKU] = useState();
   const [selectedCollection, setSelectedCollection] = useState();
   const [selectedFilters, setSelectedFilters] = useState([]);
-  const [collectionName, setCollectionName] = useState("");
+
   const [collectionNameInput, setCollectionNameInput] = useState("");
   const [loadingCreateCollection, setLoadingCreateCollection] = useState(false);
   const [loadingUpdateCollection, setLoadingUpdateCollection] = useState(false);
-  const handleSelectAllCollections = () => {
-    setSelectedFilters((prev) =>
-      isEmpty(prev) ? map(collections, (x) => x.name) : []
-    );
-  };
-  const handleChangeCollection = (name) => {
-    setSelectedFilters((prev) =>
-      prev.includes(name) ? prev.filter((x) => x !== name) : [...prev, name]
-    );
-  };
-  const handleSelectCollection = (name) => {
-    const foundCollection = collections.find((x) => x.name === name);
-    setProductLines(
-      map(foundCollection.productLines, (x) => ({
-        id: x.uid,
-        productLine: x.name,
-      }))
-    );
-    setSelectedCollection(foundCollection);
-  };
+
   const [collections, setCollections] = useState([]);
   const {
     register,
@@ -107,31 +100,6 @@ const DesignerScreens = () => {
     setLoadingCreateCollection(false);
   };
 
-  const handleChangeCollectionName = async () => {
-    setLoadingUpdateCollection(true);
-    const allTemplateNames = map(collections, (x) => x.name);
-    if (includes(allTemplateNames, collectionNameInput)) {
-      showNotification("Lỗi", "Tên template đã tồn tại", "red");
-      setLoadingUpdateCollection(false);
-      return;
-    }
-    const updateTemplateResponse =
-      await keywordServices.createNewKeywordInTemplate({
-        name: selectedCollection.name,
-        newName: collectionNameInput,
-      });
-    if (updateTemplateResponse.data) {
-      showNotification("Thành công", "Đổi tên template thành công", "green");
-      fetchCollections(1);
-    } else {
-      const message =
-        updateTemplateResponse?.response?.data?.message ||
-        "Tạo template keyword thất bại";
-      showNotification("Lỗi", message, "red");
-    }
-    setLoadingUpdateCollection(false);
-    return;
-  };
   const handleBlurProductLines = () => {
     const { keywords } = getValues();
     setOptions(compact(uniq(split(keywords, "\n"))));
@@ -159,18 +127,26 @@ const DesignerScreens = () => {
   };
 
   const fetchCollections = async (page = 1) => {
-    const response = await rndServices.getCollections({
+    const response = await rndServices.fetchBriefs({
       search,
       page,
+      limit: 50,
+      ...query,
     });
     const { data, metadata } = response;
     if (data) {
       setCollections(data);
       setProductLines(
-        map(data[0]?.productLines, (x) => ({
-          id: x.uid,
-          productLine: x.name,
-        })) || []
+        map(data, (x, index) => {
+          return {
+            ...x,
+            id: index + 1,
+            date: moment(x.createdAt).format("DD/MM/YYYY"),
+            time:
+              Math.round(moment().diff(moment(x.createdAt), "hours", true)) +
+              "h",
+          };
+        })
       );
       setPagination(metadata);
       setSelectedCollection(data[0]);
@@ -183,8 +159,7 @@ const DesignerScreens = () => {
   };
   useEffect(() => {
     fetchCollections(pagination.currentPage);
-    setSelectedFilters([]);
-  }, [search, pagination.currentPage]);
+  }, [search, pagination.currentPage, query]);
 
   useEffect(() => {
     // Update the URL when search or page changes
@@ -214,94 +189,186 @@ const DesignerScreens = () => {
           onClose={() => setVisible(false)}
           productLines={productLines}
           name={selectedCollection?.name}
+          query={query}
+          setQuery={setQuery}
+          setSelectedSKU={setSelectedSKU}
+          openModal={open}
         />
       </Card>
-      {/* <Pagination
+      <Pagination
         total={pagination.totalPages}
         page={pagination.currentPage}
         onChange={handlePageChange}
         color="pink"
         size="md"
         style={{ marginTop: "20px", marginLeft: "auto" }}
-      /> */}
-      <Modal opened={opened} onClose={close} size="lg">
-        <LoadingOverlay
-          visible={loadingCreateCollection}
-          zIndex={1000}
-          overlayProps={{ radius: "sm", blur: 2 }}
-          loaderProps={{ color: "pink", type: "bars" }}
-        />
-        <form
-          onSubmit={handleSubmit(onSubmitCreateCollection)}
-          style={{ position: "relative" }}
+      />
+      {selectedSKU && (
+        <Modal
+          opened={opened}
+          onClose={close}
+          transitionProps={{ transition: "fade", duration: 200 }}
+          overlayProps={{
+            backgroundOpacity: 0.55,
+            blur: 3,
+          }}
+          radius="md"
+          size="1000px"
         >
-          <Paper p="xl" radius="xl" withBorder>
-            <Stack>
-              <Group position="apart">
-                <Title order={2}>Create Your Collection</Title>
-              </Group>
-
-              <TextInputComponent
-                size="sm"
-                label="Name"
-                name="name"
-                register={register("name", {
-                  required: true,
-                })}
-                error={errors.name}
-              />
-              <Paper>
-                <TextInputComponent
-                  size="md"
-                  cols={16}
-                  rows={5}
-                  label="Product Lines"
-                  name="keywords"
-                  isTextArea={true}
-                  onBlur={handleBlurProductLines}
-                  register={register("keywords", {
-                    required: true,
-                  })}
-                  error={errors.keywords}
-                />
-              </Paper>
-              {!isEmpty(options) && (
-                <ScrollArea
-                  h={100}
-                  offsetScrollbars
-                  classNames={styles.scrollArea}
-                >
-                  <SimpleGrid cols={4}>
-                    {options?.map((option, i) => (
-                      <Button key={i} size="xs" radius="md" variant="default">
-                        {option}
-                      </Button>
-                    ))}
-                  </SimpleGrid>
-                </ScrollArea>
-              )}
-
-              <Group
-                position="apart"
+          <Grid>
+            <Grid.Col span={12}>
+              <div
                 style={{
-                  justifyContent: "end",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "10px",
+                  backgroundColor: "#D9F5D6",
+                  border: "1px solid #62D256",
+                  color: "#000000",
+                  borderColor: "#62D256",
+                  fontSize: "18px",
+                  borderRadius: "12px",
                 }}
               >
-                <button
-                  className={cn(
-                    "button-stroke button-small",
-                    styles.createButton
-                  )}
-                  type="submit"
-                >
-                  <Icon name="plus" size="16" />
-                  <span>Tạo</span>
-                </button>
-              </Group>
-            </Stack>
-          </Paper>{" "}
-        </form>
-      </Modal>
+                {selectedSKU?.briefType} - từ {selectedSKU?.skuRef}
+              </div>
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: "5px",
+                  fontSize: "18px",
+                }}
+              >
+                {selectedSKU?.skuRef} - {selectedSKU?.batch}
+              </div>
+            </Grid.Col>
+            <Grid.Col span={6}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {selectedSKU?.rndTeam} - RnD {selectedSKU?.rnd.name} - Designer{" "}
+                {selectedSKU?.designer.name}
+              </div>
+            </Grid.Col>
+            <Grid.Col span={5}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "10px",
+                  fontSize: "18px",
+                  alignItems: "center",
+                }}
+              >
+                REF
+              </div>
+              <Image
+                radius="md"
+                src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
+                height={300}
+              />
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "10px",
+                  fontSize: "18px",
+                  alignItems: "center",
+                  marginTop: "10px",
+                }}
+              >
+                {selectedSKU?.sku}
+              </div>
+              <List
+                spacing="lg"
+                size="sm"
+                center
+                icon={
+                  <ThemeIcon color="teal" size={24} radius="xl">
+                    <IconCircleCheck
+                      style={{ width: rem(16), height: rem(16) }}
+                    />
+                  </ThemeIcon>
+                }
+              >
+                {selectedSKU?.linkProductRef && (
+                  <List.Item>
+                    Link Product:{" "}
+                    <a href={selectedSKU?.linkProductRef} target="_blank">
+                      Click
+                    </a>
+                  </List.Item>
+                )}
+                {selectedSKU?.designLink && (
+                  <List.Item>
+                    Link Design:{" "}
+                    <a href={selectedSKU?.designLink} target="_blank">
+                      Click
+                    </a>
+                  </List.Item>
+                )}
+              </List>
+            </Grid.Col>
+            <Grid.Col span={2}></Grid.Col>
+            <Grid.Col span={5}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "10px",
+                  fontSize: "18px",
+                  alignItems: "center",
+                }}
+              >
+                Scale
+              </div>
+              <Image
+                radius="md"
+                src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
+                height={300}
+              />
+
+              <List
+                spacing="lg"
+                size="sm"
+                center
+                icon={
+                  <ThemeIcon color="teal" size={24} radius="xl">
+                    <IconCircleCheck
+                      style={{ width: rem(16), height: rem(16) }}
+                    />
+                  </ThemeIcon>
+                }
+              >
+                {selectedSKU?.mockupLink && (
+                  <List.Item>
+                    Link Product:{" "}
+                    <a href={selectedSKU?.mockupLink} target="_blank">
+                      Click
+                    </a>
+                  </List.Item>
+                )}
+              </List>
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <Editor
+                state={getStringAsEditorState(selectedSKU?.note?.designer)}
+                classEditor={styles.editor}
+                label="Designer Note"
+              />
+            </Grid.Col>
+          </Grid>
+        </Modal>
+      )}
     </>
   );
 };
