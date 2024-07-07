@@ -15,13 +15,29 @@ import {
 import { modals } from "@mantine/modals";
 import { useMutation } from "@tanstack/react-query";
 import Checkbox from "../../../components/Checkbox";
-import { keywordServices } from "../../../services";
+import { keywordServices, rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
-import { compact, filter, includes, isEmpty, map, split, uniq } from "lodash";
+import {
+  cloneDeep,
+  compact,
+  filter,
+  find,
+  includes,
+  isEmpty,
+  keys,
+  map,
+  split,
+  uniq,
+} from "lodash";
 import { useEdit } from "../../../hooks";
 import { IconSearch } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconX,
+  IconDeviceFloppy,
+  IconBan,
+} from "@tabler/icons-react";
 import { BRIEF_TYPES } from "../../../constant";
 //CREATE hook (post new user to api)
 function useCreateKeyword(name, exKeywords, setKeywords) {
@@ -199,6 +215,11 @@ const KeywordTable = ({
   setQuery,
   setSelectedSKU,
   openModal,
+  users,
+  setEditingCell,
+  setUpdateBrief,
+  updateBrief,
+  editingCell,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(productLines || []);
@@ -207,6 +228,24 @@ const KeywordTable = ({
     setData(productLines);
     setTemplateName(name);
   }, [productLines, templateName]);
+  const handleUpdateStatus = async ({ uid, status }) => {
+    const newData = map(data, (x) => {
+      if (x.uid === uid) {
+        return {
+          ...x,
+          status: status === 1 ? 2 : 1,
+        };
+      }
+      return x;
+    });
+    setData(newData);
+    await rndServices.updateBrief({
+      uid,
+      data: {
+        status: status === 1 ? 2 : 1,
+      },
+    });
+  };
   const columns = useMemo(
     () => [
       {
@@ -302,43 +341,91 @@ const KeywordTable = ({
         size: 130,
       },
       {
-        accessorKey: "designLink",
+        accessorKey: "linkDesign",
         header: "LINK DESIGN",
-        mantineTableHeadCellProps: { className: classes["designLink"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         size: 100,
+        Edit: ({ row }) => {
+          return (
+            <TextInput
+              value={updateBrief[row.original.uid]?.linkDesign}
+              onChange={(e) => {
+                setUpdateBrief({
+                  ...updateBrief,
+                  [row.original.uid]: {
+                    ...updateBrief[row.original.uid],
+                    linkDesign: e.target.value,
+                  },
+                });
+              }}
+            />
+          );
+        },
+        Cell: ({ row }) => (
+          <a
+            style={{
+              cursor: "pointer",
+            }}
+            target="_blank"
+            href={
+              row.original.linkDesign ||
+              updateBrief[row.original.uid]?.linkDesign
+            }
+          >
+            {row.original.linkDesign ||
+            updateBrief[row.original.uid]?.linkDesign ? (
+              <Badge color="blue" variant="filled">
+                {" "}
+                <u>Link</u>{" "}
+              </Badge>
+            ) : null}
+          </a>
+        ),
       },
       {
         accessorKey: "status",
         header: "DONE",
         size: 100,
-        mantineTableHeadCellProps: { className: classes["designLink"] },
-        Edit: (props) => {
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        // Edit: (props) => {
+        //   const { value, handleOnChange, handleBlur } = useEdit(props);
+        //   return (
+        //     <Button
+        //       variant="filled"
+        //       color="#62d256"
+        //       leftSection={<IconCheck />}
+        //       disabled
+        //     >
+        //       Done
+        //     </Button>
+        //   );
+        // },
+        Cell: (props) => {
           const { value, handleOnChange, handleBlur } = useEdit(props);
+          const { row, table } = props;
           return (
             <Button
               variant="filled"
-              color="#62d256"
-              leftSection={<IconCheck />}
-              disabled
+              color={row.original.status === 2 ? "red" : "green"}
+              leftSection={
+                row.original.status === 2 ? <IconBan /> : <IconCheck />
+              }
+              disabled={
+                row?.original?.status === 1 &&
+                !row?.original?.linkDesign &&
+                !updateBrief[row.original.uid]?.linkDesign
+              }
             >
-              Done
+              {row.original.status === 2 ? "Undone" : "Done"}
             </Button>
           );
         },
-        mantineEditTextInputProps: ({ cell }) => ({
-          //onBlur is more efficient, but could use onChange instead
-          onBlur: (event) => {
-            console.log("onBlur", event.target.value);
-            // handleSaveCell(cell, event.target.value);
-          },
-          variant: "unstyled", //default for editDisplayMode="table"
-        }),
       },
       {
         accessorKey: "priority",
         header: "Priority",
-        mantineTableHeadCellProps: { className: classes["designLink"] },
-        Edit: ({ cell }) => {
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        Edit: ({ cell, row }) => {
           return (
             <div
               style={{
@@ -347,6 +434,18 @@ const KeywordTable = ({
               }}
             >
               <Checkbox checked={true} />
+            </div>
+          );
+        },
+        Cell: ({ row }) => {
+          return (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Checkbox checked={row?.original?.priority || false} />
             </div>
           );
         },
@@ -370,6 +469,18 @@ const KeywordTable = ({
             }}
           >
             <Button variant="filled" color="red">
+              <IconX />
+            </Button>
+          </div>
+        ),
+        Cell: ({ cell, column, table }) => (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <Button variant="filled" color="red" size="sx">
               <IconX />
             </Button>
           </div>
@@ -435,11 +546,10 @@ const KeywordTable = ({
       confirmProps: { color: "red" },
       onConfirm: () => deleteKeyword({ id: row.original.id }),
     });
-
   const table = useMantineReactTable({
     columns,
     data,
-    editDisplayMode: "table", // ('modal', 'cell', 'table', and 'custom' are also available)
+    editDisplayMode: "cell", // ('modal', 'cell', 'table', and 'custom' are also available)
     enableEditing: true,
     enablePagination: false,
     getRowId: (row) => row.id,
@@ -538,7 +648,7 @@ const KeywordTable = ({
             />
             <Select
               placeholder="RND"
-              data={["Thảo Thảo", "Nhật Minh"]}
+              data={map(filter(users, { role: "rnd" }), "name") || []}
               styles={{
                 input: {
                   width: "150px",
@@ -547,7 +657,7 @@ const KeywordTable = ({
             />
             <Select
               placeholder="Designer"
-              data={["Phương Duy"]}
+              data={map(filter(users, { role: "designer" }), "name") || []}
               styles={{
                 input: {
                   width: "120px",
@@ -590,6 +700,17 @@ const KeywordTable = ({
               Time to done: 15h
             </div>
           </Flex>
+          {editingCell && !isEmpty(updateBrief.linkDesigns) && (
+            <Flex>
+              <Button
+                variant="filled"
+                color="blue"
+                leftSection={<IconDeviceFloppy />}
+              >
+                Save
+              </Button>
+            </Flex>
+          )}
         </div>
       );
     },
@@ -600,6 +721,61 @@ const KeywordTable = ({
         createKeywordStatus === "pending" ||
         deleteKeywordStatus === "pending",
     },
+    mantineTableBodyCellProps: ({ row, table, cell }) => ({
+      onDoubleClick: (event) => {
+        console.log(`cell----`, cell);
+        console.info(row.original);
+        if (cell && cell.column.id === "linkDesign") {
+          setEditingCell(true);
+          table.setEditingCell(cell);
+        }
+      },
+      onClick: (event) => {
+        if (cell && cell.column.id === "status") {
+          handleUpdateStatus({
+            uid: row.original.uid,
+            status: row.original.status,
+          }).then((response) => {
+            console.log(response);
+          });
+        }
+      },
+      // when leaving the cell, we want to reset the editing cell
+      onBlur: (event) => {
+        if (isEmpty(updateBrief.linkDesigns)) {
+          setEditingCell(false);
+        }
+        console.log(updateBrief);
+        const uidKeys = keys(updateBrief);
+        const newData = map(data, (x) => {
+          if (includes(uidKeys, x.uid)) {
+            return {
+              ...x,
+              ...updateBrief[x.uid],
+            };
+          }
+          return x;
+        });
+
+        const uid = uidKeys[0];
+        console.log(updateBrief[uid]);
+        if (uid && updateBrief[uid] && updateBrief[uid].linkDesign) {
+          rndServices
+            .updateBrief({
+              uid,
+              data: updateBrief[uid],
+            })
+            .then((response) => {
+              console.log(response);
+            });
+          setData(newData);
+          table.setEditingCell(null);
+        }
+      },
+      sx: {
+        cursor: "pointer", //you might want to change the cursor too when adding an onClick
+      },
+    }),
   });
 
   return <MantineReactTable table={table} />;

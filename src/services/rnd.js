@@ -157,4 +157,19 @@ export const rndServices = {
       return false;
     }
   },
+  updateBrief: async ({ uid, data }) => {
+    try {
+      const response = await axios.put(`${hostAPI}/briefs/${uid}`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log("Error at updateBrief:", error);
+      showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      return false;
+    }
+  },
 };

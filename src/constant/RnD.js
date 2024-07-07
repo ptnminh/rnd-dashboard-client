@@ -70,7 +70,7 @@ export const SAMPLE_SKU = {
     },
   ],
   productLink: "https://www.google.com",
-  designLink: "https://www.google.com",
+  linkDesign: "https://www.google.com",
   mockupLink: "https://www.google.com",
   tibLink: "",
   productLine: "PL2",

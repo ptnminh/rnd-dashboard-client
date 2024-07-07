@@ -196,10 +196,10 @@ const CampaignInfo = ({
                     </a>
                   </List.Item>
                 )}
-                {SKU.designLink && (
+                {SKU.linkDesign && (
                   <List.Item>
                     Link Design:{" "}
-                    <a href={SKU.designLink} target="_blank">
+                    <a href={SKU.linkDesign} target="_blank">
                       Click
                     </a>
                   </List.Item>

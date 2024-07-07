@@ -50,7 +50,7 @@ const DesignerScreens = () => {
   const [visible, setVisible] = useState(true);
   const [productLines, setProductLines] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
-
+  const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({
     currentPage: initialPage,
     totalPages: 1,
@@ -61,6 +61,8 @@ const DesignerScreens = () => {
   const [selectedSKU, setSelectedSKU] = useState();
   const [selectedCollection, setSelectedCollection] = useState();
   const [selectedFilters, setSelectedFilters] = useState([]);
+  const [updateBrief, setUpdateBrief] = useState({});
+  const [editingCell, setEditingCell] = useState(false);
 
   const [collectionNameInput, setCollectionNameInput] = useState("");
   const [loadingCreateCollection, setLoadingCreateCollection] = useState(false);
@@ -154,6 +156,12 @@ const DesignerScreens = () => {
       showNotification("Lỗi", "Lấy dữ liệu thất bại", "red");
     }
   };
+  const fetchUsers = async () => {
+    const { data } = await rndServices.getUsers({
+      limit: -1,
+    });
+    setUsers(data);
+  };
   const handlePageChange = (page) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
   };
@@ -175,6 +183,10 @@ const DesignerScreens = () => {
       setCollectionNameInput(selectedCollection.name);
     }
   }, [selectedCollection]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
   return (
     <>
       <Card
@@ -193,6 +205,11 @@ const DesignerScreens = () => {
           setQuery={setQuery}
           setSelectedSKU={setSelectedSKU}
           openModal={open}
+          users={users}
+          setUpdateBrief={setUpdateBrief}
+          updateBrief={updateBrief}
+          setEditingCell={setEditingCell}
+          editingCell={editingCell}
         />
       </Card>
       <Pagination
@@ -308,10 +325,10 @@ const DesignerScreens = () => {
                     </a>
                   </List.Item>
                 )}
-                {selectedSKU?.designLink && (
+                {selectedSKU?.linkDesign && (
                   <List.Item>
                     Link Design:{" "}
-                    <a href={selectedSKU?.designLink} target="_blank">
+                    <a href={selectedSKU?.linkDesign} target="_blank">
                       Click
                     </a>
                   </List.Item>
