@@ -348,8 +348,8 @@ const DesignerScreens = () => {
               >
                 {selectedSKU?.productLine?.refLink && (
                   <List.Item>
-                    Link Product:{" "}
-                    <a href={selectedSKU?.mockupLink} target="_blank">
+                    Link Mockup:{" "}
+                    <a href={selectedSKU?.productLine?.refLink} target="_blank">
                       Click
                     </a>
                   </List.Item>
