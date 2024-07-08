@@ -26,9 +26,31 @@ export const getEditorStateAsString = (editorState) => {
 
 // Convert string to editor state
 export const getStringAsEditorState = (htmlString) => {
+  if (!htmlString || typeof htmlString !== "string") {
+    // Return an empty editor state if the input is invalid
+    return EditorState.createEmpty();
+  }
+
   const contentBlock = htmlToDraft(htmlString);
-  const contentState = ContentState.createFromBlockArray(
-    contentBlock.contentBlocks
-  );
-  return EditorState.createWithContent(contentState);
+  if (contentBlock) {
+    const contentState = ContentState.createFromBlockArray(
+      contentBlock.contentBlocks
+    );
+    return EditorState.createWithContent(contentState);
+  }
+
+  // Return an empty editor state if the content block is invalid
+  return EditorState.createEmpty();
+};
+
+export const CONVERT_STATUS_TO_NUMBER = {
+  Small: 1,
+  Medium: 2,
+  Big: 3,
+};
+
+export const CONVERT_NUMBER_TO_STATUS = {
+  1: "Small",
+  2: "Medium",
+  3: "Big",
 };

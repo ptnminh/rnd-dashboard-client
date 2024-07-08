@@ -14,6 +14,7 @@ const Editor = ({
   tooltip,
   place,
   button,
+  readOnly = false,
 }) => {
   return (
     <div
@@ -37,6 +38,7 @@ const Editor = ({
         </div>
       )}
       <ReactEditor
+        readOnly={readOnly} // Step 2: Pass readOnly to ReactEditor
         editorState={state}
         toolbarClassName={styles.editorToolbar}
         wrapperClassName={styles.editorWrapper}

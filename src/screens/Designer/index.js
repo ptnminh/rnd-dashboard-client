@@ -2,43 +2,26 @@ import React, { useEffect, useState } from "react";
 import styles from "./TemplateKW.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
-import Form from "../../components/Form";
-import Table from "./Table";
 import Details from "./Details";
-import { compact, includes, isEmpty, map, split, uniq } from "lodash";
-import TextInputComponent from "../../components/TextInput";
-import Icon from "../../components/Icon";
+import { map } from "lodash";
+
 import { useDisclosure } from "@mantine/hooks";
 import { IconCircleCheck } from "@tabler/icons-react";
 import {
-  Button,
-  Group,
   Modal,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Title,
-  ScrollArea,
-  LoadingOverlay,
   Pagination,
-  Tooltip,
   Grid,
-  Badge,
   Image,
   List,
   ThemeIcon,
   rem,
+  Flex,
 } from "@mantine/core";
-import { useForm } from "react-hook-form";
-import { keywordServices, rndServices } from "../../services";
-import { showNotification } from "../../utils/index";
 import { useLocation, useNavigate } from "react-router-dom";
-import Loader from "../../components/Loader";
 import moment from "moment-timezone";
 import Editor from "../../components/Editor";
-import { convertFromRaw, EditorState } from "draft-js";
 import { getStringAsEditorState } from "../../utils";
-const navigation = ["Default", "New"];
+import { rndServices } from "../../services";
 
 const DesignerScreens = () => {
   const navigate = useNavigate();
@@ -60,79 +43,22 @@ const DesignerScreens = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedSKU, setSelectedSKU] = useState();
   const [selectedCollection, setSelectedCollection] = useState();
-  const [selectedFilters, setSelectedFilters] = useState([]);
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
+  const [trigger, setTrigger] = useState(false);
+  const [metadata, setMetadata] = useState({});
 
   const [collectionNameInput, setCollectionNameInput] = useState("");
-  const [loadingCreateCollection, setLoadingCreateCollection] = useState(false);
-  const [loadingUpdateCollection, setLoadingUpdateCollection] = useState(false);
+  const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
 
   const [collections, setCollections] = useState([]);
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    getValues,
-  } = useForm();
-
-  const onSubmitCreateCollection = async (data) => {
-    setLoadingCreateCollection(true);
-    const { name, keywords } = data;
-    const transformedKeywords = uniq(split(keywords, "\n"));
-    const createTemplateKeywordResponse =
-      await keywordServices.createTemplateKeyword({
-        name,
-        keywords: transformedKeywords,
-      });
-    if (createTemplateKeywordResponse.data) {
-      showNotification(
-        "Thành công",
-        "Tạo template keyword thành công",
-        "green"
-      );
-      fetchCollections(1);
-      close();
-    } else {
-      const message =
-        createTemplateKeywordResponse?.response?.data?.message ||
-        "Tạo template keyword thất bại";
-      showNotification("Lỗi", message, "red");
-    }
-    setLoadingCreateCollection(false);
-  };
-
-  const handleBlurProductLines = () => {
-    const { keywords } = getValues();
-    setOptions(compact(uniq(split(keywords, "\n"))));
-  };
-
-  const handleDeleteCollections = async () => {
-    setLoadingCreateCollection(true);
-    const deleteTemplateResponse = await keywordServices.deleteTemplateKeyword({
-      names: selectedFilters,
-    });
-    if (deleteTemplateResponse.message === "Done") {
-      showNotification(
-        "Thành công",
-        "Xóa template keyword thành công",
-        "green"
-      );
-      fetchCollections(1);
-    } else {
-      const message =
-        deleteTemplateResponse?.response?.data?.message ||
-        "Xóa template keyword thất bại";
-      showNotification("Lỗi", message, "red");
-    }
-    setLoadingCreateCollection(false);
-  };
 
   const fetchCollections = async (page = 1) => {
+    setLoadingFetchBrief(true);
     const response = await rndServices.fetchBriefs({
       search,
       page,
-      limit: 50,
+      limit: 30,
       ...query,
     });
     const { data, metadata } = response;
@@ -143,18 +69,26 @@ const DesignerScreens = () => {
           return {
             ...x,
             id: index + 1,
-            date: moment(x.createdAt).format("DD/MM/YYYY"),
-            time:
-              Math.round(moment().diff(moment(x.createdAt), "hours", true)) +
-              "h",
+            date: moment(x.createdAt)
+              .tz("Asia/Ho_Chi_Minh")
+              .format("DD/MM/YYYY"),
+            time: Math.round(
+              moment()
+                .tz("Asia/Ho_Chi_Minh")
+                .diff(moment(x.createdAt), "hours", true)
+            ),
           };
         })
       );
       setPagination(metadata);
+      setMetadata(metadata);
       setSelectedCollection(data[0]);
     } else {
-      showNotification("Lỗi", "Lấy dữ liệu thất bại", "red");
+      setCollections([]);
+      setProductLines([]);
     }
+    setLoadingFetchBrief(false);
+    setTrigger(false);
   };
   const fetchUsers = async () => {
     const { data } = await rndServices.getUsers({
@@ -167,7 +101,7 @@ const DesignerScreens = () => {
   };
   useEffect(() => {
     fetchCollections(pagination.currentPage);
-  }, [search, pagination.currentPage, query]);
+  }, [search, pagination.currentPage, query, trigger]);
 
   useEffect(() => {
     // Update the URL when search or page changes
@@ -194,7 +128,36 @@ const DesignerScreens = () => {
         title="DESIGNER TASK"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
-        head={<></>}
+        head={
+          <>
+            <Flex
+              style={{
+                gap: "30px",
+                padding: "10px",
+                borderRadius: "10px",
+                backgroundColor: "#EFF0F1",
+              }}
+              justify="end"
+            >
+              <div
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                }}
+              >
+                Undone: {metadata?.totalUndoneBriefs}
+              </div>
+              <div
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                }}
+              >
+                Time to done: {metadata?.totalTimeToDoneBriefs}h
+              </div>
+            </Flex>
+          </>
+        }
       >
         <Details
           className={styles.details}
@@ -210,6 +173,9 @@ const DesignerScreens = () => {
           updateBrief={updateBrief}
           setEditingCell={setEditingCell}
           editingCell={editingCell}
+          loadingFetchBrief={loadingFetchBrief}
+          setLoadingFetchBrief={setLoadingFetchBrief}
+          setTrigger={setTrigger}
         />
       </Card>
       <Pagination
@@ -350,10 +316,24 @@ const DesignerScreens = () => {
               </div>
               <Image
                 radius="md"
-                src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
+                src={
+                  selectedSKU?.productLine?.image ||
+                  "/images/content/not_found_2.jpg"
+                }
                 height={300}
               />
-
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "10px",
+                  fontSize: "18px",
+                  alignItems: "center",
+                  marginTop: "10px",
+                }}
+              >
+                {selectedSKU?.productLine?.name}
+              </div>
               <List
                 spacing="lg"
                 size="sm"
@@ -366,7 +346,7 @@ const DesignerScreens = () => {
                   </ThemeIcon>
                 }
               >
-                {selectedSKU?.mockupLink && (
+                {selectedSKU?.productLine?.refLink && (
                   <List.Item>
                     Link Product:{" "}
                     <a href={selectedSKU?.mockupLink} target="_blank">
@@ -381,6 +361,7 @@ const DesignerScreens = () => {
                 state={getStringAsEditorState(selectedSKU?.note?.designer)}
                 classEditor={styles.editor}
                 label="Designer Note"
+                readOnly={true}
               />
             </Grid.Col>
           </Grid>

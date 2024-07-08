@@ -43,6 +43,7 @@ import {
   isEmpty,
   map,
   orderBy,
+  random,
   sortBy,
   toLower,
   uniq,
@@ -51,7 +52,11 @@ import {
 import { rndServices } from "../../services";
 import TextInput from "../../components/TextInput";
 import Icon from "../../components/Icon";
-import { delayTime, getEditorStateAsString } from "../../utils";
+import {
+  CONVERT_STATUS_TO_NUMBER,
+  delayTime,
+  getEditorStateAsString,
+} from "../../utils";
 import { convertToRaw } from "draft-js";
 const HoverInfo = ({ image }) => (
   <div className={styles.hoverInfo}>
@@ -126,8 +131,10 @@ const generateScaleProductLinesTable = ({
         const foundProductLine = find(allProductLines, { name: x });
         if (!foundProductLine) return null;
         const name = foundProductLine?.skuPrefix
-          ? `${foundProductLine.skuPrefix}-${rndSortName}001`
-          : `XX-${rndSortName}001`;
+          ? `${foundProductLine.skuPrefix}-${rndSortName}${String(
+              random(1, 1000)
+            ).padStart(4, "0")}`
+          : `XX-${rndSortName}${String(random(1, 1000)).padStart(4, "0")}`;
         return {
           No: index + 1,
           "Product Line": foundProductLine?.name,
@@ -387,31 +394,26 @@ const NewCampaigns = () => {
         briefType,
         rndTeam: workGroup,
         size: {
-          rnd: rndSize,
+          rnd: CONVERT_STATUS_TO_NUMBER[rndSize],
         },
         value: {
-          rnd: briefValue,
+          rnd: CONVERT_STATUS_TO_NUMBER[briefValue],
         },
-        rnd: {
-          uid: find(users, { name: rndMember })?.uid,
-          name: rndMember,
-        },
-        designer: {
-          uid: find(users, { name: designerMember })?.uid,
-          name: designerMember,
-        },
+        rnd: find(users, { name: rndMember })?.uid,
+        designer: find(users, { name: designerMember })?.uid,
         ...(epmNote || designerNote || mktNote
           ? {
               note: {
                 ...(epmNote && { epm: getEditorStateAsString(epmNote) }),
                 ...(designerNote && {
-                  designer: getEditorStateAsString((designerNote)),
+                  designer: getEditorStateAsString(designerNote),
                 }),
-                ...(mktNote && { mkt: getEditorStateAsString((mktNote)) }),
+                ...(mktNote && { mkt: getEditorStateAsString(mktNote) }),
               },
             }
           : {}),
         status: 1,
+        productLine: find(productLines, { name: x["Product Line"] })?.uid,
       };
     });
     console.log(data);

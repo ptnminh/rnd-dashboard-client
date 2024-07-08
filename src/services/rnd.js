@@ -128,32 +128,40 @@ export const rndServices = {
     rnd,
     designer,
     status,
+    date,
   }) => {
     try {
-      const response = await axios.get(`${hostAPI}/briefs`, {
-        params: {
-          ...(search && { search }),
-          ...(page && { page }),
-          ...(limit && { pageSize: limit }),
-          ...(batch && { batch }),
-          ...(sku && { sku }),
-          ...(briefType && { briefType }),
-          ...(size && { size }),
-          ...(rndTeam && { rndTeam }),
-          ...(rnd && { rnd }),
-          ...(designer && { designer }),
-          ...(status && { status }),
-        },
-      });
+      console.log(date);
+      const filter = {
+        ...(search && { search }),
+        ...(batch && { batch }),
+        ...(sku && { sku }),
+        ...(briefType && { briefType }),
+        ...(size && { size }),
+        ...(rndTeam && { rndTeam }),
+        ...(rnd && { rnd }),
+        ...(designer && { designer }),
+        ...(status && { status }),
+        ...(date && { startDate: date.startDate, endDate: date.endDate }),
+      };
+      let url = `${hostAPI}/briefs?page=${page}&pageSize=${limit}`;
+      if (Object.keys(filter).length !== 0) {
+        const queryString = `filter=${encodeURIComponent(
+          JSON.stringify(filter)
+        )}`;
+        url = `${url}&${queryString}`;
+      }
+
+      const response = await axios.get(url);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification("Thất bại", "Không tìm thấy brief", "red");
+        // showNotification("Thất bại", "Không tìm thấy brief", "red");
         return false;
       }
       return result;
     } catch (error) {
       console.log("Error at fetchBriefs:", error);
-      showNotification("Thất bại", "Không tìm thấy brief", "red");
+      // showNotification("Thất bại", "Không tìm thấy brief", "red");
       return false;
     }
   },
@@ -169,6 +177,21 @@ export const rndServices = {
     } catch (error) {
       console.log("Error at updateBrief:", error);
       showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      return false;
+    }
+  },
+  deleteBrief: async (uid) => {
+    try {
+      const response = await axios.put(`${hostAPI}/briefs/delete/${uid}`);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Xóa brief thất bại", "red");
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log("Error at deleteBrief:", error);
+      showNotification("Thất bại", "Xóa brief thất bại", "red");
       return false;
     }
   },

@@ -27,11 +27,13 @@ import {
   keys,
   map,
   split,
+  sumBy,
   uniq,
 } from "lodash";
 import { useEdit } from "../../../hooks";
 import { IconSearch } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
+import { DateRangePicker } from "rsuite";
 import {
   IconCheck,
   IconX,
@@ -39,6 +41,11 @@ import {
   IconBan,
 } from "@tabler/icons-react";
 import { BRIEF_TYPES } from "../../../constant";
+import moment from "moment-timezone";
+import {
+  CONVERT_NUMBER_TO_STATUS,
+  CONVERT_STATUS_TO_NUMBER,
+} from "../../../utils";
 //CREATE hook (post new user to api)
 function useCreateKeyword(name, exKeywords, setKeywords) {
   return useMutation({
@@ -220,10 +227,14 @@ const KeywordTable = ({
   setUpdateBrief,
   updateBrief,
   editingCell,
+  loadingFetchBrief,
+  setLoadingFetchBrief,
+  setTrigger,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(productLines || []);
   const [templateName, setTemplateName] = useState(name);
+  const [date, sateDate] = useState();
   useEffect(() => {
     setData(productLines);
     setTemplateName(name);
@@ -245,6 +256,15 @@ const KeywordTable = ({
         status: status === 1 ? 2 : 1,
       },
     });
+  };
+  const handleUpdatePriority = async ({ uid, priority }) => {
+    await rndServices.updateBrief({
+      uid,
+      data: {
+        priority: priority === 1 ? 2 : 1,
+      },
+    });
+    setTrigger(true);
   };
   const columns = useMemo(
     () => [
@@ -308,14 +328,14 @@ const KeywordTable = ({
       },
       {
         id: "value",
-        accessorFn: (row) => row?.value?.rnd,
+        accessorFn: (row) => CONVERT_NUMBER_TO_STATUS[row?.size?.rnd],
         header: "VALUE",
         size: 100,
         enableEditing: false,
       },
       {
         id: "size",
-        accessorFn: (row) => row?.size?.rnd,
+        accessorFn: (row) => CONVERT_NUMBER_TO_STATUS[row?.size?.rnd],
         header: "SIZE",
         size: 100,
         enableEditing: false,
@@ -387,19 +407,6 @@ const KeywordTable = ({
         header: "DONE",
         size: 100,
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
-        // Edit: (props) => {
-        //   const { value, handleOnChange, handleBlur } = useEdit(props);
-        //   return (
-        //     <Button
-        //       variant="filled"
-        //       color="#62d256"
-        //       leftSection={<IconCheck />}
-        //       disabled
-        //     >
-        //       Done
-        //     </Button>
-        //   );
-        // },
         Cell: (props) => {
           const { value, handleOnChange, handleBlur } = useEdit(props);
           const { row, table } = props;
@@ -425,18 +432,7 @@ const KeywordTable = ({
         accessorKey: "priority",
         header: "Priority",
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
-        Edit: ({ cell, row }) => {
-          return (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <Checkbox checked={true} />
-            </div>
-          );
-        },
+        size: 100,
         Cell: ({ row }) => {
           return (
             <div
@@ -445,17 +441,18 @@ const KeywordTable = ({
                 justifyContent: "center",
               }}
             >
-              <Checkbox checked={row?.original?.priority || false} />
+              <Checkbox value={row?.original?.priority === 2} />
             </div>
           );
         },
       },
       {
-        accessorKey: "time",
+        id: "time",
+        accessorFn: (row) => row?.time + "h",
         header: "Time",
         mantineTableHeadCellProps: { className: classes["head-cells"] },
         enableEditing: false,
-        size: 100,
+        size: 50,
       },
       {
         accessorKey: "remove",
@@ -534,18 +531,27 @@ const KeywordTable = ({
   //DELETE action
   const openDeleteConfirmModal = (row) =>
     modals.openConfirmModal({
-      title: "Are you sure you want to delete this keyword?",
+      title: "Are you sure you want to delete this SKU?",
       centered: true,
       children: (
         <Text>
-          Are you sure you want to delete {row.original.keyword}? This action
-          cannot be undone.
+          Are you sure you want to delete {row.original.sku}? This action cannot
+          be revert.
         </Text>
       ),
       labels: { confirm: "Delete", cancel: "Cancel" },
       confirmProps: { color: "red" },
-      onConfirm: () => deleteKeyword({ id: row.original.id }),
+      onConfirm: () => handleDeleteBrief(row.original.uid),
     });
+
+  const handleDeleteBrief = async (uid) => {
+    await rndServices.deleteBrief(uid);
+    setTrigger(true);
+  };
+
+  const [batch, setBatch] = useState("");
+  const [searchSKU, setSearchSKU] = useState("");
+
   const table = useMantineReactTable({
     columns,
     data,
@@ -591,27 +597,84 @@ const KeywordTable = ({
               placeholder="Batch"
               size="sm"
               width="100px"
-              leftSection={<IconSearch size={16} />}
+              leftSection={
+                <span
+                  onClick={() => {
+                    setQuery({ ...query, batch });
+                  }}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                >
+                  <IconSearch size={16} />
+                </span>
+              }
               styles={{
                 input: {
                   width: "100px",
                 },
               }}
-              value={query?.batch}
-              onChange={(e) => setQuery({ ...query, batch: e.target.value })}
+              value={batch}
+              onChange={(e) => setBatch(e.target.value)}
             />
             <TextInput
               placeholder="SKU"
               size="sm"
               width="100px"
-              leftSection={<IconSearch size={16} />}
+              leftSection={
+                <span
+                  onClick={() => {
+                    setQuery({ ...query, sku: searchSKU });
+                  }}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                >
+                  <IconSearch size={16} />
+                </span>
+              }
               styles={{
                 input: {
                   width: "100px",
                 },
               }}
-              value={query?.sku}
-              onChange={(e) => setQuery({ ...query, sku: e.target.value })}
+              value={searchSKU}
+              onChange={(e) => setSearchSKU(e.target.value)}
+            />
+            <DateRangePicker
+              size="sx"
+              placeholder="Date"
+              style={{
+                width: "100px",
+              }}
+              value={query.dateValue}
+              onOk={(value) =>
+                setQuery({
+                  ...query,
+                  dateValue: value,
+                  date: {
+                    startDate: moment(value[0]).format("YYYY-MM-DD"),
+                    endDate: moment(value[1]).format("YYYY-MM-DD"),
+                  },
+                })
+              }
+              onClean={() => {
+                setQuery({
+                  ...query,
+                  dateValue: null,
+                  date: null,
+                });
+              }}
+              onShortcutClick={(shorcut, event) => {
+                setQuery({
+                  ...query,
+                  dateValue: shorcut.value,
+                  date: {
+                    startDate: moment(shorcut.value[0]).format("YYYY-MM-DD"),
+                    endDate: moment(shorcut.value[1]).format("YYYY-MM-DD"),
+                  },
+                });
+              }}
             />
             <Select
               placeholder="Loại Brief"
@@ -632,8 +695,14 @@ const KeywordTable = ({
                   width: "100px",
                 },
               }}
-              value={query?.size}
-              onChange={(value) => setQuery({ ...query, size: value })}
+              value={query?.sizeValue}
+              onChange={(value) =>
+                setQuery({
+                  ...query,
+                  size: CONVERT_STATUS_TO_NUMBER[value],
+                  sizeValue: value,
+                })
+              }
             />
             <Select
               placeholder="Team"
@@ -654,6 +723,14 @@ const KeywordTable = ({
                   width: "150px",
                 },
               }}
+              value={query?.rndName}
+              onChange={(value) =>
+                setQuery({
+                  ...query,
+                  rndName: find(users, { name: value })?.name,
+                  rnd: find(users, { name: value })?.uid,
+                })
+              }
             />
             <Select
               placeholder="Designer"
@@ -663,6 +740,14 @@ const KeywordTable = ({
                   width: "120px",
                 },
               }}
+              value={query?.designerName}
+              onChange={(value) =>
+                setQuery({
+                  ...query,
+                  designerName: find(users, { name: value })?.name,
+                  designer: find(users, { name: value })?.uid,
+                })
+              }
             />
             <Select
               placeholder="Status"
@@ -672,6 +757,14 @@ const KeywordTable = ({
                   width: "120px",
                 },
               }}
+              value={query?.statusValue}
+              onChange={(value) =>
+                setQuery({
+                  ...query,
+                  status: value === "Done" ? 2 : 1,
+                  statusValue: value,
+                })
+              }
             />
           </Flex>
           <Flex
@@ -689,7 +782,7 @@ const KeywordTable = ({
                 fontSize: "16px",
               }}
             >
-              Undone: 3
+              Undone: {filter(data, { status: 1 }).length}
             </div>
             <div
               style={{
@@ -697,7 +790,7 @@ const KeywordTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: 15h
+              Time to done: {sumBy(filter(data, { status: 1 }), "time")}h
             </div>
           </Flex>
           {editingCell && !isEmpty(updateBrief.linkDesigns) && (
@@ -719,7 +812,8 @@ const KeywordTable = ({
       showProgressBars:
         updateKeywordStatus === "pending" ||
         createKeywordStatus === "pending" ||
-        deleteKeywordStatus === "pending",
+        deleteKeywordStatus === "pending" ||
+        loadingFetchBrief,
     },
     mantineTableBodyCellProps: ({ row, table, cell }) => ({
       onDoubleClick: (event) => {
@@ -738,6 +832,20 @@ const KeywordTable = ({
           }).then((response) => {
             console.log(response);
           });
+          return;
+        }
+        if (cell && cell.column.id === "remove") {
+          openDeleteConfirmModal(row);
+          return;
+        }
+        if (cell && cell.column.id === "priority") {
+          handleUpdatePriority({
+            uid: row.original.uid,
+            priority: row.original.priority,
+          }).then((response) => {
+            console.log(response);
+          });
+          return;
         }
       },
       // when leaving the cell, we want to reset the editing cell
