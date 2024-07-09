@@ -105,6 +105,7 @@ const DesignerScreens = () => {
   };
   const handlePageChange = (page) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
   useEffect(() => {
     fetchCollections(pagination.currentPage);
