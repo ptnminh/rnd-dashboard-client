@@ -252,7 +252,7 @@ const DesignerScreens = () => {
                   borderRadius: "12px",
                 }}
               >
-                {selectedSKU?.briefType} - từ {selectedSKU?.skuRef}
+                {selectedSKU?.briefType}
               </div>
             </Grid.Col>
             <Grid.Col span={5}>

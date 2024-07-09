@@ -129,6 +129,7 @@ export const rndServices = {
     designer,
     status,
     date,
+    epm,
     view = "design",
   }) => {
     try {
@@ -143,6 +144,7 @@ export const rndServices = {
         ...(designer && { designer }),
         ...(status && { status }),
         ...(date && { startDate: date.startDate, endDate: date.endDate }),
+        ...(epm && { epm }),
       };
       let url = `${hostAPI}/briefs?page=${page}&pageSize=${limit}&view=${view}`;
       if (Object.keys(filter).length !== 0) {

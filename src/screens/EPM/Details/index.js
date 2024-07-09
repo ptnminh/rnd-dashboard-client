@@ -523,7 +523,7 @@ const BriefsTable = ({
               data={BRIEF_TYPES}
               styles={{
                 input: {
-                  width: "150px",
+                  width: "100px",
                 },
               }}
               value={query?.briefType}
@@ -584,7 +584,7 @@ const BriefsTable = ({
               data={map(filter(users, { role: "rnd" }), "name") || []}
               styles={{
                 input: {
-                  width: "150px",
+                  width: "100px",
                 },
               }}
               value={query?.rndName}
@@ -609,7 +609,7 @@ const BriefsTable = ({
               data={map(filter(users, { role: "designer" }), "name") || []}
               styles={{
                 input: {
-                  width: "120px",
+                  width: "100px",
                 },
               }}
               value={query?.designerName}
@@ -626,6 +626,31 @@ const BriefsTable = ({
                   ...query,
                   designerName: null,
                   designer: null,
+                });
+              }}
+            />
+            <Select
+              placeholder="EPM"
+              data={map(filter(users, { role: "epm" }), "name") || []}
+              styles={{
+                input: {
+                  width: "100px",
+                },
+              }}
+              value={query?.epmName}
+              onChange={(value) =>
+                setQuery({
+                  ...query,
+                  epmName: find(users, { name: value })?.name,
+                  epm: find(users, { name: value })?.uid,
+                })
+              }
+              clearable
+              onClear={() => {
+                setQuery({
+                  ...query,
+                  epmName: null,
+                  epm: null,
                 });
               }}
             />
