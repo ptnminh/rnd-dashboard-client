@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Flex,
+  Image,
   Select,
   Stack,
   Text,
@@ -276,24 +277,29 @@ const KeywordTable = ({
         size: 50, //small column
         header: "NO",
         enableEditing: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         accessorKey: "date",
         header: "DATE",
         size: 120,
         enableEditing: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         accessorKey: "batch",
         header: "BATCH",
         size: 100,
         enableEditing: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         accessorKey: "sku",
         header: "SKU",
         size: 100,
         enableEditing: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+
         Header: ({ column }) => (
           <div
             style={{
@@ -322,9 +328,24 @@ const KeywordTable = ({
         ),
       },
       {
+        accessorKey: "imageRef",
+        header: "HÌNH REF",
+        size: 100,
+        enableEditing: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        Cell: ({ row }) => (
+          <Image
+            radius="md"
+            src={row?.original?.imageRef || "/images/content/not_found_2.jpg"}
+            height={100}
+          />
+        ),
+      },
+      {
         accessorKey: "briefType",
         header: "LOẠI BRIEF",
         enableEditing: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         id: "value",
@@ -332,6 +353,7 @@ const KeywordTable = ({
         header: "VALUE",
         size: 100,
         enableEditing: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         id: "size",
@@ -339,12 +361,14 @@ const KeywordTable = ({
         header: "SIZE",
         size: 100,
         enableEditing: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         accessorKey: "rndTeam",
         header: "TEAM",
         size: 100,
         enableEditing: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         id: "rndName",
@@ -352,6 +376,7 @@ const KeywordTable = ({
         header: "RND",
         enableEditing: false,
         size: 130,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         id: "designer",
@@ -359,12 +384,14 @@ const KeywordTable = ({
         header: "DESIGNER",
         enableEditing: false,
         size: 130,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         accessorKey: "linkDesign",
         header: "LINK DESIGN",
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         size: 100,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ row }) => {
           return (
             <TextInput
@@ -406,6 +433,7 @@ const KeywordTable = ({
         accessorKey: "status",
         header: "DONE",
         size: 100,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: (props) => {
           const { value, handleOnChange, handleBlur } = useEdit(props);
@@ -431,6 +459,7 @@ const KeywordTable = ({
       {
         accessorKey: "priority",
         header: "Priority",
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         size: 100,
         Cell: ({ row }) => {
@@ -453,11 +482,13 @@ const KeywordTable = ({
         mantineTableHeadCellProps: { className: classes["head-cells"] },
         enableEditing: false,
         size: 50,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         accessorKey: "remove",
         header: "REMOVE",
         mantineTableHeadCellProps: { className: classes["remove"] },
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ cell, column, table }) => (
           <div
             style={{
@@ -566,6 +597,7 @@ const KeywordTable = ({
       style: { "--mrt-striped-row-background-color": "#eff0f1" },
     },
     mantineTableHeadCellProps: { className: classes["head-cells"] },
+    mantineTableBodyCellProps: { className: classes["body-cells"] },
     enableSorting: false,
     mantineTableProps: { striped: "even" },
     onCreatingRowCancel: () => setValidationErrors({}),

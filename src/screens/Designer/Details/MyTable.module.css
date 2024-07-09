@@ -24,6 +24,9 @@
   align-items: center !important;
   justify-content: center !important;
 }
+.body-cells {
+  vertical-align: middle;
+}
 
 .linkDesign {
   background-color: #d9f5d6;
