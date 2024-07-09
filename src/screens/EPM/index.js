@@ -441,7 +441,7 @@ const DesignerScreens = () => {
               <Image
                 radius="md"
                 src={
-                  selectedSKU?.productInfo?.thumbLink ||
+                  selectedSKU?.designInfo?.thumbLink ||
                   "/images/content/not_found_2.jpg"
                 }
                 height={200}
