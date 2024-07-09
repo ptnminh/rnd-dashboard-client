@@ -689,11 +689,13 @@ const BriefsTable = ({
                   size: null,
                   rndTeam: null,
                   rnd: null,
+                  epm: null,
                   designer: null,
                   status: [2, 3],
                   sizeValue: null,
                   rndName: null,
                   designerName: null,
+                  epmName: null,
                   statusValue: null,
                   dateValue: null,
                 });
