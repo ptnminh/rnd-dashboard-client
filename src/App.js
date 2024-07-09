@@ -25,6 +25,7 @@ import Statements from "./screens/Statements";
 import Shop from "./screens/Shop";
 import PageList from "./screens/PageList";
 import DesignerScreens from "./screens/Designer";
+import EPMScreens from "./screens/EPM";
 
 function App() {
   return (
@@ -75,6 +76,14 @@ function App() {
           element={
             <Page title="Campaigns">
               <DesignerScreens />
+            </Page>
+          }
+        />
+        <Route
+          path="/epm"
+          element={
+            <Page title="EPM">
+              <EPMScreens />
             </Page>
           }
         />

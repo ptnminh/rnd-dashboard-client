@@ -57,7 +57,6 @@ import {
   delayTime,
   getEditorStateAsString,
 } from "../../utils";
-import { convertToRaw } from "draft-js";
 const HoverInfo = ({ image }) => (
   <div className={styles.hoverInfo}>
     <Image radius="md" src={image} />
@@ -157,6 +156,7 @@ const NewCampaigns = () => {
   const [designerMember, setDesignerMember] = useState(DESIGNER_MEMBERS[0]);
   const [briefValue, setBriefValue] = useState(BRIEF_VALUES[0]);
   const [rndMember, setRndMember] = useState(MEMBERS[0]);
+  const [epmMember, setEpmMember] = useState(MEMBERS[0]);
   const [briefType, setBriefType] = useState(BRIEF_TYPES[0]);
   const [layout, setLayout] = useState(LAYOUT_TYPES[0]);
   const [search, setSearch] = useState("");
@@ -251,7 +251,6 @@ const NewCampaigns = () => {
     setValue,
   } = useForm();
   const handleMouseLeave = () => {
-    // Custom sorting function
     const sortedProductLines = orderBy(
       productLines,
       [
@@ -274,9 +273,11 @@ const NewCampaigns = () => {
     });
     const designers = filter(data, { role: "designer" });
     const rnds = filter(data, { role: "rnd" });
+    const epms = filter(data, { role: "epm" });
     setRndMember(map(rnds, "name")[0]);
     setDesignerMember(map(designers, "name")[0]);
     setWorkGroup(uniq(map(data, "team"))[0]);
+    setEpmMember(map(epms, "name")[0]);
     setUsers(data);
     setTeams(uniq(map(data, "team")));
   };
@@ -400,6 +401,7 @@ const NewCampaigns = () => {
           rnd: CONVERT_STATUS_TO_NUMBER[briefValue],
         },
         rnd: find(users, { name: rndMember })?.uid,
+        epm: find(users, { name: epmMember })?.uid,
         designer: find(users, { name: designerMember })?.uid,
         ...(epmNote || designerNote || mktNote
           ? {
@@ -414,6 +416,7 @@ const NewCampaigns = () => {
           : {}),
         status: 1,
         productLine: find(productLines, { name: x["Product Line"] })?.uid,
+        designLinkRef: SKU?.designLink || "",
       };
     });
     console.log(data);
@@ -457,6 +460,8 @@ const NewCampaigns = () => {
               products={products}
               designerMember={designerMember}
               setDesignerMember={setDesignerMember}
+              epmMember={epmMember}
+              setEpmMember={setEpmMember}
               briefValue={briefValue}
               setBriefValue={setBriefValue}
               rndSize={rndSize}
@@ -619,13 +624,11 @@ const NewCampaigns = () => {
             <Grid>
               <Grid.Col span={4}>
                 <Editor
-                  // state={test}
                   state={designerNote}
                   onChange={setDesignerNote}
                   classEditor={styles.editor}
                   label="Designer Note"
                 />
-                {/* <SlateEditor /> */}
               </Grid.Col>
               <Grid.Col span={4}>
                 <Editor

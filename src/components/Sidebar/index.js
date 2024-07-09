@@ -35,9 +35,14 @@ const navigation = [
     ],
   },
   {
-    title: "Designer - Task",
+    title: "Design - Task",
     icon: "diamond",
     url: "/designer",
+  },
+  {
+    title: "Listing - Task",
+    icon: "diamond",
+    url: "/epm",
   },
   // {
   //   title: "Income",

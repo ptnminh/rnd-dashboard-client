@@ -55,6 +55,8 @@ const CampaignInfo = ({
   setRndSize,
   users,
   teams,
+  epmMember,
+  setEpmMember,
 }) => {
   useEffect(() => {
     if (!isEmpty(previewData)) setVisibleReviewTable(true);
@@ -114,6 +116,15 @@ const CampaignInfo = ({
               value={designerMember}
               setValue={setDesignerMember}
               options={map(filter(users, { role: "designer" }), "name") || []}
+              classOutSideClick={styles.memberDropdown}
+            />{" "}
+            <Dropdown
+              className={styles.dropdown}
+              label={"EPM"}
+              classDropdownHead={styles.dropdownHead}
+              value={epmMember}
+              setValue={setEpmMember}
+              options={map(filter(users, { role: "epm" }), "name") || []}
               classOutSideClick={styles.memberDropdown}
             />{" "}
           </div>
@@ -196,10 +207,10 @@ const CampaignInfo = ({
                     </a>
                   </List.Item>
                 )}
-                {SKU.linkDesign && (
+                {SKU.designLink && (
                   <List.Item>
                     Link Design:{" "}
-                    <a href={SKU.linkDesign} target="_blank">
+                    <a href={SKU.designLink} target="_blank">
                       Click
                     </a>
                   </List.Item>

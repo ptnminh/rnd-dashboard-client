@@ -129,9 +129,9 @@ export const rndServices = {
     designer,
     status,
     date,
+    view = "design",
   }) => {
     try {
-      console.log(date);
       const filter = {
         ...(search && { search }),
         ...(batch && { batch }),
@@ -144,7 +144,7 @@ export const rndServices = {
         ...(status && { status }),
         ...(date && { startDate: date.startDate, endDate: date.endDate }),
       };
-      let url = `${hostAPI}/briefs?page=${page}&pageSize=${limit}`;
+      let url = `${hostAPI}/briefs?page=${page}&pageSize=${limit}&view=${view}`;
       if (Object.keys(filter).length !== 0) {
         const queryString = `filter=${encodeURIComponent(
           JSON.stringify(filter)

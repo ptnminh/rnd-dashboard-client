@@ -42,7 +42,7 @@ import {
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 
-const KeywordTable = ({
+const BriefsTable = ({
   productLines,
   name,
   query,
@@ -57,7 +57,7 @@ const KeywordTable = ({
   loadingFetchBrief,
   setLoadingFetchBrief,
   setTrigger,
-  setLinkDesign,
+  setLinkProduct,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(productLines || []);
@@ -70,7 +70,7 @@ const KeywordTable = ({
     await rndServices.updateBrief({
       uid,
       data: {
-        status: status === 1 ? 2 : 1,
+        status: status === 2 ? 3 : 2,
       },
     });
     setTrigger(true);
@@ -133,7 +133,7 @@ const KeywordTable = ({
             }}
             onClick={() => {
               setSelectedSKU(row.original);
-              setLinkDesign(row.original.linkDesign);
+              setLinkProduct(row.original.linkProduct);
               openModal();
             }}
           >
@@ -146,14 +146,17 @@ const KeywordTable = ({
       },
       {
         accessorKey: "imageRef",
-        header: "HÌNH REF",
+        header: "HÌNH SKU",
         size: 100,
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => (
           <Image
             radius="md"
-            src={row?.original?.imageRef || "/images/content/not_found_2.jpg"}
+            src={
+              row?.original?.designInfo?.thumbLink ||
+              "/images/content/not_found_2.jpg"
+            }
             height={100}
             fit="contain"
           />
@@ -231,21 +234,29 @@ const KeywordTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
-        accessorKey: "linkDesign",
-        header: "LINK DESIGN",
+        id: "epm",
+        accessorFn: (row) => row?.epm?.name,
+        header: "EPM",
+        enableEditing: false,
+        size: 130,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+      },
+      {
+        accessorKey: "linkProduct",
+        header: "LINK LISTING",
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         size: 100,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ row }) => {
           return (
             <TextInput
-              value={updateBrief[row.original.uid]?.linkDesign}
+              value={updateBrief[row.original.uid]?.linkProduct}
               onChange={(e) => {
                 setUpdateBrief({
                   ...updateBrief,
                   [row.original.uid]: {
                     ...updateBrief[row.original.uid],
-                    linkDesign: e.target.value,
+                    linkProduct: e.target.value,
                   },
                 });
               }}
@@ -259,12 +270,12 @@ const KeywordTable = ({
             }}
             target="_blank"
             href={
-              row.original.linkDesign ||
-              updateBrief[row.original.uid]?.linkDesign
+              row.original.linkProduct ||
+              updateBrief[row.original.uid]?.linkProduct
             }
           >
-            {row.original.linkDesign ||
-            updateBrief[row.original.uid]?.linkDesign ? (
+            {row.original.linkProduct ||
+            updateBrief[row.original.uid]?.linkProduct ? (
               <Badge color="blue" variant="filled">
                 {" "}
                 <u>Link</u>{" "}
@@ -284,17 +295,17 @@ const KeywordTable = ({
           return (
             <Button
               variant="filled"
-              color={row.original.status === 2 ? "red" : "green"}
+              color={row.original.status === 3 ? "red" : "green"}
               leftSection={
-                row.original.status === 2 ? <IconBan /> : <IconCheck />
+                row.original.status === 3 ? <IconBan /> : <IconCheck />
               }
               disabled={
-                row?.original?.status === 1 &&
-                !row?.original?.linkDesign &&
-                !updateBrief[row.original.uid]?.linkDesign
+                row?.original?.status === 2 &&
+                !row?.original?.linkProduct &&
+                !updateBrief[row.original.uid]?.linkProduct
               }
             >
-              {row.original.status === 2 ? "Undone" : "Done"}
+              {row.original.status === 3 ? "Undone" : "Done"}
             </Button>
           );
         },
@@ -630,7 +641,7 @@ const KeywordTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  status: value === "Done" ? [2] : [1],
+                  status: value === "Done" ? [3] : [2],
                   statusValue: value,
                 })
               }
@@ -638,7 +649,7 @@ const KeywordTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [1, 2],
+                  status: [2, 3],
                   statusValue: null,
                 });
               }}
@@ -654,7 +665,7 @@ const KeywordTable = ({
                   rndTeam: null,
                   rnd: null,
                   designer: null,
-                  status: [1, 2],
+                  status: [2, 3],
                   sizeValue: null,
                   rndName: null,
                   designerName: null,
@@ -683,7 +694,7 @@ const KeywordTable = ({
                 fontSize: "16px",
               }}
             >
-              Undone: {filter(data, { status: 1 }).length}
+              Undone: {filter(data, { status: 2 }).length}
             </div>
             <div
               style={{
@@ -691,7 +702,7 @@ const KeywordTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: {sumBy(filter(data, { status: 1 }), "time")}h
+              Time to done: {sumBy(filter(data, { status: 2 }), "time")}h
             </div>
           </Flex>
           {editingCell && !isEmpty(updateBrief.linkDesigns) && (
@@ -716,7 +727,7 @@ const KeywordTable = ({
       onDoubleClick: (event) => {
         console.log(`cell----`, cell);
         console.info(row.original);
-        if (cell && cell.column.id === "linkDesign") {
+        if (cell && cell.column.id === "linkProduct") {
           setEditingCell(true);
           table.setEditingCell(cell);
         }
@@ -761,17 +772,17 @@ const KeywordTable = ({
           return x;
         });
         const uid = uidKeys[0];
-        if (uid && updateBrief[uid] && updateBrief[uid].linkDesign) {
+        if (uid && updateBrief[uid] && updateBrief[uid].linkProduct) {
           const urlPattern =
             /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
 
-          if (!urlPattern.test(updateBrief[uid].linkDesign)) {
+          if (!urlPattern.test(updateBrief[uid].linkProduct)) {
             showNotification("Thất bại", "Link Design không hợp lệ", "red");
             setUpdateBrief({
               ...updateBrief,
               [uid]: {
                 ...updateBrief[uid],
-                linkDesign: "",
+                linkProduct: "",
               },
             });
             table.setEditingCell(null);
@@ -800,4 +811,4 @@ const KeywordTable = ({
   return <MantineReactTable table={table} />;
 };
 
-export default KeywordTable;
+export default BriefsTable;

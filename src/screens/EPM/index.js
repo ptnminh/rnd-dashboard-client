@@ -44,7 +44,7 @@ const DesignerScreens = () => {
   });
   const [query, setQuery] = useState({
     statusValue: "Undone",
-    status: [1],
+    status: [2],
   });
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedSKU, setSelectedSKU] = useState();
@@ -53,7 +53,7 @@ const DesignerScreens = () => {
   const [editingCell, setEditingCell] = useState(false);
   const [trigger, setTrigger] = useState(false);
   const [metadata, setMetadata] = useState({});
-  const [linkDesign, setLinkDesign] = useState("");
+  const [linkProduct, setLinkProduct] = useState("");
 
   const [collectionNameInput, setCollectionNameInput] = useState("");
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
@@ -66,6 +66,7 @@ const DesignerScreens = () => {
       search,
       page,
       limit: 30,
+      view: "epm",
       ...query,
     });
     const { data, metadata } = response;
@@ -129,28 +130,28 @@ const DesignerScreens = () => {
     fetchUsers();
   }, []);
 
-  const handleUpdateLinkDesign = async (uid) => {
-    if (!linkDesign) {
-      showNotification("Thất bại", "Link Design không được để trống", "red");
+  const handleUpdateLinkProduct = async (uid) => {
+    if (!linkProduct) {
+      showNotification("Thất bại", "Link Product không được để trống", "red");
       return;
     }
     const urlPattern =
       /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
-    if (!urlPattern.test(linkDesign)) {
-      showNotification("Thất bại", "Link Design không hợp lệ", "red");
+    if (!urlPattern.test(linkProduct)) {
+      showNotification("Thất bại", "Link Product không hợp lệ", "red");
       return;
     }
-    if (linkDesign) {
+    if (linkProduct) {
       const updateResponse = await rndServices.updateBrief({
         uid,
         data: {
-          linkDesign,
+          linkProduct,
         },
       });
       if (updateResponse) {
         showNotification(
           "Thành công",
-          "Update Link Design thành công",
+          "Update Link Product thành công",
           "green"
         );
         fetchCollections(pagination.currentPage);
@@ -161,7 +162,7 @@ const DesignerScreens = () => {
     <>
       <Card
         className={styles.card}
-        title="DESIGNER TASK"
+        title="LISTING TASK"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
         head={
@@ -212,7 +213,7 @@ const DesignerScreens = () => {
           loadingFetchBrief={loadingFetchBrief}
           setLoadingFetchBrief={setLoadingFetchBrief}
           setTrigger={setTrigger}
-          setLinkDesign={setLinkDesign}
+          setLinkProduct={setLinkProduct}
         />
       </Card>
       <Pagination
@@ -281,6 +282,7 @@ const DesignerScreens = () => {
               </div>
             </Grid.Col>
             <Grid.Col span={2}></Grid.Col>
+
             <Grid.Col span={5}>
               <div
                 style={{
@@ -294,14 +296,23 @@ const DesignerScreens = () => {
                 {selectedSKU?.rndTeam} - RnD {selectedSKU?.rnd.name} - Designer{" "}
                 {selectedSKU?.designer.name}
               </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "flex-start",
+                  padding: "5px",
+                  fontSize: "14px",
+                }}
+              >
+                EPM {selectedSKU?.epm.name}
+              </div>
             </Grid.Col>
             <Grid.Col span={5}>
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "flex-start",
-                  padding: "5px",
-                  fontSize: "14px",
+                  justifyContent: "center",
                   padding: "10px",
                   fontSize: "18px",
                   alignItems: "center",
@@ -338,9 +349,52 @@ const DesignerScreens = () => {
                   </ThemeIcon>
                 }
               >
+                {selectedSKU?.designLinkRef && (
+                  <List.Item>
+                    Link Design (NAS):{" "}
+                    <a
+                      style={{
+                        display: "inline-block",
+                        width: "200px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textDecoration: "none",
+                        color: "#228be6",
+                        verticalAlign: "middle",
+                      }}
+                      href={selectedSKU?.designLinkRef}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {selectedSKU?.designLinkRef}
+                    </a>
+                  </List.Item>
+                )}
+                {selectedSKU?.productInfo?.tibSearchCampaignLink && (
+                  <List.Item>
+                    Link Campaign (TIB):{" "}
+                    <a
+                      style={{
+                        display: "inline-block",
+                        width: "200px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textDecoration: "none",
+                        color: "#228be6",
+                        verticalAlign: "middle",
+                      }}
+                      href={selectedSKU?.productInfo?.tibSearchCampaignLink}
+                      target="_blank"
+                    >
+                      {selectedSKU?.productInfo?.tibSearchCampaignLink}
+                    </a>
+                  </List.Item>
+                )}
                 {selectedSKU?.linkProductRef && (
                   <List.Item>
-                    Link Product:{" "}
+                    Link Store:{" "}
                     <a
                       style={{
                         display: "inline-block",
@@ -354,30 +408,8 @@ const DesignerScreens = () => {
                       }}
                       href={selectedSKU?.linkProductRef}
                       target="_blank"
-                      rel="noopener noreferrer"
                     >
                       {selectedSKU?.linkProductRef}
-                    </a>
-                  </List.Item>
-                )}
-                {selectedSKU?.linkDesign && (
-                  <List.Item>
-                    Link Design:{" "}
-                    <a
-                      style={{
-                        display: "inline-block",
-                        width: "230px",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        textDecoration: "none",
-                        color: "#228be6",
-                        verticalAlign: "middle",
-                      }}
-                      href={selectedSKU?.linkDesign}
-                      target="_blank"
-                    >
-                      {selectedSKU?.linkDesign}
                     </a>
                   </List.Item>
                 )}
@@ -408,7 +440,7 @@ const DesignerScreens = () => {
               <Image
                 radius="md"
                 src={
-                  selectedSKU?.productLine?.image ||
+                  selectedSKU?.productInfo?.thumbLink ||
                   "/images/content/not_found_2.jpg"
                 }
                 height={200}
@@ -423,7 +455,7 @@ const DesignerScreens = () => {
                   marginTop: "10px",
                 }}
               >
-                {selectedSKU?.productLine?.name}
+                SKU mới
               </div>
               <List
                 spacing="lg"
@@ -437,13 +469,16 @@ const DesignerScreens = () => {
                   </ThemeIcon>
                 }
               >
-                {selectedSKU?.productLine?.refLink && (
+                <List.Item>
+                  Product Base: <span> {selectedSKU?.productLine?.name}</span>
+                </List.Item>
+                {selectedSKU?.linkDesign && (
                   <List.Item>
-                    Link Mockup:{" "}
+                    Link Design (NAS):{" "}
                     <a
                       style={{
                         display: "inline-block",
-                        width: "230px",
+                        width: "200px",
                         whiteSpace: "nowrap",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -451,32 +486,33 @@ const DesignerScreens = () => {
                         color: "#228be6",
                         verticalAlign: "middle",
                       }}
-                      href={selectedSKU?.productLine?.refLink}
+                      href={selectedSKU?.linkDesign}
                       target="_blank"
                     >
-                      {selectedSKU?.productLine?.refLink}
+                      {selectedSKU?.linkDesign}
                     </a>
                   </List.Item>
                 )}
+                <List.Item>Link Campaign (TIB) - Auto: (Coming soon)</List.Item>
               </List>
             </Grid.Col>
             <Grid.Col span={12}>
               <Editor
-                state={getStringAsEditorState(selectedSKU?.note?.designer)}
+                state={getStringAsEditorState(selectedSKU?.note?.epm)}
                 classEditor={styles.editor}
-                label="Designer Note"
+                label="EPM Note"
                 readOnly={true}
               />
             </Grid.Col>
             <Grid.Col span={12}>
               <Flex gap={10}>
                 <TextInput
-                  placeholder="Output - Link Design (NAS)"
+                  placeholder="Output - Link Website"
                   style={{
                     flex: "1 1 90%",
                   }}
-                  value={linkDesign}
-                  onChange={(event) => setLinkDesign(event.target.value)}
+                  value={linkProduct}
+                  onChange={(event) => setLinkProduct(event.target.value)}
                 />
                 <Button
                   style={{
@@ -485,7 +521,7 @@ const DesignerScreens = () => {
                     color: "#ffffff",
                   }}
                   onClick={() => {
-                    handleUpdateLinkDesign(selectedSKU?.uid);
+                    handleUpdateLinkProduct(selectedSKU?.uid);
                   }}
                 >
                   DONE
