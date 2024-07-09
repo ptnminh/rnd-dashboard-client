@@ -100,6 +100,22 @@ export const rndServices = {
       return false;
     }
   },
+  syncUser: async () => {
+    try {
+      const response = await axios.post(`${hostAPI}/users/sync-from-sheet`);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Sync user thất bại", "red");
+        return false;
+      }
+      showNotification("Thành công", "Sync user thành công", "green");
+      return true;
+    } catch (error) {
+      console.log("Error at syncUser:", error);
+      showNotification("Thất bại", "Sync user thất bại", "red");
+      return false;
+    }
+  },
   createBriefs: async (data) => {
     try {
       const response = await axios.post(`${hostAPI}/briefs/create-batch`, data);

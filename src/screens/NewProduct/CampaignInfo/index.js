@@ -15,8 +15,9 @@ import {
   Group,
   Avatar,
   Text,
+  Button,
 } from "@mantine/core";
-import { IconCircleCheck } from "@tabler/icons-react";
+import { IconCircleCheck, IconRotateClockwise } from "@tabler/icons-react";
 import {
   BRIEF_TYPES,
   BRIEF_VALUES,
@@ -57,6 +58,7 @@ const CampaignInfo = ({
   teams,
   epmMember,
   setEpmMember,
+  handleSyncUser,
 }) => {
   useEffect(() => {
     if (!isEmpty(previewData)) setVisibleReviewTable(true);
@@ -70,6 +72,14 @@ const CampaignInfo = ({
         classTitle="title-red"
         classCardHead={styles.classCardHead}
         classSpanTitle={styles.classSpanTitle}
+        head={
+          <Button
+            onClick={handleSyncUser}
+            leftSection={<IconRotateClockwise />}
+          >
+            Sync User
+          </Button>
+        }
       >
         <div className={styles.description}>
           <div className={styles.campType}>

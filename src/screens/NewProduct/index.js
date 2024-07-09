@@ -213,6 +213,10 @@ const NewCampaigns = () => {
     setLoadingProductLines(false);
     setLoadingSearchSKU(false);
   };
+  const handleSyncUser = async () => {
+    await rndServices.syncUser();
+    await fetchUsers();
+  };
   const handleRemoveRow = (productLine) => {
     if (selectedProductLines.length === 1) {
       showNotification("Thất bại", "Không thể xóa hết Product Line", "red");
@@ -483,6 +487,7 @@ const NewCampaigns = () => {
               setRndSize={setRndSize}
               users={users}
               teams={teams}
+              handleSyncUser={handleSyncUser}
             />
           </div>
           <div className={styles.col}>
