@@ -154,7 +154,7 @@ const KeywordTable = ({
           <Image
             radius="md"
             src={row?.original?.imageRef || "/images/content/not_found_2.jpg"}
-            height={100}
+            height="100%"
             fit="contain"
           />
         ),

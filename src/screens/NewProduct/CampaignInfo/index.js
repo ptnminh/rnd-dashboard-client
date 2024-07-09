@@ -202,24 +202,63 @@ const CampaignInfo = ({
                 {SKU.productLink && (
                   <List.Item>
                     Link Product:{" "}
-                    <a href={SKU.productLink} target="_blank">
-                      Click
+                    <a
+                      style={{
+                        display: "inline-block",
+                        width: "200px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textDecoration: "none",
+                        color: "#228be6",
+                        verticalAlign: "middle",
+                      }}
+                      href={SKU.productLink}
+                      target="_blank"
+                    >
+                      {SKU.productLink}
                     </a>
                   </List.Item>
                 )}
                 {SKU.designLink && (
                   <List.Item>
                     Link Design:{" "}
-                    <a href={SKU.designLink} target="_blank">
-                      Click
+                    <a
+                      style={{
+                        display: "inline-block",
+                        width: "200px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textDecoration: "none",
+                        color: "#228be6",
+                        verticalAlign: "middle",
+                      }}
+                      href={SKU.designLink}
+                      target="_blank"
+                    >
+                      {SKU.designLink}
                     </a>
                   </List.Item>
                 )}
                 {SKU.mockupLink && (
                   <List.Item>
                     Link Mockup:{" "}
-                    <a href={SKU.mockupLink} target="_blank">
-                      Click
+                    <a
+                      style={{
+                        display: "inline-block",
+                        width: "200px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textDecoration: "none",
+                        color: "#228be6",
+                        verticalAlign: "middle",
+                      }}
+                      href={SKU.mockupLink}
+                      target="_blank"
+                    >
+                      {SKU.mockupLink}
                     </a>
                   </List.Item>
                 )}
