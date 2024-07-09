@@ -1,14 +1,22 @@
 import React from "react";
 import styles from "./Row.module.sass";
-import Checkbox from "../../Checkbox";
 import { map } from "lodash";
 
-const Row = ({ item, value, onChange, headers, isShowCheckbox }) => {
+const Row = ({ item, headers, onRemove }) => {
   return (
     <>
       <div className={styles.row}>
         {map(headers, (header, index) => (
-          <div className={styles.col} key={index}>
+          <div
+            className={styles.col}
+            key={index}
+            style={{
+              cursor: header === "Remove" ? "pointer" : "default",
+            }}
+            onClick={() => {
+              onRemove(item["Product Line"]);
+            }}
+          >
             <div>{item[header]}</div>
           </div>
         ))}

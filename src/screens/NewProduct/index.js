@@ -138,6 +138,7 @@ const generateScaleProductLinesTable = ({
           No: index + 1,
           "Product Line": foundProductLine?.name,
           SKU: name,
+          Remove: "x",
         };
       }
     )
@@ -211,6 +212,15 @@ const NewCampaigns = () => {
     }
     setLoadingProductLines(false);
     setLoadingSearchSKU(false);
+  };
+  const handleRemoveRow = (productLine) => {
+    if (selectedProductLines.length === 1) {
+      showNotification("Thất bại", "Không thể xóa hết Product Line", "red");
+      return;
+    }
+    setSelectedProductLines(
+      filter(selectedProductLines, (x) => x !== productLine)
+    );
   };
   const handleFilterCollection = (event) => {
     const value = event.target.value;
@@ -384,6 +394,11 @@ const NewCampaigns = () => {
       collections: validCollections,
       rndSortName: find(users, { name: rndMember })?.shortName,
     });
+    if (isEmpty(generatedSKUs)) {
+      showNotification("Thất bại", "Vui lòng chọn Product Line", "red");
+      setCreateBriefLoading(false);
+      return;
+    }
     const data = map(generatedSKUs, (x) => {
       const { SKU: sku } = x;
       return {
@@ -750,7 +765,7 @@ const NewCampaigns = () => {
               {workGroup} - {rndMember}
             </div>
           </Grid.Col>
-          <Grid.Col span={5}>
+          <Grid.Col span={4}>
             <div
               style={{
                 display: "flex",
@@ -779,8 +794,7 @@ const NewCampaigns = () => {
               {SKU?.sku}
             </div>
           </Grid.Col>
-          <Grid.Col span={1}></Grid.Col>
-          <Grid.Col span={6}>
+          <Grid.Col span={8}>
             <div
               style={{
                 display: "flex",
@@ -799,7 +813,8 @@ const NewCampaigns = () => {
                   collections: validCollections,
                   rndSortName: find(users, { name: rndMember })?.shortName,
                 })}
-                headers={["No", "Product Line", "SKU"]}
+                headers={["No", "Product Line", "SKU", "Remove"]}
+                onRemove={handleRemoveRow}
               />
             </ScrollArea>
           </Grid.Col>
