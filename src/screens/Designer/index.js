@@ -79,7 +79,7 @@ const DesignerScreens = () => {
             date: moment(x.createdAt)
               .tz("Asia/Ho_Chi_Minh")
               .format("DD/MM/YYYY"),
-            time: Math.round(
+            time: Math.floor(
               moment()
                 .tz("Asia/Ho_Chi_Minh")
                 .diff(moment(x.createdAt), "hours", true)
