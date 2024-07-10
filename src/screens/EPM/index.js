@@ -18,6 +18,7 @@ import {
   Flex,
   TextInput,
   Button,
+  LoadingOverlay,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
@@ -46,6 +47,7 @@ const DesignerScreens = () => {
     statusValue: "Undone",
     status: [2],
   });
+  const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedSKU, setSelectedSKU] = useState();
   const [selectedCollection, setSelectedCollection] = useState();
@@ -57,6 +59,8 @@ const DesignerScreens = () => {
 
   const [collectionNameInput, setCollectionNameInput] = useState("");
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
+  const [loadingUpdateProductLink, setLoadingUpdateProductLink] =
+    useState(false);
 
   const [collections, setCollections] = useState([]);
 
@@ -67,6 +71,7 @@ const DesignerScreens = () => {
       page,
       limit: 30,
       view: "epm",
+      sorting,
       ...query,
     });
     const { data, metadata } = response;
@@ -110,7 +115,7 @@ const DesignerScreens = () => {
   };
   useEffect(() => {
     fetchCollections(pagination.currentPage);
-  }, [search, pagination.currentPage, query, trigger]);
+  }, [search, pagination.currentPage, query, trigger, sorting]);
 
   useEffect(() => {
     // Update the URL when search or page changes
@@ -132,7 +137,9 @@ const DesignerScreens = () => {
   }, []);
 
   const handleUpdateLinkProduct = async (uid) => {
+    setLoadingUpdateProductLink(true);
     if (!linkProduct) {
+      setLoadingUpdateProductLink(false);
       showNotification("Thất bại", "Link Product không được để trống", "red");
       return;
     }
@@ -140,6 +147,7 @@ const DesignerScreens = () => {
       /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
     if (!urlPattern.test(linkProduct)) {
       showNotification("Thất bại", "Link Product không hợp lệ", "red");
+      setLoadingUpdateProductLink(false);
       return;
     }
     if (linkProduct) {
@@ -155,9 +163,11 @@ const DesignerScreens = () => {
           "Update Link Product thành công",
           "green"
         );
-        fetchCollections(pagination.currentPage);
+        await fetchCollections(pagination.currentPage);
       }
     }
+    close();
+    setLoadingUpdateProductLink(false);
   };
   return (
     <>
@@ -215,6 +225,8 @@ const DesignerScreens = () => {
           setLoadingFetchBrief={setLoadingFetchBrief}
           setTrigger={setTrigger}
           setLinkProduct={setLinkProduct}
+          setSorting={setSorting}
+          sorting={sorting}
         />
       </Card>
       <Pagination
@@ -237,6 +249,11 @@ const DesignerScreens = () => {
           radius="md"
           size="1000px"
         >
+          <LoadingOverlay
+            visible={loadingUpdateProductLink}
+            zIndex={1000}
+            overlayProps={{ radius: "sm", blur: 2 }}
+          />
           <Grid>
             <Grid.Col span={12}>
               <div

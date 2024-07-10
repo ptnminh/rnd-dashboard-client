@@ -47,6 +47,8 @@ const BriefsTable = ({
   setLoadingFetchBrief,
   setTrigger,
   setLinkProduct,
+  sorting,
+  setSorting,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(productLines || []);
@@ -83,6 +85,7 @@ const BriefsTable = ({
         size: 50, //small column
         header: "NO",
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
@@ -91,6 +94,7 @@ const BriefsTable = ({
         size: 120,
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        enableSorting: true,
       },
       {
         accessorKey: "batch",
@@ -98,12 +102,14 @@ const BriefsTable = ({
         size: 100,
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        enableSorting: false,
       },
       {
         accessorKey: "sku",
         header: "SKU",
         size: 100,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Header: ({ column }) => (
           <div
@@ -138,6 +144,7 @@ const BriefsTable = ({
         header: "HÌNH SKU",
         size: 100,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => (
           <Image
@@ -155,6 +162,7 @@ const BriefsTable = ({
         accessorKey: "briefType",
         header: "LOẠI BRIEF",
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
@@ -162,6 +170,7 @@ const BriefsTable = ({
         header: "VALUE",
         size: 100,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => (
           <Badge
@@ -183,6 +192,7 @@ const BriefsTable = ({
         header: "SIZE",
         size: 100,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => (
           <Badge
@@ -204,6 +214,7 @@ const BriefsTable = ({
         header: "TEAM",
         size: 100,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
@@ -211,6 +222,7 @@ const BriefsTable = ({
         accessorFn: (row) => row?.rnd?.name,
         header: "RND",
         enableEditing: false,
+        enableSorting: false,
         size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
@@ -219,6 +231,7 @@ const BriefsTable = ({
         accessorFn: (row) => row?.designer?.name,
         header: "DESIGNER",
         enableEditing: false,
+        enableSorting: false,
         size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
@@ -228,6 +241,7 @@ const BriefsTable = ({
         header: "EPM",
         enableEditing: false,
         size: 130,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
@@ -235,6 +249,7 @@ const BriefsTable = ({
         header: "LINK LISTING",
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         size: 100,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ row }) => {
           return (
@@ -277,6 +292,7 @@ const BriefsTable = ({
         accessorKey: "status",
         header: "DONE",
         size: 100,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: (props) => {
@@ -302,6 +318,7 @@ const BriefsTable = ({
       {
         accessorKey: "priority",
         header: "PRIORITY",
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         size: 100,
@@ -330,6 +347,7 @@ const BriefsTable = ({
       {
         accessorKey: "remove",
         header: "ACTIONS",
+        enableSorting: false,
         mantineTableHeadCellProps: { className: classes["remove"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ cell, column, table }) => (
@@ -399,7 +417,6 @@ const BriefsTable = ({
       style: { "--mrt-striped-row-background-color": "#eff0f1" },
     },
     mantineTableHeadCellProps: { className: classes["head-cells"] },
-    enableSorting: false,
     mantineTableProps: { striped: "even" },
     onCreatingRowCancel: () => setValidationErrors({}),
     onEditingRowCancel: () => setValidationErrors({}),
@@ -447,6 +464,11 @@ const BriefsTable = ({
               }}
               value={batch}
               onChange={(e) => setBatch(e.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  setQuery({ ...query, batch });
+                }
+              }}
             />
             <TextInput
               placeholder="SKU"
@@ -471,6 +493,11 @@ const BriefsTable = ({
               }}
               value={searchSKU}
               onChange={(e) => setSearchSKU(e.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  setQuery({ ...query, sku: searchSKU });
+                }
+              }}
             />
             <DateRangePicker
               size="sx"
@@ -737,6 +764,7 @@ const BriefsTable = ({
     },
     state: {
       showProgressBars: loadingFetchBrief,
+      sorting,
     },
     mantineTableBodyCellProps: ({ row, table, cell }) => ({
       className: classes["body-cells"],
@@ -822,6 +850,7 @@ const BriefsTable = ({
         cursor: "pointer", //you might want to change the cursor too when adding an onClick
       },
     }),
+    onSortingChange: setSorting,
   });
 
   return <MantineReactTable table={table} />;

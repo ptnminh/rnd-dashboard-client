@@ -1,6 +1,7 @@
 import axios from "axios";
 import { hostAPI } from "../constant";
 import { showNotification } from "../utils/index";
+import { isEmpty } from "lodash";
 export const rndServices = {
   searchProducts: async (SKU) => {
     try {
@@ -147,6 +148,7 @@ export const rndServices = {
     date,
     epm,
     view = "design",
+    sorting,
   }) => {
     try {
       const filter = {
@@ -162,11 +164,21 @@ export const rndServices = {
         ...(date && { startDate: date.startDate, endDate: date.endDate }),
         ...(epm && { epm }),
       };
+      const sort = !isEmpty(sorting)
+        ? {
+            [sorting[0].id === "date" || "time" ? "createdAt" : sorting.id]:
+              sorting[0].desc ? "desc" : "asc",
+          }
+        : {};
       let url = `${hostAPI}/briefs?page=${page}&pageSize=${limit}&view=${view}`;
       if (Object.keys(filter).length !== 0) {
         const queryString = `filter=${encodeURIComponent(
           JSON.stringify(filter)
         )}`;
+        url = `${url}&${queryString}`;
+      }
+      if (Object.keys(sort).length !== 0) {
+        const queryString = `sort=${encodeURIComponent(JSON.stringify(sort))}`;
         url = `${url}&${queryString}`;
       }
 

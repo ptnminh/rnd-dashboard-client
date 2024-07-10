@@ -185,6 +185,11 @@ const CampaignInfo = ({
             }
             value={search}
             onChange={(value) => setSearch(value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                handleSearchSKU();
+              }
+            }}
           />
         }
       >

@@ -58,6 +58,8 @@ const KeywordTable = ({
   setLoadingFetchBrief,
   setTrigger,
   setLinkDesign,
+  sorting,
+  setSorting,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(productLines || []);
@@ -94,6 +96,7 @@ const KeywordTable = ({
         size: 50, //small column
         header: "NO",
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
@@ -101,6 +104,7 @@ const KeywordTable = ({
         header: "DATE",
         size: 120,
         enableEditing: false,
+        enableSorting: true,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
@@ -108,6 +112,7 @@ const KeywordTable = ({
         header: "BATCH",
         size: 100,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
@@ -115,6 +120,7 @@ const KeywordTable = ({
         header: "SKU",
         size: 100,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Header: ({ column }) => (
           <div
@@ -149,6 +155,7 @@ const KeywordTable = ({
         header: "HÌNH REF",
         size: 100,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => (
           <Image
@@ -163,6 +170,7 @@ const KeywordTable = ({
         accessorKey: "briefType",
         header: "LOẠI BRIEF",
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
@@ -170,6 +178,7 @@ const KeywordTable = ({
         header: "VALUE",
         size: 100,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => (
           <Badge
@@ -191,6 +200,7 @@ const KeywordTable = ({
         header: "SIZE",
         size: 100,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => (
           <Badge
@@ -212,6 +222,7 @@ const KeywordTable = ({
         header: "TEAM",
         size: 100,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
@@ -219,6 +230,7 @@ const KeywordTable = ({
         accessorFn: (row) => row?.rnd?.name,
         header: "RND",
         enableEditing: false,
+        enableSorting: false,
         size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
@@ -227,6 +239,7 @@ const KeywordTable = ({
         accessorFn: (row) => row?.designer?.name,
         header: "DESIGNER",
         enableEditing: false,
+        enableSorting: false,
         size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
@@ -235,6 +248,7 @@ const KeywordTable = ({
         header: "LINK DESIGN",
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         size: 100,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ row }) => {
           return (
@@ -277,6 +291,7 @@ const KeywordTable = ({
         accessorKey: "status",
         header: "DONE",
         size: 100,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: (props) => {
@@ -302,6 +317,7 @@ const KeywordTable = ({
       {
         accessorKey: "priority",
         header: "PRIORITY",
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         size: 100,
@@ -322,6 +338,7 @@ const KeywordTable = ({
         id: "time",
         accessorFn: (row) => row?.time + "h",
         header: "TIME",
+        enableSorting: true,
         mantineTableHeadCellProps: { className: classes["head-cells"] },
         enableEditing: false,
         size: 50,
@@ -330,6 +347,7 @@ const KeywordTable = ({
       {
         accessorKey: "remove",
         header: "ACTIONS",
+        enableSorting: false,
         mantineTableHeadCellProps: { className: classes["remove"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ cell, column, table }) => (
@@ -399,7 +417,6 @@ const KeywordTable = ({
       style: { "--mrt-striped-row-background-color": "#eff0f1" },
     },
     mantineTableHeadCellProps: { className: classes["head-cells"] },
-    enableSorting: false,
     mantineTableProps: { striped: "even" },
     onCreatingRowCancel: () => setValidationErrors({}),
     onEditingRowCancel: () => setValidationErrors({}),
@@ -447,6 +464,11 @@ const KeywordTable = ({
               }}
               value={batch}
               onChange={(e) => setBatch(e.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  setQuery({ ...query, batch });
+                }
+              }}
             />
             <TextInput
               placeholder="SKU"
@@ -471,6 +493,11 @@ const KeywordTable = ({
               }}
               value={searchSKU}
               onChange={(e) => setSearchSKU(e.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  setQuery({ ...query, sku: searchSKU });
+                }
+              }}
             />
             <DateRangePicker
               size="sx"
@@ -710,6 +737,7 @@ const KeywordTable = ({
     },
     state: {
       showProgressBars: loadingFetchBrief,
+      sorting,
     },
     mantineTableBodyCellProps: ({ row, table, cell }) => ({
       className: classes["body-cells"],
@@ -795,6 +823,7 @@ const KeywordTable = ({
         cursor: "pointer", //you might want to change the cursor too when adding an onClick
       },
     }),
+    onSortingChange: setSorting,
   });
 
   return <MantineReactTable table={table} />;

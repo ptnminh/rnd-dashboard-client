@@ -18,6 +18,7 @@ import {
   Flex,
   TextInput,
   Button,
+  LoadingOverlay,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
@@ -46,6 +47,8 @@ const DesignerScreens = () => {
     statusValue: "Undone",
     status: [1],
   });
+  const [sorting, setSorting] = useState([]);
+
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedSKU, setSelectedSKU] = useState();
   const [selectedCollection, setSelectedCollection] = useState();
@@ -57,6 +60,7 @@ const DesignerScreens = () => {
 
   const [collectionNameInput, setCollectionNameInput] = useState("");
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
+  const [loadingUpdateDesignLink, setLoadingUpdateDesignLink] = useState(false);
 
   const [collections, setCollections] = useState([]);
 
@@ -66,6 +70,7 @@ const DesignerScreens = () => {
       search,
       page,
       limit: 30,
+      sorting,
       ...query,
     });
     const { data, metadata } = response;
@@ -109,7 +114,7 @@ const DesignerScreens = () => {
   };
   useEffect(() => {
     fetchCollections(pagination.currentPage);
-  }, [search, pagination.currentPage, query, trigger]);
+  }, [search, pagination.currentPage, query, trigger, sorting]);
 
   useEffect(() => {
     // Update the URL when search or page changes
@@ -131,14 +136,17 @@ const DesignerScreens = () => {
   }, []);
 
   const handleUpdateLinkDesign = async (uid) => {
+    setLoadingUpdateDesignLink(true);
     if (!linkDesign) {
       showNotification("Thất bại", "Link Design không được để trống", "red");
+      setLoadingUpdateDesignLink(false);
       return;
     }
     const urlPattern =
       /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
     if (!urlPattern.test(linkDesign)) {
       showNotification("Thất bại", "Link Design không hợp lệ", "red");
+      setLoadingUpdateDesignLink(false);
       return;
     }
     if (linkDesign) {
@@ -154,9 +162,11 @@ const DesignerScreens = () => {
           "Update Link Design thành công",
           "green"
         );
-        fetchCollections(pagination.currentPage);
+        await fetchCollections(pagination.currentPage);
       }
     }
+    close();
+    setLoadingUpdateDesignLink(false);
   };
   return (
     <>
@@ -214,6 +224,8 @@ const DesignerScreens = () => {
           setLoadingFetchBrief={setLoadingFetchBrief}
           setTrigger={setTrigger}
           setLinkDesign={setLinkDesign}
+          setSorting={setSorting}
+          sorting={sorting}
         />
       </Card>
       <Pagination
@@ -236,6 +248,11 @@ const DesignerScreens = () => {
           radius="md"
           size="1000px"
         >
+          <LoadingOverlay
+            visible={loadingUpdateDesignLink}
+            zIndex={1000}
+            overlayProps={{ radius: "sm", blur: 2 }}
+          />
           <Grid>
             <Grid.Col span={12}>
               <div
