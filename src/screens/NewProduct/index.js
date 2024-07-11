@@ -25,6 +25,14 @@ import {
   Grid,
   Skeleton,
   Badge,
+  Flex,
+  Button,
+  TextInput as MantineTextInput,
+  Card as MantineCard,
+  Text,
+  Pagination,
+  MultiSelect,
+  Tooltip,
 } from "@mantine/core";
 import { showNotification } from "../../utils/index";
 
@@ -37,11 +45,14 @@ import {
   filter,
   find,
   flatMap,
+  forOwn,
   includes,
   intersection,
   intersectionBy,
   isEmpty,
+  keys,
   map,
+  merge,
   orderBy,
   random,
   sortBy,
@@ -57,6 +68,15 @@ import {
   delayTime,
   getEditorStateAsString,
 } from "../../utils";
+import {
+  IconSearch,
+  IconFilterOff,
+  IconCheck,
+  IconDeselect,
+  IconSelector,
+} from "@tabler/icons-react";
+import LazyLoad from "react-lazyload";
+import { useLocation, useNavigate } from "react-router";
 const HoverInfo = ({ image }) => (
   <div className={styles.hoverInfo}>
     <Image radius="md" src={image} />
@@ -145,7 +165,66 @@ const generateScaleProductLinesTable = ({
   );
 };
 
+const generateScaleClipArtTable = ({ SKU, selectedClipArts, rndSortName }) => {
+  return compact(
+    map(
+      sortBy(selectedClipArts, (clipArt) => toLower(clipArt.name)),
+      (x, index) => {
+        const name = `${
+          SKU?.skuPrefix ? SKU?.skuPrefix : "XX"
+        }-${rndSortName}${String(random(1, 1000)).padStart(4, "0")}`;
+        return {
+          No: index + 1,
+          "Clip Art": x.name,
+          SKU: name,
+          Remove: "x",
+        };
+      }
+    )
+  );
+};
+
+const generateScaleProductBaseOnBriefType = ({
+  type,
+  selectedProductLines,
+  SKU,
+  collections,
+  rndSortName,
+  selectedClipArts,
+}) => {
+  switch (type) {
+    case BRIEF_TYPES[0]:
+      return generateScaleProductLinesTable({
+        selectedProductLines,
+        SKU,
+        collections,
+        rndSortName,
+      });
+    case BRIEF_TYPES[1]:
+      return generateScaleClipArtTable({
+        SKU,
+        selectedClipArts,
+        rndSortName,
+      });
+    default:
+      return [];
+  }
+};
+
+const generateHeaderTable = (type) => {
+  switch (type) {
+    case BRIEF_TYPES[0]:
+      return ["No", "Product Line", "SKU", "Remove"];
+    case BRIEF_TYPES[1]:
+      return ["No", "Clip Art", "SKU", "Remove"];
+    default:
+      return [];
+  }
+};
+
 const NewCampaigns = () => {
+  const navigate = useNavigate();
+
   const [designerNote, setDesignerNote] = useState("");
   const [epmNote, setEPMNote] = useState("");
   const [mktNote, setMKTNote] = useState("");
@@ -155,10 +234,11 @@ const NewCampaigns = () => {
   const [workGroup, setWorkGroup] = useState(GROUP_WORKS[0]);
   const [rndSize, setRndSize] = useState(RND_SIZES[0]);
   const [designerMember, setDesignerMember] = useState(DESIGNER_MEMBERS[0]);
+  const [selectedClipArts, setSelectedClipArts] = useState([]);
   const [briefValue, setBriefValue] = useState(BRIEF_VALUES[0]);
   const [rndMember, setRndMember] = useState(MEMBERS[0]);
   const [epmMember, setEpmMember] = useState(MEMBERS[0]);
-  const [briefType, setBriefType] = useState(BRIEF_TYPES[0]);
+  const [briefType, setBriefType] = useState();
   const [layout, setLayout] = useState(LAYOUT_TYPES[0]);
   const [search, setSearch] = useState("");
   const [SKU, setSKU] = useState();
@@ -172,6 +252,16 @@ const NewCampaigns = () => {
   const [searchCollection, setSearchCollection] = useState("");
   const [searchProductLine, setSearchProductLine] = useState("");
   const [createBriefLoading, setCreateBriefLoading] = useState(false);
+  const [fetchClipArtsLoading, setFetchClipArtsLoading] = useState(false);
+  const [filtersClipArt, setFiltersClipArt] = useState([]);
+  const [clipArts, setClipArts] = useState([]);
+  const [searchClipArt, setSearchClipArt] = useState("");
+  const [query, setQuery] = useState({});
+  const topScrollClipArtRef = useRef(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+  });
   const topRef = useRef(null);
   const handleSearchSKU = async () => {
     console.log(search);
@@ -295,6 +385,10 @@ const NewCampaigns = () => {
     setUsers(data);
     setTeams(uniq(map(data, "team")));
   };
+  const fetchFilters = async () => {
+    const { data } = await rndServices.fetchFilters();
+    setFiltersClipArt(data);
+  };
   const fetchCollections = async () => {
     const { data } = await rndServices.getCollections({});
     setCollections(data);
@@ -312,7 +406,42 @@ const NewCampaigns = () => {
     fetchCollections();
     fetchAllProducts();
     fetchUsers();
+    fetchFilters();
   }, []);
+  useEffect(() => {
+    // Update the URL when search or page changes
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (pagination.currentPage !== 1)
+      params.set("page", pagination.currentPage);
+    navigate(`?${params.toString()}`, { replace: true });
+  }, [search, pagination.currentPage, navigate]);
+
+  const fetchClipArts = async (page) => {
+    setFetchClipArtsLoading(true);
+    const { data, metadata } = await rndServices.fetchClipArts({
+      page,
+      limit: 18,
+      query,
+      keyword: searchClipArt,
+    });
+    if (isEmpty(data)) {
+      setFetchClipArtsLoading(false);
+      setClipArts([]);
+      setPagination({ currentPage: 1, totalPages: 1 });
+      showNotification("Thất bại", "Không tìm thấy Clipart", "red");
+      return;
+    }
+    setClipArts(data);
+    setPagination(metadata);
+    setFetchClipArtsLoading(false);
+  };
+  useEffect(() => {
+    if (!briefType) return;
+    if (briefType === BRIEF_TYPES[1]) {
+    }
+  }, [briefType]);
+
   useEffect(() => {
     const batch = find(users, { name: rndMember, role: "rnd" })?.nextBatch;
     setBatch(batch || "");
@@ -443,7 +572,16 @@ const NewCampaigns = () => {
     close();
     setCreateBriefLoading(false);
   };
+  const handlePageChange = (page) => {
+    setPagination((prev) => ({ ...prev, currentPage: page }));
+    if (topScrollClipArtRef.current) {
+      topScrollClipArtRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
+  useEffect(() => {
+    fetchClipArts(pagination.currentPage);
+  }, [pagination.currentPage, query]);
   return (
     <>
       <div style={{ position: "relative" }}>
@@ -491,148 +629,414 @@ const NewCampaigns = () => {
             />
           </div>
           <div className={styles.col}>
-            <Box pos="relative">
-              <LoadingOverlay
-                visible={false}
-                zIndex={1000}
-                overlayProps={{ radius: "sm", blur: 2 }}
-                loaderProps={{ color: "pink", type: "bars" }}
-              />
-              <Card
-                className={cn(styles.card)}
-                title="3. Product cần Scale"
-                classTitle="title-green"
-                classCardHead={styles.classCardHead}
-                classSpanTitle={styles.classScaleSpanTitle}
-                head={
-                  <Dropdown
-                    className={styles.dropdown}
-                    classDropdownHead={styles.dropdownHead}
-                    value={layout}
-                    setValue={setLayout}
-                    options={LAYOUT_TYPES}
-                    classOutSideClick={styles.memberDropdown}
-                  />
-                }
-              >
-                {!loadingProductLines && !isEmpty(productLines) && SKU && (
-                  <Grid>
-                    <Grid.Col span={6}>
-                      <ScrollArea
-                        h={500}
-                        style={{
-                          color: "#000",
-                          borderRadius: "10px",
-                          boxShadow:
-                            "0px 1px 1px 0px rgba(0,0,0,0.12),0px 2px 2px 0px rgba(0,0,0,0.12),0px 4px 4px 0px rgba(0,0,0,0.12),0px 8px 8px 0px rgba(0,0,0,0.12),0px 16px 16px 0px rgba(0,0,0,0.12)",
-                          backgroundColor: "rgba(255, 255, 255, 1)",
-                        }}
-                      >
-                        <div className={styles.list}>
-                          <TextInput
-                            placeholder="Search Collection"
-                            type="text"
-                            name="search"
-                            value={searchCollection}
-                            onChange={(e) => handleFilterCollection(e)}
-                            className={styles.searchCollection}
-                          />
-                          {!isEmpty(validCollections) ? (
-                            map(validCollections, (x, index) => (
-                              <Checkbox
-                                className={styles.checkbox}
-                                content={`Collection - ${x.name} (${x.validProductLines.length})`}
-                                value={selectedCollection.includes(x.name)}
-                                onChange={() => handleChangeCollection(x.name)}
-                                key={index}
-                              />
-                            ))
-                          ) : (
-                            <p
-                              style={{
-                                textAlign: "center",
-                                color: "#FF6A55",
-                                marginTop: "10px",
-                              }}
-                            >
-                              Không có collection nào phù hợp
-                            </p>
-                          )}
-                        </div>
-                      </ScrollArea>
-                    </Grid.Col>
-                    <Grid.Col span={6}>
-                      <ScrollArea
-                        h={500}
-                        style={{
-                          color: "#000",
-                          borderRadius: "10px",
-                          boxShadow:
-                            "0px 1px 1px 0px rgba(0,0,0,0.12),0px 2px 2px 0px rgba(0,0,0,0.12),0px 4px 4px 0px rgba(0,0,0,0.12),0px 8px 8px 0px rgba(0,0,0,0.12),0px 16px 16px 0px rgba(0,0,0,0.12)",
-                          backgroundColor: "rgba(255, 255, 255, 1)",
-                        }}
-                      >
-                        <div ref={topRef}></div>
-                        <div
-                          className={styles.list}
-                          onMouseLeave={handleMouseLeave}
-                          style={{ position: "relative" }}
-                        >
-                          <TextInput
-                            placeholder="Search Product Lines"
-                            type="text"
-                            name="search"
-                            value={searchProductLine}
-                            onChange={(e) => handleFilterProductLines(e)}
-                            className={styles.searchCollection}
-                          />
-                          {map(productLines, (x, index) => (
-                            <Checkbox
-                              key={index}
-                              className={styles.checkbox}
-                              content={x.name}
-                              value={selectedProductLines.includes(x.name)}
-                              onChange={() => handleChange(x.name)}
-                              showHover={true}
-                              HoverComponent={HoverInfo}
-                              hoverProps={{
-                                image:
-                                  x.image || "/images/content/not_found_2.jpg",
-                              }}
-                            />
-                          ))}
-                        </div>
-                        <span
+            {briefType === BRIEF_TYPES[0] && (
+              <Box pos="relative">
+                <LoadingOverlay
+                  visible={false}
+                  zIndex={1000}
+                  overlayProps={{ radius: "sm", blur: 2 }}
+                  loaderProps={{ color: "pink", type: "bars" }}
+                />
+                <Card
+                  className={cn(styles.card)}
+                  title="3. Product cần Scale"
+                  classTitle="title-green"
+                  classCardHead={styles.classCardHead}
+                  classSpanTitle={styles.classScaleSpanTitle}
+                  head={
+                    <Dropdown
+                      className={styles.dropdown}
+                      classDropdownHead={styles.dropdownHead}
+                      value={layout}
+                      setValue={setLayout}
+                      options={LAYOUT_TYPES}
+                      classOutSideClick={styles.memberDropdown}
+                    />
+                  }
+                >
+                  {!loadingProductLines && !isEmpty(productLines) && SKU && (
+                    <Grid>
+                      <Grid.Col span={6}>
+                        <ScrollArea
+                          h={500}
                           style={{
-                            position: "absolute",
-                            bottom: "0",
-                            right: "0",
-                            cursor: "pointer",
-                            padding: "10px",
+                            color: "#000",
                             borderRadius: "10px",
+                            boxShadow:
+                              "0px 1px 1px 0px rgba(0,0,0,0.12),0px 2px 2px 0px rgba(0,0,0,0.12),0px 4px 4px 0px rgba(0,0,0,0.12),0px 8px 8px 0px rgba(0,0,0,0.12),0px 16px 16px 0px rgba(0,0,0,0.12)",
+                            backgroundColor: "rgba(255, 255, 255, 1)",
                           }}
-                          onClick={scrollToTheTop}
                         >
-                          <Icon name="arrow-top" size={24} fill="#83BF6E" />
-                        </span>
-                      </ScrollArea>
-                    </Grid.Col>
-                  </Grid>
-                )}
-                {loadingProductLines && (
-                  <Grid>
-                    <Grid.Col span={6}>
-                      <Skeleton height={350} radius="md" />
-                    </Grid.Col>
-                    <Grid.Col span={6}>
-                      <Skeleton height={350} radius="md" />
-                    </Grid.Col>
-                  </Grid>
-                )}
-              </Card>
-            </Box>
+                          <div className={styles.list}>
+                            <TextInput
+                              placeholder="Search Collection"
+                              type="text"
+                              name="search"
+                              value={searchCollection}
+                              onChange={(e) => handleFilterCollection(e)}
+                              className={styles.searchCollection}
+                            />
+                            {!isEmpty(validCollections) ? (
+                              map(validCollections, (x, index) => (
+                                <Checkbox
+                                  className={styles.checkbox}
+                                  content={`Collection - ${x.name} (${x.validProductLines.length})`}
+                                  value={selectedCollection.includes(x.name)}
+                                  onChange={() =>
+                                    handleChangeCollection(x.name)
+                                  }
+                                  key={index}
+                                />
+                              ))
+                            ) : (
+                              <p
+                                style={{
+                                  textAlign: "center",
+                                  color: "#FF6A55",
+                                  marginTop: "10px",
+                                }}
+                              >
+                                Không có collection nào phù hợp
+                              </p>
+                            )}
+                          </div>
+                        </ScrollArea>
+                      </Grid.Col>
+                      <Grid.Col span={6}>
+                        <ScrollArea
+                          h={500}
+                          style={{
+                            color: "#000",
+                            borderRadius: "10px",
+                            boxShadow:
+                              "0px 1px 1px 0px rgba(0,0,0,0.12),0px 2px 2px 0px rgba(0,0,0,0.12),0px 4px 4px 0px rgba(0,0,0,0.12),0px 8px 8px 0px rgba(0,0,0,0.12),0px 16px 16px 0px rgba(0,0,0,0.12)",
+                            backgroundColor: "rgba(255, 255, 255, 1)",
+                          }}
+                        >
+                          <div ref={topRef}></div>
+                          <div
+                            className={styles.list}
+                            onMouseLeave={handleMouseLeave}
+                            style={{ position: "relative" }}
+                          >
+                            <TextInput
+                              placeholder="Search Product Lines"
+                              type="text"
+                              name="search"
+                              value={searchProductLine}
+                              onChange={(e) => handleFilterProductLines(e)}
+                              className={styles.searchCollection}
+                            />
+                            {map(productLines, (x, index) => (
+                              <Checkbox
+                                key={index}
+                                className={styles.checkbox}
+                                content={x.name}
+                                value={selectedProductLines.includes(x.name)}
+                                onChange={() => handleChange(x.name)}
+                                showHover={true}
+                                HoverComponent={HoverInfo}
+                                hoverProps={{
+                                  image:
+                                    x.image ||
+                                    "/images/content/not_found_2.jpg",
+                                }}
+                              />
+                            ))}
+                          </div>
+                          <span
+                            style={{
+                              position: "absolute",
+                              bottom: "0",
+                              right: "0",
+                              cursor: "pointer",
+                              padding: "10px",
+                              borderRadius: "10px",
+                            }}
+                            onClick={scrollToTheTop}
+                          >
+                            <Icon name="arrow-top" size={24} fill="#83BF6E" />
+                          </span>
+                        </ScrollArea>
+                      </Grid.Col>
+                    </Grid>
+                  )}
+                  {loadingProductLines && (
+                    <Grid>
+                      <Grid.Col span={6}>
+                        <Skeleton height={350} radius="md" />
+                      </Grid.Col>
+                      <Grid.Col span={6}>
+                        <Skeleton height={350} radius="md" />
+                      </Grid.Col>
+                    </Grid>
+                  )}
+                </Card>
+              </Box>
+            )}
           </div>
         </div>
+        {briefType === BRIEF_TYPES[1] && (
+          <div className={styles.row} ref={topScrollClipArtRef}>
+            <Card
+              className={cn(styles.card, styles.clipArtCard)}
+              title="3. Clipart cần Scale"
+              classTitle="title-green"
+              classCardHead={styles.classCardHead}
+              classSpanTitle={styles.classScaleSpanTitle}
+              head={
+                <Text>
+                  {!isEmpty(selectedClipArts) ? (
+                    <span>
+                      {selectedClipArts.length} Clipart đã chọn
+                      <span
+                        style={{
+                          marginLeft: "10px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => setClipArts(selectedClipArts)}
+                      >
+                        <Tooltip label="Show Selected Clipart">
+                          <IconSelector />
+                        </Tooltip>
+                      </span>
+                      <span
+                        style={{
+                          marginLeft: "10px",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => setSelectedClipArts([])}
+                      >
+                        <Tooltip label="Deselect">
+                          <IconDeselect />
+                        </Tooltip>
+                      </span>
+                    </span>
+                  ) : null}
+                </Text>
+              }
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "10px 5px",
+                  gap: "10px",
+                  flexWrap: "wrap-reverse",
+                  backgroundColor: "#EFF0F1",
+                  borderRadius: "10px",
+                }}
+              >
+                <Flex
+                  style={{
+                    gap: "8px",
+                    padding: "10px",
+                    borderRadius: "10px",
+                    backgroundColor: "#EFF0F1",
+                  }}
+                >
+                  <MantineTextInput
+                    placeholder="Clipart Name / Niche / Note / ..."
+                    size="sm"
+                    leftSection={
+                      <span
+                        onClick={() => {
+                          setSearchClipArt(searchClipArt);
+                        }}
+                        style={{
+                          cursor: "pointer",
+                        }}
+                      >
+                        <IconSearch size={16} />
+                      </span>
+                    }
+                    styles={{
+                      input: {
+                        width: "300px",
+                      },
+                    }}
+                    value={searchClipArt}
+                    onChange={(e) => setSearchClipArt(e.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        fetchClipArts(pagination.currentPage);
+                      }
+                    }}
+                  />
+                </Flex>
+                <Flex
+                  style={{
+                    gap: "8px",
+                    padding: "10px",
+                    borderRadius: "10px",
+                  }}
+                >
+                  {map(filtersClipArt, (filter, index) => (
+                    <MultiSelect
+                      key={index}
+                      placeholder={filter.name}
+                      data={filter.value}
+                      styles={{
+                        input: {
+                          width: "150px",
+                        },
+                      }}
+                      value={query[filter.name]}
+                      onChange={(value) =>
+                        setQuery({ ...query, [filter.name]: value })
+                      }
+                      clearable
+                      onClear={() => {
+                        setQuery({
+                          ...query,
+                          [filter.key]: null,
+                        });
+                      }}
+                    />
+                  ))}
+                  <Button
+                    onClick={() => {
+                      const queryKeys = keys(query);
+                      const transformedQuery = map(queryKeys, (key) => ({
+                        [key]: [],
+                      }));
+                      setQuery(merge({}, ...transformedQuery));
+                      setSearchClipArt("");
+                    }}
+                  >
+                    <IconFilterOff />
+                  </Button>
+                </Flex>
+              </div>
+              <ScrollArea
+                h={700}
+                scrollbars="y"
+                scrollbarSize={4}
+                scrollHideDelay={1000}
+              >
+                <LoadingOverlay
+                  visible={fetchClipArtsLoading}
+                  zIndex={1000}
+                  overlayProps={{ radius: "sm", blur: 2 }}
+                />
+                <Grid
+                  style={{
+                    marginTop: "10px",
+                  }}
+                  columns={12}
+                >
+                  {map(clipArts, (clipArt, index) => (
+                    <Grid.Col
+                      span={{ sm: 4, md: 3, lg: 2 }}
+                      // span="auto"
+                      key={index}
+                      style={{
+                        position: "relative",
+                      }}
+                      onClick={() => {
+                        if (
+                          includes(map(selectedClipArts, "name"), clipArt.name)
+                        ) {
+                          setSelectedClipArts(
+                            selectedClipArts.filter(
+                              (x) => x.name !== clipArt.name
+                            )
+                          );
+                        } else {
+                          setSelectedClipArts((selectedClipArts) => [
+                            ...selectedClipArts,
+                            clipArt,
+                          ]);
+                        }
+                      }}
+                    >
+                      <MantineCard
+                        shadow="sm"
+                        padding="sm"
+                        style={{
+                          cursor: "pointer",
+                        }}
+                      >
+                        <MantineCard.Section>
+                          <LazyLoad height={200} once={true}>
+                            <Image
+                              src={
+                                clipArt.imageSrc ||
+                                "/images/content/not_found_2.jpg"
+                              }
+                              h={200}
+                              alt="No way!"
+                              fit="contain"
+                            />
+                          </LazyLoad>
+                        </MantineCard.Section>
+                        <Text
+                          fw={500}
+                          size="sm"
+                          mt="md"
+                          style={{
+                            display: "inline-block",
+                            width: "200px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            textDecoration: "none",
+                            verticalAlign: "middle",
+                          }}
+                        >
+                          {clipArt.name}
+                        </Text>
+                      </MantineCard>
+                      {includes(
+                        map(selectedClipArts, "name"),
+                        clipArt.name
+                      ) && (
+                        <>
+                          <div
+                            style={{
+                              padding: "5px",
+                              position: "absolute",
+                              top: "15px",
+                              right: "13px",
+                              borderRadius: "50%",
+                              backgroundColor: "#64CD73",
+                              zIndex: 2,
+                            }}
+                          >
+                            <IconCheck color="#ffffff" />
+                          </div>
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "9px",
+                              right: "0",
+                              height: "94%",
+                              width: "99%",
+                              cursor: "pointer",
+                              padding: "10px",
+                              borderRadius: "10px",
+                              backgroundColor: "rgba(244, 252, 243,0.5)",
+                              zIndex: 1,
+                            }}
+                          ></div>
+                        </>
+                      )}
+                    </Grid.Col>
+                  ))}
+                </Grid>
+              </ScrollArea>
+              <Pagination
+                total={pagination.totalPages}
+                page={pagination.currentPage}
+                onChange={handlePageChange}
+                color="pink"
+                size="md"
+                style={{ marginTop: "20px", marginLeft: "auto" }}
+              />
+            </Card>
+          </div>
+        )}
         <div className={styles.row}>
           <Card
             className={cn(styles.cardNote)}
@@ -673,10 +1077,13 @@ const NewCampaigns = () => {
                     styles.createButton
                   )}
                   onClick={() => {
-                    if (isEmpty(selectedProductLines)) {
+                    if (
+                      isEmpty(selectedProductLines) &&
+                      isEmpty(selectedClipArts)
+                    ) {
                       showNotification(
                         "Thất bại",
-                        "Vui lòng chọn Product Line",
+                        "Vui lòng chọn Product Line hoặc Clipart",
                         "red"
                       );
                       return;
@@ -812,13 +1219,15 @@ const NewCampaigns = () => {
             </div>
             <ScrollArea h={300} scrollbars="y">
               <CustomTable
-                items={generateScaleProductLinesTable({
+                items={generateScaleProductBaseOnBriefType({
+                  type: briefType,
                   selectedProductLines,
                   SKU,
                   collections: validCollections,
                   rndSortName: find(users, { name: rndMember })?.shortName,
+                  selectedClipArts,
                 })}
-                headers={["No", "Product Line", "SKU", "Remove"]}
+                headers={generateHeaderTable(briefType)}
                 onRemove={handleRemoveRow}
               />
             </ScrollArea>

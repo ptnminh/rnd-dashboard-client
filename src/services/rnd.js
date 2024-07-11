@@ -1,7 +1,7 @@
 import axios from "axios";
 import { hostAPI } from "../constant";
 import { showNotification } from "../utils/index";
-import { isEmpty } from "lodash";
+import { filter, isEmpty, keys, map } from "lodash";
 export const rndServices = {
   searchProducts: async (SKU) => {
     try {
@@ -222,6 +222,59 @@ export const rndServices = {
     } catch (error) {
       console.log("Error at deleteBrief:", error);
       showNotification("Thất bại", "Xóa brief thất bại", "red");
+      return false;
+    }
+  },
+  fetchFilters: async () => {
+    try {
+      const response = await axios.get(`${hostAPI}/libraries/clipart-filters`);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Không tìm thấy filters", "red");
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at fetchFilters:", error);
+      showNotification("Thất bại", "Không tìm thấy filters", "red");
+      return false;
+    }
+  },
+  fetchClipArts: async ({ page, limit, query, type = "clipart", keyword }) => {
+    try {
+      let url = `${hostAPI}/libraries?page=${page}&pageSize=${limit}&type=${type}`;
+      const queryKeys = keys(query);
+      const transformedQuery = map(queryKeys, (key) => {
+        return {
+          key,
+          value: query[key],
+        };
+      });
+      const filterTransformedQuery = filter(
+        transformedQuery,
+        (o) => !isEmpty(o.value)
+      );
+      if (!isEmpty(filterTransformedQuery) || keyword) {
+        const queryString = `filter=${encodeURIComponent(
+          JSON.stringify({
+            ...(keyword && { keyword }),
+            ...(!isEmpty(filterTransformedQuery) && {
+              multipleFilters: filterTransformedQuery,
+            }),
+          })
+        )}`;
+        url = `${url}&${queryString}`;
+      }
+      const response = await axios.get(url);
+      const { data: result } = response;
+      if (result?.success === false) {
+        // showNotification("Thất bại", "Không tìm thấy clipart", "red");
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at fetchClipArts:", error);
+      // showNotification("Thất bại", "Không tìm thấy clipart", "red");
       return false;
     }
   },

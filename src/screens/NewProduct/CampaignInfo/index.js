@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import cn from "classnames";
 import styles from "./CampaignInfo.module.sass";
 import Card from "../../../components/Card";
@@ -16,8 +16,15 @@ import {
   Avatar,
   Text,
   Button,
+  Flex,
+  Select,
 } from "@mantine/core";
-import { IconCircleCheck, IconRotateClockwise } from "@tabler/icons-react";
+import {
+  IconCircleCheck,
+  IconRotateClockwise,
+  IconSearch,
+  IconFilterOff,
+} from "@tabler/icons-react";
 import {
   BRIEF_TYPES,
   BRIEF_VALUES,
@@ -26,9 +33,11 @@ import {
   MEMBERS,
   RND_SIZES,
 } from "../../../constant";
-import { showNotification } from "../../../utils/index";
 import { Autocomplete } from "@mantine/core";
 import Icon from "../../../components/Icon";
+import moment from "moment-timezone";
+import { DateRangePicker } from "rsuite";
+import { CONVERT_STATUS_TO_NUMBER } from "../../../utils";
 
 const CampaignInfo = ({
   className,
@@ -64,6 +73,26 @@ const CampaignInfo = ({
     if (!isEmpty(previewData)) setVisibleReviewTable(true);
   }, [previewData]);
 
+  const [searchSKU, setSearchSKU] = useState("");
+  const [batch, setBatch] = useState("");
+  const [query, setQuery] = useState({
+    date: null,
+    batch: "",
+    sku: "",
+    briefType: null,
+    size: null,
+    rndTeam: null,
+    rnd: null,
+    epm: null,
+    designer: null,
+    status: [2, 3],
+    sizeValue: null,
+    rndName: null,
+    designerName: null,
+    epmName: null,
+    statusValue: null,
+    dateValue: null,
+  });
   return (
     <>
       <Card
@@ -102,7 +131,7 @@ const CampaignInfo = ({
               classOutSideClick={styles.memberDropdown}
             />{" "}
             <Dropdown
-              label={"RND Size"}
+              label={"Size"}
               className={styles.dropdown}
               classDropdownHead={styles.dropdownHead}
               value={rndSize}
