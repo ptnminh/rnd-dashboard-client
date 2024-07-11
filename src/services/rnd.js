@@ -167,7 +167,13 @@ export const rndServices = {
       const sort = !isEmpty(sorting)
         ? {
             [sorting[0].id === "date" || "time" ? "createdAt" : sorting.id]:
-              sorting[0].desc ? "desc" : "asc",
+              sorting[0].id === "time"
+                ? sorting[0].desc
+                  ? "asc"
+                  : "desc"
+                : sorting[0].desc
+                ? "desc"
+                : "asc",
           }
         : {};
       let url = `${hostAPI}/briefs?page=${page}&pageSize=${limit}&view=${view}`;
