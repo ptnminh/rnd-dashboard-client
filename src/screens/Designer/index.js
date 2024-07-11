@@ -23,7 +23,11 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
 import Editor from "../../components/Editor";
-import { CONVERT_NUMBER_TO_STATUS, getStringAsEditorState } from "../../utils";
+import {
+  CONVERT_BRIEF_TYPE_TO_OBJECT_NAME,
+  CONVERT_NUMBER_TO_STATUS,
+  getStringAsEditorState,
+} from "../../utils";
 import { rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
 import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
@@ -293,8 +297,8 @@ const DesignerScreens = () => {
                   fontSize: "14px",
                 }}
               >
-                {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} -{" "}
-                {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
+                Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} -{" "}
+                Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
                 {selectedSKU?.priority === 2 ? " - Priority" : ""}
               </div>
             </Grid.Col>
@@ -317,7 +321,7 @@ const DesignerScreens = () => {
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "flex-start",
+                  justifyContent: "center",
                   padding: "5px",
                   fontSize: "14px",
                   padding: "10px",
@@ -331,6 +335,7 @@ const DesignerScreens = () => {
                 radius="md"
                 src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
                 height={200}
+                fit="contain"
               />
               <div
                 style={{
@@ -426,10 +431,12 @@ const DesignerScreens = () => {
               <Image
                 radius="md"
                 src={
-                  selectedSKU?.productLine?.image ||
-                  "/images/content/not_found_2.jpg"
+                  selectedSKU[
+                    CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
+                  ]?.image || "/images/content/not_found_2.jpg"
                 }
                 height={200}
+                fit="contain"
               />
               <div
                 style={{
@@ -441,7 +448,11 @@ const DesignerScreens = () => {
                   marginTop: "10px",
                 }}
               >
-                {selectedSKU?.productLine?.name}
+                {
+                  selectedSKU[
+                    CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
+                  ]?.name
+                }
               </div>
               <List
                 spacing="lg"
@@ -455,7 +466,9 @@ const DesignerScreens = () => {
                   </ThemeIcon>
                 }
               >
-                {selectedSKU?.productLine?.refLink && (
+                {selectedSKU[
+                  CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
+                ]?.refLink && (
                   <List.Item>
                     Link Mockup:{" "}
                     <a
@@ -469,10 +482,22 @@ const DesignerScreens = () => {
                         color: "#228be6",
                         verticalAlign: "middle",
                       }}
-                      href={selectedSKU?.productLine?.refLink}
+                      href={
+                        selectedSKU[
+                          CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                            selectedSKU?.briefType
+                          ]
+                        ]?.refLink
+                      }
                       target="_blank"
                     >
-                      {selectedSKU?.productLine?.refLink}
+                      {
+                        selectedSKU[
+                          CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                            selectedSKU?.briefType
+                          ]
+                        ]?.refLink
+                      }
                     </a>
                   </List.Item>
                 )}

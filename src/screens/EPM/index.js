@@ -23,7 +23,11 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
 import Editor from "../../components/Editor";
-import { CONVERT_NUMBER_TO_STATUS, getStringAsEditorState } from "../../utils";
+import {
+  CONVERT_BRIEF_TYPE_TO_OBJECT_NAME,
+  CONVERT_NUMBER_TO_STATUS,
+  getStringAsEditorState,
+} from "../../utils";
 import { rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
 import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
@@ -294,8 +298,8 @@ const DesignerScreens = () => {
                   fontSize: "14px",
                 }}
               >
-                {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} -{" "}
-                {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
+                Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} -{" "}
+                Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
                 {selectedSKU?.priority === 2 ? " - Priority" : ""}
               </div>
             </Grid.Col>
@@ -342,6 +346,7 @@ const DesignerScreens = () => {
                 radius="md"
                 src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
                 height={200}
+                fit="contain"
               />
               <div
                 style={{
@@ -462,6 +467,7 @@ const DesignerScreens = () => {
                   "/images/content/not_found_2.jpg"
                 }
                 height={200}
+                fit="contain"
               />
               <div
                 style={{
@@ -488,7 +494,16 @@ const DesignerScreens = () => {
                 }
               >
                 <List.Item>
-                  Product Base: <span> {selectedSKU?.productLine?.name}</span>
+                  Product Base:{" "}
+                  <span>
+                    {
+                      selectedSKU?.[
+                        CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                          selectedSKU?.briefType
+                        ]
+                      ]?.name
+                    }
+                  </span>
                 </List.Item>
                 {selectedSKU?.linkDesign && (
                   <List.Item>

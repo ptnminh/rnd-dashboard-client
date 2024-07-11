@@ -54,3 +54,8 @@ export const CONVERT_NUMBER_TO_STATUS = {
   2: "Medium",
   3: "Big",
 };
+
+export const CONVERT_BRIEF_TYPE_TO_OBJECT_NAME = {
+  "Scale - Product Base": "productLine",
+  "Scale - Clipart": "clipart",
+};

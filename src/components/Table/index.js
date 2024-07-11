@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import styles from "./Table.module.sass";
-import cn from "classnames";
-import Checkbox from "../Checkbox";
-import Loader from "../Loader";
 import Row from "./Row";
-import { map, toUpper } from "lodash";
+import { map } from "lodash";
 
 const Table = ({
   items,

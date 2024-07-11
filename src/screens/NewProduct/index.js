@@ -611,7 +611,7 @@ const NewCampaigns = () => {
           productLine: find(productLines, { name: x["Product Line"] })?.uid,
         }),
         ...(briefType === BRIEF_TYPES[1] && {
-          clipart: find(clipArts, { name: x["Clip Art"] })?.uid,
+          clipart: find(clipArts, { uid: x.uid })?.uid,
         }),
         designLinkRef: SKU?.designLink || "",
       };
