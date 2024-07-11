@@ -157,12 +157,24 @@ const generateScaleProductLinesTable = ({
         return {
           No: index + 1,
           "Product Line": foundProductLine?.name,
+          Hình: foundProductLine?.image,
           SKU: name,
           Remove: "x",
         };
       }
     )
   );
+};
+
+const generateTextPreview = (type, layout) => {
+  switch (type) {
+    case BRIEF_TYPES[0]:
+      return layout;
+    case BRIEF_TYPES[1]:
+      return "Clip Art";
+    default:
+      return "";
+  }
 };
 
 const generateScaleClipArtTable = ({ SKU, selectedClipArts, rndSortName }) => {
@@ -176,8 +188,10 @@ const generateScaleClipArtTable = ({ SKU, selectedClipArts, rndSortName }) => {
         return {
           No: index + 1,
           "Clip Art": x.name,
+          Hình: x.imageSrc,
           SKU: name,
           Remove: "x",
+          uid: x.uid,
         };
       }
     )
@@ -214,9 +228,15 @@ const generateScaleProductBaseOnBriefType = ({
 const generateHeaderTable = (type) => {
   switch (type) {
     case BRIEF_TYPES[0]:
-      return ["No", "Product Line", "SKU", "Remove"];
+      return {
+        headers: ["No", "Product Line", "Hình", "SKU", "Remove"],
+        removeHeader: "Product Line",
+      };
     case BRIEF_TYPES[1]:
-      return ["No", "Clip Art", "SKU", "Remove"];
+      return {
+        headers: ["No", "Clip Art", "Hình", "SKU", "Remove"],
+        removeHeader: "Clip Art",
+      };
     default:
       return [];
   }
@@ -307,14 +327,23 @@ const NewCampaigns = () => {
     await rndServices.syncUser();
     await fetchUsers();
   };
-  const handleRemoveRow = (productLine) => {
-    if (selectedProductLines.length === 1) {
+  const handleRemoveRow = (name) => {
+    if (selectedProductLines.length === 1 && selectedClipArts.length === 1) {
       showNotification("Thất bại", "Không thể xóa hết Product Line", "red");
       return;
     }
-    setSelectedProductLines(
-      filter(selectedProductLines, (x) => x !== productLine)
-    );
+    switch (briefType) {
+      case BRIEF_TYPES[0]:
+        setSelectedProductLines(
+          filter(selectedProductLines, (x) => x !== name)
+        );
+        break;
+      case BRIEF_TYPES[1]:
+        setSelectedClipArts(filter(selectedClipArts, (x) => x.name !== name));
+        break;
+      default:
+        break;
+    }
   };
   const handleFilterCollection = (event) => {
     const value = event.target.value;
@@ -403,6 +432,18 @@ const NewCampaigns = () => {
     );
   };
   useEffect(() => {
+    switch (briefType) {
+      case BRIEF_TYPES[0]:
+        setSelectedProductLines([]);
+        break;
+      case BRIEF_TYPES[1]:
+        setSelectedProductLines([]);
+        break;
+      default:
+        break;
+    }
+  }, [briefType]);
+  useEffect(() => {
     fetchCollections();
     fetchAllProducts();
     fetchUsers();
@@ -436,11 +477,6 @@ const NewCampaigns = () => {
     setPagination(metadata);
     setFetchClipArtsLoading(false);
   };
-  useEffect(() => {
-    if (!briefType) return;
-    if (briefType === BRIEF_TYPES[1]) {
-    }
-  }, [briefType]);
 
   useEffect(() => {
     const batch = find(users, { name: rndMember, role: "rnd" })?.nextBatch;
@@ -519,14 +555,22 @@ const NewCampaigns = () => {
     setSelectedProductLines([]);
   }, [layout]);
 
-  const handleSubmitBrief = async () => {
-    setCreateBriefLoading(true);
-    const generatedSKUs = generateScaleProductLinesTable({
+  const prepareSubmitData = () => {
+    const rndSortName = find(users, { name: rndMember })?.shortName;
+    const data = generateScaleProductBaseOnBriefType({
+      type: briefType,
       selectedProductLines,
       SKU,
       collections: validCollections,
-      rndSortName: find(users, { name: rndMember })?.shortName,
+      rndSortName,
+      selectedClipArts,
     });
+    return data;
+  };
+
+  const handleSubmitBrief = async () => {
+    setCreateBriefLoading(true);
+    const generatedSKUs = prepareSubmitData();
     if (isEmpty(generatedSKUs)) {
       showNotification("Thất bại", "Vui lòng chọn Product Line", "red");
       setCreateBriefLoading(false);
@@ -563,7 +607,12 @@ const NewCampaigns = () => {
             }
           : {}),
         status: 1,
-        productLine: find(productLines, { name: x["Product Line"] })?.uid,
+        ...(briefType === BRIEF_TYPES[0] && {
+          productLine: find(productLines, { name: x["Product Line"] })?.uid,
+        }),
+        ...(briefType === BRIEF_TYPES[1] && {
+          clipart: find(clipArts, { name: x["Clip Art"] })?.uid,
+        }),
         designLinkRef: SKU?.designLink || "",
       };
     });
@@ -910,7 +959,7 @@ const NewCampaigns = () => {
                 </Flex>
               </div>
               <ScrollArea
-                h={700}
+                h={800}
                 scrollbars="y"
                 scrollbarSize={4}
                 scrollHideDelay={1000}
@@ -929,7 +978,6 @@ const NewCampaigns = () => {
                   {map(clipArts, (clipArt, index) => (
                     <Grid.Col
                       span={{ sm: 4, md: 3, lg: 2 }}
-                      // span="auto"
                       key={index}
                       style={{
                         position: "relative",
@@ -1077,6 +1125,10 @@ const NewCampaigns = () => {
                     styles.createButton
                   )}
                   onClick={() => {
+                    if (!SKU) {
+                      showNotification("Thất bại", "Vui lòng chọn SKU", "red");
+                      return;
+                    }
                     if (
                       isEmpty(selectedProductLines) &&
                       isEmpty(selectedClipArts)
@@ -1158,7 +1210,7 @@ const NewCampaigns = () => {
                 gradient={{ from: "blue", to: "cyan", deg: 90 }}
                 style={{ margin: "0 5px" }}
               >
-                {layout}
+                {generateTextPreview(briefType, layout)}
               </Badge>{" "}
               từ{" "}
               <Badge size="md" color="pink" style={{ marginLeft: "5px" }}>
@@ -1217,7 +1269,7 @@ const NewCampaigns = () => {
             >
               Scale
             </div>
-            <ScrollArea h={300} scrollbars="y">
+            <ScrollArea h={300} scrollbars="y" scrollbarSize={2}>
               <CustomTable
                 items={generateScaleProductBaseOnBriefType({
                   type: briefType,
@@ -1227,8 +1279,9 @@ const NewCampaigns = () => {
                   rndSortName: find(users, { name: rndMember })?.shortName,
                   selectedClipArts,
                 })}
-                headers={generateHeaderTable(briefType)}
+                headers={generateHeaderTable(briefType)?.headers}
                 onRemove={handleRemoveRow}
+                headerRemove={generateHeaderTable(briefType)?.removeHeader}
               />
             </ScrollArea>
           </Grid.Col>

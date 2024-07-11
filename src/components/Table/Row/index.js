@@ -1,8 +1,9 @@
 import React from "react";
 import styles from "./Row.module.sass";
 import { map } from "lodash";
+import { Image } from "@mantine/core";
 
-const Row = ({ item, headers, onRemove }) => {
+const Row = ({ item, headers, onRemove, headerRemove }) => {
   return (
     <>
       <div className={styles.row}>
@@ -14,10 +15,17 @@ const Row = ({ item, headers, onRemove }) => {
               cursor: header === "Remove" ? "pointer" : "default",
             }}
             onClick={() => {
-              onRemove(item["Product Line"]);
+              onRemove(item[headerRemove]);
             }}
           >
-            <div>{item[header]}</div>
+            {header === "Hình" ? (
+              <Image
+                src={item[header] || "/images/content/not_found_2.jpg"}
+                style={{ width: "50px" }}
+              />
+            ) : (
+              <div>{item[header]}</div>
+            )}
           </div>
         ))}
       </div>

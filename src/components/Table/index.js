@@ -6,7 +6,13 @@ import Loader from "../Loader";
 import Row from "./Row";
 import { map, toUpper } from "lodash";
 
-const Table = ({ items, headers, isShowCheckbox = false, onRemove }) => {
+const Table = ({
+  items,
+  headers,
+  isShowCheckbox = false,
+  onRemove,
+  headerRemove,
+}) => {
   const [selectedFilters, setSelectedFilters] = useState([]);
 
   const handleChange = (id) => {
@@ -37,6 +43,7 @@ const Table = ({ items, headers, isShowCheckbox = false, onRemove }) => {
             headers={headers}
             isShowCheckbox={isShowCheckbox}
             onRemove={onRemove}
+            headerRemove={headerRemove}
           />
         ))}
       </div>
