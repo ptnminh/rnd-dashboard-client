@@ -1219,7 +1219,7 @@ const NewCampaigns = () => {
           </div>
         )}
         {briefType === BRIEF_TYPES[2] && (
-          <div className={styles.row} ref={topScrollClipArtRef}>
+          <div className={styles.row}>
             <Card
               className={cn(styles.card, styles.clipArtCard)}
               title="4. Chọn Quote"

@@ -26,6 +26,7 @@ import Shop from "./screens/Shop";
 import PageList from "./screens/PageList";
 import DesignerScreens from "./screens/Designer";
 import EPMScreens from "./screens/EPM";
+import { ProductLine } from "./screens/ProductLine";
 
 function App() {
   return (
@@ -51,7 +52,7 @@ function App() {
           path="/rnd/product-line"
           element={
             <Page title="Campaigns dashboard">
-              <TemplateKW />
+              <ProductLine />
             </Page>
           }
         />

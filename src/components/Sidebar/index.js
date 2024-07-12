@@ -24,14 +24,6 @@ const navigation = [
         title: "List - Product Line",
         url: "/rnd/product-line",
       },
-      {
-        title: "List - Collection",
-        url: "/rnd/collection",
-      },
-      {
-        title: "List - Layout",
-        url: "/rnd/layout",
-      },
     ],
   },
   {
