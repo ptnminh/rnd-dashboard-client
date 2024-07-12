@@ -287,7 +287,9 @@ export const rndServices = {
   fetchQuotes: async ({ page, limit, query }) => {
     try {
       let url = `${hostAPI}/quotes?page=${page}&pageSize=${limit}`;
-      if (!isEmpty(query)) {
+      const queryKeys = keys(query);
+      const transformedQuery = filter(queryKeys, (key) => query[key]);
+      if (!isEmpty(transformedQuery)) {
         const queryString = `filter=${encodeURIComponent(
           JSON.stringify({
             ...(query.name && { name: query.name }),

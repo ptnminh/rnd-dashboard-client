@@ -34,6 +34,7 @@ import {
   Pagination,
   MultiSelect,
   Tooltip,
+  Select,
 } from "@mantine/core";
 import { showNotification } from "../../utils/index";
 
@@ -1246,36 +1247,28 @@ const NewCampaigns = () => {
                     backgroundColor: "#EFF0F1",
                   }}
                 >
-                  <MantineTextInput
+                  <Select
                     placeholder="Name ..."
                     size="sm"
-                    leftSection={
-                      <span
-                        onClick={() => {
-                          setQueryQuote({
-                            name: searchNameQuote,
-                          });
-                        }}
-                        style={{
-                          cursor: "pointer",
-                        }}
-                      >
-                        <IconSearch size={16} />
-                      </span>
-                    }
+                    data={["Niche"]}
                     styles={{
                       input: {
                         width: "300px",
                       },
                     }}
-                    value={searchNameQuote}
-                    onChange={(e) => setSearchNameQuote(e.target.value)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") {
-                        setQueryQuote({
-                          name: searchNameQuote,
-                        });
-                      }
+                    value={queryQuote?.name}
+                    onChange={(value) =>
+                      setQueryQuote({
+                        ...queryQuote,
+                        name: value,
+                      })
+                    }
+                    clearable
+                    onClear={() => {
+                      setQueryQuote({
+                        ...queryQuote,
+                        name: "",
+                      });
                     }}
                   />
                   <MantineTextInput
@@ -1313,8 +1306,8 @@ const NewCampaigns = () => {
                   <Button
                     onClick={() => {
                       setQueryQuote({
-                        name: "",
-                        keyword: "",
+                        name: null,
+                        keyword: null,
                       });
                     }}
                   >

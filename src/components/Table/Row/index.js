@@ -10,23 +10,25 @@ const Row = ({ item, headers, onRemove, headerRemove }) => {
         {map(
           filter(headers, (header) => header !== "uid"),
           (header, index) => (
-            <div
-              className={styles.col}
-              key={index}
-              style={{
-                cursor: header === "Remove" ? "pointer" : "default",
-              }}
-              onClick={() => {
-                onRemove(item[headerRemove] || item?.uid || "");
-              }}
-            >
+            <div className={styles.col} key={index}>
               {header === "Hình" ? (
                 <Image
                   src={item[header] || "/images/content/not_found_2.jpg"}
                   style={{ width: "50px" }}
                 />
               ) : (
-                <div>{item[header]}</div>
+                <div
+                  style={{
+                    cursor: header === "Remove" ? "pointer" : "default",
+                  }}
+                  onClick={
+                    header === "Remove"
+                      ? () => onRemove(item[headerRemove] || item?.uid || "")
+                      : undefined
+                  }
+                >
+                  {item[header]}
+                </div>
               )}
             </div>
           )
