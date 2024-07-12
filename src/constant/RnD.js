@@ -1,13 +1,18 @@
 export const MEMBERS = ["Thảo Thảo", "Nhật Minh"];
 export const DESIGNER_MEMBERS = ["Phương Duy"];
 export const GROUP_WORKS = ["BD1", "BD2", "BD3"];
-export const BRIEF_TYPES = ["Scale - Product Base", "Scale - Clipart"];
+export const BRIEF_TYPES = [
+  "Scale - Product Base",
+  "Scale - Clipart",
+  "Scale - Niche",
+];
 export const BRIEF_VALUES = ["Small", "Medium", "Big"];
 export const RND_SIZES = ["Small", "Medium", "Big"];
 export const LAYOUT_TYPES = [
   "Product Base - Chung Layout",
   "Product Base - Khác Layout",
 ];
+export const KEEP_CLIPARTS = ["Giữ ClipArt", "Đổi ClipArt"];
 export const COLLECTIONS = [
   {
     name: "Drinkware",

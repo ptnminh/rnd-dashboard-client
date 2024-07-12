@@ -3,10 +3,14 @@ import styles from "./TemplateKW.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Details from "./Details";
-import { map } from "lodash";
+import { isEmpty, map } from "lodash";
 
 import { useDisclosure } from "@mantine/hooks";
-import { IconCircleCheck } from "@tabler/icons-react";
+import {
+  IconCircleCheck,
+  IconCopy,
+  IconCopyCheckFilled,
+} from "@tabler/icons-react";
 import {
   Modal,
   Pagination,
@@ -19,6 +23,8 @@ import {
   TextInput,
   Button,
   LoadingOverlay,
+  Card as MantineCard,
+  CopyButton,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
@@ -31,6 +37,7 @@ import {
 import { rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
 import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
+import { BRIEF_TYPES } from "../../constant";
 
 const DesignerScreens = () => {
   const navigate = useNavigate();
@@ -428,32 +435,43 @@ const DesignerScreens = () => {
               >
                 Scale
               </div>
-              <Image
-                radius="md"
-                src={
-                  selectedSKU[
-                    CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
-                  ]?.image || "/images/content/not_found_2.jpg"
-                }
-                height={200}
-                fit="contain"
-              />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  padding: "10px",
-                  fontSize: "18px",
-                  alignItems: "center",
-                  marginTop: "10px",
-                }}
-              >
-                {
-                  selectedSKU[
-                    CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
-                  ]?.name
-                }
-              </div>
+              {selectedSKU?.briefType === BRIEF_TYPES[0] ||
+              selectedSKU?.briefType === BRIEF_TYPES[1] ||
+              (selectedSKU?.briefType === BRIEF_TYPES[2] &&
+                selectedSKU?.clipart.name) ? (
+                <>
+                  <Image
+                    radius="md"
+                    src={
+                      selectedSKU[
+                        CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                          selectedSKU?.briefType
+                        ]
+                      ]?.image || "/images/content/not_found_2.jpg"
+                    }
+                    height={200}
+                    fit="contain"
+                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      padding: "10px",
+                      fontSize: "18px",
+                      alignItems: "center",
+                      marginTop: "10px",
+                    }}
+                  >
+                    {
+                      selectedSKU[
+                        CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                          selectedSKU?.briefType
+                        ]
+                      ]?.name
+                    }
+                  </div>
+                </>
+              ) : null}
               <List
                 spacing="lg"
                 size="sm"
@@ -502,6 +520,70 @@ const DesignerScreens = () => {
                   </List.Item>
                 )}
               </List>
+              {selectedSKU?.briefType === BRIEF_TYPES[2] && (
+                <MantineCard
+                  shadow="sm"
+                  padding="sm"
+                  style={{
+                    cursor: "pointer",
+                    position: "relative",
+                    marginTop: "10px",
+                  }}
+                >
+                  <MantineCard.Section>
+                    <div
+                      style={{
+                        cursor: "pointer",
+                        width: "100%",
+                        height: "200px",
+                        padding: "10px",
+                        position: "relative",
+                      }}
+                    >
+                      {selectedSKU?.niche?.quote}
+                      {true && (
+                        <>
+                          <div
+                            style={{
+                              padding: "5px",
+                              position: "absolute",
+                              bottom: "10px",
+                              right: "13px",
+                              borderRadius: "50%",
+                              zIndex: 2,
+                            }}
+                          >
+                            <CopyButton value={selectedSKU?.niche?.quote} color>
+                              {({ copied, copy }) => (
+                                <Button color="#62D256" onClick={copy}>
+                                  {copied ? (
+                                    <IconCopyCheckFilled color="#ffffff" />
+                                  ) : (
+                                    <IconCopy color="#ffffff" />
+                                  )}
+                                </Button>
+                              )}
+                            </CopyButton>
+                          </div>
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: "9px",
+                              right: "0",
+                              height: "94%",
+                              width: "99%",
+                              cursor: "pointer",
+                              padding: "10px",
+                              borderRadius: "10px",
+                              zIndex: 1,
+                            }}
+                          ></div>
+                        </>
+                      )}
+                    </div>
+                  </MantineCard.Section>
+                </MantineCard>
+              )}
             </Grid.Col>
             <Grid.Col span={12}>
               <Editor

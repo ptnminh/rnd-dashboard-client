@@ -8,6 +8,7 @@ import {
   BRIEF_VALUES,
   DESIGNER_MEMBERS,
   GROUP_WORKS,
+  KEEP_CLIPARTS,
   LAYOUT_TYPES,
   MEMBERS,
   RND_SIZES,
@@ -45,16 +46,17 @@ import {
   filter,
   find,
   flatMap,
-  forOwn,
   includes,
   intersection,
   intersectionBy,
   isEmpty,
+  join,
   keys,
   map,
   merge,
   orderBy,
   random,
+  slice,
   sortBy,
   toLower,
   uniq,
@@ -76,7 +78,7 @@ import {
   IconSelector,
 } from "@tabler/icons-react";
 import LazyLoad from "react-lazyload";
-import { useLocation, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 const HoverInfo = ({ image }) => (
   <div className={styles.hoverInfo}>
     <Image radius="md" src={image} />
@@ -172,6 +174,8 @@ const generateTextPreview = (type, layout) => {
       return layout;
     case BRIEF_TYPES[1]:
       return "Clip Art";
+    case BRIEF_TYPES[2]:
+      return "Niche";
     default:
       return "";
   }
@@ -198,6 +202,34 @@ const generateScaleClipArtTable = ({ SKU, selectedClipArts, rndSortName }) => {
   );
 };
 
+const generateScaleQuoteTable = ({
+  selectedQuotes,
+  rndSortName,
+  SKU,
+  selectedClipArts,
+}) => {
+  return compact(
+    map(
+      sortBy(selectedQuotes, (quote) => toLower(quote.name)),
+      (x, index) => {
+        const name = `${
+          SKU?.skuPrefix ? SKU?.skuPrefix : "XX"
+        }-${rndSortName}${String(random(1, 1000)).padStart(4, "0")}`;
+        return {
+          No: index + 1,
+          Quote: x.quote.slice(0, 50) + (x.quote.length > 50 ? "..." : ""),
+          ...(!isEmpty(selectedClipArts) && {
+            Hình: selectedClipArts[0].imageSrc,
+          }),
+          SKU: name,
+          Remove: "x",
+          uid: x.uid,
+        };
+      }
+    )
+  );
+};
+
 const generateScaleProductBaseOnBriefType = ({
   type,
   selectedProductLines,
@@ -205,6 +237,7 @@ const generateScaleProductBaseOnBriefType = ({
   collections,
   rndSortName,
   selectedClipArts,
+  selectedQuotes,
 }) => {
   switch (type) {
     case BRIEF_TYPES[0]:
@@ -220,12 +253,19 @@ const generateScaleProductBaseOnBriefType = ({
         selectedClipArts,
         rndSortName,
       });
+    case BRIEF_TYPES[2]:
+      return generateScaleQuoteTable({
+        selectedQuotes,
+        rndSortName,
+        SKU,
+        selectedClipArts,
+      });
     default:
       return [];
   }
 };
 
-const generateHeaderTable = (type) => {
+const generateHeaderTable = (type, isKeepClipArt = true) => {
   switch (type) {
     case BRIEF_TYPES[0]:
       return {
@@ -237,6 +277,14 @@ const generateHeaderTable = (type) => {
         headers: ["No", "Clip Art", "Hình", "SKU", "Remove"],
         removeHeader: "Clip Art",
       };
+    case BRIEF_TYPES[2]:
+      return isKeepClipArt === KEEP_CLIPARTS[0]
+        ? {
+            headers: ["No", "Quote", "SKU", "Remove", "uid"],
+          }
+        : {
+            headers: ["No", "Quote", "Hình", "SKU", "Remove", "uid"],
+          };
     default:
       return [];
   }
@@ -255,6 +303,7 @@ const NewCampaigns = () => {
   const [rndSize, setRndSize] = useState(RND_SIZES[0]);
   const [designerMember, setDesignerMember] = useState(DESIGNER_MEMBERS[0]);
   const [selectedClipArts, setSelectedClipArts] = useState([]);
+  const [selectedQuotes, setSelectedQuotes] = useState([]);
   const [briefValue, setBriefValue] = useState(BRIEF_VALUES[0]);
   const [rndMember, setRndMember] = useState(MEMBERS[0]);
   const [epmMember, setEpmMember] = useState(MEMBERS[0]);
@@ -276,12 +325,22 @@ const NewCampaigns = () => {
   const [filtersClipArt, setFiltersClipArt] = useState([]);
   const [clipArts, setClipArts] = useState([]);
   const [searchClipArt, setSearchClipArt] = useState("");
+  const [searchKeywordQuote, setSearchKeywordQuote] = useState("");
+  const [searchNameQuote, setSearchNameQuote] = useState("");
   const [query, setQuery] = useState({});
   const topScrollClipArtRef = useRef(null);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
   });
+  const [quotePagination, setQuotePagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+  });
+  const [queryQuote, setQueryQuote] = useState({});
+  const [quotes, setQuotes] = useState([]);
+  const [isKeepClipArt, setKeepClipArt] = useState(KEEP_CLIPARTS[0]);
+  const [loadingQuotes, setLoadingQuotes] = useState(false);
   const topRef = useRef(null);
   const handleSearchSKU = async () => {
     console.log(search);
@@ -317,7 +376,9 @@ const NewCampaigns = () => {
         (productLines) => toLower(productLines.name)
       );
       setProductLines(
-        layout === LAYOUT_TYPES[0] ? product.sameLayouts : newProductLines
+        layout === LAYOUT_TYPES[0]
+          ? product.sameLayouts
+          : filter(newProductLines, (productLine) => productLine.name)
       );
     }
     setLoadingProductLines(false);
@@ -340,6 +401,9 @@ const NewCampaigns = () => {
         break;
       case BRIEF_TYPES[1]:
         setSelectedClipArts(filter(selectedClipArts, (x) => x.name !== name));
+        break;
+      case BRIEF_TYPES[2]:
+        setSelectedQuotes(filter(selectedQuotes, (x) => x.uid !== name));
         break;
       default:
         break;
@@ -414,6 +478,22 @@ const NewCampaigns = () => {
     setUsers(data);
     setTeams(uniq(map(data, "team")));
   };
+  const fetchQuotes = async (page) => {
+    setLoadingQuotes(true);
+    const { data, metadata } = await rndServices.fetchQuotes({
+      page,
+      limit: 8,
+      query: queryQuote,
+    });
+    setLoadingQuotes(false);
+    if (isEmpty(data)) {
+      setQuotes([]);
+      setQuotePagination({ currentPage: 1, totalPages: 1 });
+      return;
+    }
+    setQuotes(data);
+    setQuotePagination(metadata);
+  };
   const fetchFilters = async () => {
     const { data } = await rndServices.fetchFilters();
     setFiltersClipArt(data);
@@ -482,6 +562,11 @@ const NewCampaigns = () => {
     const batch = find(users, { name: rndMember, role: "rnd" })?.nextBatch;
     setBatch(batch || "");
   }, [rndMember]);
+  useEffect(() => {
+    if (isKeepClipArt === KEEP_CLIPARTS[0] && briefType === BRIEF_TYPES[2]) {
+      setSelectedClipArts([]);
+    }
+  }, [isKeepClipArt]);
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedProductLines, setSelectedProductLines] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState([]);
@@ -544,7 +629,9 @@ const NewCampaigns = () => {
         ),
         (productLines) => toLower(productLines.name)
       );
-      setProductLines(newProductLines || []);
+      setProductLines(
+        filter(newProductLines, (productLine) => productLine.name) || []
+      );
     }
     setValidCollections(validCollections || []);
   };
@@ -564,6 +651,7 @@ const NewCampaigns = () => {
       collections: validCollections,
       rndSortName,
       selectedClipArts,
+      selectedQuotes,
     });
     return data;
   };
@@ -613,6 +701,13 @@ const NewCampaigns = () => {
         ...(briefType === BRIEF_TYPES[1] && {
           clipart: find(clipArts, { uid: x.uid })?.uid,
         }),
+        ...(briefType === BRIEF_TYPES[2] && {
+          quote: x.uid,
+          ...(isKeepClipArt === KEEP_CLIPARTS[1] &&
+            !isEmpty(selectedClipArts) && {
+              clipart: selectedClipArts[0]?.uid,
+            }),
+        }),
         designLinkRef: SKU?.designLink || "",
       };
     });
@@ -627,10 +722,16 @@ const NewCampaigns = () => {
       topScrollClipArtRef.current.scrollIntoView({ behavior: "smooth" });
     }
   };
+  const handlePageQuoteChange = (page) => {
+    setQuotePagination((prev) => ({ ...prev, currentPage: page }));
+  };
 
   useEffect(() => {
     fetchClipArts(pagination.currentPage);
   }, [pagination.currentPage, query]);
+  useEffect(() => {
+    fetchQuotes(quotePagination.currentPage);
+  }, [quotePagination.currentPage, queryQuote]);
   return (
     <>
       <div style={{ position: "relative" }}>
@@ -825,45 +926,305 @@ const NewCampaigns = () => {
             )}
           </div>
         </div>
-        {briefType === BRIEF_TYPES[1] && (
+        {(briefType === BRIEF_TYPES[1] || briefType === BRIEF_TYPES[2]) && (
           <div className={styles.row} ref={topScrollClipArtRef}>
             <Card
               className={cn(styles.card, styles.clipArtCard)}
-              title="3. Clipart cần Scale"
+              title={
+                briefType === BRIEF_TYPES[1]
+                  ? "3. Clipart cần Scale"
+                  : "3. Giữ / Đổi Clipart"
+              }
               classTitle="title-green"
               classCardHead={styles.classCardHead}
               classSpanTitle={styles.classScaleSpanTitle}
               head={
-                <Text>
-                  {!isEmpty(selectedClipArts) ? (
-                    <span>
-                      {selectedClipArts.length} Clipart đã chọn
-                      <span
-                        style={{
-                          marginLeft: "10px",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => setClipArts(selectedClipArts)}
-                      >
-                        <Tooltip label="Show Selected Clipart">
-                          <IconSelector />
-                        </Tooltip>
+                <div>
+                  <Text>
+                    {!isEmpty(selectedClipArts) ? (
+                      <span>
+                        {selectedClipArts.length} Clipart đã chọn
+                        <span
+                          style={{
+                            marginLeft: "10px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => setClipArts(selectedClipArts)}
+                        >
+                          <Tooltip label="Show Selected Clipart">
+                            <IconSelector />
+                          </Tooltip>
+                        </span>
+                        <span
+                          style={{
+                            marginLeft: "10px",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => setSelectedClipArts([])}
+                        >
+                          <Tooltip label="Deselect">
+                            <IconDeselect />
+                          </Tooltip>
+                        </span>
                       </span>
-                      <span
-                        style={{
-                          marginLeft: "10px",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => setSelectedClipArts([])}
-                      >
-                        <Tooltip label="Deselect">
-                          <IconDeselect />
-                        </Tooltip>
-                      </span>
-                    </span>
-                  ) : null}
-                </Text>
+                    ) : null}
+                  </Text>
+                </div>
               }
+            >
+              <div>
+                {briefType === BRIEF_TYPES[2] && (
+                  <Dropdown
+                    className={styles.dropdown}
+                    classDropdownHead={styles.dropdownHead}
+                    value={isKeepClipArt}
+                    setValue={setKeepClipArt}
+                    options={KEEP_CLIPARTS}
+                    classOutSideClick={styles.keepClipArtLayout}
+                  />
+                )}
+              </div>
+              {(isKeepClipArt === KEEP_CLIPARTS[1] ||
+                briefType === BRIEF_TYPES[1]) && (
+                <>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      padding: "10px 5px",
+                      gap: "10px",
+                      flexWrap: "wrap-reverse",
+                      backgroundColor: "#EFF0F1",
+                      borderRadius: "10px",
+                    }}
+                  >
+                    <Flex
+                      style={{
+                        gap: "8px",
+                        padding: "10px",
+                        borderRadius: "10px",
+                        backgroundColor: "#EFF0F1",
+                      }}
+                    >
+                      <MantineTextInput
+                        placeholder="Clipart Name / Niche / Note / ..."
+                        size="sm"
+                        leftSection={
+                          <span
+                            onClick={() => {
+                              setSearchClipArt(searchClipArt);
+                            }}
+                            style={{
+                              cursor: "pointer",
+                            }}
+                          >
+                            <IconSearch size={16} />
+                          </span>
+                        }
+                        styles={{
+                          input: {
+                            width: "300px",
+                          },
+                        }}
+                        value={searchClipArt}
+                        onChange={(e) => setSearchClipArt(e.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter") {
+                            fetchClipArts(pagination.currentPage);
+                          }
+                        }}
+                      />
+                    </Flex>
+                    <Flex
+                      style={{
+                        gap: "8px",
+                        padding: "10px",
+                        borderRadius: "10px",
+                      }}
+                    >
+                      {map(filtersClipArt, (filter, index) => (
+                        <MultiSelect
+                          key={index}
+                          placeholder={filter.name}
+                          data={filter.value}
+                          styles={{
+                            input: {
+                              width: "150px",
+                            },
+                          }}
+                          value={query[filter.name]}
+                          onChange={(value) =>
+                            setQuery({ ...query, [filter.name]: value })
+                          }
+                          clearable
+                          onClear={() => {
+                            setQuery({
+                              ...query,
+                              [filter.key]: null,
+                            });
+                          }}
+                        />
+                      ))}
+                      <Button
+                        onClick={() => {
+                          const queryKeys = keys(query);
+                          const transformedQuery = map(queryKeys, (key) => ({
+                            [key]: [],
+                          }));
+                          setQuery(merge({}, ...transformedQuery));
+                          setSearchClipArt("");
+                        }}
+                      >
+                        <IconFilterOff />
+                      </Button>
+                    </Flex>
+                  </div>
+
+                  <ScrollArea
+                    h={800}
+                    scrollbars="y"
+                    scrollbarSize={4}
+                    scrollHideDelay={1000}
+                  >
+                    <LoadingOverlay
+                      visible={fetchClipArtsLoading}
+                      zIndex={1000}
+                      overlayProps={{ radius: "sm", blur: 2 }}
+                    />
+                    <Grid
+                      style={{
+                        marginTop: "10px",
+                      }}
+                      columns={12}
+                    >
+                      {map(clipArts, (clipArt, index) => (
+                        <Grid.Col
+                          span={{ sm: 4, md: 3, lg: 2 }}
+                          key={index}
+                          style={{
+                            position: "relative",
+                          }}
+                          onClick={() => {
+                            if (briefType === BRIEF_TYPES[1]) {
+                              if (
+                                includes(
+                                  map(selectedClipArts, "name"),
+                                  clipArt.name
+                                )
+                              ) {
+                                setSelectedClipArts(
+                                  selectedClipArts.filter(
+                                    (x) => x.name !== clipArt.name
+                                  )
+                                );
+                              } else {
+                                setSelectedClipArts((selectedClipArts) => [
+                                  ...selectedClipArts,
+                                  clipArt,
+                                ]);
+                              }
+                            } else if (briefType === BRIEF_TYPES[2]) {
+                              setSelectedClipArts([clipArt]);
+                            }
+                          }}
+                        >
+                          <MantineCard
+                            shadow="sm"
+                            padding="sm"
+                            style={{
+                              cursor: "pointer",
+                            }}
+                          >
+                            <MantineCard.Section>
+                              <LazyLoad height={200} once={true}>
+                                <Image
+                                  src={
+                                    clipArt.imageSrc ||
+                                    "/images/content/not_found_2.jpg"
+                                  }
+                                  h={200}
+                                  alt="No way!"
+                                  fit="contain"
+                                />
+                              </LazyLoad>
+                            </MantineCard.Section>
+                            <Text
+                              fw={500}
+                              size="sm"
+                              mt="md"
+                              style={{
+                                display: "inline-block",
+                                width: "200px",
+                                whiteSpace: "nowrap",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                textDecoration: "none",
+                                verticalAlign: "middle",
+                              }}
+                            >
+                              {clipArt.name}
+                            </Text>
+                          </MantineCard>
+                          {includes(
+                            map(selectedClipArts, "name"),
+                            clipArt.name
+                          ) && (
+                            <>
+                              <div
+                                style={{
+                                  padding: "5px",
+                                  position: "absolute",
+                                  top: "15px",
+                                  right: "13px",
+                                  borderRadius: "50%",
+                                  backgroundColor: "#64CD73",
+                                  zIndex: 2,
+                                }}
+                              >
+                                <IconCheck color="#ffffff" />
+                              </div>
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: "9px",
+                                  right: "0",
+                                  height: "94%",
+                                  width: "99%",
+                                  cursor: "pointer",
+                                  padding: "10px",
+                                  borderRadius: "10px",
+                                  backgroundColor: "rgba(244, 252, 243,0.5)",
+                                  zIndex: 1,
+                                }}
+                              ></div>
+                            </>
+                          )}
+                        </Grid.Col>
+                      ))}
+                    </Grid>
+                  </ScrollArea>
+                  <Pagination
+                    total={pagination.totalPages}
+                    page={pagination.currentPage}
+                    onChange={handlePageChange}
+                    color="pink"
+                    size="md"
+                    style={{ marginTop: "20px", marginLeft: "auto" }}
+                  />
+                </>
+              )}
+            </Card>
+          </div>
+        )}
+        {briefType === BRIEF_TYPES[2] && (
+          <div className={styles.row} ref={topScrollClipArtRef}>
+            <Card
+              className={cn(styles.card, styles.clipArtCard)}
+              title="4. Chọn Quote"
+              classTitle="title-green"
+              classCardHead={styles.classCardHead}
+              classSpanTitle={styles.classScaleSpanTitle}
             >
               <div
                 style={{
@@ -886,12 +1247,14 @@ const NewCampaigns = () => {
                   }}
                 >
                   <MantineTextInput
-                    placeholder="Clipart Name / Niche / Note / ..."
+                    placeholder="Name ..."
                     size="sm"
                     leftSection={
                       <span
                         onClick={() => {
-                          setSearchClipArt(searchClipArt);
+                          setQueryQuote({
+                            name: searchNameQuote,
+                          });
                         }}
                         style={{
                           cursor: "pointer",
@@ -905,53 +1268,54 @@ const NewCampaigns = () => {
                         width: "300px",
                       },
                     }}
-                    value={searchClipArt}
-                    onChange={(e) => setSearchClipArt(e.target.value)}
+                    value={searchNameQuote}
+                    onChange={(e) => setSearchNameQuote(e.target.value)}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
-                        fetchClipArts(pagination.currentPage);
+                        setQueryQuote({
+                          name: searchNameQuote,
+                        });
                       }
                     }}
                   />
-                </Flex>
-                <Flex
-                  style={{
-                    gap: "8px",
-                    padding: "10px",
-                    borderRadius: "10px",
-                  }}
-                >
-                  {map(filtersClipArt, (filter, index) => (
-                    <MultiSelect
-                      key={index}
-                      placeholder={filter.name}
-                      data={filter.value}
-                      styles={{
-                        input: {
-                          width: "150px",
-                        },
-                      }}
-                      value={query[filter.name]}
-                      onChange={(value) =>
-                        setQuery({ ...query, [filter.name]: value })
-                      }
-                      clearable
-                      onClear={() => {
-                        setQuery({
-                          ...query,
-                          [filter.key]: null,
+                  <MantineTextInput
+                    placeholder="Keyword ..."
+                    size="sm"
+                    leftSection={
+                      <span
+                        onClick={() => {
+                          setQueryQuote({
+                            keyword: searchKeywordQuote,
+                          });
+                        }}
+                        style={{
+                          cursor: "pointer",
+                        }}
+                      >
+                        <IconSearch size={16} />
+                      </span>
+                    }
+                    styles={{
+                      input: {
+                        width: "300px",
+                      },
+                    }}
+                    value={searchKeywordQuote}
+                    onChange={(e) => setSearchKeywordQuote(e.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        setQueryQuote({
+                          keyword: searchKeywordQuote,
                         });
-                      }}
-                    />
-                  ))}
+                      }
+                    }}
+                  />
                   <Button
                     onClick={() => {
-                      const queryKeys = keys(query);
-                      const transformedQuery = map(queryKeys, (key) => ({
-                        [key]: [],
-                      }));
-                      setQuery(merge({}, ...transformedQuery));
-                      setSearchClipArt("");
+                      setQueryQuote({
+                        name: "",
+                        keyword: "",
+                      });
                     }}
                   >
                     <IconFilterOff />
@@ -959,13 +1323,13 @@ const NewCampaigns = () => {
                 </Flex>
               </div>
               <ScrollArea
-                h={800}
+                h={500}
                 scrollbars="y"
                 scrollbarSize={4}
                 scrollHideDelay={1000}
               >
                 <LoadingOverlay
-                  visible={fetchClipArtsLoading}
+                  visible={loadingQuotes}
                   zIndex={1000}
                   overlayProps={{ radius: "sm", blur: 2 }}
                 />
@@ -975,26 +1339,22 @@ const NewCampaigns = () => {
                   }}
                   columns={12}
                 >
-                  {map(clipArts, (clipArt, index) => (
+                  {map(quotes, (quote, index) => (
                     <Grid.Col
-                      span={{ sm: 4, md: 3, lg: 2 }}
+                      span={{ sm: 5, md: 4, lg: 3 }}
                       key={index}
                       style={{
                         position: "relative",
                       }}
                       onClick={() => {
-                        if (
-                          includes(map(selectedClipArts, "name"), clipArt.name)
-                        ) {
-                          setSelectedClipArts(
-                            selectedClipArts.filter(
-                              (x) => x.name !== clipArt.name
-                            )
+                        if (includes(map(selectedQuotes, "uid"), quote.uid)) {
+                          setSelectedQuotes(
+                            selectedQuotes.filter((x) => x.uid !== quote.uid)
                           );
                         } else {
-                          setSelectedClipArts((selectedClipArts) => [
-                            ...selectedClipArts,
-                            clipArt,
+                          setSelectedQuotes((selectedQuotes) => [
+                            ...selectedQuotes,
+                            quote,
                           ]);
                         }
                       }}
@@ -1007,39 +1367,19 @@ const NewCampaigns = () => {
                         }}
                       >
                         <MantineCard.Section>
-                          <LazyLoad height={200} once={true}>
-                            <Image
-                              src={
-                                clipArt.imageSrc ||
-                                "/images/content/not_found_2.jpg"
-                              }
-                              h={200}
-                              alt="No way!"
-                              fit="contain"
-                            />
-                          </LazyLoad>
+                          <div
+                            style={{
+                              cursor: "pointer",
+                              width: "100%",
+                              height: "200px",
+                              padding: "10px",
+                            }}
+                          >
+                            {quote.quote}
+                          </div>
                         </MantineCard.Section>
-                        <Text
-                          fw={500}
-                          size="sm"
-                          mt="md"
-                          style={{
-                            display: "inline-block",
-                            width: "200px",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            textDecoration: "none",
-                            verticalAlign: "middle",
-                          }}
-                        >
-                          {clipArt.name}
-                        </Text>
                       </MantineCard>
-                      {includes(
-                        map(selectedClipArts, "name"),
-                        clipArt.name
-                      ) && (
+                      {includes(map(selectedQuotes, "uid"), quote.uid) && (
                         <>
                           <div
                             style={{
@@ -1075,9 +1415,9 @@ const NewCampaigns = () => {
                 </Grid>
               </ScrollArea>
               <Pagination
-                total={pagination.totalPages}
-                page={pagination.currentPage}
-                onChange={handlePageChange}
+                total={quotePagination.totalPages}
+                page={quotePagination.currentPage}
+                onChange={handlePageQuoteChange}
                 color="pink"
                 size="md"
                 style={{ marginTop: "20px", marginLeft: "auto" }}
@@ -1088,7 +1428,7 @@ const NewCampaigns = () => {
         <div className={styles.row}>
           <Card
             className={cn(styles.cardNote)}
-            title="4. Note"
+            title={briefType !== BRIEF_TYPES[2] ? "4. Note" : "5. Note"}
             classTitle="title-green"
             classCardHead={styles.classCardHead}
             classSpanTitle={styles.classScaleSpanTitle}
@@ -1131,11 +1471,34 @@ const NewCampaigns = () => {
                     }
                     if (
                       isEmpty(selectedProductLines) &&
+                      isEmpty(selectedClipArts) &&
+                      isEmpty(selectedQuotes)
+                    ) {
+                      showNotification(
+                        "Thất bại",
+                        "Vui lòng chọn Product Line hoặc Clipart hoặc Quote",
+                        "red"
+                      );
+                      return;
+                    }
+                    if (
+                      isKeepClipArt === KEEP_CLIPARTS[1] &&
                       isEmpty(selectedClipArts)
                     ) {
                       showNotification(
                         "Thất bại",
-                        "Vui lòng chọn Product Line hoặc Clipart",
+                        "Vui lòng chọn Clipart",
+                        "red"
+                      );
+                      return;
+                    }
+                    if (
+                      briefType === BRIEF_TYPES[2] &&
+                      isEmpty(selectedQuotes)
+                    ) {
+                      showNotification(
+                        "Thất bại",
+                        "Vui lòng chọn Quote",
                         "red"
                       );
                       return;
@@ -1278,10 +1641,13 @@ const NewCampaigns = () => {
                   collections: validCollections,
                   rndSortName: find(users, { name: rndMember })?.shortName,
                   selectedClipArts,
+                  selectedQuotes,
                 })}
-                headers={generateHeaderTable(briefType)?.headers}
+                headers={generateHeaderTable(briefType, isKeepClipArt)?.headers}
                 onRemove={handleRemoveRow}
-                headerRemove={generateHeaderTable(briefType)?.removeHeader}
+                headerRemove={
+                  generateHeaderTable(briefType, isKeepClipArt)?.removeHeader
+                }
               />
             </ScrollArea>
           </Grid.Col>

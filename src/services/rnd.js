@@ -284,4 +284,27 @@ export const rndServices = {
       return false;
     }
   },
+  fetchQuotes: async ({ page, limit, query }) => {
+    try {
+      let url = `${hostAPI}/quotes?page=${page}&pageSize=${limit}`;
+      if (!isEmpty(query)) {
+        const queryString = `filter=${encodeURIComponent(
+          JSON.stringify({
+            ...(query.name && { name: query.name }),
+            ...(query.keyword && { keyword: query.keyword }),
+          })
+        )}`;
+        url = `${url}&${queryString}`;
+      }
+      const response = await axios.get(url);
+      const { data: result } = response;
+      if (result?.success === false) {
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at fetchQuotes:", error);
+      return false;
+    }
+  },
 };

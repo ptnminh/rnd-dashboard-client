@@ -31,6 +31,7 @@ import {
 import { rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
 import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
+import { BRIEF_TYPES } from "../../constant";
 
 const DesignerScreens = () => {
   const navigate = useNavigate();
@@ -479,7 +480,7 @@ const DesignerScreens = () => {
                   marginTop: "10px",
                 }}
               >
-                SKU mới
+                {selectedSKU?.sku} mới
               </div>
               <List
                 spacing="lg"
@@ -494,7 +495,10 @@ const DesignerScreens = () => {
                 }
               >
                 <List.Item>
-                  Product Base:{" "}
+                  {selectedSKU?.briefType === BRIEF_TYPES[0]
+                    ? "Product Base"
+                    : "ClipArt"}
+                  :{" "}
                   <span>
                     {
                       selectedSKU?.[

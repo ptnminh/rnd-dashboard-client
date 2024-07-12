@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styles from "./Table.module.sass";
 import Row from "./Row";
-import { map } from "lodash";
+import { filter, map } from "lodash";
 
 const Table = ({
   items,
@@ -24,11 +24,14 @@ const Table = ({
     <div className={styles.wrapper}>
       <div className={styles.table}>
         <div className={styles.row}>
-          {map(headers, (x, index) => (
-            <div className={styles.col} key={index}>
-              {x}
-            </div>
-          ))}
+          {map(
+            filter(headers, (header) => header !== "uid"),
+            (x, index) => (
+              <div className={styles.col} key={index}>
+                {x}
+              </div>
+            )
+          )}
         </div>
         {items.map((x, index) => (
           <Row
