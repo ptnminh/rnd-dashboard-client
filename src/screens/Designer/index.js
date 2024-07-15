@@ -390,7 +390,7 @@ const DesignerScreens = () => {
                     </a>
                   </List.Item>
                 )}
-                {selectedSKU?.linkDesign && (
+                {selectedSKU?.designLinkRef && (
                   <List.Item>
                     Link Design:{" "}
                     <a
@@ -404,10 +404,10 @@ const DesignerScreens = () => {
                         color: "#228be6",
                         verticalAlign: "middle",
                       }}
-                      href={selectedSKU?.linkDesign}
+                      href={selectedSKU?.designLinkRef}
                       target="_blank"
                     >
-                      {selectedSKU?.linkDesign}
+                      {selectedSKU?.designLinkRef}
                     </a>
                   </List.Item>
                 )}
