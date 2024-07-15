@@ -450,15 +450,15 @@ export const ProductLine = () => {
     const { data } = await rndServices.getCollections({
       limit: -1,
     });
-    setCollections(data);
-    setSelectedCollection(data[0]);
+    setCollections(data || []);
+    setSelectedCollection(!isEmpty(data) ? data[0] : {});
   };
   const fetchLayouts = async () => {
     const { data } = await rndServices.getLayouts({
       limit: -1,
     });
-    setLayouts(data);
-    setSelectedLayout(data[0]);
+    setLayouts(data || []);
+    setSelectedLayout(!isEmpty(data) ? data[0] : {});
   };
   const fetchProductLines = async (page) => {
     setProductLinesLoading(true);

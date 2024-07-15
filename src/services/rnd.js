@@ -36,7 +36,7 @@ export const rndServices = {
       const response = await axios.get(url);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification("Thất bại", "Không tìm thấy collection", "red");
+        // showNotification("Thất bại", "Không tìm thấy collection", "red");
         return false;
       }
       return result;
@@ -409,7 +409,7 @@ export const rndServices = {
       const response = await axios.get(url);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification("Thất bại", "Không tìm thấy layout", "red");
+        // showNotification("Thất bại", "Không tìm thấy layout", "red");
         return false;
       }
       return result;
