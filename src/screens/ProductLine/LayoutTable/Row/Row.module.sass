@@ -22,13 +22,13 @@
                     background: $n8
     &:last-child
         .col:after
-            // display: none
+            display: none
     &.active
         &:hover
             background: none
         .col
             &:not(:first-child):not(:nth-child(2))
-                // display: none
+                display: none
             &:nth-child(2)
                 &:after
                     right: 12px
@@ -73,14 +73,21 @@
         height: 1px
         background: $n3
         +t
-            // display: none
+            display: none
         +dark
             background: $n6
-    
+    // &:first-child
+    //     width: 56px
+    //     border-radius: 8px 0 0 8px
+    //     font-size: 0
+    //     +t
+    //         display: none
+    //     &:after
+    //         left: 12px
     &:last-child
         border-radius: 0 8px 8px 0
-        &:after
-            right: 12px
+        // &:after
+        //     right: 12px
     &:nth-child(5)
         +t
             margin-left: auto
@@ -90,7 +97,7 @@
     &:nth-child(6),
     &:nth-child(7)
         +t
-            // display: none
+            display: none
 
 .item
     display: flex
@@ -100,7 +107,7 @@
     &:hover
         color: $p1
     .email
-        // display: none
+        display: none
         +t
             display: block
             font-size: 13px
@@ -127,7 +134,7 @@
     +caption1
     color: $n4
     +t
-        // display: none
+        display: none
     +dark
         color: $shades1
 
@@ -137,7 +144,7 @@
 
 .col > .email
     +t
-        // display: none
+        display: none
 
 .lifetime
     display: inline-flex

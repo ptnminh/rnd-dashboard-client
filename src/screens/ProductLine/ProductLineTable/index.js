@@ -1,22 +1,21 @@
 import React from "react";
 import styles from "./Table.module.sass";
 import cn from "classnames";
-import Checkbox from "../../../components/Checkbox";
 import Row from "./Row";
 
-import { includes, isEmpty, map } from "lodash";
+import { includes, map } from "lodash";
 
 const Table = ({
   className,
   activeTable,
-  collections,
+  productLines,
   selectedFilters,
-  handleSelectAllCollections,
   handleChangeCollection,
   handleSelectCollection,
   selectedCollection,
   collectionName,
   setCollectionName,
+  openModalConfirmDeleteProductLine,
 }) => {
   return (
     <div className={cn(styles.wrapper, className)}>
@@ -24,16 +23,17 @@ const Table = ({
         <div className={cn(styles.row, { [styles.active]: activeTable })}>
           <div className={styles.col}>Product Base</div>
         </div>
-        {map(collections, (x, index) => (
+        {map(productLines, (x, index) => (
           <Row
             item={x}
             key={index}
-            value={includes(selectedFilters, x.name)}
-            onChange={() => handleChangeCollection(x.name)}
             handleClick={handleSelectCollection}
             selectedCollection={selectedCollection}
             collectionName={collectionName}
             setCollectionName={(value) => setCollectionName(value)}
+            openModalConfirmDeleteProductLine={
+              openModalConfirmDeleteProductLine
+            }
           />
         ))}
       </div>

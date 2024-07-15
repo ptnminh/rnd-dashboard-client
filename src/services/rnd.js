@@ -46,6 +46,21 @@ export const rndServices = {
       return false;
     }
   },
+  deleteCollection: async (uid) => {
+    try {
+      const response = await axios.delete(`${hostAPI}/collections/${uid}`);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Xóa collection thất bại", "red");
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log("Error at deleteCollection:", error);
+      showNotification("Thất bại", "Xóa collection thất bại", "red");
+      return false;
+    }
+  },
   getAllProducts: async ({ page, limit, search, isTakeAll }) => {
     try {
       let query = "";
@@ -201,6 +216,7 @@ export const rndServices = {
       return false;
     }
   },
+
   updateBrief: async ({ uid, data }) => {
     try {
       const response = await axios.put(`${hostAPI}/briefs/${uid}`, data);
@@ -306,6 +322,134 @@ export const rndServices = {
       return result;
     } catch (error) {
       console.log("Error at fetchQuotes:", error);
+      return false;
+    }
+  },
+  fetchProductLines: async ({ page, limit, query }) => {
+    try {
+      let url = `${hostAPI}/product-lines?page=${page}&pageSize=${limit}`;
+      const queryKeys = keys(query);
+      const transformedQuery = filter(queryKeys, (key) => query[key]);
+      if (!isEmpty(transformedQuery)) {
+        const queryString = `filter=${encodeURIComponent(
+          JSON.stringify({
+            ...(query.name && { name: query.name }),
+            ...(query.keyword && { keyword: query.keyword }),
+          })
+        )}`;
+        url = `${url}&${queryString}`;
+      }
+      const response = await axios.get(url);
+      const { data: result } = response;
+      if (result?.success === false) {
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at fetchProductLines:", error);
+      return false;
+    }
+  },
+  createCollection: async (data) => {
+    try {
+      const response = await axios.post(`${hostAPI}/collections`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Tạo collection thất bại", "red");
+        return false;
+      }
+      showNotification("Thành công", "Tạo collection thành công", "green");
+      return result;
+    } catch (error) {
+      console.log("Error at createCollection:", error);
+      showNotification("Thất bại", "Tạo collection thất bại", "red");
+      return false;
+    }
+  },
+  updateCollection: async (data) => {
+    try {
+      const response = await axios.post(`${hostAPI}/collections`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Cập nhật collection thất bại", "red");
+        return false;
+      }
+      showNotification("Thành công", "Cập nhật collection thành công", "green");
+      return result;
+    } catch (error) {
+      console.log("Error at updateCollection:", error);
+      showNotification("Thất bại", "Cập nhật collection thất bại", "red");
+      return false;
+    }
+  },
+  getLayouts: async ({ page, limit }) => {
+    try {
+      let query = "";
+      if (limit) {
+        query = `pageSize=${limit}`;
+      }
+      if (page) {
+        query = `${query}&page=${page}`;
+      }
+
+      const url = query ? `${hostAPI}/layouts?${query}` : `${hostAPI}/layouts`;
+      const response = await axios.get(url);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Không tìm thấy layout", "red");
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at getLayouts:", error);
+      showNotification("Thất bại", "Không tìm thấy layout", "red");
+      return false;
+    }
+  },
+  createLayout: async (data) => {
+    try {
+      const response = await axios.post(`${hostAPI}/layouts`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Tạo layout thất bại", "red");
+        return false;
+      }
+      showNotification("Thành công", "Tạo layout thành công", "green");
+      return result;
+    } catch (error) {
+      console.log("Error at createLayout:", error);
+      showNotification("Thất bại", "Tạo layout thất bại", "red");
+      return false;
+    }
+  },
+  updateLayout: async (data) => {
+    try {
+      const response = await axios.post(`${hostAPI}/layouts`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Cập nhật layout thất bại", "red");
+        return false;
+      }
+      showNotification("Thành công", "Cập nhật layout thành công", "green");
+      return result;
+    } catch (error) {
+      console.log("Error at updateLayout:", error);
+      showNotification("Thất bại", "Cập nhật layout thất bại", "red");
+      return false;
+    }
+  },
+  deleteLayout: async (uid) => {
+    try {
+      const response = await axios.delete(`${hostAPI}/layouts/${uid}`);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Xóa layout thất bại", "red");
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log("Error at deleteLayout:", error);
+      showNotification("Thất bại", "Xóa layout thất bại", "red");
       return false;
     }
   },
