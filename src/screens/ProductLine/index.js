@@ -439,9 +439,13 @@ export const ProductLine = () => {
     setActiveStep((current) => (current > 0 ? current - 1 : current));
   const handleSelectCollection = (name) => {
     setSelectedCollection(find(collections, { name }));
+    setActiveStep(0);
+    setActiveChooseProductBaseStep(0);
   };
   const handleSelectLayout = (name) => {
     setSelectedLayout(find(layouts, { name }));
+    setActiveStep(0);
+    setActiveChooseProductBaseStep(0);
   };
   const handleSelectAllCollections = () => {};
   const handleChangeCollection = () => {};
@@ -685,6 +689,7 @@ export const ProductLine = () => {
     } else {
       setEditCollection(false);
     }
+    fetchProductLines(1);
   }, [activeTab]);
   const handlePageChange = (page) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
