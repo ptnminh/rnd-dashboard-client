@@ -84,6 +84,7 @@ const Row = ({
               >
                 <span
                   onClick={() => {
+                    setEditCollectionName(item.name);
                     setEditCollection(!editCollection);
                   }}
                 >
