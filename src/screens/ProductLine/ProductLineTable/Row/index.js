@@ -2,6 +2,7 @@ import React from "react";
 import styles from "./Row.module.sass";
 import cn from "classnames";
 import Icon from "../../../../components/Icon";
+import { Image } from "@mantine/core";
 
 const Row = ({
   item,
@@ -24,6 +25,16 @@ const Row = ({
               <div className={styles.user}>{item.name}</div>
             </div>
           </div>
+        </div>
+        <div className={styles.col}>
+          <Image
+            src={
+              item.imageSrc || item.image || "/images/content/not_found_2.jpg"
+            }
+            height={50}
+            width={50}
+            fit="contain"
+          />
         </div>
         <div
           className={styles.col}
