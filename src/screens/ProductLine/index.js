@@ -1010,6 +1010,7 @@ export const ProductLine = () => {
                             <Image
                               src={
                                 productLine.imageSrc ||
+                                productLine?.image ||
                                 "/images/content/not_found_2.jpg"
                               }
                               h={200}
@@ -1474,6 +1475,8 @@ export const ProductLine = () => {
                           <Image
                             src={
                               productLine.imageSrc ||
+                              productLine?.image ||
+                              productLine.image ||
                               "/images/content/not_found_2.jpg"
                             }
                             h={200}
@@ -1697,6 +1700,7 @@ export const ProductLine = () => {
                             <Image
                               src={
                                 productLine.imageSrc ||
+                                productLine?.image ||
                                 "/images/content/not_found_2.jpg"
                               }
                               h={200}
@@ -1808,6 +1812,7 @@ export const ProductLine = () => {
                           <Image
                             src={
                               productLine.imageSrc ||
+                              productLine?.image ||
                               "/images/content/not_found_2.jpg"
                             }
                             h={200}
