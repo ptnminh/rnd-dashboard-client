@@ -497,6 +497,10 @@ export const ProductLine = () => {
     setQueryProductLines({});
     setCollectionName("");
     setActiveStep(0);
+    setPagination({
+      currentPage: 1,
+      totalPages: 1,
+    });
     close();
   };
   const handleCreateLayout = async () => {
@@ -514,6 +518,10 @@ export const ProductLine = () => {
     setQueryProductLines({});
     setSelectedProductLines([]);
     setLayoutName("");
+    setPagination({
+      currentPage: 1,
+      totalPages: 1,
+    });
     setActiveStep(0);
     closeModalLayout();
   };
@@ -532,6 +540,10 @@ export const ProductLine = () => {
     setCreateCollectionsLoading(false);
     setSelectedProductLines([]);
     setActiveChooseProductBaseStep(0);
+    setPagination({
+      currentPage: 1,
+      totalPages: 1,
+    });
     closeModalProductBase();
   };
   const handleAddProductBaseLayout = async () => {
@@ -547,6 +559,10 @@ export const ProductLine = () => {
     setCreateLayoutLoading(false);
     setSelectedProductLines([]);
     setActiveChooseProductBaseStep(0);
+    setPagination({
+      currentPage: 1,
+      totalPages: 1,
+    });
     closeModalProductBase();
   };
   const handleSaveNewCollectionName = async () => {
@@ -923,6 +939,10 @@ export const ProductLine = () => {
                     <Button
                       onClick={() => {
                         setSearchProductLine("");
+                        setPagination({
+                          currentPage: 1,
+                          totalPages: 1,
+                        });
                         setQueryProductLines({
                           keyword: "",
                         });
@@ -1272,6 +1292,10 @@ export const ProductLine = () => {
                     <Button
                       onClick={() => {
                         setSearchProductLine("");
+                        setPagination({
+                          currentPage: 1,
+                          totalPages: 1,
+                        });
                         setQueryProductLines({
                           keyword: "",
                         });
