@@ -328,6 +328,7 @@ const NewCampaigns = () => {
   const [searchClipArt, setSearchClipArt] = useState("");
   const [searchKeywordQuote, setSearchKeywordQuote] = useState("");
   const [searchNameQuote, setSearchNameQuote] = useState("");
+  const [quoteFilters, setQuoteFilters] = useState([]);
   const [query, setQuery] = useState({});
   const topScrollClipArtRef = useRef(null);
   const [pagination, setPagination] = useState({
@@ -344,7 +345,6 @@ const NewCampaigns = () => {
   const [loadingQuotes, setLoadingQuotes] = useState(false);
   const topRef = useRef(null);
   const handleSearchSKU = async () => {
-    console.log(search);
     if (isEmpty(search)) {
       showNotification("Thất bại", "Vui lòng nhập SKU", "red");
       return;
@@ -495,6 +495,10 @@ const NewCampaigns = () => {
     setQuotes(data);
     setQuotePagination(metadata);
   };
+  const fetchQuotesFilter = async () => {
+    const { data } = await rndServices.fetchQuotesFilter();
+    setQuoteFilters(data);
+  };
   const fetchFilters = async () => {
     const { data } = await rndServices.fetchFilters();
     setFiltersClipArt(data);
@@ -529,6 +533,7 @@ const NewCampaigns = () => {
     fetchAllProducts();
     fetchUsers();
     fetchFilters();
+    fetchQuotesFilter();
   }, []);
   useEffect(() => {
     // Update the URL when search or page changes
@@ -1250,7 +1255,7 @@ const NewCampaigns = () => {
                   <Select
                     placeholder="Name ..."
                     size="sm"
-                    data={["Niche"]}
+                    data={quoteFilters?.names || []}
                     styles={{
                       input: {
                         width: "300px",

@@ -325,6 +325,19 @@ export const rndServices = {
       return false;
     }
   },
+  fetchQuotesFilter: async () => {
+    try {
+      const response = await axios.get(`${hostAPI}/quotes/filters`);
+      const { data: result } = response;
+      if (result?.success === false) {
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at fetchQuotesFilter:", error);
+      return false;
+    }
+  },
   fetchProductLines: async ({ page, limit, query }) => {
     try {
       let url = `${hostAPI}/product-lines?page=${page}&pageSize=${limit}`;
