@@ -5,6 +5,7 @@ export const BRIEF_TYPES = [
   "Scale - Product Base",
   "Scale - Clipart",
   "Scale - Niche",
+  "New - Phủ Market",
 ];
 export const BRIEF_VALUES = ["Small", "Medium", "Big"];
 export const RND_SIZES = ["Small", "Medium", "Big"];

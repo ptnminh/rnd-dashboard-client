@@ -51,13 +51,11 @@ import {
   intersection,
   intersectionBy,
   isEmpty,
-  join,
   keys,
   map,
   merge,
   orderBy,
   random,
-  slice,
   sortBy,
   toLower,
   uniq,
@@ -80,6 +78,8 @@ import {
 } from "@tabler/icons-react";
 import LazyLoad from "react-lazyload";
 import { useNavigate } from "react-router";
+import ProductBase from "./ProductBase";
+import RefDesign from "./RefDesign";
 const HoverInfo = ({ image }) => (
   <div className={styles.hoverInfo}>
     <Image radius="md" src={image} />
@@ -177,6 +177,8 @@ const generateTextPreview = (type, layout) => {
       return "Clip Art";
     case BRIEF_TYPES[2]:
       return "Niche";
+    case BRIEF_TYPES[3]:
+      return "New - Phủ Market";
     default:
       return "";
   }
@@ -230,6 +232,30 @@ const generateScaleQuoteTable = ({
     )
   );
 };
+const generateScaleNewDesign = ({
+  designs,
+  rndSortName,
+  selectedProductBases,
+}) => {
+  return compact(
+    map(designs, (x, index) => {
+      const prefix = selectedProductBases[0]?.skuPrefix || "XX";
+      const name = `${prefix}-${rndSortName}${String(random(1, 1000)).padStart(
+        4,
+        "0"
+      )}`;
+      return {
+        No: index + 1,
+        Design: x.imageRef,
+        Clipart: x?.clipart?.imageSrc,
+        SKU: name,
+        Remove: "x",
+        clipartId: x?.clipart?.uid,
+        designLinkRef: x?.designLinkRef,
+      };
+    })
+  );
+};
 
 const generateScaleProductBaseOnBriefType = ({
   type,
@@ -239,6 +265,8 @@ const generateScaleProductBaseOnBriefType = ({
   rndSortName,
   selectedClipArts,
   selectedQuotes,
+  designs,
+  selectedProductBases,
 }) => {
   switch (type) {
     case BRIEF_TYPES[0]:
@@ -260,6 +288,12 @@ const generateScaleProductBaseOnBriefType = ({
         rndSortName,
         SKU,
         selectedClipArts,
+      });
+    case BRIEF_TYPES[3]:
+      return generateScaleNewDesign({
+        designs,
+        rndSortName,
+        selectedProductBases,
       });
     default:
       return [];
@@ -286,6 +320,11 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
         : {
             headers: ["No", "Quote", "Hình", "SKU", "Remove", "uid"],
           };
+    case BRIEF_TYPES[3]:
+      return {
+        headers: ["No", "Design", "Clipart", "SKU", "Remove"],
+        removeHeader: "Design",
+      };
     default:
       return [];
   }
@@ -327,10 +366,11 @@ const NewCampaigns = () => {
   const [clipArts, setClipArts] = useState([]);
   const [searchClipArt, setSearchClipArt] = useState("");
   const [searchKeywordQuote, setSearchKeywordQuote] = useState("");
-  const [searchNameQuote, setSearchNameQuote] = useState("");
+  const [productBases, setProductBases] = useState([]);
   const [quoteFilters, setQuoteFilters] = useState([]);
   const [query, setQuery] = useState({});
   const topScrollClipArtRef = useRef(null);
+  const [designs, setDesigns] = useState([]);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -339,6 +379,13 @@ const NewCampaigns = () => {
     currentPage: 1,
     totalPages: 1,
   });
+  const [productBasePagination, setProductBasePagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+  });
+  const [queryProductBase, setQueryProductBase] = useState({});
+  const [selectedProductBases, setSelectedProductBases] = useState([]);
+  const [loadingProductBase, setLoadingProductBase] = useState(false);
   const [queryQuote, setQueryQuote] = useState({});
   const [quotes, setQuotes] = useState([]);
   const [isKeepClipArt, setKeepClipArt] = useState(KEEP_CLIPARTS[0]);
@@ -381,6 +428,8 @@ const NewCampaigns = () => {
           ? product.sameLayouts
           : filter(newProductLines, (productLine) => productLine.name)
       );
+    } else {
+      setSKU(null);
     }
     setLoadingProductLines(false);
     setLoadingSearchSKU(false);
@@ -405,6 +454,9 @@ const NewCampaigns = () => {
         break;
       case BRIEF_TYPES[2]:
         setSelectedQuotes(filter(selectedQuotes, (x) => x.uid !== name));
+        break;
+      case BRIEF_TYPES[3]:
+        setDesigns(filter(designs, (x) => x.imageRef !== name));
         break;
       default:
         break;
@@ -495,6 +547,27 @@ const NewCampaigns = () => {
     setQuotes(data);
     setQuotePagination(metadata);
   };
+  const fetchProductBases = async (page) => {
+    setLoadingProductBase(true);
+    const { data, metadata } = await rndServices.fetchProductLines({
+      limit: 12,
+      page,
+      query: queryProductBase,
+    });
+    if (isEmpty(data)) {
+      setLoadingProductBase(false);
+      setProductBases([]);
+      setProductBasePagination({
+        currentPage: 1,
+        totalPages: 1,
+      });
+      return;
+    }
+    setLoadingProductBase(false);
+    setProductBases(data || []);
+    setProductBasePagination(metadata);
+    return;
+  };
   const fetchQuotesFilter = async () => {
     const { data } = await rndServices.fetchQuotesFilter();
     setQuoteFilters(data);
@@ -516,17 +589,41 @@ const NewCampaigns = () => {
       }))
     );
   };
+
+  const handleResetState = () => {
+    setSearchClipArt("");
+    setSelectedClipArts([]);
+    setPagination({
+      currentPage: 1,
+      totalPages: 1,
+    });
+    const queryKeys = keys(query);
+    const transformedQuery = map(queryKeys, (key) => ({
+      [key]: [],
+    }));
+    setQuery(merge({}, ...transformedQuery));
+    setSelectedProductLines([]);
+    setProductBases([]);
+  };
+
   useEffect(() => {
     switch (briefType) {
-      case BRIEF_TYPES[0]:
+      case BRIEF_TYPES[0]: {
+        break;
+      }
+      case BRIEF_TYPES[1]: {
         setSelectedProductLines([]);
         break;
-      case BRIEF_TYPES[1]:
-        setSelectedProductLines([]);
+      }
+      case BRIEF_TYPES[3]: {
+        setSKU(null);
+        fetchProductBases(productBasePagination.currentPage);
         break;
+      }
       default:
         break;
     }
+    handleResetState();
   }, [briefType]);
   useEffect(() => {
     fetchCollections();
@@ -658,6 +755,8 @@ const NewCampaigns = () => {
       rndSortName,
       selectedClipArts,
       selectedQuotes,
+      selectedProductBases,
+      designs,
     });
     return data;
   };
@@ -673,9 +772,9 @@ const NewCampaigns = () => {
     const data = map(generatedSKUs, (x) => {
       const { SKU: sku } = x;
       return {
-        skuRef: SKU.sku,
-        linkProductRef: SKU.productLink,
-        imageRef: SKU.image,
+        skuRef: SKU?.sku || "",
+        linkProductRef: SKU?.productLink || "",
+        imageRef: SKU?.image || "",
         sku,
         batch,
         briefType,
@@ -715,6 +814,12 @@ const NewCampaigns = () => {
             }),
         }),
         designLinkRef: SKU?.designLink || "",
+        ...(briefType === BRIEF_TYPES[3] && {
+          productLine: selectedProductBases[0]?.uid,
+          imageRef: x.Design,
+          clipart: x.clipartId || "",
+          designLinkRef: x.designLinkRef,
+        }),
       };
     });
     console.log(data);
@@ -731,6 +836,9 @@ const NewCampaigns = () => {
   const handlePageQuoteChange = (page) => {
     setQuotePagination((prev) => ({ ...prev, currentPage: page }));
   };
+  const handlePageProductBaseChange = (page) => {
+    setProductBasePagination((prev) => ({ ...prev, currentPage: page }));
+  };
 
   useEffect(() => {
     fetchClipArts(pagination.currentPage);
@@ -738,6 +846,9 @@ const NewCampaigns = () => {
   useEffect(() => {
     fetchQuotes(quotePagination.currentPage);
   }, [quotePagination.currentPage, queryQuote]);
+  useEffect(() => {
+    fetchProductBases(productBasePagination.currentPage);
+  }, [productBasePagination.currentPage, queryProductBase]);
   return (
     <>
       <div style={{ position: "relative" }}>
@@ -1423,6 +1534,41 @@ const NewCampaigns = () => {
             </Card>
           </div>
         )}
+        {briefType === BRIEF_TYPES[3] && (
+          <>
+            <div className={styles.row}>
+              <ProductBase
+                productLines={productBases}
+                selectedProductLines={selectedProductBases}
+                setSelectedProductLines={setSelectedProductBases}
+                pagination={productBasePagination}
+                handlePageChange={handlePageProductBaseChange}
+                setQueryProductLines={setQueryProductBase}
+                fetchProductLinesLoading={loadingProductBase}
+              />
+            </div>
+            <div className={styles.row}>
+              <RefDesign
+                designs={designs}
+                setDesigns={setDesigns}
+                clipArts={clipArts}
+                fetchClipArts={fetchClipArts}
+                pagination={pagination}
+                searchClipArt={searchClipArt}
+                setSearchClipArt={setSearchClipArt}
+                filtersClipArt={filtersClipArt}
+                query={query}
+                selectedClipArts={selectedClipArts}
+                setSelectedClipArts={setSelectedClipArts}
+                handlePageChange={handlePageChange}
+                briefType={briefType}
+                BRIEF_TYPES={BRIEF_TYPES}
+                fetchClipArtsLoading={fetchClipArtsLoading}
+                setQuery={setQuery}
+              />
+            </div>
+          </>
+        )}
         <div className={styles.row}>
           <Card
             className={cn(styles.cardNote)}
@@ -1463,14 +1609,16 @@ const NewCampaigns = () => {
                     styles.createButton
                   )}
                   onClick={() => {
-                    if (!SKU) {
+                    if (!SKU && briefType !== BRIEF_TYPES[3]) {
                       showNotification("Thất bại", "Vui lòng chọn SKU", "red");
                       return;
                     }
                     if (
                       isEmpty(selectedProductLines) &&
                       isEmpty(selectedClipArts) &&
-                      isEmpty(selectedQuotes)
+                      isEmpty(selectedQuotes) &&
+                      isEmpty(selectedProductBases) &&
+                      isEmpty(designs)
                     ) {
                       showNotification(
                         "Thất bại",
@@ -1497,6 +1645,18 @@ const NewCampaigns = () => {
                       showNotification(
                         "Thất bại",
                         "Vui lòng chọn Quote",
+                        "red"
+                      );
+                      return;
+                    }
+                    if (
+                      briefType === BRIEF_TYPES[3] &&
+                      isEmpty(selectedProductBases) &&
+                      isEmpty(designs)
+                    ) {
+                      showNotification(
+                        "Thất bại",
+                        "Vui lòng chọn Product Base hoặc Design",
                         "red"
                       );
                       return;
@@ -1573,10 +1733,14 @@ const NewCampaigns = () => {
               >
                 {generateTextPreview(briefType, layout)}
               </Badge>{" "}
-              từ{" "}
-              <Badge size="md" color="pink" style={{ marginLeft: "5px" }}>
-                {SKU?.sku}
-              </Badge>{" "}
+              {SKU?.sku && (
+                <>
+                  từ{" "}
+                  <Badge size="md" color="pink" style={{ marginLeft: "5px" }}>
+                    {SKU?.sku}
+                  </Badge>{" "}
+                </>
+              )}
             </div>
           </Grid.Col>
           <Grid.Col span={12}>
@@ -1600,11 +1764,15 @@ const NewCampaigns = () => {
                 alignItems: "center",
               }}
             >
-              REF
+              {briefType !== BRIEF_TYPES[3] ? "Ref" : "Product Line"}
             </div>
             <Image
               radius="md"
-              src={SKU?.image || "/images/content/not_found_2.jpg"}
+              src={
+                SKU?.image ||
+                selectedProductBases[0]?.imageSrc ||
+                "/images/content/not_found_2.jpg"
+              }
             />
             <div
               style={{
@@ -1616,7 +1784,7 @@ const NewCampaigns = () => {
                 marginTop: "10px",
               }}
             >
-              {SKU?.sku}
+              {SKU?.sku || selectedProductBases[0]?.name}
             </div>
           </Grid.Col>
           <Grid.Col span={8}>
@@ -1640,6 +1808,8 @@ const NewCampaigns = () => {
                   rndSortName: find(users, { name: rndMember })?.shortName,
                   selectedClipArts,
                   selectedQuotes,
+                  designs,
+                  selectedProductBases,
                 })}
                 headers={generateHeaderTable(briefType, isKeepClipArt)?.headers}
                 onRemove={handleRemoveRow}

@@ -38,6 +38,7 @@ import { rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
 import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
 import { BRIEF_TYPES } from "../../constant";
+import NewDesign from "./NewDesign";
 
 const DesignerScreens = () => {
   const navigate = useNavigate();
@@ -247,7 +248,7 @@ const DesignerScreens = () => {
         size="md"
         style={{ marginTop: "20px", marginLeft: "auto" }}
       />
-      {selectedSKU && (
+      {selectedSKU && selectedSKU?.briefType !== BRIEF_TYPES[3] && (
         <Modal
           opened={opened}
           onClose={close}
@@ -330,8 +331,6 @@ const DesignerScreens = () => {
                   display: "flex",
                   justifyContent: "center",
                   padding: "5px",
-                  fontSize: "14px",
-                  padding: "10px",
                   fontSize: "18px",
                   alignItems: "center",
                 }}
@@ -619,6 +618,17 @@ const DesignerScreens = () => {
             </Grid.Col>
           </Grid>
         </Modal>
+      )}
+      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[3] && (
+        <NewDesign
+          opened={opened}
+          close={close}
+          selectedSKU={selectedSKU}
+          linkDesign={linkDesign}
+          loadingUpdateDesignLink={loadingUpdateDesignLink}
+          setLinkDesign={setLinkDesign}
+          handleUpdateLinkDesign={handleUpdateLinkDesign}
+        />
       )}
     </>
   );

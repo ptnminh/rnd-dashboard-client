@@ -11,7 +11,9 @@ const Row = ({ item, headers, onRemove, headerRemove }) => {
           filter(headers, (header) => header !== "uid"),
           (header, index) => (
             <div className={styles.col} key={index}>
-              {header === "Hình" ? (
+              {header === "Hình" ||
+              header === "Design" ||
+              header === "Clipart" ? (
                 <Image
                   src={item[header] || "/images/content/not_found_2.jpg"}
                   style={{ width: "50px" }}

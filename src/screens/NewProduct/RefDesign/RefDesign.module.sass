@@ -1,0 +1,114 @@
+@import ../../../styles/helpers
+
+.row
+    display: flex
+    +t
+        display: block
+
+.col
+    &:first-child
+        flex: 0 0 50%
+        width: 50%
+        padding-right: 8px
+        +d
+            flex: 0 0 calc(100% - 296px)
+            width: calc(100% - 296px)
+        +t
+            width: 100%
+            padding: 0
+    &:nth-child(2)
+        flex-shrink: 0
+        width: 50%
+        +d
+            width: 296px
+        +t
+            width: auto
+
+.card
+    margin-bottom: 8px
+    width: 100%
+    &:not(:last-child)
+        margin-bottom: 8px
+
+.list
+    display: flex
+    flex-wrap: wrap
+    flex-direction: column
+    padding: 8px
+    width: 100%
+    margin: -4px -16px 32px 0
+    +d
+        margin-bottom: 24px
+.checkbox
+    flex: 0 0 calc(33.33% - 16px)
+    width: 100%
+    margin: 16px 16px 0 0
+    +m
+        flex: 0 0 calc(50% - 16px)
+        width: calc(50% - 16px)
+
+.maximumCamp
+    margin-top: 16px
+    padding: 0
+.nav
+    display: flex
+    margin-left: auto
+    +t
+        display: none
+.link
+    padding: 8px 16px
+    border-radius: 8px
+    +base1-s
+    color: $n4
+    transition: all .2s
+    &:hover,
+    &.active
+        color: $n7
+        +dark
+            color: $n1
+    &.active
+        background: $n3
+        +dark
+            background: $n6
+    &:not(:last-child)
+        margin-right: 8px
+
+.classCardHead
+    margin-bottom: 16px
+
+.checkboxChannel
+    flex: 0 0 calc(33.33% - 16px)
+    width: 100%
+    margin: 0 16px 0 0
+    +m
+        flex: 0 0 calc(50% - 16px)
+        width: calc(50% - 16px)
+
+.classScaleSpanTitle
+    background-color: #91DE9E
+    padding: 4px
+    border-radius: 5px
+.memberDropdown
+    width: 40% !important
+    margin-left: auto
+
+.searchCollection
+    width: 100%
+
+.cardNote
+    width: 100%
+
+
+.clipArtCard
+    width: 100%
+
+.keepClipArtLayout
+    width: 10% !important
+    margin-bottom: 16px
+
+.fileUploader
+    max-width: 300px !important
+    min-width: 200px !important
+    margin-bottom: 16px
+    .file-types
+        display: none !important
