@@ -172,20 +172,29 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Cell: ({ row }) => (
-          <Badge
-            color={
-              row?.original?.size?.rnd === 1
-                ? "green"
-                : row?.original?.size?.rnd === 2
-                ? "yellow"
-                : "red"
-            }
-            variant="filled"
-          >
-            {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}
-          </Badge>
-        ),
+        Cell: ({ row }) => {
+          let color = null;
+          switch (row?.original?.value?.rnd) {
+            case 1:
+              color = "red";
+              break;
+            case 3:
+              color = "green";
+              break;
+            case 4:
+              color = "#38761C";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}</span>
+          );
+        },
       },
       {
         accessorKey: "size",
@@ -194,20 +203,23 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Cell: ({ row }) => (
-          <Badge
-            color={
-              row?.original?.value?.rnd === 1
-                ? "green"
-                : row?.original?.value?.rnd === 2
-                ? "yellow"
-                : "red"
-            }
-            variant="filled"
-          >
-            {CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}
-          </Badge>
-        ),
+        Cell: ({ row }) => {
+          let color = null;
+          switch (row?.original?.size?.rnd) {
+            case 1:
+              color = "green";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}</span>
+          );
+        },
       },
       {
         accessorKey: "rndTeam",

@@ -47,12 +47,14 @@ export const CONVERT_STATUS_TO_NUMBER = {
   Small: 1,
   Medium: 2,
   Big: 3,
+  "Super Big": 4,
 };
 
 export const CONVERT_NUMBER_TO_STATUS = {
   1: "Small",
   2: "Medium",
   3: "Big",
+  4: "Super Big",
 };
 
 export const CONVERT_BRIEF_TYPE_TO_OBJECT_NAME = {

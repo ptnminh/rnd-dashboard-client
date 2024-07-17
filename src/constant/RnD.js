@@ -7,7 +7,7 @@ export const BRIEF_TYPES = [
   "Scale - Niche",
   "New - Phủ Market",
 ];
-export const BRIEF_VALUES = ["Small", "Medium", "Big"];
+export const BRIEF_VALUES = ["Small", "Medium", "Big", "Super Big"];
 export const RND_SIZES = ["Small", "Medium", "Big"];
 export const LAYOUT_TYPES = [
   "Product Base - Chung Layout",
