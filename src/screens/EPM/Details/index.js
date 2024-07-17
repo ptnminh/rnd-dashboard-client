@@ -337,7 +337,7 @@ const BriefsTable = ({
       },
       {
         id: "time",
-        accessorFn: (row) => row?.time + "h",
+        accessorFn: (row) => row?.productInfo?.time,
         header: "TIME",
         mantineTableHeadCellProps: { className: classes["head-cells"] },
         enableEditing: false,

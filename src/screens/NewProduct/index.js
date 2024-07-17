@@ -823,8 +823,12 @@ const NewCampaigns = () => {
       };
     });
     console.log(data);
-    await rndServices.createBriefs({ payloads: data });
-    close();
+    const createBriefResponse = await rndServices.createBriefs({
+      payloads: data,
+    });
+    if (createBriefResponse) {
+      close();
+    }
     setCreateBriefLoading(false);
   };
   const handlePageChange = (page) => {
@@ -1651,8 +1655,7 @@ const NewCampaigns = () => {
                     }
                     if (
                       briefType === BRIEF_TYPES[3] &&
-                      isEmpty(selectedProductBases) &&
-                      isEmpty(designs)
+                      (isEmpty(selectedProductBases) || isEmpty(designs))
                     ) {
                       showNotification(
                         "Thất bại",

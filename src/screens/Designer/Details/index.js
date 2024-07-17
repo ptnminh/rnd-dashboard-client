@@ -336,7 +336,7 @@ const KeywordTable = ({
       },
       {
         id: "time",
-        accessorFn: (row) => row?.time + "h",
+        accessorFn: (row) => row?.designInfo?.time,
         header: "TIME",
         enableSorting: true,
         mantineTableHeadCellProps: { className: classes["head-cells"] },

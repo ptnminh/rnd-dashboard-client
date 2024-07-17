@@ -5,7 +5,7 @@ import { filter, isEmpty, keys, map } from "lodash";
 export const rndServices = {
   searchProducts: async (SKU) => {
     try {
-      const response = await axios.get(`${hostAPI}/products/search/${SKU}`);
+      const response = await axios.get(`${hostAPI}/skus/search/${SKU}`);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Không tìm thấy SKU", "red");
@@ -73,9 +73,9 @@ export const rndServices = {
       if (limit) {
         query = `${query}&pageSize=${limit}`;
       }
-      let url = query ? `${hostAPI}/products?${query}` : `${hostAPI}/products`;
+      let url = query ? `${hostAPI}/skus?${query}` : `${hostAPI}/skus`;
       if (isTakeAll) {
-        url = `${hostAPI}/products?pageSize=-1`;
+        url = `${hostAPI}/skus?pageSize=-1`;
       }
       const response = await axios.get(url);
       const { data: result } = response;
@@ -137,7 +137,11 @@ export const rndServices = {
       const response = await axios.post(`${hostAPI}/briefs/create-batch`, data);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification("Thất bại", "Tạo brief thất bại", "red");
+        showNotification(
+          "Thất bại",
+          result?.message || "Tạo brief thất bại",
+          "red"
+        );
         return false;
       }
       showNotification("Thành công", "Tạo brief thành công", "green");

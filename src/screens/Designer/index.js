@@ -3,7 +3,7 @@ import styles from "./TemplateKW.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Details from "./Details";
-import { isEmpty, map } from "lodash";
+import { map } from "lodash";
 
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -37,7 +37,7 @@ import {
 import { rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
 import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
-import { BRIEF_TYPES } from "../../constant";
+import { BRIEF_TYPES, STATUS } from "../../constant";
 import NewDesign from "./NewDesign";
 
 const DesignerScreens = () => {
@@ -166,6 +166,7 @@ const DesignerScreens = () => {
         uid,
         data: {
           linkDesign,
+          status: STATUS.DESIGNED,
         },
       });
       if (updateResponse) {

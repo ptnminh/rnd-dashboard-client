@@ -31,7 +31,7 @@ import {
 import { rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
 import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
-import { BRIEF_TYPES } from "../../constant";
+import { BRIEF_TYPES, STATUS } from "../../constant";
 
 const DesignerScreens = () => {
   const navigate = useNavigate();
@@ -160,6 +160,7 @@ const DesignerScreens = () => {
         uid,
         data: {
           linkProduct,
+          status: STATUS.LISTED,
         },
       });
       if (updateResponse) {
@@ -497,7 +498,7 @@ const DesignerScreens = () => {
                 <List.Item>
                   {selectedSKU?.briefType === BRIEF_TYPES[0]
                     ? "Product Base"
-                    : "ClipArt"}
+                    : "Clipart"}
                   :{" "}
                   <span>
                     {
