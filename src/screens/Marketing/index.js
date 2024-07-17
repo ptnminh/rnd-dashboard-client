@@ -180,7 +180,7 @@ const MKTScreens = () => {
     <>
       <Card
         className={styles.card}
-        title="LISTING TASK"
+        title="MKT TASK"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
         head={

@@ -536,7 +536,15 @@ const NewCampaigns = () => {
   };
   useEffect(() => {
     const rnds = filter(users, { role: "rnd", team: workGroup });
+    const designers = !isEmpty(
+      filter(users, { role: "designer", team: workGroup })
+    )
+      ? filter(users, { role: "designer", team: workGroup })
+      : filter(users, { role: "designer" });
     setRndMember(map(rnds, "name")[0]);
+    setDesignerMember(map(designers, "name")[0]);
+    // const epms = filter(users, { role: "epm", team: workGroup });
+    // setEpmMember(map(epms, "name")[0]);
   }, [workGroup]);
   const fetchQuotes = async (page) => {
     setLoadingQuotes(true);

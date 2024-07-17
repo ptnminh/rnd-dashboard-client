@@ -114,7 +114,14 @@ const CampaignInfo = ({
               classDropdownHead={styles.dropdownHead}
               value={designerMember}
               setValue={setDesignerMember}
-              options={map(filter(users, { role: "designer" }), "name") || []}
+              options={
+                !isEmpty(filter(users, { role: "designer", team: workGroup }))
+                  ? map(
+                      filter(users, { role: "designer", team: workGroup }),
+                      "name"
+                    )
+                  : map(filter(users, { role: "designer" }), "name")
+              }
               classOutSideClick={styles.memberDropdown}
             />{" "}
             <Dropdown
