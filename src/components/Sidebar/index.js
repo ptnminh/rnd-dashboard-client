@@ -36,6 +36,11 @@ const navigation = [
     icon: "diamond",
     url: "/epm",
   },
+  {
+    title: "MKT - Task",
+    icon: "diamond",
+    url: "/mkt",
+  },
   // {
   //   title: "Income",
   //   slug: "income",

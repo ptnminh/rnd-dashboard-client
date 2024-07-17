@@ -27,6 +27,7 @@ import PageList from "./screens/PageList";
 import DesignerScreens from "./screens/Designer";
 import EPMScreens from "./screens/EPM";
 import { ProductLine } from "./screens/ProductLine";
+import MKTScreens from "./screens/Marketing";
 
 function App() {
   return (
@@ -85,6 +86,14 @@ function App() {
           element={
             <Page title="EPM">
               <EPMScreens />
+            </Page>
+          }
+        />
+        <Route
+          path="/mkt"
+          element={
+            <Page title="MKT">
+              <MKTScreens />
             </Page>
           }
         />
