@@ -42,7 +42,7 @@ const GridWithClipArt = ({ selectedSKU }) => {
           src={
             selectedSKU?.productLine?.image || "/images/content/not_found_2.jpg"
           }
-          height={100}
+          height={200}
           fit="contain"
         />
         <div
@@ -119,6 +119,16 @@ const GridWithClipArt = ({ selectedSKU }) => {
           height={200}
           fit="contain"
         />
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "10px",
+            fontSize: "18px",
+            alignItems: "center",
+            marginTop: "20px",
+          }}
+        ></div>
         <List
           spacing="lg"
           size="sm"
@@ -328,6 +338,16 @@ const GridWithNoClipArt = ({ selectedSKU }) => {
           height={200}
           fit="contain"
         />
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "10px",
+            fontSize: "18px",
+            alignItems: "center",
+            marginTop: "20px",
+          }}
+        ></div>
         <List
           spacing="lg"
           size="sm"
