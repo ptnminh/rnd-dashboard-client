@@ -261,7 +261,7 @@ const GridWithNoClipArt = ({ selectedSKU }) => {
           src={
             selectedSKU?.productLine?.image || "/images/content/not_found_2.jpg"
           }
-          height={100}
+          height={200}
           fit="contain"
         />
         <div
