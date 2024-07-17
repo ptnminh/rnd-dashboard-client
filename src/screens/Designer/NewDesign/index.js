@@ -42,7 +42,7 @@ const NewDesign = ({
         blur: 3,
       }}
       radius="md"
-      size="1200px"
+      size="80%"
     >
       <LoadingOverlay
         visible={loadingUpdateDesignLink}
@@ -127,7 +127,7 @@ const NewDesign = ({
               selectedSKU?.productLine?.image ||
               "/images/content/not_found_2.jpg"
             }
-            height={200}
+            height={100}
             fit="contain"
           />
           <div
