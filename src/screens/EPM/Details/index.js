@@ -176,7 +176,10 @@ const BriefsTable = ({
           let color = null;
           switch (row?.original?.value?.rnd) {
             case 1:
-              color = "red";
+              color = "#cfcfcf";
+              break;
+            case 2:
+              color = "yellow";
               break;
             case 3:
               color = "green";
@@ -208,6 +211,12 @@ const BriefsTable = ({
           switch (row?.original?.size?.rnd) {
             case 1:
               color = "green";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "red";
               break;
             default:
               break;
