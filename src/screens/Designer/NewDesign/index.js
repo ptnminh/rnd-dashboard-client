@@ -440,7 +440,7 @@ const NewDesign = ({
               fontSize: "18px",
             }}
           >
-            {selectedSKU?.sku} - {selectedSKU?.batch}
+            SKU: {selectedSKU?.sku} - Batch: {selectedSKU?.batch}
           </div>
           <div
             style={{

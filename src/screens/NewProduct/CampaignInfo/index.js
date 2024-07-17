@@ -102,7 +102,10 @@ const CampaignInfo = ({
               classDropdownHead={styles.dropdownHead}
               value={rndMember}
               setValue={setRndMember}
-              options={map(filter(users, { role: "rnd" }), "name") || []}
+              options={
+                map(filter(users, { role: "rnd", team: workGroup }), "name") ||
+                []
+              }
               classOutSideClick={styles.memberDropdown}
             />{" "}
             <Dropdown

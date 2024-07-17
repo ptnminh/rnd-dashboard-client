@@ -518,19 +518,26 @@ const NewCampaigns = () => {
   };
   const onSubmit = async (data) => {};
   const fetchUsers = async () => {
-    const { data } = await rndServices.getUsers({
+    let { data } = await rndServices.getUsers({
       limit: -1,
     });
+    data = orderBy(data, ["team"], ["asc"]);
     const designers = filter(data, { role: "designer" });
     const rnds = filter(data, { role: "rnd" });
     const epms = filter(data, { role: "epm" });
-    setRndMember(map(rnds, "name")[0]);
+    const teams = compact(uniq(map(data, "team")));
+    const team = teams[0];
+    setWorkGroup(team);
+    setRndMember(map(filter(rnds, { team }), "name")[0]);
     setDesignerMember(map(designers, "name")[0]);
-    setWorkGroup(uniq(map(data, "team"))[0]);
     setEpmMember(map(epms, "name")[0]);
     setUsers(data);
     setTeams(uniq(map(data, "team")));
   };
+  useEffect(() => {
+    const rnds = filter(users, { role: "rnd", team: workGroup });
+    setRndMember(map(rnds, "name")[0]);
+  }, [workGroup]);
   const fetchQuotes = async (page) => {
     setLoadingQuotes(true);
     const { data, metadata } = await rndServices.fetchQuotes({
