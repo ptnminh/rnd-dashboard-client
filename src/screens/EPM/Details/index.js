@@ -579,7 +579,7 @@ const BriefsTable = ({
             />
             <Select
               placeholder="Team"
-              data={["BD1", "BD2", "BD3"]}
+              data={["BD1", "BD2", "BD3", "POD-Biz"]}
               styles={{
                 input: {
                   width: "100px",
