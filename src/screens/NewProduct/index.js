@@ -904,6 +904,7 @@ const NewCampaigns = () => {
     });
     if (createBriefResponse) {
       close();
+      window.location.reload();
     }
     setCreateBriefLoading(false);
   };
