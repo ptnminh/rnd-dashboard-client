@@ -100,11 +100,7 @@ const filterValidCollections = (collections, type, SKU) => {
       includes(map(collection.productLines, "name"), rootProductLine)
     );
   } else if (type === LAYOUT_TYPES[1]) {
-    validCollections = filter(
-      collections,
-      (collection) =>
-        !includes(map(collection.productLines, "name"), rootProductLine)
-    );
+    validCollections = collections;
   }
   return filter(
     map(validCollections, (collection) => {

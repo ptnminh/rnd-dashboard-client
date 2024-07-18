@@ -12,18 +12,7 @@ import {
 import { modals } from "@mantine/modals";
 import Checkbox from "../../../components/Checkbox";
 
-import {
-  compact,
-  filter,
-  find,
-  includes,
-  isEmpty,
-  keys,
-  map,
-  split,
-  sumBy,
-  uniq,
-} from "lodash";
+import { filter, find, includes, isEmpty, keys, map } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
@@ -55,7 +44,6 @@ const KeywordTable = ({
   updateBrief,
   editingCell,
   loadingFetchBrief,
-  setLoadingFetchBrief,
   setTrigger,
   setLinkDesign,
   sorting,
