@@ -766,7 +766,7 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: {sumBy(filter(data, { status: 2 }), "time")}h
+              Time to done: {filter(data, { status: 2 }).length}h
             </div>
           </Flex>
           {editingCell && !isEmpty(updateBrief.linkDesigns) && (
