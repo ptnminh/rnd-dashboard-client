@@ -159,7 +159,7 @@ const generateScaleProductLinesTable = ({
         const prefix = foundProductLine?.skuPrefix || "XX";
         if (!foundProductLine) return null;
         let realRnDAccumulator =
-          find(skuPrefixAccumulators, { prefix })?.accumulator ||
+          find(skuPrefixAccumulators, { prefix })?.accumulator + 1 ||
           currentRnDAccumulator + 1;
         if (prefix !== "XX") {
           let foundPrefixIndex = findIndex(skuPrefixAccumulators, { prefix });
@@ -169,7 +169,7 @@ const generateScaleProductLinesTable = ({
           } else {
             skuPrefixAccumulators.push({
               prefix,
-              accumulator: realRnDAccumulator + 1,
+              accumulator: realRnDAccumulator,
             });
           }
         }
