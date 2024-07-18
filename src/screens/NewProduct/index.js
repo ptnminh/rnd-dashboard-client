@@ -46,6 +46,7 @@ import {
   differenceBy,
   filter,
   find,
+  findIndex,
   flatMap,
   includes,
   intersection,
@@ -55,7 +56,6 @@ import {
   map,
   merge,
   orderBy,
-  random,
   sortBy,
   toLower,
   uniq,
@@ -138,6 +138,7 @@ const generateScaleProductLinesTable = ({
   SKU,
   collections,
   rndSortName,
+  rndId,
 }) => {
   const allProductLines = compact(
     concat(
@@ -146,27 +147,55 @@ const generateScaleProductLinesTable = ({
       flatMap(collections, "validProductLines")
     )
   );
-  return compact(
+  let skuPrefixAccumulators = [];
+  let tables = compact(
     map(
       sortBy(selectedProductLines, (productLine) => toLower(productLine)),
       (x, index) => {
         const foundProductLine = find(allProductLines, { name: x });
+        const skuAccumulators = foundProductLine?.skuAccumulators || [];
+        const currentRnDAccumulator =
+          find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
+        const prefix = foundProductLine?.skuPrefix || "XX";
         if (!foundProductLine) return null;
-        const name = foundProductLine?.skuPrefix
-          ? `${foundProductLine.skuPrefix}-${rndSortName}${String(
-              random(1, 1000)
-            ).padStart(4, "0")}`
-          : `XX-${rndSortName}${String(random(1, 1000)).padStart(4, "0")}`;
+        let realRnDAccumulator =
+          find(skuPrefixAccumulators, { prefix })?.accumulator ||
+          currentRnDAccumulator + 1;
+        if (prefix !== "XX") {
+          let foundPrefixIndex = findIndex(skuPrefixAccumulators, { prefix });
+          if (foundPrefixIndex !== -1) {
+            const foundPrefix = skuPrefixAccumulators[foundPrefixIndex];
+            foundPrefix.accumulator = foundPrefix.accumulator + 1;
+          } else {
+            skuPrefixAccumulators.push({
+              prefix,
+              accumulator: realRnDAccumulator + 1,
+            });
+          }
+        }
+        const name = `${prefix}-${rndSortName}${String(
+          realRnDAccumulator
+        ).padStart(4, "0")}`;
         return {
           No: index + 1,
           "Product Line": foundProductLine?.name,
           Hình: foundProductLine?.image,
           SKU: name,
           Remove: "x",
+          nextAccumulator: realRnDAccumulator,
+          skuPrefix: prefix,
         };
       }
     )
   );
+  return map(tables, (table) => {
+    const { skuPrefix } = table;
+    const foundPrefix = find(skuPrefixAccumulators, { prefix: skuPrefix });
+    return {
+      ...table,
+      nextAccumulator: foundPrefix?.accumulator || table.nextAccumulator,
+    };
+  });
 };
 
 const generateTextPreview = (type, layout) => {
@@ -184,14 +213,23 @@ const generateTextPreview = (type, layout) => {
   }
 };
 
-const generateScaleClipArtTable = ({ SKU, selectedClipArts, rndSortName }) => {
+const generateScaleClipArtTable = ({
+  SKU,
+  selectedClipArts,
+  rndSortName,
+  rndId,
+}) => {
+  const skuAccumulators = SKU?.skuAccumulators || [];
+  const currentRnDAccumulator =
+    find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
   return compact(
     map(
       sortBy(selectedClipArts, (clipArt) => toLower(clipArt.name)),
       (x, index) => {
+        const realRnDAccumulator = currentRnDAccumulator + index + 1;
         const name = `${
           SKU?.skuPrefix ? SKU?.skuPrefix : "XX"
-        }-${rndSortName}${String(random(1, 1000)).padStart(4, "0")}`;
+        }-${rndSortName}${String(realRnDAccumulator).padStart(4, "0")}`;
         return {
           No: index + 1,
           "Clip Art": x.name,
@@ -199,6 +237,8 @@ const generateScaleClipArtTable = ({ SKU, selectedClipArts, rndSortName }) => {
           SKU: name,
           Remove: "x",
           uid: x.uid,
+          nextAccumulator: currentRnDAccumulator + selectedClipArts.length,
+          skuPrefix: SKU?.skuPrefix,
         };
       }
     )
@@ -210,14 +250,19 @@ const generateScaleQuoteTable = ({
   rndSortName,
   SKU,
   selectedClipArts,
+  rndId,
 }) => {
+  const skuAccumulators = SKU?.skuAccumulators || [];
+  const currentRnDAccumulator =
+    find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
   return compact(
     map(
       sortBy(selectedQuotes, (quote) => toLower(quote.name)),
       (x, index) => {
+        const realRnDAccumulator = currentRnDAccumulator + index + 1;
         const name = `${
           SKU?.skuPrefix ? SKU?.skuPrefix : "XX"
-        }-${rndSortName}${String(random(1, 1000)).padStart(4, "0")}`;
+        }-${rndSortName}${String(realRnDAccumulator).padStart(4, "0")}`;
         return {
           No: index + 1,
           Quote: x.quote.slice(0, 50) + (x.quote.length > 50 ? "..." : ""),
@@ -227,6 +272,8 @@ const generateScaleQuoteTable = ({
           SKU: name,
           Remove: "x",
           uid: x.uid,
+          nextAccumulator: currentRnDAccumulator + selectedQuotes.length,
+          skuPrefix: SKU?.skuPrefix,
         };
       }
     )
@@ -236,14 +283,18 @@ const generateScaleNewDesign = ({
   designs,
   rndSortName,
   selectedProductBases,
+  rndId,
 }) => {
+  const prefix = selectedProductBases[0]?.skuPrefix || "XX";
+  const skuAccumulators = selectedProductBases[0]?.skuAccumulators || [];
+  const currentRnDAccumulator =
+    find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
   return compact(
     map(designs, (x, index) => {
-      const prefix = selectedProductBases[0]?.skuPrefix || "XX";
-      const name = `${prefix}-${rndSortName}${String(random(1, 1000)).padStart(
-        4,
-        "0"
-      )}`;
+      const realRnDAccumulator = currentRnDAccumulator + index + 1;
+      const name = `${prefix}-${rndSortName}${String(
+        realRnDAccumulator
+      ).padStart(4, "0")}`;
       return {
         No: index + 1,
         Design: x.imageRef,
@@ -252,6 +303,8 @@ const generateScaleNewDesign = ({
         Remove: "x",
         clipartId: x?.clipart?.uid,
         designLinkRef: x?.designLinkRef,
+        nextAccumulator: currentRnDAccumulator + designs.length,
+        skuPrefix: prefix,
       };
     })
   );
@@ -267,6 +320,7 @@ const generateScaleProductBaseOnBriefType = ({
   selectedQuotes,
   designs,
   selectedProductBases,
+  rndId,
 }) => {
   switch (type) {
     case BRIEF_TYPES[0]:
@@ -275,12 +329,14 @@ const generateScaleProductBaseOnBriefType = ({
         SKU,
         collections,
         rndSortName,
+        rndId,
       });
     case BRIEF_TYPES[1]:
       return generateScaleClipArtTable({
         SKU,
         selectedClipArts,
         rndSortName,
+        rndId,
       });
     case BRIEF_TYPES[2]:
       return generateScaleQuoteTable({
@@ -288,12 +344,14 @@ const generateScaleProductBaseOnBriefType = ({
         rndSortName,
         SKU,
         selectedClipArts,
+        rndId,
       });
     case BRIEF_TYPES[3]:
       return generateScaleNewDesign({
         designs,
         rndSortName,
         selectedProductBases,
+        rndId,
       });
     default:
       return [];
@@ -761,17 +819,18 @@ const NewCampaigns = () => {
   }, [layout]);
 
   const prepareSubmitData = () => {
-    const rndSortName = find(users, { name: rndMember })?.shortName;
+    const rnd = find(users, { name: rndMember });
     const data = generateScaleProductBaseOnBriefType({
       type: briefType,
       selectedProductLines,
       SKU,
       collections: validCollections,
-      rndSortName,
+      rndSortName: rnd?.shortName,
       selectedClipArts,
       selectedQuotes,
       selectedProductBases,
       designs,
+      rndId: rnd?.uid,
     });
     return data;
   };
@@ -785,7 +844,7 @@ const NewCampaigns = () => {
       return;
     }
     const data = map(generatedSKUs, (x) => {
-      const { SKU: sku } = x;
+      const { SKU: sku, nextAccumulator, skuPrefix } = x;
       return {
         skuRef: SKU?.sku || "",
         linkProductRef: SKU?.productLink || "",
@@ -835,6 +894,8 @@ const NewCampaigns = () => {
           clipart: x.clipartId || "",
           designLinkRef: x.designLinkRef,
         }),
+        nextSkuAccumulator: nextAccumulator,
+        ...(skuPrefix && skuPrefix !== "XX" && { skuPrefix }),
       };
     });
     console.log(data);
@@ -1828,6 +1889,7 @@ const NewCampaigns = () => {
                   selectedQuotes,
                   designs,
                   selectedProductBases,
+                  rndId: find(users, { name: rndMember })?.uid,
                 })}
                 headers={generateHeaderTable(briefType, isKeepClipArt)?.headers}
                 onRemove={handleRemoveRow}
