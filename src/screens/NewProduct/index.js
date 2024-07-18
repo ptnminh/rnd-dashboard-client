@@ -75,11 +75,13 @@ import {
   IconCheck,
   IconDeselect,
   IconSelector,
+  IconRotateClockwise,
 } from "@tabler/icons-react";
 import LazyLoad from "react-lazyload";
 import { useNavigate } from "react-router";
 import ProductBase from "./ProductBase";
 import RefDesign from "./RefDesign";
+import Loader from "../../components/Loader";
 const HoverInfo = ({ image }) => (
   <div className={styles.hoverInfo}>
     <Image radius="md" src={image} />
@@ -448,6 +450,7 @@ const NewCampaigns = () => {
   const [quotes, setQuotes] = useState([]);
   const [isKeepClipArt, setKeepClipArt] = useState(KEEP_CLIPARTS[0]);
   const [loadingQuotes, setLoadingQuotes] = useState(false);
+  const [loaderIcon, setLoaderIcon] = useState(false);
   const topRef = useRef(null);
   const handleSearchSKU = async () => {
     if (isEmpty(search)) {
@@ -495,6 +498,24 @@ const NewCampaigns = () => {
   const handleSyncUser = async () => {
     await rndServices.syncUser();
     await fetchUsers();
+  };
+  const handleSyncQuotes = async () => {
+    setLoaderIcon(true);
+    await rndServices.syncQuotes();
+    await fetchQuotes(quotePagination.currentPage);
+    setLoaderIcon(false);
+  };
+  const handleSyncProductBases = async () => {
+    setLoaderIcon(true);
+    await rndServices.syncProductBases();
+    await fetchProductBases(productBasePagination.currentPage);
+    setLoaderIcon(false);
+  };
+  const handleSyncCliparts = async () => {
+    setLoaderIcon(true);
+    await rndServices.syncCliparts();
+    await fetchClipArts(pagination.currentPage);
+    setLoaderIcon(false);
   };
   const handleRemoveRow = (name) => {
     if (selectedProductLines.length === 1 && selectedClipArts.length === 1) {
@@ -1137,7 +1158,14 @@ const NewCampaigns = () => {
               classCardHead={styles.classCardHead}
               classSpanTitle={styles.classScaleSpanTitle}
               head={
-                <div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "20px",
+                  }}
+                >
                   <Text>
                     {!isEmpty(selectedClipArts) ? (
                       <span>
@@ -1167,6 +1195,20 @@ const NewCampaigns = () => {
                       </span>
                     ) : null}
                   </Text>
+                  <Flex>
+                    <Button
+                      onClick={handleSyncCliparts}
+                      leftSection={
+                        loaderIcon ? (
+                          <Loader white={true} />
+                        ) : (
+                          <IconRotateClockwise />
+                        )
+                      }
+                    >
+                      Sync Clipart
+                    </Button>
+                  </Flex>
                 </div>
               }
             >
@@ -1423,6 +1465,20 @@ const NewCampaigns = () => {
               classTitle="title-green"
               classCardHead={styles.classCardHead}
               classSpanTitle={styles.classScaleSpanTitle}
+              head={
+                <Button
+                  onClick={handleSyncQuotes}
+                  leftSection={
+                    loaderIcon ? (
+                      <Loader white={true} />
+                    ) : (
+                      <IconRotateClockwise />
+                    )
+                  }
+                >
+                  Sync Quotes
+                </Button>
+              }
             >
               <div
                 style={{
@@ -1626,6 +1682,8 @@ const NewCampaigns = () => {
                 handlePageChange={handlePageProductBaseChange}
                 setQueryProductLines={setQueryProductBase}
                 fetchProductLinesLoading={loadingProductBase}
+                handleSyncProductBases={handleSyncProductBases}
+                loaderIcon={loaderIcon}
               />
             </div>
             <div className={styles.row}>

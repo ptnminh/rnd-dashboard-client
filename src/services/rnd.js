@@ -329,6 +329,52 @@ export const rndServices = {
       return false;
     }
   },
+  syncQuotes: async () => {
+    try {
+      const response = await axios.post(`${hostAPI}/quotes/sync-from-sheet`);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Sync thất bại", "red");
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log("Error at syncQuotes:", error);
+      return false;
+    }
+  },
+  syncProductBases: async () => {
+    try {
+      const response = await axios.post(
+        `${hostAPI}/libraries/sync-latest-product-lines`
+      );
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Sync thất bại", "red");
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log("Error at syncQuotes:", error);
+      return false;
+    }
+  },
+  syncCliparts: async () => {
+    try {
+      const response = await axios.post(
+        `${hostAPI}/libraries/sync-latest-cliparts`
+      );
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Sync thất bại", "red");
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.log("Error at syncQuotes:", error);
+      return false;
+    }
+  },
   fetchQuotesFilter: async () => {
     try {
       const response = await axios.get(`${hostAPI}/quotes/filters`);

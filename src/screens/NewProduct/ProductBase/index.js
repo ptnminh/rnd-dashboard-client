@@ -12,11 +12,17 @@ import {
 } from "@mantine/core";
 import { includes, map } from "lodash";
 import LazyLoad from "react-lazyload";
-import { IconCheck, IconSearch, IconFilterOff } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconSearch,
+  IconFilterOff,
+  IconRotateClockwise,
+} from "@tabler/icons-react";
 import cn from "classnames";
 import styles from "./ProductBase.module.sass";
 import { useState } from "react";
 import Card from "../../../components/Card";
+import Loader from "../../../components/Loader";
 
 const ProductBase = ({
   productLines,
@@ -26,6 +32,8 @@ const ProductBase = ({
   setQueryProductLines,
   pagination,
   handlePageChange,
+  handleSyncProductBases,
+  loaderIcon,
 }) => {
   const [searchProductLine, setSearchProductLine] = useState("");
   return (
@@ -47,6 +55,16 @@ const ProductBase = ({
             borderRadius: "10px",
           }}
         >
+          <Flex>
+            <Button
+              onClick={handleSyncProductBases}
+              leftSection={
+                loaderIcon ? <Loader white={true} /> : <IconRotateClockwise />
+              }
+            >
+              Sync Product Base
+            </Button>
+          </Flex>
           <Flex
             style={{
               gap: "8px",
