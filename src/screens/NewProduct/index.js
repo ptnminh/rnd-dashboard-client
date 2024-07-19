@@ -13,18 +13,15 @@ import {
   MEMBERS,
   RND_SIZES,
 } from "../../constant";
-import Checkbox from "../../components/Checkbox";
 import Editor from "../../components/Editor";
 import { useForm } from "react-hook-form";
 import { useDisclosure } from "@mantine/hooks";
 import {
-  Box,
   LoadingOverlay,
   ScrollArea,
   Modal,
   Image,
   Grid,
-  Skeleton,
   Badge,
   Flex,
   Button,
@@ -62,8 +59,6 @@ import {
   uniqBy,
 } from "lodash";
 import { rndServices } from "../../services";
-import TextInput from "../../components/TextInput";
-import Icon from "../../components/Icon";
 import {
   CONVERT_STATUS_TO_NUMBER,
   delayTime,
@@ -82,11 +77,6 @@ import { useNavigate } from "react-router";
 import ProductBase from "./ProductBase";
 import RefDesign from "./RefDesign";
 import Loader from "../../components/Loader";
-const HoverInfo = ({ image }) => (
-  <div className={styles.hoverInfo}>
-    <Image radius="md" src={image} />
-  </div>
-);
 
 const filterValidCollections = (collections, type, SKU) => {
   let validCollections = [];
@@ -404,7 +394,7 @@ const NewCampaigns = () => {
   const [rndMember, setRndMember] = useState(MEMBERS[0]);
   const [epmMember, setEpmMember] = useState(MEMBERS[0]);
   const [briefType, setBriefType] = useState();
-  const [layout, setLayout] = useState(LAYOUT_TYPES[0]);
+  const [layout, setLayout] = useState();
   const [search, setSearch] = useState("");
   const [SKU, setSKU] = useState();
   const [productLines, setProductLines] = useState([]);
@@ -462,29 +452,6 @@ const NewCampaigns = () => {
     if (product) {
       showNotification("Thành công", "Tìm thấy SKU", "green");
       setSKU(product);
-
-      // filter collections
-      const validCollections = compact(
-        filterValidCollections(collections, layout, product)
-      );
-      setValidCollections(validCollections);
-      const newProductLines = sortBy(
-        compact(
-          uniqBy(
-            concat(
-              product?.diffLayouts,
-              flatMap(map(validCollections, "validProductLines"))
-            ),
-            "uid"
-          )
-        ),
-        (productLines) => toLower(productLines.name)
-      );
-      setProductLines(
-        layout === LAYOUT_TYPES[0]
-          ? product.sameLayouts
-          : filter(newProductLines, (productLine) => productLine.name)
-      );
     } else {
       setSKU(null);
     }
@@ -537,60 +504,14 @@ const NewCampaigns = () => {
         break;
     }
   };
-  const handleFilterCollection = (event) => {
-    const value = event.target.value;
-    setSearchCollection(value);
-    if (!value) {
-      handleChangeLayout();
-      return;
-    }
-    const filterValidCollections = filter(validCollections, (collection) => {
-      return includes(toLower(collection.name), toLower(value));
-    });
-    if (isEmpty(filterValidCollections)) {
-      return;
-    }
-    setValidCollections(filterValidCollections);
-  };
-  const handleFilterProductLines = (event) => {
-    const value = event.target.value;
-    setSearchProductLine(value);
-    if (!value) {
-      setProductLines(
-        layout === LAYOUT_TYPES[0] ? SKU?.sameLayouts : SKU?.diffLayouts
-      );
-      return;
-    }
-    const filterProductLines = filter(productLines, (productLine) => {
-      return includes(toLower(productLine.name), toLower(value));
-    });
-    if (isEmpty(filterProductLines)) {
-      return;
-    }
-    setProductLines(filterProductLines);
-  };
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
   } = useForm();
-  const handleMouseLeave = () => {
-    const sortedProductLines = orderBy(
-      productLines,
-      [
-        (product) => (includes(selectedProductLines, product.name) ? 0 : 1),
-        "name",
-      ],
-      ["asc", "asc"]
-    );
-    setProductLines(sortedProductLines);
-  };
-  const scrollToTheTop = () => {
-    if (topRef.current) {
-      topRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+
   const onSubmit = async (data) => {};
   const fetchUsers = async () => {
     let { data } = await rndServices.getUsers({
@@ -699,6 +620,7 @@ const NewCampaigns = () => {
   useEffect(() => {
     switch (briefType) {
       case BRIEF_TYPES[0]: {
+        fetchProductBases(productBasePagination.currentPage);
         break;
       }
       case BRIEF_TYPES[1]: {
@@ -763,47 +685,6 @@ const NewCampaigns = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedProductLines, setSelectedProductLines] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState([]);
-  const handleChange = (name) => {
-    if (selectedProductLines.includes(name)) {
-      const newProductLines = selectedProductLines.filter((x) => x !== name);
-      setSelectedProductLines(newProductLines);
-      for (const collection of validCollections) {
-        const { validProductLines, name } = collection;
-        if (
-          isEmpty(intersection(map(validProductLines, "name"), newProductLines))
-        ) {
-          setSelectedCollection(selectedCollection.filter((x) => x !== name));
-        }
-      }
-    } else {
-      setSelectedProductLines((selectedProductLines) => [
-        ...selectedProductLines,
-        name,
-      ]);
-    }
-  };
-  const handleChangeCollection = (name) => {
-    const productLineCollection = find(validCollections, {
-      name,
-    }).validProductLines;
-
-    if (selectedCollection.includes(name)) {
-      setSelectedCollection(selectedCollection.filter((x) => x !== name));
-      setSelectedProductLines(
-        selectedProductLines.filter(
-          (x) => !includes(map(productLineCollection, "name"), x)
-        )
-      );
-    } else {
-      setSelectedCollection((selectedCollection) => [
-        ...selectedCollection,
-        name,
-      ]);
-      setSelectedProductLines((selectedProductLines) =>
-        uniq([...selectedProductLines, ...map(productLineCollection, "name")])
-      );
-    }
-  };
 
   const handleChangeLayout = () => {
     const validCollections = filterValidCollections(collections, layout, SKU);
@@ -828,12 +709,6 @@ const NewCampaigns = () => {
     }
     setValidCollections(validCollections || []);
   };
-
-  useEffect(() => {
-    handleChangeLayout();
-    setSelectedCollection([]);
-    setSelectedProductLines([]);
-  }, [layout]);
 
   const prepareSubmitData = () => {
     const rnd = find(users, { name: rndMember });
@@ -993,154 +868,31 @@ const NewCampaigns = () => {
               handleSyncUser={handleSyncUser}
             />
           </div>
-          <div className={styles.col}>
-            {briefType === BRIEF_TYPES[0] && (
-              <Box pos="relative">
-                <LoadingOverlay
-                  visible={false}
-                  zIndex={1000}
-                  overlayProps={{ radius: "sm", blur: 2 }}
-                  loaderProps={{ color: "pink", type: "bars" }}
-                />
-                <Card
-                  className={cn(styles.card)}
-                  title="3. Product cần Scale"
-                  classTitle="title-green"
-                  classCardHead={styles.classCardHead}
-                  classSpanTitle={styles.classScaleSpanTitle}
-                  head={
-                    <Dropdown
-                      className={styles.dropdown}
-                      classDropdownHead={styles.dropdownHead}
-                      value={layout}
-                      setValue={setLayout}
-                      options={LAYOUT_TYPES}
-                      classOutSideClick={styles.memberDropdown}
-                    />
-                  }
-                >
-                  {!loadingProductLines && !isEmpty(productLines) && SKU && (
-                    <Grid>
-                      <Grid.Col span={6}>
-                        <ScrollArea
-                          h={500}
-                          style={{
-                            color: "#000",
-                            borderRadius: "10px",
-                            boxShadow:
-                              "0px 1px 1px 0px rgba(0,0,0,0.12),0px 2px 2px 0px rgba(0,0,0,0.12),0px 4px 4px 0px rgba(0,0,0,0.12),0px 8px 8px 0px rgba(0,0,0,0.12),0px 16px 16px 0px rgba(0,0,0,0.12)",
-                            backgroundColor: "rgba(255, 255, 255, 1)",
-                          }}
-                        >
-                          <div className={styles.list}>
-                            <TextInput
-                              placeholder="Search Collection"
-                              type="text"
-                              name="search"
-                              value={searchCollection}
-                              onChange={(e) => handleFilterCollection(e)}
-                              className={styles.searchCollection}
-                            />
-                            {!isEmpty(validCollections) ? (
-                              map(validCollections, (x, index) => (
-                                <Checkbox
-                                  className={styles.checkbox}
-                                  content={`Collection - ${x.name} (${x.validProductLines.length})`}
-                                  value={selectedCollection.includes(x.name)}
-                                  onChange={() =>
-                                    handleChangeCollection(x.name)
-                                  }
-                                  key={index}
-                                />
-                              ))
-                            ) : (
-                              <p
-                                style={{
-                                  textAlign: "center",
-                                  color: "#FF6A55",
-                                  marginTop: "10px",
-                                }}
-                              >
-                                Không có collection nào phù hợp
-                              </p>
-                            )}
-                          </div>
-                        </ScrollArea>
-                      </Grid.Col>
-                      <Grid.Col span={6}>
-                        <ScrollArea
-                          h={500}
-                          style={{
-                            color: "#000",
-                            borderRadius: "10px",
-                            boxShadow:
-                              "0px 1px 1px 0px rgba(0,0,0,0.12),0px 2px 2px 0px rgba(0,0,0,0.12),0px 4px 4px 0px rgba(0,0,0,0.12),0px 8px 8px 0px rgba(0,0,0,0.12),0px 16px 16px 0px rgba(0,0,0,0.12)",
-                            backgroundColor: "rgba(255, 255, 255, 1)",
-                          }}
-                        >
-                          <div ref={topRef}></div>
-                          <div
-                            className={styles.list}
-                            onMouseLeave={handleMouseLeave}
-                            style={{ position: "relative" }}
-                          >
-                            <TextInput
-                              placeholder="Search Product Lines"
-                              type="text"
-                              name="search"
-                              value={searchProductLine}
-                              onChange={(e) => handleFilterProductLines(e)}
-                              className={styles.searchCollection}
-                            />
-                            {map(productLines, (x, index) => (
-                              <Checkbox
-                                key={index}
-                                className={styles.checkbox}
-                                content={x.name}
-                                value={selectedProductLines.includes(x.name)}
-                                onChange={() => handleChange(x.name)}
-                                showHover={true}
-                                HoverComponent={HoverInfo}
-                                hoverProps={{
-                                  image:
-                                    x.image ||
-                                    "/images/content/not_found_2.jpg",
-                                }}
-                              />
-                            ))}
-                          </div>
-                          <span
-                            style={{
-                              position: "absolute",
-                              bottom: "0",
-                              right: "0",
-                              cursor: "pointer",
-                              padding: "10px",
-                              borderRadius: "10px",
-                            }}
-                            onClick={scrollToTheTop}
-                          >
-                            <Icon name="arrow-top" size={24} fill="#83BF6E" />
-                          </span>
-                        </ScrollArea>
-                      </Grid.Col>
-                    </Grid>
-                  )}
-                  {loadingProductLines && (
-                    <Grid>
-                      <Grid.Col span={6}>
-                        <Skeleton height={350} radius="md" />
-                      </Grid.Col>
-                      <Grid.Col span={6}>
-                        <Skeleton height={350} radius="md" />
-                      </Grid.Col>
-                    </Grid>
-                  )}
-                </Card>
-              </Box>
-            )}
-          </div>
         </div>
+        {briefType === BRIEF_TYPES[0] && (
+          <div className={styles.row}>
+            <ProductBase
+              productLines={productBases}
+              selectedProductLines={selectedProductBases}
+              setSelectedProductLines={setSelectedProductBases}
+              pagination={productBasePagination}
+              handlePageChange={handlePageProductBaseChange}
+              setQueryProductLines={setQueryProductBase}
+              fetchProductLinesLoading={loadingProductBase}
+              handleSyncProductBases={handleSyncProductBases}
+              loaderIcon={loaderIcon}
+              title={"3. Product cần Scale"}
+              collections={collections}
+              layout={layout}
+              setLayout={setLayout}
+              validCollections={validCollections}
+              setValidCollections={setValidCollections}
+              briefType={briefType}
+              SKU={SKU}
+              // fetchProductBases={fetchProductBases}
+            />
+          </div>
+        )}
         {(briefType === BRIEF_TYPES[1] || briefType === BRIEF_TYPES[2]) && (
           <div className={styles.row} ref={topScrollClipArtRef}>
             <Card

@@ -59,7 +59,7 @@ const Editor = ({
   );
 
   const debouncedOnChange = useMemo(
-    () => debounce((newState) => onChange(newState), 300),
+    () => debounce((newState) => onChange(newState), 0),
     [onChange]
   );
 
@@ -90,7 +90,7 @@ const Editor = ({
         toolbarClassName={styles.editorToolbar}
         wrapperClassName={cn(styles.editorWrapper, classEditorWrapper)}
         editorClassName={styles.editorMain}
-        onEditorStateChange={debouncedOnChange}
+        onEditorStateChange={onChange}
         toolbar={{
           options: [
             "inline",
@@ -136,12 +136,15 @@ const Editor = ({
             inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",
             alt: { present: false, mandatory: false },
             defaultSize: {
-              height: "70%",
-              width: "70%",
+              height: "90%",
+              width: "90%",
             },
           },
         }}
         handlePastedFiles={handlePastedFiles}
+        localization={{
+          locale: "vi",
+        }}
       />
       {button && (
         <button className={cn("button-small", styles.button)}>{button}</button>
