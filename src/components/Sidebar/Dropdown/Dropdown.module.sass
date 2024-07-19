@@ -88,6 +88,17 @@
                 color: $n4
                 svg
                     fill: $n4
+    &.active
+        background: $n3
+        box-shadow: inset 0px -2px 1px rgba(0, 0, 0, 0.05), inset 0px 1px 1px #FFFFFF
+        color: $n7
+        +dark
+            background: $n6
+            box-shadow: inset 0px -2px 1px rgba(0, 0, 0, 0.4), inset 0px 1px 1px rgba(255, 255, 255, 0.11)
+            color: $n1
+        svg
+            opacity: 1
+    
     svg
         flex-shrink: 0
         fill: $n4
@@ -207,3 +218,6 @@
     text-align: center
     line-height: 24px
     color: $n7
+
+
+    

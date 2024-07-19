@@ -9,16 +9,12 @@ import Help from "./Help";
 import { Logo } from "./logo";
 
 const navigation = [
-  // {
-  //   title: "Home",
-  //   icon: "home",
-  //   url: "/",
-  // },
   {
     title: "RnD - Tạo Brief",
     slug: "rnd",
     icon: "diamond",
-    add: true,
+    // add: true,
+    pathname: "/rnd/brief",
     dropdown: [
       {
         title: "List - Product Line",
@@ -29,7 +25,14 @@ const navigation = [
   {
     title: "Design - Task",
     icon: "diamond",
-    url: "/designer",
+    slug: "/designer",
+    pathname: "/designer",
+    dropdown: [
+      {
+        title: "Design - Feedback",
+        url: "/designer/feedback",
+      },
+    ],
   },
   {
     title: "Listing - Task",
@@ -41,29 +44,6 @@ const navigation = [
     icon: "diamond",
     url: "/mkt",
   },
-  // {
-  //   title: "Income",
-  //   slug: "income",
-  //   icon: "pie-chart",
-  //   dropdown: [
-  //     {
-  //       title: "Earning",
-  //       url: "/income/earning",
-  //     },
-  //     {
-  //       title: "Refunds",
-  //       url: "/income/refunds",
-  //     },
-  //     {
-  //       title: "Payouts",
-  //       url: "/income/payouts",
-  //     },
-  //     {
-  //       title: "Statements",
-  //       url: "/income/statements",
-  //     },
-  //   ],
-  // },
 ];
 
 const Sidebar = ({ className, onClose }) => {
@@ -84,17 +64,19 @@ const Sidebar = ({ className, onClose }) => {
         <div className={styles.menu}>
           {navigation.map((x, index) =>
             x.url ? (
-              <NavLink
-                className={styles.item}
-                activeClassName={styles.active}
-                to={x.url}
-                key={index}
-                exact
-                onClick={onClose}
-              >
-                <Icon name={x.icon} size="24" />
-                {x.title}
-              </NavLink>
+              <>
+                <NavLink
+                  className={styles.item}
+                  activeClassName={styles.active}
+                  to={x.url}
+                  key={index}
+                  exact
+                  onClick={onClose}
+                >
+                  <Icon name={x.icon} size="24" />
+                  {x.title}
+                </NavLink>
+              </>
             ) : (
               <Dropdown
                 className={styles.dropdown}

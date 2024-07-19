@@ -1,6 +1,7 @@
 import { ContentState, convertToRaw, EditorState } from "draft-js";
 import draftToHtml from "draftjs-to-html";
 import htmlToDraft from "html-to-draftjs";
+import { concat, findIndex, remove } from "lodash";
 export const numberWithCommas = (x) => {
   var parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -63,3 +64,26 @@ export const CONVERT_BRIEF_TYPE_TO_OBJECT_NAME = {
   "Scale - Niche": "clipart",
   "New - Phủ Market": "clipart",
 };
+export function generateRandomString(length) {
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
+export function reorderArrayById(items, id) {
+  // Find the index of the item with the specified id
+  const index = findIndex(items, { uid: id });
+
+  if (index !== -1) {
+    // Remove the item from its original position
+    const [item] = remove(items, (item, i) => i === index);
+    // Concatenate the item at the beginning of the array
+    items = concat([item], items);
+  }
+
+  return items;
+}

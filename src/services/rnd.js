@@ -77,7 +77,11 @@ export const rndServices = {
       if (isTakeAll) {
         url = `${hostAPI}/skus?pageSize=-1`;
       }
-      const response = await axios.get(url);
+      const response = await axios.get(url, {
+        params: {
+          fields: "sku",
+        },
+      });
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Không tìm thấy product", "red");

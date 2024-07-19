@@ -28,6 +28,7 @@ import DesignerScreens from "./screens/Designer";
 import EPMScreens from "./screens/EPM";
 import { ProductLine } from "./screens/ProductLine";
 import MKTScreens from "./screens/Marketing";
+import DesignerFeedbackScreens from "./screens/DesignerFeedback";
 
 function App() {
   return (
@@ -78,6 +79,14 @@ function App() {
           element={
             <Page title="Campaigns">
               <DesignerScreens />
+            </Page>
+          }
+        />
+        <Route
+          path="/designer/feedback"
+          element={
+            <Page title="Designer Feedback">
+              <DesignerFeedbackScreens />
             </Page>
           }
         />

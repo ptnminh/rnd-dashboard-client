@@ -1,17 +1,19 @@
 import React, { useState } from "react";
 import cn from "classnames";
 import styles from "./Dropdown.module.sass";
-import { Link, NavLink, useLocation } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import Icon from "../../Icon";
 
 const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
   const [visible, setVisible] = useState(false);
 
   const { pathname } = useLocation();
+  const navigate = useNavigate();
 
   const handleClick = () => {
     setVisible(!visible);
     setValue(true);
+    navigate(item.pathname);
   };
 
   const Head = () => {
@@ -20,7 +22,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
         className={cn(
           styles.head,
           {
-            [styles.active]: pathname.includes(item.slug),
+            [styles.active]: pathname === item.pathname,
           },
           { [styles.wide]: visibleSidebar }
         )}
@@ -40,7 +42,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
         className,
         { [styles.active]: visible },
         {
-          [styles.active]: pathname.includes(item.slug),
+          [styles.active]: pathname.includes(item.slug || item.pathname),
         },
         { [styles.wide]: visibleSidebar }
       )}
@@ -48,15 +50,15 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
       {item.add ? (
         <div
           className={cn(styles.top, {
-            [styles.active]: pathname.startsWith("/rnd/brief"),
+            [styles.active]: pathname.startsWith(item.pathname),
           })}
         >
           <Head />
           <Link
             className={cn(styles.add, {
-              [styles.active]: pathname.startsWith("/rnd/brief"),
+              [styles.active]: pathname.startsWith(item.pathname),
             })}
-            to="/rnd/brief"
+            to={item.pathname}
             onClick={onClose}
           >
             <Icon name="plus" size="10" />

@@ -1,178 +1,107 @@
-import React, { useCallback, useMemo } from "react";
-import isHotkey from "is-hotkey";
-import { Editable, withReact, useSlate, Slate } from "slate-react";
-import {
-  Editor,
-  Transforms,
-  createEditor,
-  Element as SlateElement,
-} from "slate";
+import React, { useMemo, useCallback, useState } from "react";
+import { createEditor } from "slate";
+import { Slate, Editable, withReact, useSlate } from "slate-react";
 import { withHistory } from "slate-history";
-import { Button, Icon, Toolbar } from "./components";
+import { Descendant, Transforms, Text } from "slate";
+import {
+  IconBold,
+  IconItalic,
+  IconUnderline,
+  IconCode,
+} from "@tabler/icons-react";
 
-const HOTKEYS = {
-  "mod+b": "bold",
-  "mod+i": "italic",
-  "mod+u": "underline",
-  "mod+`": "code",
-};
+const initialValue = [
+  {
+    type: "paragraph",
+    children: [{ text: "This is editable text!" }],
+  },
+];
 
-const LIST_TYPES = ["numbered-list", "bulleted-list"];
-const TEXT_ALIGN_TYPES = ["left", "center", "right", "justify"];
+const SlateEditor = () => {
+  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
+  const [value, setValue] = useState(initialValue);
 
-const MantineEditor = () => {
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
-  const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
   return (
-    <Slate editor={editor} initialValue={initialValue}>
-      <Toolbar>
-        <MarkButton format="bold" icon="format_bold" />
-        <MarkButton format="italic" icon="format_italic" />
-        <MarkButton format="underline" icon="format_underlined" />
-        <MarkButton format="code" icon="code" />
-        <BlockButton format="heading-one" icon="looks_one" />
-        <BlockButton format="heading-two" icon="looks_two" />
-        <BlockButton format="block-quote" icon="format_quote" />
-        <BlockButton format="numbered-list" icon="format_list_numbered" />
-        <BlockButton format="bulleted-list" icon="format_list_bulleted" />
-        <BlockButton format="left" icon="format_align_left" />
-        <BlockButton format="center" icon="format_align_center" />
-        <BlockButton format="right" icon="format_align_right" />
-        <BlockButton format="justify" icon="format_align_justify" />
-      </Toolbar>
+    <Slate
+      editor={editor}
+      value={value}
+      initialValue={value}
+      onChange={(newValue) => setValue(newValue)}
+    >
+      <div>
+        <Toolbar>
+          <MarkButton format="bold" icon={<IconBold />} />
+          <MarkButton format="italic" icon={<IconItalic />} />
+          <MarkButton format="underline" icon={<IconUnderline />} />
+          <MarkButton format="code" icon={<IconCode />} />
+        </Toolbar>
+      </div>
       <Editable
         renderElement={renderElement}
         renderLeaf={renderLeaf}
-        placeholder="Enter some rich text…"
-        spellCheck
-        autoFocus
-        onKeyDown={(event) => {
-          for (const hotkey in HOTKEYS) {
-            if (isHotkey(hotkey, event)) {
-              event.preventDefault();
-              const mark = HOTKEYS[hotkey];
-              toggleMark(editor, mark);
-            }
-          }
-        }}
+        placeholder="Enter some text..."
       />
     </Slate>
   );
 };
 
-const toggleBlock = (editor, format) => {
-  const isActive = isBlockActive(
-    editor,
-    format,
-    TEXT_ALIGN_TYPES.includes(format) ? "align" : "type"
+const Toolbar = ({ children }) => {
+  return (
+    <div
+      style={{
+        display: "flex",
+        borderBottom: "1px solid #ddd",
+        marginBottom: "10px",
+      }}
+    >
+      {children}
+    </div>
   );
-  const isList = LIST_TYPES.includes(format);
+};
 
-  Transforms.unwrapNodes(editor, {
-    match: (n) =>
-      !Editor.isEditor(n) &&
-      SlateElement.isElement(n) &&
-      LIST_TYPES.includes(n.type) &&
-      !TEXT_ALIGN_TYPES.includes(format),
-    split: true,
-  });
-  let newProperties;
-  if (TEXT_ALIGN_TYPES.includes(format)) {
-    newProperties = {
-      align: isActive ? undefined : format,
-    };
-  } else {
-    newProperties = {
-      type: isActive ? "paragraph" : isList ? "list-item" : format,
-    };
-  }
-  Transforms.setNodes(editor, newProperties);
-
-  if (!isActive && isList) {
-    const block = { type: format, children: [] };
-    Transforms.wrapNodes(editor, block);
-  }
+const MarkButton = ({ format, icon }) => {
+  const editor = useSlate();
+  return (
+    <button
+      onMouseDown={(event) => {
+        event.preventDefault();
+        toggleMark(editor, format);
+      }}
+    >
+      {icon}
+    </button>
+  );
 };
 
 const toggleMark = (editor, format) => {
   const isActive = isMarkActive(editor, format);
-
   if (isActive) {
-    Editor.removeMark(editor, format);
+    Transforms.removeNodes(editor, { match: (n) => n[format], split: true });
   } else {
-    Editor.addMark(editor, format, true);
+    Transforms.setNodes(
+      editor,
+      { [format]: true },
+      { match: (n) => Text.isText(n), split: true }
+    );
   }
 };
 
-const isBlockActive = (editor, format, blockType = "type") => {
-  const { selection } = editor;
-  if (!selection) return false;
-
-  const [match] = Array.from(
-    Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, selection),
-      match: (n) =>
-        !Editor.isEditor(n) &&
-        SlateElement.isElement(n) &&
-        n[blockType] === format,
-    })
-  );
-
-  return !!match;
-};
-
 const isMarkActive = (editor, format) => {
-  const marks = Editor.marks(editor);
+  const marks = Text.marks(editor);
   return marks ? marks[format] === true : false;
 };
 
 const Element = ({ attributes, children, element }) => {
-  const style = { textAlign: element.align };
   switch (element.type) {
-    case "block-quote":
-      return (
-        <blockquote style={style} {...attributes}>
-          {children}
-        </blockquote>
-      );
-    case "bulleted-list":
-      return (
-        <ul style={style} {...attributes}>
-          {children}
-        </ul>
-      );
-    case "heading-one":
-      return (
-        <h1 style={style} {...attributes}>
-          {children}
-        </h1>
-      );
-    case "heading-two":
-      return (
-        <h2 style={style} {...attributes}>
-          {children}
-        </h2>
-      );
-    case "list-item":
-      return (
-        <li style={style} {...attributes}>
-          {children}
-        </li>
-      );
-    case "numbered-list":
-      return (
-        <ol style={style} {...attributes}>
-          {children}
-        </ol>
-      );
+    case "quote":
+      return <blockquote {...attributes}>{children}</blockquote>;
+    case "heading":
+      return <h2 {...attributes}>{children}</h2>;
     default:
-      return (
-        <p style={style} {...attributes}>
-          {children}
-        </p>
-      );
+      return <p {...attributes}>{children}</p>;
   }
 };
 
@@ -196,74 +125,4 @@ const Leaf = ({ attributes, children, leaf }) => {
   return <span {...attributes}>{children}</span>;
 };
 
-const BlockButton = ({ format, icon }) => {
-  const editor = useSlate();
-  return (
-    <Button
-      active={isBlockActive(
-        editor,
-        format,
-        TEXT_ALIGN_TYPES.includes(format) ? "align" : "type"
-      )}
-      onMouseDown={(event) => {
-        event.preventDefault();
-        toggleBlock(editor, format);
-      }}
-    >
-      <Icon>{icon}</Icon>
-    </Button>
-  );
-};
-
-const MarkButton = ({ format, icon }) => {
-  const editor = useSlate();
-  return (
-    <Button
-      active={isMarkActive(editor, format)}
-      onMouseDown={(event) => {
-        event.preventDefault();
-        toggleMark(editor, format);
-      }}
-    >
-      <Icon>{icon}</Icon>
-    </Button>
-  );
-};
-
-const initialValue = [
-  {
-    type: "paragraph",
-    children: [
-      { text: "This is editable " },
-      { text: "rich", bold: true },
-      { text: " text, " },
-      { text: "much", italic: true },
-      { text: " better than a " },
-      { text: "<textarea>", code: true },
-      { text: "!" },
-    ],
-  },
-  {
-    type: "paragraph",
-    children: [
-      {
-        text: "Since it's rich text, you can do things like turn a selection of text ",
-      },
-      { text: "bold", bold: true },
-      {
-        text: ", or add a semantically rendered block quote in the middle of the page, like this:",
-      },
-    ],
-  },
-  {
-    type: "block-quote",
-    children: [{ text: "A wise quote." }],
-  },
-  {
-    type: "paragraph",
-    align: "center",
-    children: [{ text: "Try it out for yourself!" }],
-  },
-];
-
-export default MantineEditor;
+export default SlateEditor;

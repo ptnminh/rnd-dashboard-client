@@ -1,9 +1,27 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import styles from "./Editor.module.sass";
 import cn from "classnames";
 import { Editor as ReactEditor } from "react-draft-wysiwyg";
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import Tooltip from "../Tooltip";
+import { uploadServices } from "../../services/uploads";
+import { generateRandomString } from "../../utils";
+import {
+  AtomicBlockUtils,
+  EditorState,
+  ContentState,
+  Modifier,
+} from "draft-js";
+import { debounce } from "lodash";
+
+// Function to handle image uploads
+const uploadImageCallBack = async (file) => {
+  const fileName = generateRandomString(10);
+  const updateFileResponse = await uploadServices.upload(file, fileName);
+  if (updateFileResponse) {
+    return { data: { link: updateFileResponse.data.url } };
+  }
+};
 
 const Editor = ({
   state,
@@ -15,7 +33,37 @@ const Editor = ({
   place,
   button,
   readOnly = false,
+  classEditorWrapper,
 }) => {
+  const handlePastedFiles = useCallback(
+    (files) => {
+      const file = files[0];
+      uploadImageCallBack(file).then((result) => {
+        const contentState = state.getCurrentContent();
+        const contentStateWithEntity = contentState.createEntity(
+          "IMAGE",
+          "IMMUTABLE",
+          { src: result.data.link, width: "90%", height: "90%" }
+        );
+        const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+        const newState = AtomicBlockUtils.insertAtomicBlock(
+          EditorState.set(state, { currentContent: contentStateWithEntity }),
+          entityKey,
+          " "
+        );
+        onChange(
+          EditorState.forceSelection(
+            newState,
+            newState.getCurrentContent().getSelectionAfter()
+          )
+        );
+      });
+    },
+    [state, onChange]
+  );
+
+  const debouncedOnChange = useMemo(() => debounce(onChange, 300), [onChange]);
+
   return (
     <div
       className={cn(
@@ -38,27 +86,22 @@ const Editor = ({
         </div>
       )}
       <ReactEditor
-        readOnly={readOnly} // Step 2: Pass readOnly to ReactEditor
+        readOnly={readOnly}
         editorState={state}
         toolbarClassName={styles.editorToolbar}
-        wrapperClassName={styles.editorWrapper}
+        wrapperClassName={cn(styles.editorWrapper, classEditorWrapper)}
         editorClassName={styles.editorMain}
-        onEditorStateChange={onChange}
+        onEditorStateChange={debouncedOnChange}
         toolbar={{
           options: [
             "inline",
             "blockType",
             "fontSize",
-            "fontFamily",
             "list",
             "textAlign",
-            "colorPicker",
-            "link",
             "embedded",
             "emoji",
             "image",
-            "remove",
-            "history",
           ],
           inline: {
             options: ["bold", "italic", "underline"],
@@ -89,16 +132,17 @@ const Editor = ({
             urlEnabled: true,
             uploadEnabled: true,
             alignmentEnabled: true,
-            uploadCallback: undefined,
+            uploadCallback: uploadImageCallBack,
             previewImage: false,
             inputAccept: "image/gif,image/jpeg,image/jpg,image/png,image/svg",
             alt: { present: false, mandatory: false },
             defaultSize: {
-              height: "90%",
-              width: "90%",
+              height: "70%",
+              width: "70%",
             },
           },
         }}
+        handlePastedFiles={handlePastedFiles}
       />
       {button && (
         <button className={cn("button-small", styles.button)}>{button}</button>
@@ -107,4 +151,4 @@ const Editor = ({
   );
 };
 
-export default Editor;
+export default React.memo(Editor);
