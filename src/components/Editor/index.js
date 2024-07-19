@@ -6,12 +6,7 @@ import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import Tooltip from "../Tooltip";
 import { uploadServices } from "../../services/uploads";
 import { generateRandomString } from "../../utils";
-import {
-  AtomicBlockUtils,
-  EditorState,
-  ContentState,
-  Modifier,
-} from "draft-js";
+import { AtomicBlockUtils, EditorState } from "draft-js";
 import { debounce } from "lodash";
 
 // Function to handle image uploads

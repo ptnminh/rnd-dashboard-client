@@ -615,7 +615,7 @@ const KeywordTable = ({
                 });
               }}
             />
-            <Select
+            {/* <Select
               placeholder="Status"
               data={["Done", "Undone"]}
               styles={{
@@ -639,7 +639,7 @@ const KeywordTable = ({
                   statusValue: null,
                 });
               }}
-            />
+            /> */}
             <Button
               onClick={() => {
                 setQuery({

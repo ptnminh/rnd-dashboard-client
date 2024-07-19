@@ -44,7 +44,7 @@ const DesignerFeedbackScreens = () => {
   });
   const [query, setQuery] = useState({
     statusValue: "Undone",
-    status: [1],
+    status: [2],
   });
   const [sorting, setSorting] = useState([]);
   const [colorRating, setColorRating] = useState(0);
