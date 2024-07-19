@@ -615,31 +615,7 @@ const KeywordTable = ({
                 });
               }}
             />
-            {/* <Select
-              placeholder="Status"
-              data={["Done", "Undone"]}
-              styles={{
-                input: {
-                  width: "120px",
-                },
-              }}
-              value={query?.statusValue}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  status: value === "Done" ? [2] : [1],
-                  statusValue: value,
-                })
-              }
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  status: [1, 2],
-                  statusValue: null,
-                });
-              }}
-            /> */}
+
             <Button
               onClick={() => {
                 setQuery({
@@ -651,7 +627,7 @@ const KeywordTable = ({
                   rndTeam: null,
                   rnd: null,
                   designer: null,
-                  status: [1, 2],
+                  status: [2],
                   sizeValue: null,
                   rndName: null,
                   designerName: null,
@@ -665,43 +641,6 @@ const KeywordTable = ({
               <IconFilterOff />
             </Button>
           </Flex>
-          <Flex
-            style={{
-              gap: "30px",
-              padding: "10px",
-              borderRadius: "10px",
-              backgroundColor: "#EFF0F1",
-            }}
-            justify="end"
-          >
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Undone: {filter(data, { status: 1 }).length}
-            </div>
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Time to done: {filter(data, { status: 1 }).length}h
-            </div>
-          </Flex>
-          {editingCell && !isEmpty(updateBrief.linkDesigns) && (
-            <Flex>
-              <Button
-                variant="filled"
-                color="blue"
-                leftSection={<IconDeviceFloppy />}
-              >
-                Save
-              </Button>
-            </Flex>
-          )}
         </div>
       );
     },

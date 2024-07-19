@@ -707,7 +707,7 @@ const BriefsTable = ({
                   rnd: null,
                   epm: null,
                   designer: null,
-                  status: [2, 3],
+                  status: [3],
                   sizeValue: null,
                   rndName: null,
                   designerName: null,
