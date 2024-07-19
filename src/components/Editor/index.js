@@ -34,30 +34,34 @@ const Editor = ({
     (files) => {
       const file = files[0];
       uploadImageCallBack(file).then((result) => {
-        const contentState = state.getCurrentContent();
+        const editorState = state;
+        const contentState = editorState.getCurrentContent();
         const contentStateWithEntity = contentState.createEntity(
           "IMAGE",
-          "IMMUTABLE",
+          "MUTABLE",
           { src: result.data.link, width: "90%", height: "90%" }
         );
         const entityKey = contentStateWithEntity.getLastCreatedEntityKey();
+        const newEditorState = EditorState.set(
+          editorState,
+          { currentContent: contentStateWithEntity },
+          "create-entity"
+        );
         const newState = AtomicBlockUtils.insertAtomicBlock(
-          EditorState.set(state, { currentContent: contentStateWithEntity }),
+          newEditorState,
           entityKey,
           " "
         );
-        onChange(
-          EditorState.forceSelection(
-            newState,
-            newState.getCurrentContent().getSelectionAfter()
-          )
-        );
+        onChange(newState);
       });
     },
     [state, onChange]
   );
 
-  const debouncedOnChange = useMemo(() => debounce(onChange, 300), [onChange]);
+  const debouncedOnChange = useMemo(
+    () => debounce((newState) => onChange(newState), 300),
+    [onChange]
+  );
 
   return (
     <div
@@ -146,4 +150,4 @@ const Editor = ({
   );
 };
 
-export default React.memo(Editor);
+export default Editor;
