@@ -182,7 +182,10 @@ const ProductBase = ({
                 }}
                 value={validCollections || []}
                 onChange={(value) => {
-                  setValidCollections(value);
+                  if (!layout) {
+                    showNotification("Thất bại", "Vui lòng chọn Layout", "red");
+                    return;
+                  }
                   const allProductLines = flatMap(
                     compact(
                       map(
@@ -203,6 +206,7 @@ const ProductBase = ({
                         (x) => !includes(map(SKU.sameLayouts, "uid"), x.uid)
                       );
                     }
+                    setValidCollections(value);
                     setSelectedProductLines(newSelectedProductLines);
                   }
                 }}
@@ -240,7 +244,7 @@ const ProductBase = ({
                   },
                 }}
                 clearable
-                value={layout || ""}
+                value={layout}
                 onChange={(value) => {
                   if (!SKU) {
                     showNotification("Thất bại", "Vui lòng chọn SKU", "red");
@@ -248,28 +252,26 @@ const ProductBase = ({
                   }
                   setLayout(value);
                   if (!value) {
-                    setSelectedProductLines([]);
+                    setPreviewSelectedProductLine([]);
                     return;
                   }
                   if (value === LAYOUT_TYPES[0]) {
-                    setSelectedProductLines(SKU.sameLayouts);
+                    setPreviewSelectedProductLine(SKU.sameLayouts);
                   } else {
-                    setSelectedProductLines(SKU.diffLayouts);
+                    setPreviewSelectedProductLine(SKU.diffLayouts);
                   }
                 }}
                 onClear={() => {
-                  const newSelectedProductLines = filter(
-                    selectedProductLines,
-                    (x) => !includes(map(SKU.sameLayouts, "uid"), x.uid)
-                  );
-                  setSelectedProductLines(newSelectedProductLines);
+                  setPreviewSelectedProductLine([]);
+                  setValidCollections([]);
                 }}
               />
               <Button
                 onClick={() => {
-                  setLayout("");
+                  setLayout(null);
                   setValidCollections([]);
                   setSelectedProductLines([]);
+                  setPreviewSelectedProductLine([]);
                 }}
               >
                 <IconFilterOff />
@@ -283,26 +285,50 @@ const ProductBase = ({
                 backgroundColor: "#EFF0F1",
               }}
             >
-              <Text>
-                {!isEmpty(selectedProductLines) ? (
-                  <span>
-                    {selectedProductLines.length} Product Base đã chọn
-                    <span
-                      style={{
-                        marginLeft: "10px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        setPreviewSelectedProductLine(selectedProductLines);
-                        open();
-                      }}
-                    >
-                      <Tooltip label="Show Selected Clipart">
-                        <IconSelector size={24} />
-                      </Tooltip>
-                    </span>
-                  </span>
+              <Text
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                {!isEmpty(previewSelectedProductLine) ||
+                !isEmpty(selectedProductLines) ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "10px",
+                    }}
+                  >
+                    {!isEmpty(selectedProductLines) && (
+                      <span>
+                        {selectedProductLines.length} Product Base đã chọn
+                      </span>
+                    )}
+                    {!isEmpty(previewSelectedProductLine) && (
+                      <span>
+                        {previewSelectedProductLine.length} Product Base{" "}
+                        {layout === LAYOUT_TYPES[0]
+                          ? "cùng layout"
+                          : "khác layout"}
+                      </span>
+                    )}
+                  </div>
                 ) : null}
+                <span
+                  style={{
+                    marginLeft: "10px",
+                    cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    open();
+                  }}
+                >
+                  <Tooltip label="Preview Product Base">
+                    <IconSelector size={24} />
+                  </Tooltip>
+                </span>
               </Text>
             </Flex>
           </div>
@@ -475,54 +501,130 @@ const ProductBase = ({
             }}
             columns={12}
           >
-            {map(previewSelectedProductLine, (productLine, index) => (
-              <Grid.Col
-                span={{ sm: 5, md: 4, lg: 3 }}
-                key={index}
-                style={{
-                  position: "relative",
-                }}
-              >
-                <MantineCard
-                  shadow="sm"
-                  padding="sm"
+            {map(
+              uniqBy(
+                concat(selectedProductLines, previewSelectedProductLine),
+                "uid"
+              ),
+              (productLine, index) => (
+                <Grid.Col
+                  span={{ sm: 5, md: 4, lg: 3 }}
+                  key={index}
                   style={{
-                    cursor: "pointer",
+                    position: "relative",
+                  }}
+                  onClick={() => {
+                    if (briefType !== BRIEF_TYPES[0]) {
+                      if (
+                        includes(
+                          map(selectedProductLines, "uid"),
+                          productLine.uid
+                        )
+                      ) {
+                        setSelectedProductLines(
+                          selectedProductLines.filter(
+                            (x) => x.uid !== productLine.uid
+                          )
+                        );
+                      } else {
+                        setSelectedProductLines([productLine]);
+                      }
+                    } else {
+                      if (
+                        includes(
+                          map(selectedProductLines, "name"),
+                          productLine.name
+                        )
+                      ) {
+                        setSelectedProductLines(
+                          selectedProductLines.filter(
+                            (x) => x.name !== productLine.name
+                          )
+                        );
+                      } else {
+                        setSelectedProductLines([
+                          ...selectedProductLines,
+                          productLine,
+                        ]);
+                      }
+                    }
                   }}
                 >
-                  <MantineCard.Section>
-                    <LazyLoad height={200} once={true}>
-                      <Image
-                        src={
-                          productLine.imageSrc ||
-                          productLine?.image ||
-                          "/images/content/not_found_2.jpg"
-                        }
-                        h={200}
-                        alt="No way!"
-                        fit="contain"
-                      />
-                    </LazyLoad>
-                  </MantineCard.Section>
-                  <Text
-                    fw={500}
-                    size="sm"
-                    mt="md"
+                  <MantineCard
+                    shadow="sm"
+                    padding="sm"
                     style={{
-                      display: "inline-block",
-                      width: "200px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      textDecoration: "none",
-                      verticalAlign: "middle",
+                      cursor: "pointer",
                     }}
                   >
-                    {productLine.name}
-                  </Text>
-                </MantineCard>
-              </Grid.Col>
-            ))}
+                    <MantineCard.Section>
+                      <LazyLoad height={200} once={true}>
+                        <Image
+                          src={
+                            productLine.imageSrc ||
+                            productLine?.image ||
+                            "/images/content/not_found_2.jpg"
+                          }
+                          h={200}
+                          alt="No way!"
+                          fit="contain"
+                        />
+                      </LazyLoad>
+                    </MantineCard.Section>
+                    <Text
+                      fw={500}
+                      size="sm"
+                      mt="md"
+                      style={{
+                        display: "inline-block",
+                        width: "200px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textDecoration: "none",
+                        verticalAlign: "middle",
+                      }}
+                    >
+                      {productLine.name}
+                    </Text>
+                  </MantineCard>
+                  {includes(
+                    map(selectedProductLines, "name"),
+                    productLine.name
+                  ) && (
+                    <>
+                      <div
+                        style={{
+                          padding: "5px",
+                          position: "absolute",
+                          top: "15px",
+                          right: "13px",
+                          borderRadius: "50%",
+                          backgroundColor: "#64CD73",
+                          zIndex: 2,
+                        }}
+                      >
+                        <IconCheck color="#ffffff" />
+                      </div>
+                      <div
+                        style={{
+                          position: "absolute",
+                          top: "9px",
+                          right: "0",
+                          height: "94%",
+                          width: "99%",
+                          cursor: "pointer",
+                          padding: "10px",
+                          borderRadius: "10px",
+                          backgroundColor: "rgba(244, 252, 243,0.5)",
+                          zIndex: 1,
+                        }}
+                      ></div>
+                    </>
+                  )}
+                </Grid.Col>
+              )
+            )}
           </Grid>
         </ScrollArea>
       </Modal>

@@ -128,19 +128,13 @@ const generateScaleProductLinesTable = ({
   rndSortName,
   rndId,
 }) => {
-  const allProductLines = compact(
-    concat(
-      SKU?.sameLayouts,
-      SKU?.diffLayouts,
-      flatMap(collections, "validProductLines")
-    )
-  );
+  const allProductLines = compact(concat(SKU?.sameLayouts, SKU?.diffLayouts));
   let skuPrefixAccumulators = [];
   let tables = compact(
     map(
       sortBy(selectedProductLines, (productLine) => toLower(productLine)),
       (x, index) => {
-        const foundProductLine = find(allProductLines, { name: x });
+        const foundProductLine = find(allProductLines, { uid: x.uid });
         const skuAccumulators = foundProductLine?.skuAccumulators || [];
         const currentRnDAccumulator =
           find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
@@ -300,7 +294,6 @@ const generateScaleNewDesign = ({
 
 const generateScaleProductBaseOnBriefType = ({
   type,
-  selectedProductLines,
   SKU,
   collections,
   rndSortName,
@@ -313,7 +306,7 @@ const generateScaleProductBaseOnBriefType = ({
   switch (type) {
     case BRIEF_TYPES[0]:
       return generateScaleProductLinesTable({
-        selectedProductLines,
+        selectedProductLines: selectedProductBases,
         SKU,
         collections,
         rndSortName,
@@ -404,8 +397,6 @@ const NewCampaigns = () => {
   const [reviewData, setReviewData] = useState([]);
   const [validCollections, setValidCollections] = useState([]);
   const [products, setProducts] = useState([]);
-  const [searchCollection, setSearchCollection] = useState("");
-  const [searchProductLine, setSearchProductLine] = useState("");
   const [createBriefLoading, setCreateBriefLoading] = useState(false);
   const [fetchClipArtsLoading, setFetchClipArtsLoading] = useState(false);
   const [filtersClipArt, setFiltersClipArt] = useState([]);
@@ -437,7 +428,6 @@ const NewCampaigns = () => {
   const [isKeepClipArt, setKeepClipArt] = useState(KEEP_CLIPARTS[0]);
   const [loadingQuotes, setLoadingQuotes] = useState(false);
   const [loaderIcon, setLoaderIcon] = useState(false);
-  const topRef = useRef(null);
   const handleSearchSKU = async () => {
     if (isEmpty(search)) {
       showNotification("Thất bại", "Vui lòng nhập SKU", "red");
@@ -447,7 +437,7 @@ const NewCampaigns = () => {
     setSelectedProductLines([]);
     setLoadingSearchSKU(true);
     setLoadingProductLines(true);
-    await delayTime(2000);
+    // await delayTime(2000);
     const product = await rndServices.searchProducts(search);
     if (product) {
       showNotification("Thành công", "Tìm thấy SKU", "green");
@@ -481,14 +471,14 @@ const NewCampaigns = () => {
     setLoaderIcon(false);
   };
   const handleRemoveRow = (name) => {
-    if (selectedProductLines.length === 1 && selectedClipArts.length === 1) {
+    if (selectedProductBases.length === 1 && selectedClipArts.length === 1) {
       showNotification("Thất bại", "Không thể xóa hết Product Line", "red");
       return;
     }
     switch (briefType) {
       case BRIEF_TYPES[0]:
-        setSelectedProductLines(
-          filter(selectedProductLines, (x) => x !== name)
+        setSelectedProductBases(
+          filter(selectedProductBases, (x) => x.name !== name)
         );
         break;
       case BRIEF_TYPES[1]:
@@ -608,6 +598,10 @@ const NewCampaigns = () => {
       currentPage: 1,
       totalPages: 1,
     });
+    setProductBasePagination({
+      currentPage: 1,
+      totalPages: 1,
+    });
     const queryKeys = keys(query);
     const transformedQuery = map(queryKeys, (key) => ({
       [key]: [],
@@ -615,12 +609,16 @@ const NewCampaigns = () => {
     setQuery(merge({}, ...transformedQuery));
     setSelectedProductLines([]);
     setProductBases([]);
+    setValidCollections([]);
+    setLayout("");
+    setSelectedProductBases([]);
+    setQueryProductBase({});
   };
 
   useEffect(() => {
     switch (briefType) {
       case BRIEF_TYPES[0]: {
-        fetchProductBases(productBasePagination.currentPage);
+        // fetchProductBases(productBasePagination.currentPage);
         break;
       }
       case BRIEF_TYPES[1]: {
@@ -629,7 +627,7 @@ const NewCampaigns = () => {
       }
       case BRIEF_TYPES[3]: {
         setSKU(null);
-        fetchProductBases(productBasePagination.currentPage);
+        // fetchProductBases(productBasePagination.currentPage);
         break;
       }
       default:
@@ -686,35 +684,10 @@ const NewCampaigns = () => {
   const [selectedProductLines, setSelectedProductLines] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState([]);
 
-  const handleChangeLayout = () => {
-    const validCollections = filterValidCollections(collections, layout, SKU);
-    if (layout === LAYOUT_TYPES[0]) {
-      setProductLines(SKU?.sameLayouts || []);
-    } else {
-      const newProductLines = sortBy(
-        compact(
-          uniqBy(
-            concat(
-              SKU?.diffLayouts,
-              flatMap(map(validCollections, "validProductLines"))
-            ),
-            "uid"
-          )
-        ),
-        (productLines) => toLower(productLines.name)
-      );
-      setProductLines(
-        filter(newProductLines, (productLine) => productLine.name) || []
-      );
-    }
-    setValidCollections(validCollections || []);
-  };
-
   const prepareSubmitData = () => {
     const rnd = find(users, { name: rndMember });
     const data = generateScaleProductBaseOnBriefType({
       type: briefType,
-      selectedProductLines,
       SKU,
       collections: validCollections,
       rndSortName: rnd?.shortName,
@@ -767,7 +740,7 @@ const NewCampaigns = () => {
           : {}),
         status: 1,
         ...(briefType === BRIEF_TYPES[0] && {
-          productLine: find(productLines, { name: x["Product Line"] })?.uid,
+          productLine: find(productBases, { name: x["Product Line"] })?.uid,
         }),
         ...(briefType === BRIEF_TYPES[1] && {
           clipart: find(clipArts, { uid: x.uid })?.uid,
@@ -873,6 +846,7 @@ const NewCampaigns = () => {
           <div className={styles.row}>
             <ProductBase
               productLines={productBases}
+              setProductLines={setProductBases}
               selectedProductLines={selectedProductBases}
               setSelectedProductLines={setSelectedProductBases}
               pagination={productBasePagination}
@@ -889,7 +863,7 @@ const NewCampaigns = () => {
               setValidCollections={setValidCollections}
               briefType={briefType}
               SKU={SKU}
-              // fetchProductBases={fetchProductBases}
+              fetchProductBases={fetchProductBases}
             />
           </div>
         )}
@@ -1501,7 +1475,6 @@ const NewCampaigns = () => {
                       return;
                     }
                     if (
-                      isEmpty(selectedProductLines) &&
                       isEmpty(selectedClipArts) &&
                       isEmpty(selectedQuotes) &&
                       isEmpty(selectedProductBases) &&
@@ -1688,7 +1661,6 @@ const NewCampaigns = () => {
               <CustomTable
                 items={generateScaleProductBaseOnBriefType({
                   type: briefType,
-                  selectedProductLines,
                   SKU,
                   collections: validCollections,
                   rndSortName: find(users, { name: rndMember })?.shortName,
