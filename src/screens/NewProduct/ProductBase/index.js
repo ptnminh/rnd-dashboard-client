@@ -174,13 +174,13 @@ const ProductBase = ({
             >
               <MultiSelect
                 placeholder="Chọn Collections"
-                data={map(collections, "name") || []}
+                data={map(collections, "name")}
                 styles={{
                   input: {
                     width: "300px",
                   },
                 }}
-                value={validCollections || []}
+                value={validCollections}
                 onChange={(value) => {
                   if (!layout) {
                     showNotification("Thất bại", "Vui lòng chọn Layout", "red");
@@ -195,7 +195,7 @@ const ProductBase = ({
                     )
                   );
                   let newSelectedProductLines = [];
-                  if (layout) {
+                  if (layout && !isEmpty(value)) {
                     if (layout === LAYOUT_TYPES[0]) {
                       newSelectedProductLines = filter(allProductLines, (x) =>
                         includes(map(SKU.sameLayouts, "uid"), x.uid)
@@ -206,7 +206,48 @@ const ProductBase = ({
                         (x) => !includes(map(SKU.sameLayouts, "uid"), x.uid)
                       );
                     }
-                    setValidCollections(value);
+                    setSelectedProductLines(
+                      uniqBy(
+                        concat(selectedProductLines, newSelectedProductLines),
+                        "uid"
+                      )
+                    );
+                  }
+                  setValidCollections(value);
+                }}
+                onRemove={(value) => {
+                  if (!layout) {
+                    showNotification("Thất bại", "Vui lòng chọn Layout", "red");
+                    return;
+                  }
+                  const allProductLines = flatMap(
+                    compact(
+                      map(
+                        filter(collections, (x) => value === x.name),
+                        "productLines"
+                      )
+                    )
+                  );
+                  let newSelectedProductLines = [];
+                  const sameLayouts = intersectionBy(
+                    allProductLines,
+                    SKU.sameLayouts,
+                    "uid"
+                  );
+                  if (layout) {
+                    if (layout === LAYOUT_TYPES[0]) {
+                      // remove all same layout of this collection
+                      newSelectedProductLines = filter(
+                        selectedProductLines,
+                        (x) => !includes(map(sameLayouts, "uid"), x.uid)
+                      );
+                    } else {
+                      // remove all diff layout of this collection
+                      newSelectedProductLines = filter(
+                        selectedProductLines,
+                        (x) => includes(map(sameLayouts, "uid"), x.uid)
+                      );
+                    }
                     setSelectedProductLines(newSelectedProductLines);
                   }
                 }}
@@ -221,18 +262,20 @@ const ProductBase = ({
                     "uid"
                   );
                   let newSelectedProductLines = [];
-                  if (layout === LAYOUT_TYPES[0]) {
-                    newSelectedProductLines = filter(
-                      selectedProductLines,
-                      (x) => includes(map(sameLayouts, "uid"), x.uid)
-                    );
-                  } else {
-                    newSelectedProductLines = filter(
-                      selectedProductLines,
-                      (x) => !includes(map(sameLayouts, "uid"), x.uid)
-                    );
+                  if (layout) {
+                    if (layout === LAYOUT_TYPES[0]) {
+                      newSelectedProductLines = filter(
+                        selectedProductLines,
+                        (x) => !includes(map(sameLayouts, "uid"), x.uid)
+                      );
+                    } else {
+                      newSelectedProductLines = filter(
+                        selectedProductLines,
+                        (x) => includes(map(sameLayouts, "uid"), x.uid)
+                      );
+                    }
+                    setSelectedProductLines(newSelectedProductLines);
                   }
-                  setSelectedProductLines(newSelectedProductLines);
                 }}
               />
               <Select
@@ -263,6 +306,7 @@ const ProductBase = ({
                 }}
                 onClear={() => {
                   setPreviewSelectedProductLine([]);
+                  setSelectedProductLines([]);
                   setValidCollections([]);
                 }}
               />
