@@ -183,7 +183,7 @@ const generateScaleProductLinesTable = ({
 const generateTextPreview = (type, layout) => {
   switch (type) {
     case BRIEF_TYPES[0]:
-      return layout;
+      return layout || "Product Base";
     case BRIEF_TYPES[1]:
       return "Clip Art";
     case BRIEF_TYPES[2]:
