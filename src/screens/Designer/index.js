@@ -40,6 +40,7 @@ import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
 import { BRIEF_TYPES, STATUS } from "../../constant";
 import NewDesign from "./NewDesign";
 import ScaleDesign from "./ScaleDesign";
+import ScaleMixMatch from "./ScaleMixMatch";
 
 const DesignerScreens = () => {
   const navigate = useNavigate();
@@ -652,7 +653,7 @@ const DesignerScreens = () => {
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[5] && (
-        <ScaleDesign
+        <ScaleMixMatch
           opened={opened}
           close={close}
           selectedSKU={selectedSKU}

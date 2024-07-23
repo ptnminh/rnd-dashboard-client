@@ -461,7 +461,9 @@ const DesignerScreens = () => {
                   alignItems: "center",
                 }}
               >
-                Scale
+                {selectedSKU?.briefType === BRIEF_TYPES[5]
+                  ? "Design + Clipart"
+                  : "Scale"}
               </div>
               <Image
                 radius="md"
@@ -496,10 +498,14 @@ const DesignerScreens = () => {
                   </ThemeIcon>
                 }
               >
-                {selectedSKU?.briefType === BRIEF_TYPES[5] ? (
+                {selectedSKU?.briefType === BRIEF_TYPES[4] ||
+                selectedSKU?.briefType === BRIEF_TYPES[5] ? (
                   <List.Item>
                     Product Base:
-                    <span>{selectedSKU?.skuInfo.name}</span>
+                    <span>
+                      {selectedSKU?.skuInfo.name ||
+                        selectedSKU?.productLine?.name}
+                    </span>
                   </List.Item>
                 ) : (
                   <List.Item>

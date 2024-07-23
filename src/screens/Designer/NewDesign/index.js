@@ -197,7 +197,7 @@ const GridWithClipArt = ({ selectedSKU }) => {
             display: "flex",
             justifyContent: "center",
             padding: "10px",
-            fontSize: "18px",
+            fontSize: "16px",
             alignItems: "center",
             marginTop: "10px",
           }}

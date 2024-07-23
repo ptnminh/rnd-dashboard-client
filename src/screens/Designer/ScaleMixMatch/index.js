@@ -65,7 +65,7 @@ const ScaleMixMatch = ({
               borderRadius: "12px",
             }}
           >
-            Scale Design
+            New - Mix Match
           </div>
         </Grid.Col>
         <Grid.Col span={5}>
@@ -289,7 +289,7 @@ const ScaleMixMatch = ({
                 display: "flex",
                 justifyContent: "center",
                 padding: "10px",
-                fontSize: "18px",
+                fontSize: "16px",
                 alignItems: "center",
                 marginTop: "10px",
               }}
