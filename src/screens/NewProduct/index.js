@@ -303,7 +303,7 @@ const generateScaleMixMatch = ({
         SKU: name,
         Remove: "x",
         clipartId: x?.uid,
-        designLinkRef: x?.designLinkRef,
+        designLinkRef: x?.marketBrief?.designLinkRef,
         nextAccumulator: currentRnDAccumulator + selectedClipArts.length,
         skuPrefix: prefix,
       };
@@ -321,6 +321,7 @@ const generateScaleProductBaseOnBriefType = ({
   selectedProductBases,
   rndId,
   selectedSKUs,
+  marketBrief,
 }) => {
   switch (type) {
     case BRIEF_TYPES[0]:
@@ -361,7 +362,13 @@ const generateScaleProductBaseOnBriefType = ({
         rndId,
       });
     case BRIEF_TYPES[5]:
-      return [];
+      return generateScaleMixMatch({
+        selectedProductBases,
+        rndSortName,
+        rndId,
+        selectedClipArts,
+        marketBrief,
+      });
     default:
       return [];
   }
@@ -764,6 +771,7 @@ const NewCampaigns = () => {
       designs,
       rndId: rnd?.uid,
       selectedSKUs,
+      marketBrief,
     });
     return data;
   };
@@ -833,7 +841,8 @@ const NewCampaigns = () => {
           productLine: selectedProductBases[0]?.uid,
           designLinkRef: x.designLinkRef,
           imageRef: x.imageRef,
-          skuId: x.skuRef,
+          uid: x.uid,
+          skuRef: x.skuRef,
         }),
       };
     });
@@ -842,7 +851,7 @@ const NewCampaigns = () => {
     });
     if (createBriefResponse) {
       close();
-      // window.location.reload();
+      window.location.reload();
     }
     setCreateBriefLoading(false);
   };
@@ -1864,6 +1873,7 @@ const NewCampaigns = () => {
                   selectedProductBases,
                   rndId: find(users, { name: rndMember })?.uid,
                   selectedSKUs,
+                  marketBrief,
                 })}
                 headers={generateHeaderTable(briefType, isKeepClipArt)?.headers}
                 onRemove={handleRemoveRow}
@@ -1919,6 +1929,7 @@ const NewCampaigns = () => {
         generateHeaderTable={generateHeaderTable}
         isKeepClipArt={isKeepClipArt}
         handleSubmitBrief={handleSubmitBrief}
+        marketBrief={marketBrief}
       />
     </>
   );
