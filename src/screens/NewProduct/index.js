@@ -409,7 +409,7 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
         headers: [
           "No",
           "Product Base",
-          "Ref",
+          "Hình",
           "Clipart",
           "SKU",
           "Remove",
@@ -827,6 +827,10 @@ const NewCampaigns = () => {
                   designer: getEditorStateAsString(designerNote),
                 }),
                 ...(mktNote && { mkt: getEditorStateAsString(mktNote) }),
+                ...(marketBrief &&
+                  marketBrief.note && {
+                    mixMatch: getEditorStateAsString(marketBrief?.note),
+                  }),
               },
             }
           : {}),
@@ -859,6 +863,12 @@ const NewCampaigns = () => {
           imageRef: x.imageRef,
           skuId: x.uid,
           skuRef: x.skuRef,
+        }),
+        ...(briefType === BRIEF_TYPES[5] && {
+          productLine: selectedProductBases[0]?.uid,
+          clipart: x.uid,
+          designLinkRef: x.designLinkRef,
+          imageRef: x["Hình"],
         }),
       };
     });
@@ -1946,6 +1956,7 @@ const NewCampaigns = () => {
         isKeepClipArt={isKeepClipArt}
         handleSubmitBrief={handleSubmitBrief}
         marketBrief={marketBrief}
+        handleRemoveRow={handleRemoveRow}
       />
     </>
   );

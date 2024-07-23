@@ -252,382 +252,384 @@ const DesignerScreens = () => {
       />
       {selectedSKU &&
         selectedSKU?.briefType !== BRIEF_TYPES[3] &&
-        selectedSKU?.briefType !== BRIEF_TYPES[4] && (
-          <Modal
-            opened={opened}
-            onClose={close}
-            transitionProps={{ transition: "fade", duration: 200 }}
-            overlayProps={{
-              backgroundOpacity: 0.55,
-              blur: 3,
-            }}
-            radius="md"
-            size="1000px"
-          >
-            <LoadingOverlay
-              visible={loadingUpdateDesignLink}
-              zIndex={1000}
-              overlayProps={{ radius: "sm", blur: 2 }}
-            />
-            <Grid>
-              <Grid.Col span={12}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "10px",
-                    backgroundColor: "#D9F5D6",
-                    border: "1px solid #62D256",
-                    color: "#000000",
-                    borderColor: "#62D256",
-                    fontSize: "18px",
-                    borderRadius: "12px",
-                  }}
-                >
-                  {selectedSKU?.briefType} - từ {selectedSKU?.skuRef}
-                </div>
-              </Grid.Col>
-              <Grid.Col span={5}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-start",
-                    padding: "5px",
-                    fontSize: "18px",
-                  }}
-                >
-                  SKU: {selectedSKU?.sku} - Batch: {selectedSKU?.batch}
-                </div>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-start",
-                    padding: "5px",
-                    fontSize: "14px",
-                  }}
-                >
-                  Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} -{" "}
-                  Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
-                  {selectedSKU?.priority === 2 ? " - Priority" : ""}
-                </div>
-              </Grid.Col>
-              <Grid.Col span={2}></Grid.Col>
-              <Grid.Col span={5}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-start",
-                    padding: "5px",
-                    fontSize: "14px",
-                  }}
-                >
-                  {selectedSKU?.rndTeam} - RnD {selectedSKU?.rnd.name} -
-                  Designer {selectedSKU?.designer.name}
-                </div>
-              </Grid.Col>
-              <Grid.Col span={5}>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    padding: "5px",
-                    fontSize: "18px",
-                    alignItems: "center",
-                  }}
-                >
-                  REF
-                </div>
-                <Image
-                  radius="md"
-                  src={
-                    selectedSKU?.imageRef || "/images/content/not_found_2.jpg"
-                  }
-                  height={200}
-                  fit="contain"
-                />
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    padding: "10px",
-                    fontSize: "18px",
-                    alignItems: "center",
-                    marginTop: "10px",
-                  }}
-                >
-                  {selectedSKU?.skuRef}
-                </div>
-                <List
-                  spacing="lg"
-                  size="sm"
-                  center
-                  icon={
-                    <ThemeIcon color="teal" size={24} radius="xl">
-                      <IconCircleCheck
-                        style={{ width: rem(16), height: rem(16) }}
-                      />
-                    </ThemeIcon>
-                  }
-                >
-                  {selectedSKU?.linkProductRef && (
-                    <List.Item>
-                      Link Product:{" "}
-                      <a
-                        style={{
-                          display: "inline-block",
-                          width: "230px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textDecoration: "none",
-                          color: "#228be6",
-                          verticalAlign: "middle",
-                        }}
-                        href={selectedSKU?.linkProductRef}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {selectedSKU?.linkProductRef}
-                      </a>
-                    </List.Item>
-                  )}
-                  {selectedSKU?.designLinkRef && (
-                    <List.Item>
-                      Link Design:{" "}
-                      <a
-                        style={{
-                          display: "inline-block",
-                          width: "230px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textDecoration: "none",
-                          color: "#228be6",
-                          verticalAlign: "middle",
-                        }}
-                        href={selectedSKU?.designLinkRef}
-                        target="_blank"
-                      >
-                        {selectedSKU?.designLinkRef}
-                      </a>
-                    </List.Item>
-                  )}
-                </List>
-              </Grid.Col>
-              <Grid.Col
-                span={2}
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <IconArrowBigRightLinesFilled size={56} color="#228be6" />
-              </Grid.Col>
-              <Grid.Col span={5}>
-                <div
+        selectedSKU?.briefType !== BRIEF_TYPES[4] &&
+        selectedSKU?.briefType !==
+          BRIEF_TYPES[5](
+            <Modal
+              opened={opened}
+              onClose={close}
+              transitionProps={{ transition: "fade", duration: 200 }}
+              overlayProps={{
+                backgroundOpacity: 0.55,
+                blur: 3,
+              }}
+              radius="md"
+              size="1000px"
+            >
+              <LoadingOverlay
+                visible={loadingUpdateDesignLink}
+                zIndex={1000}
+                overlayProps={{ radius: "sm", blur: 2 }}
+              />
+              <Grid>
+                <Grid.Col span={12}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      padding: "10px",
+                      backgroundColor: "#D9F5D6",
+                      border: "1px solid #62D256",
+                      color: "#000000",
+                      borderColor: "#62D256",
+                      fontSize: "18px",
+                      borderRadius: "12px",
+                    }}
+                  >
+                    {selectedSKU?.briefType} - từ {selectedSKU?.skuRef}
+                  </div>
+                </Grid.Col>
+                <Grid.Col span={5}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                      padding: "5px",
+                      fontSize: "18px",
+                    }}
+                  >
+                    SKU: {selectedSKU?.sku} - Batch: {selectedSKU?.batch}
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                      padding: "5px",
+                      fontSize: "14px",
+                    }}
+                  >
+                    Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} -{" "}
+                    Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
+                    {selectedSKU?.priority === 2 ? " - Priority" : ""}
+                  </div>
+                </Grid.Col>
+                <Grid.Col span={2}></Grid.Col>
+                <Grid.Col span={5}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "flex-start",
+                      padding: "5px",
+                      fontSize: "14px",
+                    }}
+                  >
+                    {selectedSKU?.rndTeam} - RnD {selectedSKU?.rnd.name} -
+                    Designer {selectedSKU?.designer.name}
+                  </div>
+                </Grid.Col>
+                <Grid.Col span={5}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      padding: "5px",
+                      fontSize: "18px",
+                      alignItems: "center",
+                    }}
+                  >
+                    REF
+                  </div>
+                  <Image
+                    radius="md"
+                    src={
+                      selectedSKU?.imageRef || "/images/content/not_found_2.jpg"
+                    }
+                    height={200}
+                    fit="contain"
+                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      padding: "10px",
+                      fontSize: "18px",
+                      alignItems: "center",
+                      marginTop: "10px",
+                    }}
+                  >
+                    {selectedSKU?.skuRef}
+                  </div>
+                  <List
+                    spacing="lg"
+                    size="sm"
+                    center
+                    icon={
+                      <ThemeIcon color="teal" size={24} radius="xl">
+                        <IconCircleCheck
+                          style={{ width: rem(16), height: rem(16) }}
+                        />
+                      </ThemeIcon>
+                    }
+                  >
+                    {selectedSKU?.linkProductRef && (
+                      <List.Item>
+                        Link Product:{" "}
+                        <a
+                          style={{
+                            display: "inline-block",
+                            width: "230px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            textDecoration: "none",
+                            color: "#228be6",
+                            verticalAlign: "middle",
+                          }}
+                          href={selectedSKU?.linkProductRef}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {selectedSKU?.linkProductRef}
+                        </a>
+                      </List.Item>
+                    )}
+                    {selectedSKU?.designLinkRef && (
+                      <List.Item>
+                        Link Design:{" "}
+                        <a
+                          style={{
+                            display: "inline-block",
+                            width: "230px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            textDecoration: "none",
+                            color: "#228be6",
+                            verticalAlign: "middle",
+                          }}
+                          href={selectedSKU?.designLinkRef}
+                          target="_blank"
+                        >
+                          {selectedSKU?.designLinkRef}
+                        </a>
+                      </List.Item>
+                    )}
+                  </List>
+                </Grid.Col>
+                <Grid.Col
+                  span={2}
                   style={{
                     display: "flex",
                     justifyContent: "center",
-                    padding: "10px",
-                    fontSize: "18px",
                     alignItems: "center",
                   }}
                 >
-                  Scale
-                </div>
-                {selectedSKU?.briefType === BRIEF_TYPES[0] ||
-                selectedSKU?.briefType === BRIEF_TYPES[1] ||
-                (selectedSKU?.briefType === BRIEF_TYPES[2] &&
-                  selectedSKU?.clipart.name) ? (
-                  <>
-                    <Image
-                      radius="md"
-                      src={
-                        selectedSKU[
-                          CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                            selectedSKU?.briefType
-                          ]
-                        ]?.image || "/images/content/not_found_2.jpg"
-                      }
-                      height={200}
-                      fit="contain"
-                    />
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        padding: "10px",
-                        fontSize: "18px",
-                        alignItems: "center",
-                        marginTop: "10px",
-                      }}
-                    >
-                      {
-                        selectedSKU[
-                          CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                            selectedSKU?.briefType
-                          ]
-                        ]?.name
-                      }
-                    </div>
-                  </>
-                ) : null}
-                <List
-                  spacing="lg"
-                  size="sm"
-                  center
-                  icon={
-                    <ThemeIcon color="teal" size={24} radius="xl">
-                      <IconCircleCheck
-                        style={{ width: rem(16), height: rem(16) }}
-                      />
-                    </ThemeIcon>
-                  }
-                >
-                  {selectedSKU[
-                    CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
-                  ]?.refLink && (
-                    <List.Item>
-                      Link Mockup:{" "}
-                      <a
-                        style={{
-                          display: "inline-block",
-                          width: "230px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textDecoration: "none",
-                          color: "#228be6",
-                          verticalAlign: "middle",
-                        }}
-                        href={
+                  <IconArrowBigRightLinesFilled size={56} color="#228be6" />
+                </Grid.Col>
+                <Grid.Col span={5}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      padding: "10px",
+                      fontSize: "18px",
+                      alignItems: "center",
+                    }}
+                  >
+                    Scale
+                  </div>
+                  {selectedSKU?.briefType === BRIEF_TYPES[0] ||
+                  selectedSKU?.briefType === BRIEF_TYPES[1] ||
+                  (selectedSKU?.briefType === BRIEF_TYPES[2] &&
+                    selectedSKU?.clipart.name) ? (
+                    <>
+                      <Image
+                        radius="md"
+                        src={
                           selectedSKU[
                             CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
                               selectedSKU?.briefType
                             ]
-                          ]?.refLink
+                          ]?.image || "/images/content/not_found_2.jpg"
                         }
-                        target="_blank"
+                        height={200}
+                        fit="contain"
+                      />
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          padding: "10px",
+                          fontSize: "18px",
+                          alignItems: "center",
+                          marginTop: "10px",
+                        }}
                       >
                         {
                           selectedSKU[
                             CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
                               selectedSKU?.briefType
                             ]
-                          ]?.refLink
+                          ]?.name
                         }
-                      </a>
-                    </List.Item>
-                  )}
-                </List>
-                {selectedSKU?.briefType === BRIEF_TYPES[2] && (
-                  <MantineCard
-                    shadow="sm"
-                    padding="sm"
-                    style={{
-                      cursor: "pointer",
-                      position: "relative",
-                      marginTop: "10px",
-                    }}
-                  >
-                    <MantineCard.Section>
-                      <div
-                        style={{
-                          cursor: "pointer",
-                          width: "100%",
-                          height: "200px",
-                          padding: "10px",
-                          position: "relative",
-                        }}
-                      >
-                        {selectedSKU?.niche?.quote}
-                        {true && (
-                          <>
-                            <div
-                              style={{
-                                padding: "5px",
-                                position: "absolute",
-                                bottom: "10px",
-                                right: "13px",
-                                borderRadius: "50%",
-                                zIndex: 2,
-                              }}
-                            >
-                              <CopyButton
-                                value={selectedSKU?.niche?.quote}
-                                color
-                              >
-                                {({ copied, copy }) => (
-                                  <Button color="#62D256" onClick={copy}>
-                                    {copied ? (
-                                      <IconCopyCheckFilled color="#ffffff" />
-                                    ) : (
-                                      <IconCopy color="#ffffff" />
-                                    )}
-                                  </Button>
-                                )}
-                              </CopyButton>
-                            </div>
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: "9px",
-                                right: "0",
-                                height: "94%",
-                                width: "99%",
-                                cursor: "pointer",
-                                padding: "10px",
-                                borderRadius: "10px",
-                                zIndex: 1,
-                              }}
-                            ></div>
-                          </>
-                        )}
                       </div>
-                    </MantineCard.Section>
-                  </MantineCard>
-                )}
-              </Grid.Col>
-              <Grid.Col span={12}>
-                <Editor
-                  state={getStringAsEditorState(selectedSKU?.note?.designer)}
-                  classEditor={styles.editor}
-                  label="Designer Note"
-                  readOnly={true}
-                />
-              </Grid.Col>
-              <Grid.Col span={12}>
-                <Flex gap={10}>
-                  <TextInput
-                    placeholder="Output - Link Design (NAS)"
-                    style={{
-                      flex: "1 1 90%",
-                    }}
-                    value={linkDesign}
-                    onChange={(event) => setLinkDesign(event.target.value)}
-                  />
-                  <Button
-                    style={{
-                      flex: "1 1 10%",
-                      backgroundColor: "#62D256",
-                      color: "#ffffff",
-                    }}
-                    onClick={() => {
-                      handleUpdateLinkDesign(selectedSKU?.uid);
-                    }}
+                    </>
+                  ) : null}
+                  <List
+                    spacing="lg"
+                    size="sm"
+                    center
+                    icon={
+                      <ThemeIcon color="teal" size={24} radius="xl">
+                        <IconCircleCheck
+                          style={{ width: rem(16), height: rem(16) }}
+                        />
+                      </ThemeIcon>
+                    }
                   >
-                    DONE
-                  </Button>
-                </Flex>
-              </Grid.Col>
-            </Grid>
-          </Modal>
-        )}
+                    {selectedSKU[
+                      CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
+                    ]?.refLink && (
+                      <List.Item>
+                        Link Mockup:{" "}
+                        <a
+                          style={{
+                            display: "inline-block",
+                            width: "230px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            textDecoration: "none",
+                            color: "#228be6",
+                            verticalAlign: "middle",
+                          }}
+                          href={
+                            selectedSKU[
+                              CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                                selectedSKU?.briefType
+                              ]
+                            ]?.refLink
+                          }
+                          target="_blank"
+                        >
+                          {
+                            selectedSKU[
+                              CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                                selectedSKU?.briefType
+                              ]
+                            ]?.refLink
+                          }
+                        </a>
+                      </List.Item>
+                    )}
+                  </List>
+                  {selectedSKU?.briefType === BRIEF_TYPES[2] && (
+                    <MantineCard
+                      shadow="sm"
+                      padding="sm"
+                      style={{
+                        cursor: "pointer",
+                        position: "relative",
+                        marginTop: "10px",
+                      }}
+                    >
+                      <MantineCard.Section>
+                        <div
+                          style={{
+                            cursor: "pointer",
+                            width: "100%",
+                            height: "200px",
+                            padding: "10px",
+                            position: "relative",
+                          }}
+                        >
+                          {selectedSKU?.niche?.quote}
+                          {true && (
+                            <>
+                              <div
+                                style={{
+                                  padding: "5px",
+                                  position: "absolute",
+                                  bottom: "10px",
+                                  right: "13px",
+                                  borderRadius: "50%",
+                                  zIndex: 2,
+                                }}
+                              >
+                                <CopyButton
+                                  value={selectedSKU?.niche?.quote}
+                                  color
+                                >
+                                  {({ copied, copy }) => (
+                                    <Button color="#62D256" onClick={copy}>
+                                      {copied ? (
+                                        <IconCopyCheckFilled color="#ffffff" />
+                                      ) : (
+                                        <IconCopy color="#ffffff" />
+                                      )}
+                                    </Button>
+                                  )}
+                                </CopyButton>
+                              </div>
+                              <div
+                                style={{
+                                  position: "absolute",
+                                  top: "9px",
+                                  right: "0",
+                                  height: "94%",
+                                  width: "99%",
+                                  cursor: "pointer",
+                                  padding: "10px",
+                                  borderRadius: "10px",
+                                  zIndex: 1,
+                                }}
+                              ></div>
+                            </>
+                          )}
+                        </div>
+                      </MantineCard.Section>
+                    </MantineCard>
+                  )}
+                </Grid.Col>
+                <Grid.Col span={12}>
+                  <Editor
+                    state={getStringAsEditorState(selectedSKU?.note?.designer)}
+                    classEditor={styles.editor}
+                    label="Designer Note"
+                    readOnly={true}
+                  />
+                </Grid.Col>
+                <Grid.Col span={12}>
+                  <Flex gap={10}>
+                    <TextInput
+                      placeholder="Output - Link Design (NAS)"
+                      style={{
+                        flex: "1 1 90%",
+                      }}
+                      value={linkDesign}
+                      onChange={(event) => setLinkDesign(event.target.value)}
+                    />
+                    <Button
+                      style={{
+                        flex: "1 1 10%",
+                        backgroundColor: "#62D256",
+                        color: "#ffffff",
+                      }}
+                      onClick={() => {
+                        handleUpdateLinkDesign(selectedSKU?.uid);
+                      }}
+                    >
+                      DONE
+                    </Button>
+                  </Flex>
+                </Grid.Col>
+              </Grid>
+            </Modal>
+          )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[3] && (
         <NewDesign
           opened={opened}
@@ -640,6 +642,17 @@ const DesignerScreens = () => {
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[4] && (
+        <ScaleDesign
+          opened={opened}
+          close={close}
+          selectedSKU={selectedSKU}
+          linkDesign={linkDesign}
+          loadingUpdateDesignLink={loadingUpdateDesignLink}
+          setLinkDesign={setLinkDesign}
+          handleUpdateLinkDesign={handleUpdateLinkDesign}
+        />
+      )}
+      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[5] && (
         <ScaleDesign
           opened={opened}
           close={close}

@@ -214,7 +214,9 @@ const ScaleDesign = ({
               alignItems: "center",
               marginTop: "20px",
             }}
-          ></div>
+          >
+            {selectedSKU?.skuInfo?.sku}
+          </div>
           <List
             spacing="lg"
             size="sm"
@@ -228,7 +230,7 @@ const ScaleDesign = ({
           >
             {selectedSKU?.skuInfo?.nasShareLink && (
               <List.Item>
-                Link Mockup:{" "}
+                Link Design:{" "}
                 <a
                   style={{
                     display: "inline-block",
