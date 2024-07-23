@@ -9,6 +9,7 @@ import {
   DESIGNER_MEMBERS,
   GROUP_WORKS,
   KEEP_CLIPARTS,
+  LAYOUT_TYPES,
   MEMBERS,
   RND_SIZES,
 } from "../../constant";
@@ -37,6 +38,7 @@ import { showNotification } from "../../utils/index";
 import Dropdown from "../../components/Dropdown";
 import CustomTable from "../../components/Table";
 import {
+  ceil,
   compact,
   concat,
   filter,
@@ -489,6 +491,7 @@ const NewCampaigns = () => {
   const [isKeepClipArt, setKeepClipArt] = useState(KEEP_CLIPARTS[0]);
   const [loadingQuotes, setLoadingQuotes] = useState(false);
   const [loaderIcon, setLoaderIcon] = useState(false);
+  const [usingInlineProductBaseData, setUsingProductBaseData] = useState(false);
   const handleSearchSKU = async () => {
     if (isEmpty(search)) {
       showNotification("Thất bại", "Vui lòng nhập SKU", "red");
@@ -498,7 +501,6 @@ const NewCampaigns = () => {
     setSelectedProductLines([]);
     setLoadingSearchSKU(true);
     setLoadingProductLines(true);
-    // await delayTime(2000);
     const product = await rndServices.searchProducts(search);
     if (product) {
       showNotification("Thành công", "Tìm thấy SKU", "green");
@@ -587,6 +589,7 @@ const NewCampaigns = () => {
     setUsers(data);
     setTeams(uniq(map(data, "team")));
   };
+
   useEffect(() => {
     const rnds = filter(users, { role: "rnd", team: workGroup });
     const designers = !isEmpty(
@@ -633,6 +636,28 @@ const NewCampaigns = () => {
   };
   const fetchProductBases = async (page) => {
     setLoadingProductBase(true);
+    if (usingInlineProductBaseData) {
+      const productBases =
+        layout === LAYOUT_TYPES[0] ? SKU?.sameLayouts : SKU?.diffLayouts;
+      let data = productBases;
+      if (queryProductBase.keyword) {
+        data = productBases?.filter((x) =>
+          x.name.toLowerCase().includes(queryProductBase.keyword.toLowerCase())
+        );
+      }
+      const metadata = {
+        currentPage: page,
+        totalPages: ceil(data.length / 12),
+      };
+      data = data.slice(
+        (page - 1) * 12,
+        page * 12 > data.length ? data.length : page * 12
+      );
+      setProductBases(data);
+      setProductBasePagination(metadata);
+      setLoadingProductBase(false);
+      return;
+    }
     const { data, metadata } = await rndServices.fetchProductLines({
       limit: 12,
       page,
@@ -700,6 +725,7 @@ const NewCampaigns = () => {
     setSelectedProductBases([]);
     setQueryProductBase({});
     setMarketBrief({});
+    setUsingProductBaseData(false);
   };
 
   useEffect(() => {
@@ -878,7 +904,7 @@ const NewCampaigns = () => {
     });
     if (createBriefResponse) {
       close();
-      window.location.reload();
+      // window.location.reload();
     }
     setCreateBriefLoading(false);
   };
@@ -906,7 +932,12 @@ const NewCampaigns = () => {
   }, [quotePagination.currentPage, queryQuote]);
   useEffect(() => {
     fetchProductBases(productBasePagination.currentPage);
-  }, [productBasePagination.currentPage, queryProductBase]);
+  }, [
+    productBasePagination.currentPage,
+    queryProductBase,
+    layout,
+    usingInlineProductBaseData,
+  ]);
   useEffect(() => {
     fetchSKUs(skuPagination.currentPage);
   }, [skuPagination.currentPage, querySKU]);
@@ -980,6 +1011,8 @@ const NewCampaigns = () => {
               briefType={briefType}
               SKU={SKU}
               fetchProductBases={fetchProductBases}
+              setUsingProductBaseData={setUsingProductBaseData}
+              setProductBasePagination={setProductBasePagination}
             />
           </div>
         )}

@@ -60,11 +60,11 @@ const ProductBase = ({
   setValidCollections,
   briefType,
   SKU,
+  setUsingProductBaseData,
+  setProductBasePagination,
 }) => {
   const [searchProductLine, setSearchProductLine] = useState("");
-  const [previewSelectedProductLine, setPreviewSelectedProductLine] = useState(
-    []
-  );
+
   const [opened, { open, close }] = useDisclosure(false);
 
   return (
@@ -97,286 +97,268 @@ const ProductBase = ({
                 Sync Product Base
               </Button>
             </Flex>
-            <Flex
-              style={{
-                gap: "8px",
-                padding: "10px",
-                borderRadius: "10px",
-                backgroundColor: "#EFF0F1",
-              }}
-            >
-              <TextInput
-                placeholder="Product Base ..."
-                size="sm"
-                leftSection={
-                  <span
-                    onClick={() => {
-                      setQueryProductLines({
-                        keyword: searchProductLine,
-                      });
-                    }}
-                    style={{
-                      cursor: "pointer",
-                    }}
-                  >
-                    <IconSearch size={16} />
-                  </span>
-                }
-                styles={{
-                  input: {
-                    width: "300px",
-                  },
-                }}
-                value={searchProductLine}
-                onChange={(e) => setSearchProductLine(e.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    setQueryProductLines({
-                      keyword: searchProductLine,
-                    });
-                  }
-                }}
-              />
-              <Button
-                onClick={() => {
-                  setSearchProductLine("");
-                  setQueryProductLines({
-                    keyword: "",
-                  });
-                }}
-              >
-                <IconFilterOff />
-              </Button>
-            </Flex>
           </div>
         }
       >
-        {briefType === BRIEF_TYPES[0] && (
-          <div
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "10px 5px",
+            flexWrap: "wrap-reverse",
+            backgroundColor: "#EFF0F1",
+            borderRadius: "10px",
+          }}
+        >
+          <Flex
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "10px 5px",
-              gap: "10px",
-              flexWrap: "wrap-reverse",
-              backgroundColor: "#EFF0F1",
+              gap: "8px",
+              padding: "10px",
               borderRadius: "10px",
+              backgroundColor: "#EFF0F1",
             }}
           >
-            <Flex
-              style={{
-                gap: "8px",
-                padding: "10px",
-                borderRadius: "10px",
-                backgroundColor: "#EFF0F1",
-              }}
-            >
-              <MultiSelect
-                placeholder="Chọn Collections"
-                data={map(collections, "name")}
-                styles={{
-                  input: {
-                    width: "300px",
-                  },
-                }}
-                value={validCollections}
-                onChange={(value) => {
-                  if (!layout) {
-                    showNotification("Thất bại", "Vui lòng chọn Layout", "red");
-                    return;
-                  }
-                  const allProductLines = flatMap(
-                    compact(
-                      map(
-                        filter(collections, (x) => includes(value, x.name)),
-                        "productLines"
-                      )
-                    )
-                  );
-                  let newSelectedProductLines = [];
-                  if (layout && !isEmpty(value)) {
-                    if (layout === LAYOUT_TYPES[0]) {
-                      newSelectedProductLines = filter(allProductLines, (x) =>
-                        includes(map(SKU.sameLayouts, "uid"), x.uid)
-                      );
-                    } else {
-                      newSelectedProductLines = filter(
-                        allProductLines,
-                        (x) => !includes(map(SKU.sameLayouts, "uid"), x.uid)
-                      );
+            {briefType === BRIEF_TYPES[0] && (
+              <>
+                <Select
+                  placeholder="Chọn Layout"
+                  data={LAYOUT_TYPES}
+                  styles={{
+                    input: {
+                      width: "300px",
+                    },
+                  }}
+                  clearable
+                  value={layout}
+                  onChange={(value) => {
+                    if (!SKU) {
+                      showNotification("Thất bại", "Vui lòng chọn SKU", "red");
+                      return;
                     }
-                    setSelectedProductLines(
-                      uniqBy(
-                        concat(selectedProductLines, newSelectedProductLines),
-                        "uid"
+                    setLayout(value);
+                    setUsingProductBaseData(true);
+                  }}
+                  onClear={() => {
+                    setSelectedProductLines([]);
+                    setValidCollections([]);
+                    setUsingProductBaseData(false);
+                  }}
+                />
+                <MultiSelect
+                  placeholder="Chọn Collections"
+                  data={map(collections, "name")}
+                  styles={{
+                    input: {
+                      width: "300px",
+                    },
+                  }}
+                  value={validCollections}
+                  onChange={(value) => {
+                    if (!layout) {
+                      showNotification(
+                        "Thất bại",
+                        "Vui lòng chọn Layout",
+                        "red"
+                      );
+                      return;
+                    }
+                    const allProductLines = flatMap(
+                      compact(
+                        map(
+                          filter(collections, (x) => includes(value, x.name)),
+                          "productLines"
+                        )
                       )
                     );
-                  }
-                  setValidCollections(value);
-                }}
-                onRemove={(value) => {
-                  if (!layout) {
-                    showNotification("Thất bại", "Vui lòng chọn Layout", "red");
-                    return;
-                  }
-                  const allProductLines = flatMap(
-                    compact(
-                      map(
-                        filter(collections, (x) => value === x.name),
-                        "productLines"
+                    let newSelectedProductLines = [];
+                    if (layout && !isEmpty(value)) {
+                      if (layout === LAYOUT_TYPES[0]) {
+                        newSelectedProductLines = filter(allProductLines, (x) =>
+                          includes(map(SKU.sameLayouts, "uid"), x.uid)
+                        );
+                      } else {
+                        newSelectedProductLines = filter(
+                          allProductLines,
+                          (x) => !includes(map(SKU.sameLayouts, "uid"), x.uid)
+                        );
+                      }
+                      setSelectedProductLines(
+                        uniqBy(
+                          concat(selectedProductLines, newSelectedProductLines),
+                          "uid"
+                        )
+                      );
+                    }
+                    setValidCollections(value);
+                  }}
+                  onRemove={(value) => {
+                    if (!layout) {
+                      showNotification(
+                        "Thất bại",
+                        "Vui lòng chọn Layout",
+                        "red"
+                      );
+                      return;
+                    }
+                    const allProductLines = flatMap(
+                      compact(
+                        map(
+                          filter(collections, (x) => value === x.name),
+                          "productLines"
+                        )
                       )
-                    )
-                  );
-                  let newSelectedProductLines = [];
-                  const sameLayouts = intersectionBy(
-                    allProductLines,
-                    SKU.sameLayouts,
-                    "uid"
-                  );
-                  if (layout) {
-                    if (layout === LAYOUT_TYPES[0]) {
-                      // remove all same layout of this collection
-                      newSelectedProductLines = filter(
-                        selectedProductLines,
-                        (x) => !includes(map(sameLayouts, "uid"), x.uid)
-                      );
-                    } else {
-                      // remove all diff layout of this collection
-                      newSelectedProductLines = filter(
-                        selectedProductLines,
-                        (x) => includes(map(sameLayouts, "uid"), x.uid)
-                      );
+                    );
+                    let newSelectedProductLines = [];
+                    const sameLayouts = intersectionBy(
+                      allProductLines,
+                      SKU.sameLayouts,
+                      "uid"
+                    );
+                    if (layout) {
+                      if (layout === LAYOUT_TYPES[0]) {
+                        // remove all same layout of this collection
+                        newSelectedProductLines = filter(
+                          selectedProductLines,
+                          (x) => !includes(map(sameLayouts, "uid"), x.uid)
+                        );
+                      } else {
+                        // remove all diff layout of this collection
+                        newSelectedProductLines = filter(
+                          selectedProductLines,
+                          (x) => includes(map(sameLayouts, "uid"), x.uid)
+                        );
+                      }
+                      setSelectedProductLines(newSelectedProductLines);
                     }
-                    setSelectedProductLines(newSelectedProductLines);
-                  }
-                }}
-                clearable
-                onClear={() => {
-                  const allProductLines = flatMap(
-                    compact(map(collections, "productLines"))
-                  );
-                  const sameLayouts = intersectionBy(
-                    allProductLines,
-                    SKU.sameLayouts,
-                    "uid"
-                  );
-                  let newSelectedProductLines = [];
-                  if (layout) {
-                    if (layout === LAYOUT_TYPES[0]) {
-                      newSelectedProductLines = filter(
-                        selectedProductLines,
-                        (x) => !includes(map(sameLayouts, "uid"), x.uid)
-                      );
-                    } else {
-                      newSelectedProductLines = filter(
-                        selectedProductLines,
-                        (x) => includes(map(sameLayouts, "uid"), x.uid)
-                      );
+                  }}
+                  clearable
+                  onClear={() => {
+                    const allProductLines = flatMap(
+                      compact(map(collections, "productLines"))
+                    );
+                    const sameLayouts = intersectionBy(
+                      allProductLines,
+                      SKU.sameLayouts,
+                      "uid"
+                    );
+                    let newSelectedProductLines = [];
+                    if (layout) {
+                      if (layout === LAYOUT_TYPES[0]) {
+                        newSelectedProductLines = filter(
+                          selectedProductLines,
+                          (x) => !includes(map(sameLayouts, "uid"), x.uid)
+                        );
+                      } else {
+                        newSelectedProductLines = filter(
+                          selectedProductLines,
+                          (x) => includes(map(sameLayouts, "uid"), x.uid)
+                        );
+                      }
+                      setSelectedProductLines(newSelectedProductLines);
                     }
-                    setSelectedProductLines(newSelectedProductLines);
-                  }
-                }}
-              />
-              <Select
-                placeholder="Chọn Layout"
-                data={LAYOUT_TYPES}
-                styles={{
-                  input: {
-                    width: "300px",
-                  },
-                }}
-                clearable
-                value={layout}
-                onChange={(value) => {
-                  if (!SKU) {
-                    showNotification("Thất bại", "Vui lòng chọn SKU", "red");
-                    return;
-                  }
-                  setLayout(value);
-                  if (!value) {
-                    setPreviewSelectedProductLine([]);
-                    return;
-                  }
-                  if (value === LAYOUT_TYPES[0]) {
-                    setPreviewSelectedProductLine(SKU.sameLayouts);
-                  } else {
-                    setPreviewSelectedProductLine(SKU.diffLayouts);
-                  }
-                }}
-                onClear={() => {
-                  setPreviewSelectedProductLine([]);
-                  setSelectedProductLines([]);
-                  setValidCollections([]);
-                }}
-              />
-              <Button
-                onClick={() => {
-                  setLayout(null);
-                  setValidCollections([]);
-                  setSelectedProductLines([]);
-                  setPreviewSelectedProductLine([]);
-                }}
-              >
-                <IconFilterOff />
-              </Button>
-            </Flex>
-            <Flex
-              style={{
-                gap: "8px",
-                padding: "10px",
-                borderRadius: "10px",
-                backgroundColor: "#EFF0F1",
-              }}
-            >
-              <Text
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-              >
-                {!isEmpty(previewSelectedProductLine) ||
-                !isEmpty(selectedProductLines) ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "10px",
-                    }}
-                  >
-                    {!isEmpty(selectedProductLines) && (
-                      <span>
-                        {selectedProductLines.length} Product Base đã chọn
-                      </span>
-                    )}
-                    {!isEmpty(previewSelectedProductLine) && (
-                      <span>
-                        {previewSelectedProductLine.length} Product Base{" "}
-                        {layout === LAYOUT_TYPES[0]
-                          ? "cùng layout"
-                          : "khác layout"}
-                      </span>
-                    )}
-                  </div>
-                ) : null}
+                  }}
+                />
+              </>
+            )}
+
+            <TextInput
+              placeholder="Product Base ..."
+              size="sm"
+              leftSection={
                 <span
+                  onClick={() => {
+                    setQueryProductLines({
+                      keyword: searchProductLine,
+                    });
+                  }}
                   style={{
-                    marginLeft: "10px",
                     cursor: "pointer",
                   }}
-                  onClick={() => {
-                    open();
+                >
+                  <IconSearch size={16} />
+                </span>
+              }
+              styles={{
+                input: {
+                  width: "300px",
+                },
+              }}
+              value={searchProductLine}
+              onChange={(e) => setSearchProductLine(e.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  setQueryProductLines({
+                    keyword: searchProductLine,
+                  });
+                }
+              }}
+            />
+            <Button
+              onClick={() => {
+                if (setProductBasePagination) {
+                  setProductBasePagination({
+                    currentPage: 1,
+                  });
+                }
+                if (setUsingProductBaseData) {
+                  setUsingProductBaseData(false);
+                }
+                setSearchProductLine("");
+                setQueryProductLines({
+                  keyword: "",
+                });
+                if (setLayout) {
+                  setLayout(null);
+                }
+                if (setValidCollections) {
+                  setValidCollections([]);
+                }
+                setSelectedProductLines([]);
+              }}
+            >
+              <IconFilterOff />
+            </Button>
+          </Flex>
+          {briefType === BRIEF_TYPES[0] && (
+            <Text
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+              }}
+            >
+              {!isEmpty(selectedProductLines) ? (
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "10px",
                   }}
                 >
-                  <Tooltip label="Preview Product Base">
-                    <IconSelector size={24} />
-                  </Tooltip>
-                </span>
-              </Text>
-            </Flex>
-          </div>
-        )}
+                  {!isEmpty(selectedProductLines) && (
+                    <span>
+                      {selectedProductLines.length} Product Base đã chọn
+                    </span>
+                  )}
+                </div>
+              ) : null}
+              <span
+                style={{
+                  marginLeft: "10px",
+                  cursor: "pointer",
+                }}
+                onClick={() => {
+                  open();
+                }}
+              >
+                <Tooltip label="Preview Product Base">
+                  <IconSelector size={24} />
+                </Tooltip>
+              </span>
+            </Text>
+          )}
+        </div>
 
         <ScrollArea
           h={550}
@@ -545,130 +527,124 @@ const ProductBase = ({
             }}
             columns={12}
           >
-            {map(
-              uniqBy(
-                concat(selectedProductLines, previewSelectedProductLine),
-                "uid"
-              ),
-              (productLine, index) => (
-                <Grid.Col
-                  span={{ sm: 5, md: 4, lg: 3 }}
-                  key={index}
-                  style={{
-                    position: "relative",
-                  }}
-                  onClick={() => {
-                    if (briefType !== BRIEF_TYPES[0]) {
-                      if (
-                        includes(
-                          map(selectedProductLines, "uid"),
-                          productLine.uid
+            {map(uniqBy(selectedProductLines, "uid"), (productLine, index) => (
+              <Grid.Col
+                span={{ sm: 5, md: 4, lg: 3 }}
+                key={index}
+                style={{
+                  position: "relative",
+                }}
+                onClick={() => {
+                  if (briefType !== BRIEF_TYPES[0]) {
+                    if (
+                      includes(
+                        map(selectedProductLines, "uid"),
+                        productLine.uid
+                      )
+                    ) {
+                      setSelectedProductLines(
+                        selectedProductLines.filter(
+                          (x) => x.uid !== productLine.uid
                         )
-                      ) {
-                        setSelectedProductLines(
-                          selectedProductLines.filter(
-                            (x) => x.uid !== productLine.uid
-                          )
-                        );
-                      } else {
-                        setSelectedProductLines([productLine]);
-                      }
+                      );
                     } else {
-                      if (
-                        includes(
-                          map(selectedProductLines, "name"),
-                          productLine.name
-                        )
-                      ) {
-                        setSelectedProductLines(
-                          selectedProductLines.filter(
-                            (x) => x.name !== productLine.name
-                          )
-                        );
-                      } else {
-                        setSelectedProductLines([
-                          ...selectedProductLines,
-                          productLine,
-                        ]);
-                      }
+                      setSelectedProductLines([productLine]);
                     }
+                  } else {
+                    if (
+                      includes(
+                        map(selectedProductLines, "name"),
+                        productLine.name
+                      )
+                    ) {
+                      setSelectedProductLines(
+                        selectedProductLines.filter(
+                          (x) => x.name !== productLine.name
+                        )
+                      );
+                    } else {
+                      setSelectedProductLines([
+                        ...selectedProductLines,
+                        productLine,
+                      ]);
+                    }
+                  }
+                }}
+              >
+                <MantineCard
+                  shadow="sm"
+                  padding="sm"
+                  style={{
+                    cursor: "pointer",
                   }}
                 >
-                  <MantineCard
-                    shadow="sm"
-                    padding="sm"
+                  <MantineCard.Section>
+                    <LazyLoad height={200} once={true}>
+                      <Image
+                        src={
+                          productLine.imageSrc ||
+                          productLine?.image ||
+                          "/images/content/not_found_2.jpg"
+                        }
+                        h={200}
+                        alt="No way!"
+                        fit="contain"
+                      />
+                    </LazyLoad>
+                  </MantineCard.Section>
+                  <Text
+                    fw={500}
+                    size="sm"
+                    mt="md"
                     style={{
-                      cursor: "pointer",
+                      display: "inline-block",
+                      width: "200px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      textDecoration: "none",
+                      verticalAlign: "middle",
                     }}
                   >
-                    <MantineCard.Section>
-                      <LazyLoad height={200} once={true}>
-                        <Image
-                          src={
-                            productLine.imageSrc ||
-                            productLine?.image ||
-                            "/images/content/not_found_2.jpg"
-                          }
-                          h={200}
-                          alt="No way!"
-                          fit="contain"
-                        />
-                      </LazyLoad>
-                    </MantineCard.Section>
-                    <Text
-                      fw={500}
-                      size="sm"
-                      mt="md"
+                    {productLine.name}
+                  </Text>
+                </MantineCard>
+                {includes(
+                  map(selectedProductLines, "name"),
+                  productLine.name
+                ) && (
+                  <>
+                    <div
                       style={{
-                        display: "inline-block",
-                        width: "200px",
-                        whiteSpace: "nowrap",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        textDecoration: "none",
-                        verticalAlign: "middle",
+                        padding: "5px",
+                        position: "absolute",
+                        top: "15px",
+                        right: "13px",
+                        borderRadius: "50%",
+                        backgroundColor: "#64CD73",
+                        zIndex: 2,
                       }}
                     >
-                      {productLine.name}
-                    </Text>
-                  </MantineCard>
-                  {includes(
-                    map(selectedProductLines, "name"),
-                    productLine.name
-                  ) && (
-                    <>
-                      <div
-                        style={{
-                          padding: "5px",
-                          position: "absolute",
-                          top: "15px",
-                          right: "13px",
-                          borderRadius: "50%",
-                          backgroundColor: "#64CD73",
-                          zIndex: 2,
-                        }}
-                      >
-                        <IconCheck color="#ffffff" />
-                      </div>
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "9px",
-                          right: "0",
-                          height: "94%",
-                          width: "99%",
-                          cursor: "pointer",
-                          padding: "10px",
-                          borderRadius: "10px",
-                          backgroundColor: "rgba(244, 252, 243,0.5)",
-                          zIndex: 1,
-                        }}
-                      ></div>
-                    </>
-                  )}
-                </Grid.Col>
-              )
-            )}
+                      <IconCheck color="#ffffff" />
+                    </div>
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "9px",
+                        right: "0",
+                        height: "94%",
+                        width: "99%",
+                        cursor: "pointer",
+                        padding: "10px",
+                        borderRadius: "10px",
+                        backgroundColor: "rgba(244, 252, 243,0.5)",
+                        zIndex: 1,
+                      }}
+                    ></div>
+                  </>
+                )}
+              </Grid.Col>
+            ))}
           </Grid>
         </ScrollArea>
       </Modal>

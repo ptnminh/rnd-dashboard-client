@@ -381,7 +381,9 @@ const DesignerScreens = () => {
               >
                 {selectedSKU?.designLinkRef && (
                   <List.Item>
-                    Link Design (NAS):{" "}
+                    {selectedSKU?.briefType === BRIEF_TYPES[5]
+                      ? "Link Product (Market):"
+                      : "Link Design (NAS):"}{" "}
                     <a
                       style={{
                         display: "inline-block",
@@ -505,7 +507,7 @@ const DesignerScreens = () => {
                 {selectedSKU?.briefType === BRIEF_TYPES[4] ||
                 selectedSKU?.briefType === BRIEF_TYPES[5] ? (
                   <List.Item>
-                    Product Base:
+                    Product Base: {""}
                     <span>
                       {selectedSKU?.skuInfo.name ||
                         selectedSKU?.productLine?.name}
