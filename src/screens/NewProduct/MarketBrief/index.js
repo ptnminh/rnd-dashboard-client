@@ -40,7 +40,7 @@ const MarketBriefDesign = ({ marketBrief, setMarketBrief, title }) => {
     if (updateFileResponse) {
       const newMarketBrief = {
         imageRef: updateFileResponse.data.url,
-        designLinkRef: marketBrief?.designLinkRef,
+        designLinkRef: marketBrief?.designLinkRef || "",
         note: marketBrief?.note,
       };
       setMarketBrief(newMarketBrief);
@@ -71,7 +71,7 @@ const MarketBriefDesign = ({ marketBrief, setMarketBrief, title }) => {
         if (updateFileResponse) {
           const newMarketBrief = {
             imageRef: updateFileResponse.data.url,
-            designLinkRef: marketBrief?.designLinkRef,
+            designLinkRef: marketBrief?.designLinkRef || "",
             note: marketBrief?.note,
           };
           setMarketBrief(newMarketBrief);

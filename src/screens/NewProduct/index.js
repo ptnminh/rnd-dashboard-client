@@ -297,14 +297,15 @@ const generateScaleMixMatch = ({
       ).padStart(4, "0")}`;
       return {
         No: index + 1,
-        "Product Base": selectedProductBases[0]?.name,
+        "Hình Product Base":
+          selectedProductBases[0]?.image || selectedProductBases[0]?.imageSrc,
         Hình: marketBrief?.imageRef,
         Clipart: x.imageSrc,
         SKU: name,
         Remove: "x",
         uid: x.uid,
         clipartId: x?.uid,
-        designLinkRef: x?.marketBrief?.designLinkRef,
+        designLinkRef: marketBrief?.designLinkRef,
         nextAccumulator: currentRnDAccumulator + selectedClipArts.length,
         skuPrefix: prefix,
       };
@@ -408,7 +409,7 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
       return {
         headers: [
           "No",
-          "Product Base",
+          "Hình Product Base",
           "Hình",
           "Clipart",
           "SKU",
@@ -819,7 +820,7 @@ const NewCampaigns = () => {
         rnd: find(users, { name: rndMember })?.uid,
         epm: find(users, { name: epmMember })?.uid,
         designer: find(users, { name: designerMember })?.uid,
-        ...(epmNote || designerNote || mktNote
+        ...(epmNote || designerNote || mktNote || marketBrief?.note
           ? {
               note: {
                 ...(epmNote && { epm: getEditorStateAsString(epmNote) }),

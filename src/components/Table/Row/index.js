@@ -13,7 +13,8 @@ const Row = ({ item, headers, onRemove, headerRemove }) => {
             <div className={styles.col} key={index}>
               {header === "Hình" ||
               header === "Design" ||
-              header === "Clipart" ? (
+              header === "Clipart" ||
+              header === "Hình Product Base" ? (
                 <Image
                   src={item[header] || "/images/content/not_found_2.jpg"}
                   style={{ width: "50px" }}
