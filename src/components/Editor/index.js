@@ -58,11 +58,6 @@ const Editor = ({
     [state, onChange]
   );
 
-  const debouncedOnChange = useMemo(
-    () => debounce((newState) => onChange(newState), 0),
-    [onChange]
-  );
-
   return (
     <div
       className={cn(

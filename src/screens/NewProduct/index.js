@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./NewCampaigns.module.sass";
 import CampaignInfo from "./CampaignInfo";
 import cn from "classnames";
@@ -9,7 +9,6 @@ import {
   DESIGNER_MEMBERS,
   GROUP_WORKS,
   KEEP_CLIPARTS,
-  LAYOUT_TYPES,
   MEMBERS,
   RND_SIZES,
 } from "../../constant";
@@ -40,14 +39,11 @@ import CustomTable from "../../components/Table";
 import {
   compact,
   concat,
-  differenceBy,
+  debounce,
   filter,
   find,
   findIndex,
-  flatMap,
   includes,
-  intersection,
-  intersectionBy,
   isEmpty,
   keys,
   map,
@@ -56,14 +52,9 @@ import {
   sortBy,
   toLower,
   uniq,
-  uniqBy,
 } from "lodash";
 import { rndServices } from "../../services";
-import {
-  CONVERT_STATUS_TO_NUMBER,
-  delayTime,
-  getEditorStateAsString,
-} from "../../utils";
+import { CONVERT_STATUS_TO_NUMBER, getEditorStateAsString } from "../../utils";
 import {
   IconSearch,
   IconFilterOff,
@@ -77,49 +68,6 @@ import { useNavigate } from "react-router";
 import ProductBase from "./ProductBase";
 import RefDesign from "./RefDesign";
 import Loader from "../../components/Loader";
-
-const filterValidCollections = (collections, type, SKU) => {
-  let validCollections = [];
-  if (!SKU) {
-    return [];
-  }
-  const { productLine: rootProductLine } = SKU;
-
-  if (type === LAYOUT_TYPES[0]) {
-    validCollections = filter(collections, (collection) =>
-      includes(map(collection.productLines, "name"), rootProductLine)
-    );
-  } else if (type === LAYOUT_TYPES[1]) {
-    validCollections = collections;
-  }
-  return filter(
-    map(validCollections, (collection) => {
-      const { productLines: collectionProductLines } = collection;
-      if (type === LAYOUT_TYPES[0]) {
-        const intersectionProductLines = intersectionBy(
-          collectionProductLines,
-          SKU.sameLayouts,
-          "uid"
-        );
-        return {
-          ...collection,
-          validProductLines: intersectionProductLines,
-        };
-      } else if (type === LAYOUT_TYPES[1]) {
-        const diffLayouts = differenceBy(
-          collectionProductLines,
-          SKU.sameLayouts,
-          "uid"
-        );
-        return {
-          ...collection,
-          validProductLines: diffLayouts,
-        };
-      }
-    }),
-    (x) => !isEmpty(x.validProductLines)
-  );
-};
 
 const generateScaleProductLinesTable = ({
   selectedProductLines,
@@ -581,8 +529,11 @@ const NewCampaigns = () => {
     const { data } = await rndServices.getCollections({});
     setCollections(data);
   };
-  const fetchAllProducts = async () => {
-    const data = await rndServices.getAllProducts({ isTakeAll: true });
+  const fetchAllProducts = async (search) => {
+    const data = await rndServices.getAllProducts({
+      limit: 20,
+      ...(search && { search }),
+    });
     setProducts(
       map(data, (x) => ({
         SKU: x.sku,
@@ -824,6 +775,7 @@ const NewCampaigns = () => {
               search={search}
               setSearch={setSearch}
               handleSearchSKU={handleSearchSKU}
+              fetchAllProducts={fetchAllProducts}
               loadingSearchSKU={loadingSearchSKU}
               SKU={SKU}
               selectedProductLines={selectedProductLines}

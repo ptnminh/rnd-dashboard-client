@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import cn from "classnames";
 import styles from "./CampaignInfo.module.sass";
 import Card from "../../../components/Card";
 import Dropdown from "../../../components/Dropdown";
-import { filter, isEmpty, map, uniq } from "lodash";
+import { debounce, filter, isEmpty, map, uniq } from "lodash";
 import {
   Grid,
   Image,
@@ -45,10 +45,18 @@ const CampaignInfo = ({
   epmMember,
   setEpmMember,
   handleSyncUser,
+  fetchAllProducts,
 }) => {
   useEffect(() => {
     if (!isEmpty(previewData)) setVisibleReviewTable(true);
   }, [previewData]);
+  // Debounce the fetchAllProducts function
+  const debouncedFetchAllProducts = useCallback(
+    debounce((value) => {
+      fetchAllProducts(value);
+    }, 300),
+    []
+  );
 
   return (
     <>
@@ -181,7 +189,10 @@ const CampaignInfo = ({
                 </span>
               }
               value={search}
-              onChange={(value) => setSearch(value)}
+              onChange={(value) => {
+                setSearch(value);
+                debouncedFetchAllProducts(value);
+              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   handleSearchSKU();

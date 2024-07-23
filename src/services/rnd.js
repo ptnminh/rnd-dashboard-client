@@ -64,9 +64,6 @@ export const rndServices = {
   getAllProducts: async ({ page, limit, search, isTakeAll }) => {
     try {
       let query = "";
-      if (search) {
-        query = `&search=${search}`;
-      }
       if (page) {
         query = `${query}&page=${page}`;
       }
@@ -76,6 +73,14 @@ export const rndServices = {
       let url = query ? `${hostAPI}/skus?${query}` : `${hostAPI}/skus`;
       if (isTakeAll) {
         url = `${hostAPI}/skus?pageSize=-1`;
+      }
+      if (search) {
+        const queryString = `filter=${encodeURIComponent(
+          JSON.stringify({
+            ...(search && { keyword: search }),
+          })
+        )}`;
+        url = `${hostAPI}/skus?${query}&${queryString}`;
       }
       const response = await axios.get(url, {
         params: {
