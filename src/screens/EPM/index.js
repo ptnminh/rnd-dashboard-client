@@ -343,7 +343,9 @@ const DesignerScreens = () => {
                   alignItems: "center",
                 }}
               >
-                REF
+                {selectedSKU?.briefType === BRIEF_TYPES[5]
+                  ? "Product Line"
+                  : "Ref"}
               </div>
               <Image
                 radius="md"
@@ -361,7 +363,9 @@ const DesignerScreens = () => {
                   marginTop: "10px",
                 }}
               >
-                {selectedSKU?.skuRef}
+                {selectedSKU?.briefType === BRIEF_TYPES[5]
+                  ? selectedSKU?.productLine?.name
+                  : selectedSKU?.skuRef}
               </div>
               <List
                 spacing="lg"
