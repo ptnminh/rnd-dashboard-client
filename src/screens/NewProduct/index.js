@@ -298,10 +298,11 @@ const generateScaleMixMatch = ({
       return {
         No: index + 1,
         "Product Base": selectedProductBases[0]?.name,
-        Ref: marketBrief?.imageRef,
+        Hình: marketBrief?.imageRef,
         Clipart: x.imageSrc,
         SKU: name,
         Remove: "x",
+        uid: x.uid,
         clipartId: x?.uid,
         designLinkRef: x?.marketBrief?.designLinkRef,
         nextAccumulator: currentRnDAccumulator + selectedClipArts.length,
@@ -402,6 +403,18 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
     case BRIEF_TYPES[4]:
       return {
         headers: ["No", "Product Base", "Hình", "SKU", "Remove", "uid"],
+      };
+    case BRIEF_TYPES[5]:
+      return {
+        headers: [
+          "No",
+          "Product Base",
+          "Ref",
+          "Clipart",
+          "SKU",
+          "Remove",
+          "uid",
+        ],
       };
     default:
       return [];
@@ -539,6 +552,9 @@ const NewCampaigns = () => {
         break;
       case BRIEF_TYPES[4]:
         setSelectedSKUs(filter(selectedSKUs, (x) => x.uid !== name));
+        break;
+      case BRIEF_TYPES[5]:
+        setSelectedClipArts(filter(selectedClipArts, (x) => x.uid !== name));
         break;
       default:
         break;
@@ -841,7 +857,7 @@ const NewCampaigns = () => {
           productLine: selectedProductBases[0]?.uid,
           designLinkRef: x.designLinkRef,
           imageRef: x.imageRef,
-          uid: x.uid,
+          skuId: x.uid,
           skuRef: x.skuRef,
         }),
       };
