@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import styles from "./Editor.module.sass";
 import cn from "classnames";
 import { Editor as ReactEditor } from "react-draft-wysiwyg";
@@ -7,7 +7,6 @@ import Tooltip from "../Tooltip";
 import { uploadServices } from "../../services/uploads";
 import { generateRandomString } from "../../utils";
 import { AtomicBlockUtils, EditorState } from "draft-js";
-import { debounce } from "lodash";
 
 // Function to handle image uploads
 const uploadImageCallBack = async (file) => {
@@ -89,8 +88,6 @@ const Editor = ({
         toolbar={{
           options: [
             "inline",
-            "blockType",
-            "fontSize",
             "list",
             "textAlign",
             "embedded",

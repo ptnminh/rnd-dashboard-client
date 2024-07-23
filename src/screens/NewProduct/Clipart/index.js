@@ -151,7 +151,10 @@ const Clipart = ({
                 position: "relative",
               }}
               onClick={() => {
-                if (briefType === BRIEF_TYPES[1]) {
+                if (
+                  briefType === BRIEF_TYPES[1] ||
+                  briefType === BRIEF_TYPES[5]
+                ) {
                   if (includes(map(selectedClipArts, "name"), clipArt.name)) {
                     setSelectedClipArts(
                       selectedClipArts.filter((x) => x.name !== clipArt.name)
@@ -248,16 +251,18 @@ const Clipart = ({
         size="md"
         style={{ marginTop: "20px", marginLeft: "auto" }}
       />
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          width: "100%",
-        }}
-        onClick={handleSelectClipart}
-      >
-        <Button>Finish</Button>
-      </div>
+      {briefType !== BRIEF_TYPES[5] && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            width: "100%",
+          }}
+          onClick={handleSelectClipart}
+        >
+          <Button>Finish</Button>
+        </div>
+      )}
     </>
   );
 };

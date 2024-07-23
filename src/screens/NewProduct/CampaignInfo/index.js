@@ -164,157 +164,159 @@ const CampaignInfo = ({
           />{" "}
         </div>
       </Card>
-      {briefType !== BRIEF_TYPES[3] && (
-        <Card
-          className={cn(styles.card, className)}
-          title="2. Input Ref"
-          classTitle="title-green"
-          classCardHead={styles.classCardHead}
-          classSpanTitle={styles.classSpanBriefTitle}
-          head={
-            <Autocomplete
-              placeholder="Search SKU"
-              data={uniq(map(products, "SKU"))}
-              withScrollArea={true}
-              defaultDropdownOpened={false}
-              maxDropdownHeight={100}
-              leftSection={
-                <span
-                  onClick={handleSearchSKU}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                >
-                  <Icon name="search" size={18} />
-                </span>
-              }
-              value={search}
-              onChange={(value) => {
-                setSearch(value);
-                debouncedFetchAllProducts(value);
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  handleSearchSKU();
+      {briefType !== BRIEF_TYPES[3] &&
+        briefType !== BRIEF_TYPES[4] &&
+        briefType !== BRIEF_TYPES[5] && (
+          <Card
+            className={cn(styles.card, className)}
+            title="2. Input Ref"
+            classTitle="title-green"
+            classCardHead={styles.classCardHead}
+            classSpanTitle={styles.classSpanBriefTitle}
+            head={
+              <Autocomplete
+                placeholder="Search SKU"
+                data={uniq(map(products, "SKU"))}
+                withScrollArea={true}
+                defaultDropdownOpened={false}
+                maxDropdownHeight={100}
+                leftSection={
+                  <span
+                    onClick={handleSearchSKU}
+                    style={{
+                      cursor: "pointer",
+                    }}
+                  >
+                    <Icon name="search" size={18} />
+                  </span>
                 }
-              }}
-            />
-          }
-        >
-          {SKU && !loadingSearchSKU && (
-            <Grid>
-              <Grid.Col span={6}>
-                <Image
-                  radius="md"
-                  src={SKU.image || "/images/content/not_found_2.jpg"}
-                />
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <List
-                  spacing="lg"
-                  size="sm"
-                  center
-                  icon={
-                    <ThemeIcon color="teal" size={24} radius="xl">
-                      <IconCircleCheck
-                        style={{ width: rem(16), height: rem(16) }}
-                      />
-                    </ThemeIcon>
+                value={search}
+                onChange={(value) => {
+                  setSearch(value);
+                  debouncedFetchAllProducts(value);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    handleSearchSKU();
                   }
-                >
-                  {SKU.productLink && (
-                    <List.Item>
-                      Link Product:{" "}
-                      <a
-                        style={{
-                          display: "inline-block",
-                          width: "200px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textDecoration: "none",
-                          color: "#228be6",
-                          verticalAlign: "middle",
-                        }}
-                        href={SKU.productLink}
-                        target="_blank"
-                      >
-                        {SKU.productLink}
-                      </a>
-                    </List.Item>
-                  )}
-                  {SKU.designLink && (
-                    <List.Item>
-                      Link Design:{" "}
-                      <a
-                        style={{
-                          display: "inline-block",
-                          width: "200px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textDecoration: "none",
-                          color: "#228be6",
-                          verticalAlign: "middle",
-                        }}
-                        href={SKU.designLink}
-                        target="_blank"
-                      >
-                        {SKU.designLink}
-                      </a>
-                    </List.Item>
-                  )}
-                  {SKU.mockupLink && (
-                    <List.Item>
-                      Link Mockup:{" "}
-                      <a
-                        style={{
-                          display: "inline-block",
-                          width: "200px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textDecoration: "none",
-                          color: "#228be6",
-                          verticalAlign: "middle",
-                        }}
-                        href={SKU.mockupLink}
-                        target="_blank"
-                      >
-                        {SKU.mockupLink}
-                      </a>
-                    </List.Item>
-                  )}
-                  {SKU.tibLink && (
-                    <List.Item>
-                      Link TIB:{" "}
-                      <a href={SKU.tibLink} target="_blank">
-                        Click
-                      </a>
-                    </List.Item>
-                  )}
-                  {SKU.productLine && (
-                    <List.Item>PL: {SKU.productLine}</List.Item>
-                  )}
-                </List>
-              </Grid.Col>
-            </Grid>
-          )}
-          {loadingSearchSKU && (
-            <Grid>
-              <Grid.Col span={6}>
-                <Skeleton height={260} radius="md" />
-              </Grid.Col>
-              <Grid.Col span={6}>
-                <Skeleton height={50} mt={10} radius="md" />
-                <Skeleton height={50} mt={10} radius="md" />
-                <Skeleton height={50} mt={10} radius="md" />
-                <Skeleton height={50} mt={10} radius="md" />
-              </Grid.Col>
-            </Grid>
-          )}
-        </Card>
-      )}
+                }}
+              />
+            }
+          >
+            {SKU && !loadingSearchSKU && (
+              <Grid>
+                <Grid.Col span={6}>
+                  <Image
+                    radius="md"
+                    src={SKU.image || "/images/content/not_found_2.jpg"}
+                  />
+                </Grid.Col>
+                <Grid.Col span={6}>
+                  <List
+                    spacing="lg"
+                    size="sm"
+                    center
+                    icon={
+                      <ThemeIcon color="teal" size={24} radius="xl">
+                        <IconCircleCheck
+                          style={{ width: rem(16), height: rem(16) }}
+                        />
+                      </ThemeIcon>
+                    }
+                  >
+                    {SKU.productLink && (
+                      <List.Item>
+                        Link Product:{" "}
+                        <a
+                          style={{
+                            display: "inline-block",
+                            width: "200px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            textDecoration: "none",
+                            color: "#228be6",
+                            verticalAlign: "middle",
+                          }}
+                          href={SKU.productLink}
+                          target="_blank"
+                        >
+                          {SKU.productLink}
+                        </a>
+                      </List.Item>
+                    )}
+                    {SKU.designLink && (
+                      <List.Item>
+                        Link Design:{" "}
+                        <a
+                          style={{
+                            display: "inline-block",
+                            width: "200px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            textDecoration: "none",
+                            color: "#228be6",
+                            verticalAlign: "middle",
+                          }}
+                          href={SKU.designLink}
+                          target="_blank"
+                        >
+                          {SKU.designLink}
+                        </a>
+                      </List.Item>
+                    )}
+                    {SKU.mockupLink && (
+                      <List.Item>
+                        Link Mockup:{" "}
+                        <a
+                          style={{
+                            display: "inline-block",
+                            width: "200px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            textDecoration: "none",
+                            color: "#228be6",
+                            verticalAlign: "middle",
+                          }}
+                          href={SKU.mockupLink}
+                          target="_blank"
+                        >
+                          {SKU.mockupLink}
+                        </a>
+                      </List.Item>
+                    )}
+                    {SKU.tibLink && (
+                      <List.Item>
+                        Link TIB:{" "}
+                        <a href={SKU.tibLink} target="_blank">
+                          Click
+                        </a>
+                      </List.Item>
+                    )}
+                    {SKU.productLine && (
+                      <List.Item>PL: {SKU.productLine}</List.Item>
+                    )}
+                  </List>
+                </Grid.Col>
+              </Grid>
+            )}
+            {loadingSearchSKU && (
+              <Grid>
+                <Grid.Col span={6}>
+                  <Skeleton height={260} radius="md" />
+                </Grid.Col>
+                <Grid.Col span={6}>
+                  <Skeleton height={50} mt={10} radius="md" />
+                  <Skeleton height={50} mt={10} radius="md" />
+                  <Skeleton height={50} mt={10} radius="md" />
+                  <Skeleton height={50} mt={10} radius="md" />
+                </Grid.Col>
+              </Grid>
+            )}
+          </Card>
+        )}
     </>
   );
 };

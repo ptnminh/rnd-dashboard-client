@@ -61,7 +61,7 @@ export const rndServices = {
       return false;
     }
   },
-  getAllProducts: async ({ page, limit, search, isTakeAll }) => {
+  getAllProducts: async ({ page, limit, search, isTakeAll, productName }) => {
     try {
       let query = "";
       if (page) {
@@ -74,10 +74,11 @@ export const rndServices = {
       if (isTakeAll) {
         url = `${hostAPI}/skus?pageSize=-1`;
       }
-      if (search) {
+      if (search || productName) {
         const queryString = `filter=${encodeURIComponent(
           JSON.stringify({
-            ...(search && { keyword: search }),
+            ...(search && { sku: search }),
+            ...(productName && { productName }),
           })
         )}`;
         url = `${hostAPI}/skus?${query}&${queryString}`;
@@ -96,6 +97,44 @@ export const rndServices = {
     } catch (error) {
       console.log("Error at getAllProducts:", error);
       showNotification("Thất bại", "Không tìm thấy product", "red");
+      return false;
+    }
+  },
+  fetchSKUs: async ({
+    page,
+    limit,
+    query,
+    includeFields = "productInfo,nasLink",
+    fields = "uid,sku,productLine",
+  }) => {
+    try {
+      let url = `${hostAPI}/skus?page=${page}&pageSize=${limit}`;
+      const queryKeys = keys(query);
+      const transformedQuery = filter(queryKeys, (key) => query[key]);
+      if (!isEmpty(transformedQuery)) {
+        const queryString = `filter=${encodeURIComponent(
+          JSON.stringify({
+            ...(query.keyword && { sku: query.keyword }),
+            ...(query.productName && { productName: query.productName }),
+          })
+        )}`;
+        url = `${url}&${queryString}`;
+      }
+      if (includeFields) {
+        url = `${url}&includeFields=${includeFields}`;
+      }
+      const response = await axios.get(url, {
+        params: {
+          fields,
+        },
+      });
+      const { data: result } = response;
+      if (result?.success === false) {
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at fetchQuotes:", error);
       return false;
     }
   },

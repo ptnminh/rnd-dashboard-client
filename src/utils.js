@@ -63,6 +63,7 @@ export const CONVERT_BRIEF_TYPE_TO_OBJECT_NAME = {
   "Scale - Clipart": "clipart",
   "Scale - Niche": "clipart",
   "New - Phủ Market": "clipart",
+  "Scale - Design": "skuInfo",
 };
 export function generateRandomString(length) {
   const characters =

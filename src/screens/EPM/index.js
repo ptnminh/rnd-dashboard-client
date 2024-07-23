@@ -496,21 +496,28 @@ const DesignerScreens = () => {
                   </ThemeIcon>
                 }
               >
-                <List.Item>
-                  {selectedSKU?.briefType === BRIEF_TYPES[0]
-                    ? "Product Base"
-                    : "Clipart"}
-                  :{" "}
-                  <span>
-                    {
-                      selectedSKU?.[
-                        CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                          selectedSKU?.briefType
-                        ]
-                      ]?.name
-                    }
-                  </span>
-                </List.Item>
+                {selectedSKU?.briefType === BRIEF_TYPES[5] ? (
+                  <List.Item>
+                    Product Base:
+                    <span>{selectedSKU?.skuInfo.name}</span>
+                  </List.Item>
+                ) : (
+                  <List.Item>
+                    {selectedSKU?.briefType === BRIEF_TYPES[0]
+                      ? "Product Base"
+                      : "Clipart"}
+                    :{" "}
+                    <span>
+                      {
+                        selectedSKU?.[
+                          CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                            selectedSKU?.briefType
+                          ]
+                        ]?.name
+                      }
+                    </span>
+                  </List.Item>
+                )}
                 {selectedSKU?.linkDesign && (
                   <List.Item>
                     Link Design (NAS):{" "}

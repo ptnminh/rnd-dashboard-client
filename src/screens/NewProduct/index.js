@@ -39,7 +39,6 @@ import CustomTable from "../../components/Table";
 import {
   compact,
   concat,
-  debounce,
   filter,
   find,
   findIndex,
@@ -68,11 +67,14 @@ import { useNavigate } from "react-router";
 import ProductBase from "./ProductBase";
 import RefDesign from "./RefDesign";
 import Loader from "../../components/Loader";
+import SKUComponent from "./SKU";
+import Clipart from "./Clipart";
+import MarketBriefDesign from "./MarketBrief";
+import ModalPreviewMixMatch from "./ModalPreviewMixMatch";
 
 const generateScaleProductLinesTable = ({
   selectedProductLines,
   SKU,
-  collections,
   rndSortName,
   rndId,
 }) => {
@@ -114,6 +116,7 @@ const generateScaleProductLinesTable = ({
           Remove: "x",
           nextAccumulator: realRnDAccumulator,
           skuPrefix: prefix,
+          uid: foundProductLine?.uid,
         };
       }
     )
@@ -138,9 +141,45 @@ const generateTextPreview = (type, layout) => {
       return "Niche";
     case BRIEF_TYPES[3]:
       return "New - Phủ Market";
+    case BRIEF_TYPES[4]:
+      return "Design";
     default:
       return "";
   }
+};
+
+const generateScaleDesignTable = ({
+  selectedSKUs,
+  rndSortName,
+  selectedProductBases,
+  rndId,
+}) => {
+  const prefix = selectedProductBases[0]?.skuPrefix || "XX";
+  const skuAccumulators = selectedProductBases[0]?.skuAccumulators || [];
+  const currentRnDAccumulator =
+    find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
+  return compact(
+    map(selectedSKUs, (x, index) => {
+      const realRnDAccumulator = currentRnDAccumulator + index + 1;
+      const name = `${prefix}-${rndSortName}${String(
+        realRnDAccumulator
+      ).padStart(4, "0")}`;
+      return {
+        No: index + 1,
+        "Product Base": x?.productLine || "",
+        Hình: x?.productInfo?.imageSrc,
+        SKU: name,
+        Remove: "x",
+        uid: x?.uid,
+        designLinkRef: x?.attribute?.nasShareLink || "",
+        nextAccumulator: currentRnDAccumulator + selectedSKUs.length,
+        skuPrefix: prefix,
+        skuRef: x.sku,
+        imageRef:
+          selectedProductBases[0]?.image || selectedProductBases[0]?.imageSrc,
+      };
+    })
+  );
 };
 
 const generateScaleClipArtTable = ({
@@ -239,7 +278,38 @@ const generateScaleNewDesign = ({
     })
   );
 };
-
+const generateScaleMixMatch = ({
+  selectedProductBases,
+  rndSortName,
+  rndId,
+  marketBrief,
+  selectedClipArts,
+}) => {
+  const prefix = selectedProductBases[0]?.skuPrefix || "XX";
+  const skuAccumulators = selectedProductBases[0]?.skuAccumulators || [];
+  const currentRnDAccumulator =
+    find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
+  return compact(
+    map(selectedClipArts, (x, index) => {
+      const realRnDAccumulator = currentRnDAccumulator + index + 1;
+      const name = `${prefix}-${rndSortName}${String(
+        realRnDAccumulator
+      ).padStart(4, "0")}`;
+      return {
+        No: index + 1,
+        "Product Base": selectedProductBases[0]?.name,
+        Ref: marketBrief?.imageRef,
+        Clipart: x.imageSrc,
+        SKU: name,
+        Remove: "x",
+        clipartId: x?.uid,
+        designLinkRef: x?.designLinkRef,
+        nextAccumulator: currentRnDAccumulator + selectedClipArts.length,
+        skuPrefix: prefix,
+      };
+    })
+  );
+};
 const generateScaleProductBaseOnBriefType = ({
   type,
   SKU,
@@ -250,6 +320,7 @@ const generateScaleProductBaseOnBriefType = ({
   designs,
   selectedProductBases,
   rndId,
+  selectedSKUs,
 }) => {
   switch (type) {
     case BRIEF_TYPES[0]:
@@ -282,6 +353,15 @@ const generateScaleProductBaseOnBriefType = ({
         selectedProductBases,
         rndId,
       });
+    case BRIEF_TYPES[4]:
+      return generateScaleDesignTable({
+        selectedSKUs,
+        rndSortName,
+        selectedProductBases,
+        rndId,
+      });
+    case BRIEF_TYPES[5]:
+      return [];
     default:
       return [];
   }
@@ -312,6 +392,10 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
         headers: ["No", "Design", "Clipart", "SKU", "Remove"],
         removeHeader: "Design",
       };
+    case BRIEF_TYPES[4]:
+      return {
+        headers: ["No", "Product Base", "Hình", "SKU", "Remove", "uid"],
+      };
     default:
       return [];
   }
@@ -338,7 +422,6 @@ const NewCampaigns = () => {
   const [layout, setLayout] = useState();
   const [search, setSearch] = useState("");
   const [SKU, setSKU] = useState();
-  const [productLines, setProductLines] = useState([]);
   const [collections, setCollections] = useState([]);
   const [loadingSearchSKU, setLoadingSearchSKU] = useState(false);
   const [loadingProductLines, setLoadingProductLines] = useState(false);
@@ -350,6 +433,7 @@ const NewCampaigns = () => {
   const [filtersClipArt, setFiltersClipArt] = useState([]);
   const [clipArts, setClipArts] = useState([]);
   const [searchClipArt, setSearchClipArt] = useState("");
+  const [marketBrief, setMarketBrief] = useState({});
   const [searchKeywordQuote, setSearchKeywordQuote] = useState("");
   const [productBases, setProductBases] = useState([]);
   const [quoteFilters, setQuoteFilters] = useState([]);
@@ -368,11 +452,19 @@ const NewCampaigns = () => {
     currentPage: 1,
     totalPages: 1,
   });
+  const [skuPagination, setSkuPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+  });
   const [queryProductBase, setQueryProductBase] = useState({});
+  const [querySKU, setQuerySKU] = useState({});
   const [selectedProductBases, setSelectedProductBases] = useState([]);
+  const [selectedSKUs, setSelectedSKUs] = useState([]);
   const [loadingProductBase, setLoadingProductBase] = useState(false);
+  const [loadingSKU, setLoadingSKU] = useState(false);
   const [queryQuote, setQueryQuote] = useState({});
   const [quotes, setQuotes] = useState([]);
+  const [foundSKUs, setFoundSKUs] = useState([]);
   const [isKeepClipArt, setKeepClipArt] = useState(KEEP_CLIPARTS[0]);
   const [loadingQuotes, setLoadingQuotes] = useState(false);
   const [loaderIcon, setLoaderIcon] = useState(false);
@@ -438,6 +530,9 @@ const NewCampaigns = () => {
       case BRIEF_TYPES[3]:
         setDesigns(filter(designs, (x) => x.imageRef !== name));
         break;
+      case BRIEF_TYPES[4]:
+        setSelectedSKUs(filter(selectedSKUs, (x) => x.uid !== name));
+        break;
       default:
         break;
     }
@@ -495,6 +590,22 @@ const NewCampaigns = () => {
     }
     setQuotes(data);
     setQuotePagination(metadata);
+  };
+  const fetchSKUs = async (page) => {
+    setLoadingSKU(true);
+    const { data, metadata } = await rndServices.fetchSKUs({
+      page,
+      limit: 12,
+      ...(!isEmpty(querySKU) && { query: querySKU }),
+    });
+    setLoadingSKU(false);
+    if (isEmpty(data)) {
+      setFoundSKUs([]);
+      setSkuPagination({ currentPage: 1, totalPages: 1 });
+      return;
+    }
+    setFoundSKUs(data);
+    setSkuPagination(metadata);
   };
   const fetchProductBases = async (page) => {
     setLoadingProductBase(true);
@@ -564,6 +675,7 @@ const NewCampaigns = () => {
     setLayout("");
     setSelectedProductBases([]);
     setQueryProductBase({});
+    setMarketBrief({});
   };
 
   useEffect(() => {
@@ -632,6 +744,10 @@ const NewCampaigns = () => {
     }
   }, [isKeepClipArt]);
   const [opened, { open, close }] = useDisclosure(false);
+  const [
+    openedModalPreviewMixMatch,
+    { open: openModalPreviewMixMatch, close: closeModalPreviewMixMatch },
+  ] = useDisclosure(false);
   const [selectedProductLines, setSelectedProductLines] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState([]);
 
@@ -647,6 +763,7 @@ const NewCampaigns = () => {
       selectedProductBases,
       designs,
       rndId: rnd?.uid,
+      selectedSKUs,
     });
     return data;
   };
@@ -691,7 +808,7 @@ const NewCampaigns = () => {
           : {}),
         status: 1,
         ...(briefType === BRIEF_TYPES[0] && {
-          productLine: find(productBases, { name: x["Product Line"] })?.uid,
+          productLine: x?.uid,
         }),
         ...(briefType === BRIEF_TYPES[1] && {
           clipart: find(clipArts, { uid: x.uid })?.uid,
@@ -712,15 +829,20 @@ const NewCampaigns = () => {
         }),
         nextSkuAccumulator: nextAccumulator,
         ...(skuPrefix && skuPrefix !== "XX" && { skuPrefix }),
+        ...(briefType === BRIEF_TYPES[4] && {
+          productLine: selectedProductBases[0]?.uid,
+          designLinkRef: x.designLinkRef,
+          imageRef: x.imageRef,
+          skuId: x.skuRef,
+        }),
       };
     });
-    console.log(data);
     const createBriefResponse = await rndServices.createBriefs({
       payloads: data,
     });
     if (createBriefResponse) {
       close();
-      window.location.reload();
+      // window.location.reload();
     }
     setCreateBriefLoading(false);
   };
@@ -736,6 +858,9 @@ const NewCampaigns = () => {
   const handlePageProductBaseChange = (page) => {
     setProductBasePagination((prev) => ({ ...prev, currentPage: page }));
   };
+  const handlePageSKUChange = (page) => {
+    setSkuPagination((prev) => ({ ...prev, currentPage: page }));
+  };
 
   useEffect(() => {
     fetchClipArts(pagination.currentPage);
@@ -746,6 +871,9 @@ const NewCampaigns = () => {
   useEffect(() => {
     fetchProductBases(productBasePagination.currentPage);
   }, [productBasePagination.currentPage, queryProductBase]);
+  useEffect(() => {
+    fetchSKUs(skuPagination.currentPage);
+  }, [skuPagination.currentPage, querySKU]);
   return (
     <>
       <div style={{ position: "relative" }}>
@@ -1382,6 +1510,87 @@ const NewCampaigns = () => {
             </div>
           </>
         )}
+        {briefType === BRIEF_TYPES[4] && (
+          <>
+            <div className={styles.row}>
+              <ProductBase
+                productLines={productBases}
+                selectedProductLines={selectedProductBases}
+                setSelectedProductLines={setSelectedProductBases}
+                pagination={productBasePagination}
+                handlePageChange={handlePageProductBaseChange}
+                setQueryProductLines={setQueryProductBase}
+                fetchProductLinesLoading={loadingProductBase}
+                handleSyncProductBases={handleSyncProductBases}
+                loaderIcon={loaderIcon}
+              />
+            </div>
+            <div className={styles.row}>
+              <SKUComponent
+                foundSKUs={foundSKUs}
+                selectedSKUs={selectedSKUs}
+                setSelectedSKUs={setSelectedSKUs}
+                pagination={skuPagination}
+                setPagination={setSkuPagination}
+                handlePageChange={handlePageSKUChange}
+                setQuerySKU={setQuerySKU}
+                loadingSKU={loadingSKU}
+                title={"3. Design cần Scale"}
+              />
+            </div>
+          </>
+        )}
+        {briefType === BRIEF_TYPES[5] && (
+          <>
+            <div className={styles.row}>
+              <MarketBriefDesign
+                marketBrief={marketBrief}
+                setMarketBrief={setMarketBrief}
+                title={"2. Input Ref"}
+              />
+            </div>
+            <div className={styles.row}>
+              <Card
+                className={styles.card}
+                classCardHead={styles.classCardHead}
+                classSpanTitle={styles.classScaleSpanTitle}
+                title="3. Clipart cần Scale"
+                classTitle={cn("title-green", styles.title)}
+              >
+                <Clipart
+                  clipArts={clipArts}
+                  fetchClipArts={fetchClipArts}
+                  pagination={pagination}
+                  searchClipArt={searchClipArt}
+                  setSearchClipArt={setSearchClipArt}
+                  filtersClipArt={filtersClipArt}
+                  query={query}
+                  selectedClipArts={selectedClipArts}
+                  setSelectedClipArts={setSelectedClipArts}
+                  handlePageChange={handlePageChange}
+                  briefType={briefType}
+                  BRIEF_TYPES={BRIEF_TYPES}
+                  fetchClipArtsLoading={fetchClipArtsLoading}
+                  setQuery={setQuery}
+                />
+              </Card>
+            </div>
+            <div className={styles.row}>
+              <ProductBase
+                productLines={productBases}
+                selectedProductLines={selectedProductBases}
+                setSelectedProductLines={setSelectedProductBases}
+                pagination={productBasePagination}
+                handlePageChange={handlePageProductBaseChange}
+                setQueryProductLines={setQueryProductBase}
+                fetchProductLinesLoading={loadingProductBase}
+                handleSyncProductBases={handleSyncProductBases}
+                loaderIcon={loaderIcon}
+                title={"4. Chọn Product Base"}
+              />
+            </div>
+          </>
+        )}
         <div className={styles.row}>
           <Card
             className={cn(styles.cardNote)}
@@ -1422,7 +1631,12 @@ const NewCampaigns = () => {
                     styles.createButton
                   )}
                   onClick={() => {
-                    if (!SKU && briefType !== BRIEF_TYPES[3]) {
+                    if (
+                      !SKU &&
+                      briefType !== BRIEF_TYPES[3] &&
+                      briefType !== BRIEF_TYPES[4] &&
+                      briefType !== BRIEF_TYPES[5]
+                    ) {
                       showNotification("Thất bại", "Vui lòng chọn SKU", "red");
                       return;
                     }
@@ -1430,7 +1644,8 @@ const NewCampaigns = () => {
                       isEmpty(selectedClipArts) &&
                       isEmpty(selectedQuotes) &&
                       isEmpty(selectedProductBases) &&
-                      isEmpty(designs)
+                      isEmpty(designs) &&
+                      isEmpty(selectedSKUs)
                     ) {
                       showNotification(
                         "Thất bại",
@@ -1472,7 +1687,34 @@ const NewCampaigns = () => {
                       );
                       return;
                     }
-                    open();
+                    if (
+                      briefType === BRIEF_TYPES[4] &&
+                      (isEmpty(selectedSKUs) || isEmpty(selectedProductBases))
+                    ) {
+                      showNotification(
+                        "Thất bại",
+                        "Vui lòng chọn Product Base và Product",
+                        "red"
+                      );
+                      return;
+                    }
+                    if (briefType !== BRIEF_TYPES[5]) {
+                      open();
+                    } else {
+                      if (
+                        isEmpty(marketBrief) &&
+                        isEmpty(selectedClipArts) &&
+                        isEmpty(selectedProductBases)
+                      ) {
+                        showNotification(
+                          "Thất bại",
+                          "Vui lòng nhập thông tin Ref",
+                          "red"
+                        );
+                        return;
+                      }
+                      openModalPreviewMixMatch();
+                    }
                   }}
                   style={{
                     marginTop: "24px",
@@ -1621,6 +1863,7 @@ const NewCampaigns = () => {
                   designs,
                   selectedProductBases,
                   rndId: find(users, { name: rndMember })?.uid,
+                  selectedSKUs,
                 })}
                 headers={generateHeaderTable(briefType, isKeepClipArt)?.headers}
                 onRemove={handleRemoveRow}
@@ -1660,6 +1903,23 @@ const NewCampaigns = () => {
           </Grid.Col>
         </Grid>
       </Modal>
+      <ModalPreviewMixMatch
+        opened={openedModalPreviewMixMatch}
+        close={closeModalPreviewMixMatch}
+        batch={batch}
+        workGroup={workGroup}
+        rndMember={rndMember}
+        generateScaleProductBaseOnBriefType={
+          generateScaleProductBaseOnBriefType
+        }
+        briefType={briefType}
+        users={users}
+        selectedClipArts={selectedClipArts}
+        selectedProductBases={selectedProductBases}
+        generateHeaderTable={generateHeaderTable}
+        isKeepClipArt={isKeepClipArt}
+        handleSubmitBrief={handleSubmitBrief}
+      />
     </>
   );
 };
