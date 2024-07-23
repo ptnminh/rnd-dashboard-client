@@ -299,7 +299,7 @@ const generateScaleMixMatch = ({
         No: index + 1,
         "Hình Product Base":
           selectedProductBases[0]?.image || selectedProductBases[0]?.imageSrc,
-        Hình: marketBrief?.imageRef,
+        Ref: marketBrief?.imageRef,
         Clipart: x.imageSrc,
         SKU: name,
         Remove: "x",
@@ -410,7 +410,7 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
         headers: [
           "No",
           "Hình Product Base",
-          "Hình",
+          "Ref",
           "Clipart",
           "SKU",
           "Remove",
@@ -869,7 +869,7 @@ const NewCampaigns = () => {
           productLine: selectedProductBases[0]?.uid,
           clipart: x.uid,
           designLinkRef: x.designLinkRef,
-          imageRef: x["Hình"],
+          imageRef: x["Ref"],
         }),
       };
     });

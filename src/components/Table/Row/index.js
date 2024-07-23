@@ -14,7 +14,8 @@ const Row = ({ item, headers, onRemove, headerRemove }) => {
               {header === "Hình" ||
               header === "Design" ||
               header === "Clipart" ||
-              header === "Hình Product Base" ? (
+              header === "Hình Product Base" ||
+              header === "Ref" ? (
                 <Image
                   src={item[header] || "/images/content/not_found_2.jpg"}
                   style={{ width: "50px" }}
