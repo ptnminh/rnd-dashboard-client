@@ -361,7 +361,7 @@ const GridWithNoClipArt = ({ selectedSKU }) => {
         >
           {selectedSKU.designLinkRef && (
             <List.Item>
-              Link Mockup:{" "}
+              Link sản phẩm (Market):{" "}
               <a
                 style={{
                   display: "inline-block",
