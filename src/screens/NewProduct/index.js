@@ -44,6 +44,7 @@ import {
   filter,
   find,
   findIndex,
+  flatMap,
   includes,
   isEmpty,
   keys,
@@ -256,29 +257,55 @@ const generateScaleNewDesign = ({
   selectedProductBases,
   rndId,
 }) => {
-  const prefix = selectedProductBases[0]?.skuPrefix || "XX";
-  const skuAccumulators = selectedProductBases[0]?.skuAccumulators || [];
-  const currentRnDAccumulator =
-    find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
-  return compact(
-    map(designs, (x, index) => {
-      const realRnDAccumulator = currentRnDAccumulator + index + 1;
-      const name = `${prefix}-${rndSortName}${String(
-        realRnDAccumulator
-      ).padStart(4, "0")}`;
-      return {
-        No: index + 1,
-        Design: x.imageRef,
-        Clipart: x?.clipart?.imageSrc,
-        SKU: name,
-        Remove: "x",
-        clipartId: x?.clipart?.uid,
-        designLinkRef: x?.designLinkRef,
-        nextAccumulator: currentRnDAccumulator + designs.length,
-        skuPrefix: prefix,
-      };
+  let skuPrefixAccumulators = [];
+
+  let tables = compact(
+    map(selectedProductBases, (productBase) => {
+      const prefix = productBase?.skuPrefix || "XX";
+      const skuAccumulators = productBase?.skuAccumulators || [];
+      const currentRnDAccumulator =
+        find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
+      return map(designs, (x, index) => {
+        let realRnDAccumulator =
+          find(skuPrefixAccumulators, { prefix })?.accumulator + index ||
+          currentRnDAccumulator + 1;
+        if (prefix !== "XX") {
+          let foundPrefixIndex = findIndex(skuPrefixAccumulators, { prefix });
+          if (foundPrefixIndex !== -1) {
+            const foundPrefix = skuPrefixAccumulators[foundPrefixIndex];
+            foundPrefix.accumulator = foundPrefix.accumulator + 1;
+          } else {
+            skuPrefixAccumulators.push({
+              prefix,
+              accumulator: realRnDAccumulator,
+            });
+          }
+        }
+        const name = `${prefix}-${rndSortName}${String(
+          realRnDAccumulator
+        ).padStart(4, "0")}`;
+        return {
+          No: index + 1,
+          Design: x.imageRef,
+          Clipart: x?.clipart?.imageSrc,
+          SKU: name,
+          Remove: "x",
+          nextAccumulator: realRnDAccumulator,
+          clipartId: x?.clipart?.uid,
+          designLinkRef: x?.designLinkRef,
+          skuPrefix: prefix,
+        };
+      });
     })
   );
+  return map(flatMap(tables), (table) => {
+    const { skuPrefix } = table;
+    const foundPrefix = find(skuPrefixAccumulators, { prefix: skuPrefix });
+    return {
+      ...table,
+      nextAccumulator: foundPrefix?.accumulator || table.nextAccumulator,
+    };
+  });
 };
 const generateScaleMixMatch = ({
   selectedProductBases,

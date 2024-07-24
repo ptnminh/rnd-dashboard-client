@@ -385,7 +385,10 @@ const ProductBase = ({
                   position: "relative",
                 }}
                 onClick={() => {
-                  if (briefType !== BRIEF_TYPES[0]) {
+                  if (
+                    briefType !== BRIEF_TYPES[0] &&
+                    briefType !== BRIEF_TYPES[3]
+                  ) {
                     if (
                       includes(
                         map(selectedProductLines, "uid"),
