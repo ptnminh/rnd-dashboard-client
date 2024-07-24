@@ -2,11 +2,19 @@ export const MEMBERS = ["Thảo Thảo", "Nhật Minh"];
 export const DESIGNER_MEMBERS = ["Phương Duy"];
 export const GROUP_WORKS = ["BD1", "BD2", "BD3"];
 export const BRIEF_TYPES = [
-  "Scale - Product Base",
+  "Scale - Product Line",
   "Scale - Clipart",
   "Scale - Niche",
   "New - Phủ Market",
   "Scale - Design",
+  "New - Mix Match",
+];
+export const CHOOSE_BRIEF_TYPES = [
+  "Scale - Product Line",
+  "Scale - Clipart",
+  "Scale - Design",
+  "Scale - Niche",
+  "New - Phủ Market",
   "New - Mix Match",
 ];
 export const BRIEF_VALUES = ["Small", "Medium", "Big", "Super Big"];

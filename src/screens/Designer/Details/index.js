@@ -22,7 +22,7 @@ import {
   IconDeviceFloppy,
   IconBan,
 } from "@tabler/icons-react";
-import { BRIEF_TYPES } from "../../../constant";
+import { BRIEF_TYPES, CHOOSE_BRIEF_TYPES } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -545,7 +545,7 @@ const KeywordTable = ({
             />
             <Select
               placeholder="Loại Brief"
-              data={BRIEF_TYPES}
+              data={CHOOSE_BRIEF_TYPES}
               styles={{
                 input: {
                   width: "150px",
@@ -833,6 +833,7 @@ const KeywordTable = ({
       },
     }),
     onSortingChange: setSorting,
+    enableStickyHeader: true,
   });
 
   return <MantineReactTable table={table} />;

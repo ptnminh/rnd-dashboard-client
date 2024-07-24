@@ -405,7 +405,7 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
       };
     case BRIEF_TYPES[4]:
       return {
-        headers: ["No", "Product Base", "Hình", "SKU", "Remove", "uid"],
+        headers: ["No", "Hình", "SKU", "Remove", "uid"],
       };
     case BRIEF_TYPES[5]:
       return {
@@ -433,14 +433,14 @@ const NewCampaigns = () => {
   const [batch, setBatch] = useState("");
   const [teams, setTeams] = useState([]);
   const [users, setUsers] = useState([]);
-  const [workGroup, setWorkGroup] = useState(GROUP_WORKS[0]);
-  const [rndSize, setRndSize] = useState(RND_SIZES[0]);
-  const [designerMember, setDesignerMember] = useState(DESIGNER_MEMBERS[0]);
+  const [workGroup, setWorkGroup] = useState();
+  const [rndSize, setRndSize] = useState();
+  const [designerMember, setDesignerMember] = useState();
   const [selectedClipArts, setSelectedClipArts] = useState([]);
   const [selectedQuotes, setSelectedQuotes] = useState([]);
-  const [briefValue, setBriefValue] = useState(BRIEF_VALUES[0]);
-  const [rndMember, setRndMember] = useState(MEMBERS[0]);
-  const [epmMember, setEpmMember] = useState(MEMBERS[0]);
+  const [briefValue, setBriefValue] = useState();
+  const [rndMember, setRndMember] = useState();
+  const [epmMember, setEpmMember] = useState();
   const [briefType, setBriefType] = useState();
   const [layout, setLayout] = useState();
   const [search, setSearch] = useState("");
@@ -582,10 +582,10 @@ const NewCampaigns = () => {
     const epms = filter(data, { role: "epm" });
     const teams = compact(uniq(map(data, "team")));
     const team = teams[0];
-    setWorkGroup(team);
-    setRndMember(map(filter(rnds, { team }), "name")[0]);
-    setDesignerMember(map(designers, "name")[0]);
-    setEpmMember(map(epms, "name")[0]);
+    // setWorkGroup(team);
+    // setRndMember(map(filter(rnds, { team }), "name")[0]);
+    // setDesignerMember(map(designers, "name")[0]);
+    // setEpmMember(map(epms, "name")[0]);
     setUsers(data);
     setTeams(uniq(map(data, "team")));
   };
@@ -597,10 +597,12 @@ const NewCampaigns = () => {
     )
       ? filter(users, { role: "designer", team: workGroup })
       : filter(users, { role: "designer" });
-    setRndMember(map(rnds, "name")[0]);
-    setDesignerMember(map(designers, "name")[0]);
-    // const epms = filter(users, { role: "epm", team: workGroup });
-    // setEpmMember(map(epms, "name")[0]);
+    if (!includes(map(rnds, "name"), rndMember)) {
+      setRndMember("");
+    }
+    if (!includes(map(designers, "name"), designerMember)) {
+      setDesignerMember("");
+    }
   }, [workGroup]);
   const fetchQuotes = async (page) => {
     setLoadingQuotes(true);
@@ -820,6 +822,44 @@ const NewCampaigns = () => {
   };
 
   const handleSubmitBrief = async () => {
+    if (
+      !workGroup ||
+      !rndMember ||
+      !epmMember ||
+      !designerMember ||
+      !briefType ||
+      !rndSize ||
+      !briefValue
+    ) {
+      if (!workGroup) {
+        showNotification("Thất bại", "Vui lòng chọn Team", "red");
+        return;
+      }
+      if (!rndMember) {
+        showNotification("Thất bại", "Vui lòng chọn RND", "red");
+        return;
+      }
+      if (!epmMember) {
+        showNotification("Thất bại", "Vui lòng chọn EPM", "red");
+        return;
+      }
+      if (!designerMember) {
+        showNotification("Thất bại", "Vui lòng chọn Designer", "red");
+        return;
+      }
+      if (!briefType) {
+        showNotification("Thất bại", "Vui lòng chọn Brief Type", "red");
+        return;
+      }
+      if (!rndSize) {
+        showNotification("Thất bại", "Vui lòng chọn Size", "red");
+        return;
+      }
+      if (!briefValue) {
+        showNotification("Thất bại", "Vui lòng chọn Value", "red");
+        return;
+      }
+    }
     setCreateBriefLoading(true);
     const generatedSKUs = prepareSubmitData();
     if (isEmpty(generatedSKUs)) {
@@ -904,7 +944,7 @@ const NewCampaigns = () => {
     });
     if (createBriefResponse) {
       close();
-      window.location.reload();
+      // window.location.reload();
     }
     setCreateBriefLoading(false);
   };
@@ -1700,6 +1740,10 @@ const NewCampaigns = () => {
                     styles.createButton
                   )}
                   onClick={() => {
+                    if (!rndMember) {
+                      showNotification("Thất bại", "Vui lòng chọn RND", "red");
+                      return;
+                    }
                     if (
                       !SKU &&
                       briefType !== BRIEF_TYPES[3] &&

@@ -59,7 +59,7 @@ export const CONVERT_NUMBER_TO_STATUS = {
 };
 
 export const CONVERT_BRIEF_TYPE_TO_OBJECT_NAME = {
-  "Scale - Product Base": "productLine",
+  "Scale - Product Line": "productLine",
   "Scale - Clipart": "clipart",
   "Scale - Niche": "clipart",
   "New - Phủ Market": "clipart",

@@ -20,8 +20,12 @@ const Dropdown = ({
 }) => {
   const [visible, setVisible] = useState(false);
 
-  const handleClick = (value) => {
-    setValue(value);
+  const handleClick = (receivedValue) => {
+    if (value === receivedValue) {
+      setValue("");
+    } else {
+      setValue(receivedValue);
+    }
     setVisible(false);
   };
 

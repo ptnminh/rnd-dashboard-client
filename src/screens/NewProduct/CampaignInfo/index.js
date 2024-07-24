@@ -14,7 +14,12 @@ import {
   Button,
 } from "@mantine/core";
 import { IconCircleCheck, IconRotateClockwise } from "@tabler/icons-react";
-import { BRIEF_TYPES, BRIEF_VALUES, RND_SIZES } from "../../../constant";
+import {
+  BRIEF_TYPES,
+  BRIEF_VALUES,
+  CHOOSE_BRIEF_TYPES,
+  RND_SIZES,
+} from "../../../constant";
 import { Autocomplete } from "@mantine/core";
 import Icon from "../../../components/Icon";
 
@@ -111,8 +116,9 @@ const CampaignInfo = ({
               value={rndMember}
               setValue={setRndMember}
               options={
-                map(filter(users, { role: "rnd", team: workGroup }), "name") ||
-                []
+                !isEmpty(filter(users, { role: "rnd", team: workGroup }))
+                  ? map(filter(users, { role: "rnd", team: workGroup }), "name")
+                  : map(filter(users, { role: "rnd" }), "name")
               }
               classOutSideClick={styles.memberDropdown}
             />{" "}
@@ -160,7 +166,7 @@ const CampaignInfo = ({
             classDropdownHead={styles.dropdownHead}
             value={briefType}
             setValue={setBriefType}
-            options={BRIEF_TYPES}
+            options={CHOOSE_BRIEF_TYPES}
           />{" "}
         </div>
       </Card>
