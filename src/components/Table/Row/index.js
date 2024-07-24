@@ -2,11 +2,17 @@ import React from "react";
 import styles from "./Row.module.sass";
 import { filter, map } from "lodash";
 import { Image } from "@mantine/core";
+import cn from "classnames";
 
 const Row = ({ item, headers, onRemove, headerRemove }) => {
   return (
     <>
-      <div className={styles.row}>
+      <div
+        className={cn({
+          [styles.row]: true,
+          [styles.active]: item && item?.SKU?.startsWith("XX"),
+        })}
+      >
         {map(
           filter(headers, (header) => header !== "uid"),
           (header, index) => (

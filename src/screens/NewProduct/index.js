@@ -1968,19 +1968,30 @@ const NewCampaigns = () => {
             </div>
             <ScrollArea h={300} scrollbars="y" scrollbarSize={2}>
               <CustomTable
-                items={generateScaleProductBaseOnBriefType({
-                  type: briefType,
-                  SKU,
-                  collections: validCollections,
-                  rndSortName: find(users, { name: rndMember })?.shortName,
-                  selectedClipArts,
-                  selectedQuotes,
-                  designs,
-                  selectedProductBases,
-                  rndId: find(users, { name: rndMember })?.uid,
-                  selectedSKUs,
-                  marketBrief,
-                })}
+                items={map(
+                  orderBy(
+                    generateScaleProductBaseOnBriefType({
+                      type: briefType,
+                      SKU,
+                      collections: validCollections,
+                      rndSortName: find(users, { name: rndMember })?.shortName,
+                      selectedClipArts,
+                      selectedQuotes,
+                      designs,
+                      selectedProductBases,
+                      rndId: find(users, { name: rndMember })?.uid,
+                      selectedSKUs,
+                      marketBrief,
+                    }),
+                    [(item) => !item?.SKU?.startsWith("XX"), "SKU"]
+                  ),
+                  (x, index) => {
+                    return {
+                      ...x,
+                      No: index + 1,
+                    };
+                  }
+                )}
                 headers={generateHeaderTable(briefType, isKeepClipArt)?.headers}
                 onRemove={handleRemoveRow}
                 headerRemove={
