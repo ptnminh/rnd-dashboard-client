@@ -1595,6 +1595,7 @@ const NewCampaigns = () => {
                 fetchProductLinesLoading={loadingProductBase}
                 handleSyncProductBases={handleSyncProductBases}
                 loaderIcon={loaderIcon}
+                briefType={briefType}
               />
             </div>
             <div className={styles.row}>
@@ -1632,6 +1633,7 @@ const NewCampaigns = () => {
                 fetchProductLinesLoading={loadingProductBase}
                 handleSyncProductBases={handleSyncProductBases}
                 loaderIcon={loaderIcon}
+                briefType={briefType}
               />
             </div>
             <div className={styles.row}>
