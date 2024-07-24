@@ -413,6 +413,7 @@ const DesignerScreens = () => {
                         }}
                         href={selectedSKU?.designLinkRef}
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
                         {selectedSKU?.designLinkRef}
                       </a>

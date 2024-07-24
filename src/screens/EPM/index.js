@@ -395,7 +395,14 @@ const DesignerScreens = () => {
                         color: "#228be6",
                         verticalAlign: "middle",
                       }}
-                      href={selectedSKU?.designLinkRef}
+                      href={
+                        selectedSKU?.briefType === BRIEF_TYPES[5]
+                          ? `https://${selectedSKU.designLinkRef.replace(
+                              /^(https?:\/\/)?/,
+                              ""
+                            )}`
+                          : selectedSKU?.designLinkRef
+                      }
                       target="_blank"
                       rel="noopener noreferrer"
                     >

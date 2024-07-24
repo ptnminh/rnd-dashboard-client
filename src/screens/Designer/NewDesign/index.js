@@ -154,8 +154,12 @@ const GridWithClipArt = ({ selectedSKU }) => {
                   color: "#228be6",
                   verticalAlign: "middle",
                 }}
-                href={selectedSKU.designLinkRef}
+                href={`https://${selectedSKU.designLinkRef.replace(
+                  /^(https?:\/\/)?/,
+                  ""
+                )}`}
                 target="_blank"
+                rel="noopener noreferrer"
               >
                 {selectedSKU.designLinkRef}
               </a>
@@ -373,7 +377,10 @@ const GridWithNoClipArt = ({ selectedSKU }) => {
                   color: "#228be6",
                   verticalAlign: "middle",
                 }}
-                href={selectedSKU.designLinkRef}
+                href={`https://${selectedSKU.designLinkRef.replace(
+                  /^(https?:\/\/)?/,
+                  ""
+                )}`}
                 target="_blank"
               >
                 {selectedSKU.designLinkRef}
