@@ -141,7 +141,7 @@ const BriefsTable = ({
       },
       {
         accessorKey: "imageRef",
-        header: "HÌNH SKU",
+        header: "HÌNH REF",
         size: 100,
         enableEditing: false,
         enableSorting: false,
@@ -227,94 +227,52 @@ const BriefsTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
-        id: "designer",
-        accessorFn: (row) => row?.designer?.name,
-        header: "DESIGNER",
+        id: "adsImage",
+        accessorFn: (row) => row?.rnd?.name,
+        header: "HÌNH ADS",
         enableEditing: false,
         enableSorting: false,
         size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["ads-image"] },
       },
       {
-        id: "epm",
-        accessorFn: (row) => row?.epm?.name,
-        header: "EPM",
+        id: "video",
+        accessorFn: (row) => row?.rnd?.name,
+        header: "VIDEO",
         enableEditing: false,
-        size: 130,
         enableSorting: false,
+        size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["ads-image"] },
       },
       {
-        accessorKey: "linkProduct",
-        header: "LINK LISTING",
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        accessorKey: "status",
+        header: "DONE",
         size: 100,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Edit: ({ row }) => {
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        Cell: (props) => {
+          const { row } = props;
           return (
-            <TextInput
-              value={updateBrief[row.original.uid]?.linkProduct}
-              onChange={(e) => {
-                setUpdateBrief({
-                  ...updateBrief,
-                  [row.original.uid]: {
-                    ...updateBrief[row.original.uid],
-                    linkProduct: e.target.value,
-                  },
-                });
-              }}
-            />
+            <Button
+              variant="filled"
+              color={row.original.status === 3 ? "red" : "green"}
+              leftSection={
+                row.original.status === 3 ? <IconBan /> : <IconCheck />
+              }
+              disabled={
+                row?.original?.status === 2 &&
+                !row?.original?.linkProduct &&
+                !updateBrief[row.original.uid]?.linkProduct
+              }
+            >
+              {row.original.status === 3 ? "Undone" : "Done"}
+            </Button>
           );
         },
-        Cell: ({ row }) => (
-          <a
-            style={{
-              cursor: "pointer",
-            }}
-            target="_blank"
-            href={
-              row.original.linkProduct ||
-              updateBrief[row.original.uid]?.linkProduct
-            }
-          >
-            {row.original.linkProduct ||
-            updateBrief[row.original.uid]?.linkProduct ? (
-              <Badge color="blue" variant="filled">
-                {" "}
-                <u>Link</u>{" "}
-              </Badge>
-            ) : null}
-          </a>
-        ),
       },
-      // {
-      //   accessorKey: "status",
-      //   header: "DONE",
-      //   size: 100,
-      //   enableSorting: false,
-      //   mantineTableBodyCellProps: { className: classes["body-cells"] },
-      //   mantineTableHeadCellProps: { className: classes["linkDesign"] },
-      //   Cell: (props) => {
-      //     const { row } = props;
-      //     return (
-      //       <Button
-      //         variant="filled"
-      //         color={row.original.status === 3 ? "red" : "green"}
-      //         leftSection={
-      //           row.original.status === 3 ? <IconBan /> : <IconCheck />
-      //         }
-      //         disabled={
-      //           row?.original?.status === 2 &&
-      //           !row?.original?.linkProduct &&
-      //           !updateBrief[row.original.uid]?.linkProduct
-      //         }
-      //       >
-      //         {row.original.status === 3 ? "Undone" : "Done"}
-      //       </Button>
-      //     );
-      //   },
-      // },
       {
         accessorKey: "priority",
         header: "PRIORITY",
@@ -344,37 +302,37 @@ const BriefsTable = ({
         size: 50,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
-      // {
-      //   accessorKey: "remove",
-      //   header: "ACTIONS",
-      //   enableSorting: false,
-      //   mantineTableHeadCellProps: { className: classes["remove"] },
-      //   mantineTableBodyCellProps: { className: classes["body-cells"] },
-      //   Edit: ({ cell, column, table }) => (
-      //     <div
-      //       style={{
-      //         display: "flex",
-      //         justifyContent: "center",
-      //       }}
-      //     >
-      //       <Button variant="filled" color="red">
-      //         <IconX />
-      //       </Button>
-      //     </div>
-      //   ),
-      //   Cell: ({ cell, column, table }) => (
-      //     <div
-      //       style={{
-      //         display: "flex",
-      //         justifyContent: "center",
-      //       }}
-      //     >
-      //       <Button variant="filled" color="red" size="sx">
-      //         <IconX />
-      //       </Button>
-      //     </div>
-      //   ),
-      // },
+      {
+        accessorKey: "remove",
+        header: "ACTIONS",
+        enableSorting: false,
+        mantineTableHeadCellProps: { className: classes["remove"] },
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        Edit: ({ cell, column, table }) => (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <Button variant="filled" color="red">
+              <IconX />
+            </Button>
+          </div>
+        ),
+        Cell: ({ cell, column, table }) => (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <Button variant="filled" color="red" size="sx">
+              <IconX />
+            </Button>
+          </div>
+        ),
+      },
     ],
     [validationErrors]
   );
@@ -646,31 +604,6 @@ const BriefsTable = ({
               }}
             />
             <Select
-              placeholder="EPM"
-              data={map(filter(users, { role: "epm" }), "name") || []}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={query?.epmName}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  epmName: find(users, { name: value })?.name,
-                  epm: find(users, { name: value })?.uid,
-                })
-              }
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  epmName: null,
-                  epm: null,
-                });
-              }}
-            />
-            <Select
               placeholder="Status"
               data={["Done", "Undone"]}
               styles={{
@@ -722,43 +655,6 @@ const BriefsTable = ({
               <IconFilterOff />
             </Button>
           </Flex>
-          <Flex
-            style={{
-              gap: "30px",
-              padding: "10px",
-              borderRadius: "10px",
-              backgroundColor: "#EFF0F1",
-            }}
-            justify="end"
-          >
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Undone: {filter(data, { status: 2 }).length}
-            </div>
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Time to done: {sumBy(filter(data, { status: 2 }), "time")}h
-            </div>
-          </Flex>
-          {editingCell && !isEmpty(updateBrief.linkDesigns) && (
-            <Flex>
-              <Button
-                variant="filled"
-                color="blue"
-                leftSection={<IconDeviceFloppy />}
-              >
-                Save
-              </Button>
-            </Flex>
-          )}
         </div>
       );
     },

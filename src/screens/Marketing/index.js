@@ -33,6 +33,7 @@ import { showNotification } from "../../utils/index";
 import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
 import { BRIEF_TYPES, STATUS } from "../../constant";
 import NewDesign from "./NewDesign";
+import PostCamp from "./PostCamp";
 
 const MKTScreens = () => {
   const navigate = useNavigate();
@@ -180,39 +181,9 @@ const MKTScreens = () => {
     <>
       <Card
         className={styles.card}
-        title="MKT TASK"
+        title="List SKU đang đợi"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
-        head={
-          <>
-            <Flex
-              style={{
-                gap: "30px",
-                padding: "10px",
-                borderRadius: "10px",
-                backgroundColor: "#EFF0F1",
-              }}
-              justify="end"
-            >
-              <div
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "16px",
-                }}
-              >
-                Undone: {metadata?.totalUndoneBriefs}
-              </div>
-              <div
-                style={{
-                  fontWeight: "bold",
-                  fontSize: "16px",
-                }}
-              >
-                Time to done: {metadata?.totalTimeToDoneBriefs}h
-              </div>
-            </Flex>
-          </>
-        }
       >
         <Details
           className={styles.details}
@@ -581,6 +552,7 @@ const MKTScreens = () => {
           handleUpdateLinkProduct={handleUpdateLinkProduct}
         />
       )}
+      <PostCamp />
     </>
   );
 };

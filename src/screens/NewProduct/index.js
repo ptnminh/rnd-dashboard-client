@@ -906,7 +906,7 @@ const NewCampaigns = () => {
           productLine: x?.uid,
         }),
         ...(briefType === BRIEF_TYPES[1] && {
-          clipart: find(clipArts, { uid: x.uid })?.uid,
+          clipart: x?.uid,
         }),
         ...(briefType === BRIEF_TYPES[2] && {
           quote: x.uid,
