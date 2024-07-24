@@ -134,9 +134,6 @@ const Editor = ({
           },
         }}
         handlePastedFiles={handlePastedFiles}
-        localization={{
-          locale: "vi",
-        }}
       />
       {button && (
         <button className={cn("button-small", styles.button)}>{button}</button>
