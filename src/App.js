@@ -29,6 +29,7 @@ import EPMScreens from "./screens/EPM";
 import { ProductLine } from "./screens/ProductLine";
 import MKTScreens from "./screens/Marketing";
 import DesignerFeedbackScreens from "./screens/DesignerFeedback";
+import RootCampaign from "./screens/RootCampaign";
 
 function App() {
   return (
@@ -103,6 +104,14 @@ function App() {
           element={
             <Page title="MKT">
               <MKTScreens />
+            </Page>
+          }
+        />
+        <Route
+          path="/mkt/root-campaign"
+          element={
+            <Page title="MKT">
+              <RootCampaign />
             </Page>
           }
         />

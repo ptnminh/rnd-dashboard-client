@@ -3,7 +3,6 @@ import styles from "./Sidebar.module.sass";
 import { Link, NavLink } from "react-router-dom";
 import cn from "classnames";
 import Icon from "../Icon";
-import Theme from "../Theme";
 import Dropdown from "./Dropdown";
 import Help from "./Help";
 import { Logo } from "./logo";
@@ -42,7 +41,14 @@ const navigation = [
   {
     title: "MKT - Task",
     icon: "diamond",
-    url: "/mkt",
+    slug: "/mkt",
+    pathname: "/mkt",
+    dropdown: [
+      {
+        title: "MKT - Camp Phôi",
+        url: "/mkt/root-campaign",
+      },
+    ],
   },
 ];
 
@@ -93,9 +99,6 @@ const Sidebar = ({ className, onClose }) => {
           <Icon name="arrow-right" size="24" />
           <Icon name="close" size="24" />
         </button>
-        <div className={styles.foot}>
-          <Theme className={styles.theme} visibleSidebar={visible} />
-        </div>
       </div>
       <Help
         visible={visibleHelp}
