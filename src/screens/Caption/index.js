@@ -62,6 +62,7 @@ const ListCaptions = ({
   const [data, setData] = useState(captions);
   const [searchCaption, setSearchCaption] = useState("");
   const [opened, { open, close }] = useDisclosure(false);
+  const [selectedCaption, setSelectedCaption] = useState({});
   useEffect(() => {
     setData(captions);
   }, [captions]);
@@ -284,47 +285,46 @@ const ListCaptions = ({
                   </Flex>
                 </Grid.Col>
 
-                {caption?.productLineInfo && (
-                  <Tooltip label="Chọn Product Base">
-                    <Grid.Col span={12}>
-                      <MantineCard
-                        shadow="sm"
-                        padding="lg"
-                        radius="md"
-                        withBorder
+                <Tooltip label="Chọn Product Base">
+                  <Grid.Col span={12}>
+                    <MantineCard
+                      shadow="sm"
+                      padding="lg"
+                      radius="md"
+                      withBorder
+                    >
+                      <MantineCard.Section
+                        onClick={() => {
+                          setProductBasePagination({
+                            currentPage: 1,
+                            totalPages: 1,
+                          });
+                          setSelectedCaption(caption);
+                          setSelectedProductLines([caption.productLineInfo]);
+                          open();
+                        }}
+                        style={{
+                          cursor: "pointer",
+                        }}
                       >
-                        <MantineCard.Section
-                          onClick={() => {
-                            setProductBasePagination({
-                              currentPage: 1,
-                              totalPages: 1,
-                            });
-                            setSelectedProductLines([caption.productLineInfo]);
-                            open();
-                          }}
+                        <Image
+                          src={
+                            caption.productLineInfo.imageSrc ||
+                            "/images/content/not_found_2.jpg"
+                          }
+                          height={160}
+                          alt="Norway"
                           style={{
-                            cursor: "pointer",
+                            objectFit: "contain",
                           }}
-                        >
-                          <Image
-                            src={
-                              caption.productLineInfo.imageSrc ||
-                              "/images/content/not_found_2.jpg"
-                            }
-                            height={160}
-                            alt="Norway"
-                            style={{
-                              objectFit: "contain",
-                            }}
-                          />
-                        </MantineCard.Section>
-                        <Group justify="space-between" mt="md" mb="xs">
-                          <Text fw={500}>{caption.productLineInfo.name}</Text>
-                        </Group>
-                      </MantineCard>
-                    </Grid.Col>
-                  </Tooltip>
-                )}
+                        />
+                      </MantineCard.Section>
+                      <Group justify="space-between" mt="md" mb="xs">
+                        <Text fw={500}>{caption.productLineInfo.name}</Text>
+                      </Group>
+                    </MantineCard>
+                  </Grid.Col>
+                </Tooltip>
               </Grid>
             </Fieldset>
           </Grid.Col>
@@ -337,7 +337,7 @@ const ListCaptions = ({
             currentPage: 1,
             totalPages: 1,
           });
-          setSelectedProductLines([]);
+          handleUpdateCaption(selectedCaption);
           close();
           setQueryProductLines({
             keyword: "",
