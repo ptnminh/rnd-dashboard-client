@@ -48,6 +48,10 @@ const navigation = [
         title: "MKT - Camp Phôi",
         url: "/mkt/root-campaign",
       },
+      {
+        title: "MKT - Caption",
+        url: "/mkt/caption",
+      },
     ],
   },
 ];

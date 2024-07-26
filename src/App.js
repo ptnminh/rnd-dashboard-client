@@ -30,6 +30,7 @@ import { ProductLine } from "./screens/ProductLine";
 import MKTScreens from "./screens/Marketing";
 import DesignerFeedbackScreens from "./screens/DesignerFeedback";
 import RootCampaign from "./screens/RootCampaign";
+import Caption from "./screens/Caption";
 
 function App() {
   return (
@@ -112,6 +113,14 @@ function App() {
           element={
             <Page title="MKT">
               <RootCampaign />
+            </Page>
+          }
+        />
+        <Route
+          path="/mkt/caption"
+          element={
+            <Page title="MKT">
+              <Caption />
             </Page>
           }
         />
