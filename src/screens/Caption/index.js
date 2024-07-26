@@ -18,6 +18,7 @@ import {
   TextInput,
   Card as MantineCard,
   Modal,
+  Tooltip,
 } from "@mantine/core";
 import styles from "./Caption.module.sass";
 import cn from "classnames";
@@ -56,6 +57,7 @@ const ListCaptions = ({
   setQueryProductLines,
   pagination,
   handlePageChange,
+  setProductBasePagination,
 }) => {
   const [data, setData] = useState(captions);
   const [searchCaption, setSearchCaption] = useState("");
@@ -251,7 +253,7 @@ const ListCaptions = ({
                         });
                       }}
                       minRows={10}
-                      maxRows={12}
+                      maxRows={10}
                     />
                     <TagsInput
                       label="Tags"
@@ -281,40 +283,47 @@ const ListCaptions = ({
                     />
                   </Flex>
                 </Grid.Col>
+
                 {caption?.productLineInfo && (
-                  <Grid.Col span={12}>
-                    <MantineCard
-                      shadow="sm"
-                      padding="lg"
-                      radius="md"
-                      withBorder
-                    >
-                      <MantineCard.Section
-                        onClick={() => {
-                          setSelectedProductLines([caption.productLineInfo]);
-                          open();
-                        }}
-                        style={{
-                          cursor: "pointer",
-                        }}
+                  <Tooltip label="Chọn Product Base">
+                    <Grid.Col span={12}>
+                      <MantineCard
+                        shadow="sm"
+                        padding="lg"
+                        radius="md"
+                        withBorder
                       >
-                        <Image
-                          src={
-                            caption.productLineInfo.imageSrc ||
-                            "/images/content/not_found_2.jpg"
-                          }
-                          height={160}
-                          alt="Norway"
-                          style={{
-                            objectFit: "cover",
+                        <MantineCard.Section
+                          onClick={() => {
+                            setProductBasePagination({
+                              currentPage: 1,
+                              totalPages: 1,
+                            });
+                            setSelectedProductLines([caption.productLineInfo]);
+                            open();
                           }}
-                        />
-                      </MantineCard.Section>
-                      <Group justify="space-between" mt="md" mb="xs">
-                        <Text fw={500}>{caption.productLineInfo.name}</Text>
-                      </Group>
-                    </MantineCard>
-                  </Grid.Col>
+                          style={{
+                            cursor: "pointer",
+                          }}
+                        >
+                          <Image
+                            src={
+                              caption.productLineInfo.imageSrc ||
+                              "/images/content/not_found_2.jpg"
+                            }
+                            height={160}
+                            alt="Norway"
+                            style={{
+                              objectFit: "contain",
+                            }}
+                          />
+                        </MantineCard.Section>
+                        <Group justify="space-between" mt="md" mb="xs">
+                          <Text fw={500}>{caption.productLineInfo.name}</Text>
+                        </Group>
+                      </MantineCard>
+                    </Grid.Col>
+                  </Tooltip>
                 )}
               </Grid>
             </Fieldset>
@@ -323,7 +332,17 @@ const ListCaptions = ({
       </Grid>
       <Modal
         opened={opened}
-        onClose={close}
+        onClose={() => {
+          setProductBasePagination({
+            currentPage: 1,
+            totalPages: 1,
+          });
+          setSelectedProductLines([]);
+          close();
+          setQueryProductLines({
+            keyword: "",
+          });
+        }}
         transitionProps={{ transition: "fade", duration: 200 }}
         overlayProps={{
           backgroundOpacity: 0.55,
@@ -403,7 +422,7 @@ const Caption = () => {
   const fetchCaptions = async (page) => {
     setLoadingCaption(true);
     const { data, metadata } = await captionServices.fetchCaptions({
-      limit: 6,
+      limit: 3,
       page,
       query: queryCaption,
     });
@@ -439,7 +458,13 @@ const Caption = () => {
     setCaptionsPagination((prev) => ({ ...prev, currentPage: page }));
   };
   const items = charactersList.map((item) => (
-    <Accordion.Item value={item.id} key={item.label}>
+    <Accordion.Item
+      value={item.id}
+      key={item.label}
+      onClick={() => {
+        fetchProductBases(1);
+      }}
+    >
       <Accordion.Control>
         <AccordionLabel {...item} />
       </Accordion.Control>
@@ -480,6 +505,7 @@ const Caption = () => {
       });
       setSelectedProductBases([]);
       showNotification("Thành công", "Tạo caption thành công", "green");
+      await fetchCaptions(captionsPagination.currentPage);
     }
     setLoadingCreateCaption(false);
   };
@@ -635,9 +661,11 @@ const Caption = () => {
               selectedProductLines={selectedProductBases}
               setSelectedProductLines={setSelectedProductBases}
               fetchProductLinesLoading={loadingProductBase}
+              setQueryProductLines={setQueryProductBase}
               pagination={productBasePagination}
               handlePageChange={handlePageChange}
               title="Chọn Product Base"
+              setProductBasePagination={setProductBasePagination}
             />
             <Pagination
               total={captionsPagination.totalPages}
