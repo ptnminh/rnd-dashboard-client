@@ -60,9 +60,9 @@ import {
   IconSearch,
   IconFilterOff,
   IconCheck,
-  IconDeselect,
-  IconSelector,
+  IconEye,
   IconRotateClockwise,
+  IconCodePlus,
 } from "@tabler/icons-react";
 import LazyLoad from "react-lazyload";
 import { useNavigate } from "react-router";
@@ -73,6 +73,7 @@ import SKUComponent from "./SKU";
 import Clipart from "./Clipart";
 import MarketBriefDesign from "./MarketBrief";
 import ModalPreviewMixMatch from "./ModalPreviewMixMatch";
+import ModalPreviewGroupClipart from "./ModalPreviewGroupClipart";
 
 const generateScaleProductLinesTable = ({
   selectedProductLines,
@@ -186,7 +187,7 @@ const generateScaleDesignTable = ({
 
 const generateScaleClipArtTable = ({
   SKU,
-  selectedClipArts,
+  grouppedCliparts,
   rndSortName,
   rndId,
 }) => {
@@ -194,25 +195,22 @@ const generateScaleClipArtTable = ({
   const currentRnDAccumulator =
     find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
   return compact(
-    map(
-      sortBy(selectedClipArts, (clipArt) => toLower(clipArt.name)),
-      (x, index) => {
-        const realRnDAccumulator = currentRnDAccumulator + index + 1;
-        const name = `${
-          SKU?.skuPrefix ? SKU?.skuPrefix : "XX"
-        }-${rndSortName}${String(realRnDAccumulator).padStart(4, "0")}`;
-        return {
-          No: index + 1,
-          "Clip Art": x.name,
-          Hình: x.imageSrc,
-          SKU: name,
-          Remove: "x",
-          uid: x.uid,
-          nextAccumulator: currentRnDAccumulator + selectedClipArts.length,
-          skuPrefix: SKU?.skuPrefix,
-        };
-      }
-    )
+    map(grouppedCliparts, (x, index) => {
+      const realRnDAccumulator = currentRnDAccumulator + index + 1;
+      const name = `${
+        SKU?.skuPrefix ? SKU?.skuPrefix : "XX"
+      }-${rndSortName}${String(realRnDAccumulator).padStart(4, "0")}`;
+      return {
+        No: index + 1,
+        Hình: map(x.cliparts, "imageSrc"),
+        SKU: name,
+        Remove: "x",
+        uid: x.index,
+        nextAccumulator: currentRnDAccumulator + grouppedCliparts.length,
+        skuPrefix: SKU?.skuPrefix,
+        clipartIds: map(x.cliparts, "uid"),
+      };
+    })
   );
 };
 
@@ -220,7 +218,7 @@ const generateScaleQuoteTable = ({
   selectedQuotes,
   rndSortName,
   SKU,
-  selectedClipArts,
+  grouppedCliparts,
   rndId,
 }) => {
   const skuAccumulators = SKU?.skuAccumulators || [];
@@ -237,8 +235,9 @@ const generateScaleQuoteTable = ({
         return {
           No: index + 1,
           Quote: x.quote.slice(0, 50) + (x.quote.length > 50 ? "..." : ""),
-          ...(!isEmpty(selectedClipArts) && {
-            Hình: selectedClipArts[0].imageSrc,
+          ...(!isEmpty(grouppedCliparts) && {
+            Hình: map(grouppedCliparts.cliparts, "imageSrc"),
+            clipartIds: map(grouppedCliparts.cliparts, "uid"),
           }),
           SKU: name,
           Remove: "x",
@@ -326,6 +325,7 @@ const generateScaleProductBaseOnBriefType = ({
   rndId,
   selectedSKUs,
   marketBrief,
+  grouppedCliparts,
 }) => {
   switch (type) {
     case BRIEF_TYPES[0]:
@@ -339,7 +339,7 @@ const generateScaleProductBaseOnBriefType = ({
     case BRIEF_TYPES[1]:
       return generateScaleClipArtTable({
         SKU,
-        selectedClipArts,
+        grouppedCliparts,
         rndSortName,
         rndId,
       });
@@ -348,7 +348,7 @@ const generateScaleProductBaseOnBriefType = ({
         selectedQuotes,
         rndSortName,
         SKU,
-        selectedClipArts,
+        grouppedCliparts,
         rndId,
       });
     case BRIEF_TYPES[3]:
@@ -387,7 +387,7 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
       };
     case BRIEF_TYPES[1]:
       return {
-        headers: ["No", "Clip Art", "Hình", "SKU", "Remove"],
+        headers: ["No", "Hình", "SKU", "Remove"],
         removeHeader: "Clip Art",
       };
     case BRIEF_TYPES[2]:
@@ -463,6 +463,13 @@ const NewCampaigns = () => {
   const [query, setQuery] = useState({});
   const topScrollClipArtRef = useRef(null);
   const [designs, setDesigns] = useState([]);
+  const [
+    openedModalPreviewGroupClipart,
+    {
+      open: openModalPreviewGroupClipart,
+      close: closeModalPreviewGroupClipart,
+    },
+  ] = useDisclosure(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -481,6 +488,7 @@ const NewCampaigns = () => {
   });
   const [queryProductBase, setQueryProductBase] = useState({});
   const [querySKU, setQuerySKU] = useState({});
+  const [grouppedCliparts, setGrouppedCliparts] = useState([]);
   const [selectedProductBases, setSelectedProductBases] = useState([]);
   const [selectedSKUs, setSelectedSKUs] = useState([]);
   const [loadingProductBase, setLoadingProductBase] = useState(false);
@@ -545,7 +553,12 @@ const NewCampaigns = () => {
         );
         break;
       case BRIEF_TYPES[1]:
-        setSelectedClipArts(filter(selectedClipArts, (x) => x.name !== name));
+        setSelectedClipArts(
+          filter(
+            grouppedCliparts,
+            (x) => x.index.toString() !== name.toString()
+          )
+        );
         break;
       case BRIEF_TYPES[2]:
         setSelectedQuotes(filter(selectedQuotes, (x) => x.uid !== name));
@@ -577,15 +590,6 @@ const NewCampaigns = () => {
       limit: -1,
     });
     data = orderBy(data, ["team"], ["asc"]);
-    const designers = filter(data, { role: "designer" });
-    const rnds = filter(data, { role: "rnd" });
-    const epms = filter(data, { role: "epm" });
-    const teams = compact(uniq(map(data, "team")));
-    const team = teams[0];
-    // setWorkGroup(team);
-    // setRndMember(map(filter(rnds, { team }), "name")[0]);
-    // setDesignerMember(map(designers, "name")[0]);
-    // setEpmMember(map(epms, "name")[0]);
     setUsers(data);
     setTeams(uniq(map(data, "team")));
   };
@@ -728,6 +732,7 @@ const NewCampaigns = () => {
     setQueryProductBase({});
     setMarketBrief({});
     setUsingProductBaseData(false);
+    setGrouppedCliparts([]);
   };
 
   useEffect(() => {
@@ -817,6 +822,7 @@ const NewCampaigns = () => {
       rndId: rnd?.uid,
       selectedSKUs,
       marketBrief,
+      grouppedCliparts,
     });
     return data;
   };
@@ -906,13 +912,13 @@ const NewCampaigns = () => {
           productLine: x?.uid,
         }),
         ...(briefType === BRIEF_TYPES[1] && {
-          clipart: x?.uid,
+          clipartIds: x?.clipartIds,
         }),
         ...(briefType === BRIEF_TYPES[2] && {
           quote: x.uid,
           ...(isKeepClipArt === KEEP_CLIPARTS[1] &&
-            !isEmpty(selectedClipArts) && {
-              clipart: selectedClipArts[0]?.uid,
+            !isEmpty(grouppedCliparts) && {
+              clipartIds: x?.clipartIds,
             }),
         }),
         designLinkRef: SKU?.designLink || "",
@@ -981,6 +987,17 @@ const NewCampaigns = () => {
   useEffect(() => {
     fetchSKUs(skuPagination.currentPage);
   }, [skuPagination.currentPage, querySKU]);
+
+  const handleMergeClipart = () => {
+    setGrouppedCliparts([
+      ...grouppedCliparts,
+      {
+        index: grouppedCliparts.length + 1,
+        cliparts: selectedClipArts,
+      },
+    ]);
+    setSelectedClipArts([]);
+  };
   return (
     <>
       <div style={{ position: "relative" }}>
@@ -1077,36 +1094,26 @@ const NewCampaigns = () => {
                     gap: "20px",
                   }}
                 >
-                  <Text>
-                    {!isEmpty(selectedClipArts) ? (
-                      <span>
-                        {selectedClipArts.length} Clipart đã chọn
-                        <span
-                          style={{
-                            marginLeft: "10px",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => setClipArts(selectedClipArts)}
-                        >
-                          <Tooltip label="Show Selected Clipart">
-                            <IconSelector />
-                          </Tooltip>
-                        </span>
-                        <span
-                          style={{
-                            marginLeft: "10px",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => setSelectedClipArts([])}
-                        >
-                          <Tooltip label="Deselect">
-                            <IconDeselect />
-                          </Tooltip>
-                        </span>
-                      </span>
-                    ) : null}
-                  </Text>
-                  <Flex>
+                  {!isEmpty(selectedClipArts) && (
+                    <Text>
+                      <Button
+                        leftSection={<IconCodePlus />}
+                        onClick={handleMergeClipart}
+                      >
+                        Group
+                      </Button>
+                    </Text>
+                  )}
+                  <Flex gap={10}>
+                    {!isEmpty(grouppedCliparts) && (
+                      <Button
+                        leftSection={<IconEye />}
+                        onClick={openModalPreviewGroupClipart}
+                      >
+                        Preview
+                      </Button>
+                    )}
+
                     <Button
                       onClick={handleSyncCliparts}
                       leftSection={
@@ -1257,26 +1264,22 @@ const NewCampaigns = () => {
                             position: "relative",
                           }}
                           onClick={() => {
-                            if (briefType === BRIEF_TYPES[1]) {
-                              if (
-                                includes(
-                                  map(selectedClipArts, "name"),
-                                  clipArt.name
+                            if (
+                              includes(
+                                map(selectedClipArts, "name"),
+                                clipArt.name
+                              )
+                            ) {
+                              setSelectedClipArts(
+                                selectedClipArts.filter(
+                                  (x) => x.name !== clipArt.name
                                 )
-                              ) {
-                                setSelectedClipArts(
-                                  selectedClipArts.filter(
-                                    (x) => x.name !== clipArt.name
-                                  )
-                                );
-                              } else {
-                                setSelectedClipArts((selectedClipArts) => [
-                                  ...selectedClipArts,
-                                  clipArt,
-                                ]);
-                              }
-                            } else if (briefType === BRIEF_TYPES[2]) {
-                              setSelectedClipArts([clipArt]);
+                              );
+                            } else {
+                              setSelectedClipArts((selectedClipArts) => [
+                                ...selectedClipArts,
+                                clipArt,
+                              ]);
                             }
                           }}
                         >
@@ -1756,7 +1759,7 @@ const NewCampaigns = () => {
                       return;
                     }
                     if (
-                      isEmpty(selectedClipArts) &&
+                      isEmpty(grouppedCliparts) &&
                       isEmpty(selectedQuotes) &&
                       isEmpty(selectedProductBases) &&
                       isEmpty(designs) &&
@@ -1771,7 +1774,7 @@ const NewCampaigns = () => {
                     }
                     if (
                       isKeepClipArt === KEEP_CLIPARTS[1] &&
-                      isEmpty(selectedClipArts)
+                      isEmpty(grouppedCliparts)
                     ) {
                       showNotification(
                         "Thất bại",
@@ -1982,6 +1985,7 @@ const NewCampaigns = () => {
                       rndId: find(users, { name: rndMember })?.uid,
                       selectedSKUs,
                       marketBrief,
+                      grouppedCliparts,
                     }),
                     [(item) => !item?.SKU?.startsWith("XX"), "SKU"]
                   ),
@@ -2048,6 +2052,12 @@ const NewCampaigns = () => {
         handleSubmitBrief={handleSubmitBrief}
         marketBrief={marketBrief}
         handleRemoveRow={handleRemoveRow}
+      />
+      <ModalPreviewGroupClipart
+        opened={openedModalPreviewGroupClipart}
+        close={closeModalPreviewGroupClipart}
+        grouppedCliparts={grouppedCliparts}
+        setGrouppedCliparts={setGrouppedCliparts}
       />
     </>
   );

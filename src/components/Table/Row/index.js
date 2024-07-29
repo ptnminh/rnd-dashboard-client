@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./Row.module.sass";
 import { filter, map } from "lodash";
-import { Image } from "@mantine/core";
+import { Flex, Grid, Image, ScrollArea } from "@mantine/core";
 import cn from "classnames";
 
 const Row = ({ item, headers, onRemove, headerRemove }) => {
@@ -22,10 +22,25 @@ const Row = ({ item, headers, onRemove, headerRemove }) => {
               header === "Clipart" ||
               header === "Hình Product Base" ||
               header === "Ref" ? (
-                <Image
-                  src={item[header] || "/images/content/not_found_2.jpg"}
-                  style={{ width: "50px" }}
-                />
+                <ScrollArea offsetScrollbars="x" w={200}>
+                  {Array.isArray(item[header]) ? (
+                    <Grid>
+                      {map(item[header], (image, index) => (
+                        <Grid.Col span={3}>
+                          <Image
+                            src={image || "/images/content/not_found_2.jpg"}
+                            style={{ width: "50px" }}
+                          />
+                        </Grid.Col>
+                      ))}
+                    </Grid>
+                  ) : (
+                    <Image
+                      src={item[header] || "/images/content/not_found_2.jpg"}
+                      style={{ width: "50px" }}
+                    />
+                  )}
+                </ScrollArea>
               ) : (
                 <div
                   style={{

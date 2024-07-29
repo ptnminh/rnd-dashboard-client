@@ -31,6 +31,8 @@ const Clipart = ({
   BRIEF_TYPES,
   handlePageChange,
   handleSelectClipart,
+  grouppedClipArts,
+  setGrouppedClipArts,
 }) => {
   return (
     <>
