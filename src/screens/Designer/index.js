@@ -42,6 +42,7 @@ import NewDesign from "./NewDesign";
 import ScaleDesign from "./ScaleDesign";
 import ScaleMixMatch from "./ScaleMixMatch";
 import ScaleClipart from "./ScaleCliparts";
+import ScaleNiche from "./Niche";
 
 const DesignerScreens = () => {
   const navigate = useNavigate();
@@ -254,6 +255,7 @@ const DesignerScreens = () => {
       />
       {selectedSKU &&
         selectedSKU?.briefType !== BRIEF_TYPES[1] &&
+        selectedSKU?.briefType !== BRIEF_TYPES[2] &&
         selectedSKU?.briefType !== BRIEF_TYPES[3] &&
         selectedSKU?.briefType !== BRIEF_TYPES[4] &&
         selectedSKU?.briefType !== BRIEF_TYPES[5] && (
@@ -635,6 +637,17 @@ const DesignerScreens = () => {
         )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[1] && (
         <ScaleClipart
+          opened={opened}
+          close={close}
+          selectedSKU={selectedSKU}
+          linkDesign={linkDesign}
+          loadingUpdateDesignLink={loadingUpdateDesignLink}
+          setLinkDesign={setLinkDesign}
+          handleUpdateLinkDesign={handleUpdateLinkDesign}
+        />
+      )}
+      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[2] && (
+        <ScaleNiche
           opened={opened}
           close={close}
           selectedSKU={selectedSKU}

@@ -13,6 +13,7 @@ import {
   Card,
   Group,
   Text,
+  CopyButton,
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -21,12 +22,14 @@ import {
 import {
   IconCircleCheck,
   IconArrowBigRightLinesFilled,
+  IconCopyCheckFilled,
+  IconCopy,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
-import styles from "./ScaleCliparts.module.sass";
-import { isEmpty, map } from "lodash";
+import styles from "./ScaleNiche.module.sass";
+import { map } from "lodash";
 
-const ScaleClipart = ({
+const ScaleNiche = ({
   close,
   selectedSKU,
   linkDesign,
@@ -277,6 +280,68 @@ const ScaleClipart = ({
               ))}
             </Flex>
           </ScrollArea>
+          <Card
+            shadow="sm"
+            padding="sm"
+            style={{
+              cursor: "pointer",
+              position: "relative",
+              marginTop: "10px",
+            }}
+          >
+            <Card.Section>
+              <div
+                style={{
+                  cursor: "pointer",
+                  width: "100%",
+                  height: "200px",
+                  padding: "10px",
+                  position: "relative",
+                }}
+              >
+                {selectedSKU?.niche?.quote}
+                {true && (
+                  <>
+                    <div
+                      style={{
+                        padding: "5px",
+                        position: "absolute",
+                        bottom: "10px",
+                        right: "13px",
+                        borderRadius: "50%",
+                        zIndex: 2,
+                      }}
+                    >
+                      <CopyButton value={selectedSKU?.niche?.quote} color>
+                        {({ copied, copy }) => (
+                          <Button color="#62D256" onClick={copy}>
+                            {copied ? (
+                              <IconCopyCheckFilled color="#ffffff" />
+                            ) : (
+                              <IconCopy color="#ffffff" />
+                            )}
+                          </Button>
+                        )}
+                      </CopyButton>
+                    </div>
+                    <div
+                      style={{
+                        position: "absolute",
+                        top: "9px",
+                        right: "0",
+                        height: "94%",
+                        width: "99%",
+                        cursor: "pointer",
+                        padding: "10px",
+                        borderRadius: "10px",
+                        zIndex: 1,
+                      }}
+                    ></div>
+                  </>
+                )}
+              </div>
+            </Card.Section>
+          </Card>
         </Grid.Col>
 
         <Grid.Col span={12}>
@@ -316,4 +381,4 @@ const ScaleClipart = ({
   );
 };
 
-export default ScaleClipart;
+export default ScaleNiche;

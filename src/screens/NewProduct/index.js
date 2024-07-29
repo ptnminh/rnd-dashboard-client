@@ -218,7 +218,7 @@ const generateScaleQuoteTable = ({
   selectedQuotes,
   rndSortName,
   SKU,
-  grouppedCliparts,
+  selectedClipArts,
   rndId,
 }) => {
   const skuAccumulators = SKU?.skuAccumulators || [];
@@ -235,9 +235,9 @@ const generateScaleQuoteTable = ({
         return {
           No: index + 1,
           Quote: x.quote.slice(0, 50) + (x.quote.length > 50 ? "..." : ""),
-          ...(!isEmpty(grouppedCliparts) && {
-            Hình: map(grouppedCliparts.cliparts, "imageSrc"),
-            clipartIds: map(grouppedCliparts.cliparts, "uid"),
+          ...(!isEmpty(selectedClipArts) && {
+            Hình: map(selectedClipArts, "imageSrc"),
+            clipartIds: map(selectedClipArts, "uid"),
           }),
           SKU: name,
           Remove: "x",
@@ -348,7 +348,7 @@ const generateScaleProductBaseOnBriefType = ({
         selectedQuotes,
         rndSortName,
         SKU,
-        grouppedCliparts,
+        selectedClipArts,
         rndId,
       });
     case BRIEF_TYPES[3]:
@@ -917,7 +917,7 @@ const NewCampaigns = () => {
         ...(briefType === BRIEF_TYPES[2] && {
           quote: x.uid,
           ...(isKeepClipArt === KEEP_CLIPARTS[1] &&
-            !isEmpty(grouppedCliparts) && {
+            !isEmpty(selectedClipArts) && {
               clipartIds: x?.clipartIds,
             }),
         }),
@@ -1094,25 +1094,27 @@ const NewCampaigns = () => {
                     gap: "20px",
                   }}
                 >
-                  {!isEmpty(selectedClipArts) && (
-                    <Text>
-                      <Button
-                        leftSection={<IconCodePlus />}
-                        onClick={handleMergeClipart}
-                      >
-                        Group
-                      </Button>
-                    </Text>
-                  )}
-                  <Flex gap={10}>
-                    {!isEmpty(grouppedCliparts) && (
-                      <Button
-                        leftSection={<IconEye />}
-                        onClick={openModalPreviewGroupClipart}
-                      >
-                        Preview
-                      </Button>
+                  {!isEmpty(selectedClipArts) &&
+                    briefType === BRIEF_TYPES[1] && (
+                      <Text>
+                        <Button
+                          leftSection={<IconCodePlus />}
+                          onClick={handleMergeClipart}
+                        >
+                          Group
+                        </Button>
+                      </Text>
                     )}
+                  <Flex gap={10}>
+                    {!isEmpty(grouppedCliparts) &&
+                      briefType === BRIEF_TYPES[1] && (
+                        <Button
+                          leftSection={<IconEye />}
+                          onClick={openModalPreviewGroupClipart}
+                        >
+                          Preview
+                        </Button>
+                      )}
 
                     <Button
                       onClick={handleSyncCliparts}
@@ -1774,7 +1776,7 @@ const NewCampaigns = () => {
                     }
                     if (
                       isKeepClipArt === KEEP_CLIPARTS[1] &&
-                      isEmpty(grouppedCliparts)
+                      isEmpty(selectedClipArts)
                     ) {
                       showNotification(
                         "Thất bại",

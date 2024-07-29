@@ -34,6 +34,7 @@ import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
 import { BRIEF_TYPES, STATUS } from "../../constant";
 import NewDesign from "./NewDesign";
 import Clipart from "./Clipart";
+import Niche from "./Niche";
 
 const DesignerScreens = () => {
   const navigate = useNavigate();
@@ -247,6 +248,7 @@ const DesignerScreens = () => {
       />
       {selectedSKU &&
         selectedSKU?.briefType !== BRIEF_TYPES[1] &&
+        selectedSKU?.briefType !== BRIEF_TYPES[2] &&
         selectedSKU?.briefType !== BRIEF_TYPES[3] && (
           <Modal
             opened={opened}
@@ -605,6 +607,17 @@ const DesignerScreens = () => {
         )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[1] && (
         <Clipart
+          opened={opened}
+          close={close}
+          selectedSKU={selectedSKU}
+          linkProduct={linkProduct}
+          loadingUpdateProductLink={loadingUpdateProductLink}
+          setLinkProduct={setLinkProduct}
+          handleUpdateLinkProduct={handleUpdateLinkProduct}
+        />
+      )}
+      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[2] && (
+        <Niche
           opened={opened}
           close={close}
           selectedSKU={selectedSKU}

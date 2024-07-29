@@ -9,10 +9,6 @@ import {
   Flex,
   TextInput,
   Button,
-  ScrollArea,
-  Card,
-  Group,
-  Text,
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -23,16 +19,15 @@ import {
   IconArrowBigRightLinesFilled,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
-import styles from "./ScaleCliparts.module.sass";
-import { isEmpty, map } from "lodash";
+import { join, map } from "lodash";
 
-const ScaleClipart = ({
+const Niche = ({
   close,
   selectedSKU,
-  linkDesign,
-  loadingUpdateDesignLink,
-  setLinkDesign,
-  handleUpdateLinkDesign,
+  linkProduct,
+  loadingUpdateProductLink,
+  setLinkProduct,
+  handleUpdateLinkProduct,
   opened,
 }) => {
   return (
@@ -45,10 +40,10 @@ const ScaleClipart = ({
         blur: 3,
       }}
       radius="md"
-      size="80%"
+      size="1000px"
     >
       <LoadingOverlay
-        visible={loadingUpdateDesignLink}
+        visible={loadingUpdateProductLink}
         zIndex={1000}
         overlayProps={{ radius: "sm", blur: 2 }}
       />
@@ -68,7 +63,7 @@ const ScaleClipart = ({
               borderRadius: "12px",
             }}
           >
-            Scale Clipart
+            {selectedSKU?.briefType}
           </div>
         </Grid.Col>
         <Grid.Col span={5}>
@@ -98,6 +93,7 @@ const ScaleClipart = ({
           </div>
         </Grid.Col>
         <Grid.Col span={2}></Grid.Col>
+
         <Grid.Col span={5}>
           <div
             style={{
@@ -111,18 +107,29 @@ const ScaleClipart = ({
             {selectedSKU?.rndTeam} - RnD {selectedSKU?.rnd.name} - Designer{" "}
             {selectedSKU?.designer.name}
           </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              padding: "5px",
+              fontSize: "14px",
+            }}
+          >
+            EPM {selectedSKU?.epm.name}
+          </div>
         </Grid.Col>
         <Grid.Col span={5}>
           <div
             style={{
               display: "flex",
               justifyContent: "center",
-              padding: "5px",
+              padding: "10px",
               fontSize: "18px",
               alignItems: "center",
             }}
           >
-            REF
+            Ref
           </div>
           <Image
             radius="md"
@@ -152,9 +159,52 @@ const ScaleClipart = ({
               </ThemeIcon>
             }
           >
-            {selectedSKU?.productLine?.refLink && (
+            {selectedSKU?.designLinkRef && (
               <List.Item>
-                Link Product Base (Library):{" "}
+                Link Design (NAS):{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "200px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={selectedSKU?.designLinkRef}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {selectedSKU?.designLinkRef}
+                </a>
+              </List.Item>
+            )}
+            {selectedSKU?.productInfo?.tibSearchCampaignLink && (
+              <List.Item>
+                Link Campaign (TIB):{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "200px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={selectedSKU?.productInfo?.tibSearchCampaignLink}
+                  target="_blank"
+                >
+                  {selectedSKU?.productInfo?.tibSearchCampaignLink}
+                </a>
+              </List.Item>
+            )}
+            {selectedSKU?.linkProductRef && (
+              <List.Item>
+                Link Store:{" "}
                 <a
                   style={{
                     display: "inline-block",
@@ -166,40 +216,17 @@ const ScaleClipart = ({
                     color: "#228be6",
                     verticalAlign: "middle",
                   }}
-                  href={selectedSKU?.productLine?.refLink}
+                  href={selectedSKU?.linkProductRef}
                   target="_blank"
-                  rel="noopener noreferrer"
                 >
-                  {selectedSKU?.productLine?.refLink}
-                </a>
-              </List.Item>
-            )}
-            {selectedSKU?.productLine?.designLink && (
-              <List.Item>
-                Link Design (NAS):{" "}
-                <a
-                  style={{
-                    display: "inline-block",
-                    width: "50px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    textDecoration: "none",
-                    color: "#228be6",
-                    verticalAlign: "middle",
-                  }}
-                  href={selectedSKU?.productLine?.designLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {selectedSKU?.productLine?.designLink}
+                  {selectedSKU?.linkProductRef}
                 </a>
               </List.Item>
             )}
           </List>
         </Grid.Col>
         <Grid.Col
-          span={1}
+          span={2}
           style={{
             display: "flex",
             justifyContent: "center",
@@ -208,94 +235,95 @@ const ScaleClipart = ({
         >
           <IconArrowBigRightLinesFilled size={56} color="#228be6" />
         </Grid.Col>
-        <Grid.Col span={6}>
+        <Grid.Col span={5}>
           <div
             style={{
               display: "flex",
               justifyContent: "center",
-              padding: "5px",
+              padding: "10px",
               fontSize: "18px",
               alignItems: "center",
             }}
           >
-            SCALE
+            Scale
           </div>
-          <ScrollArea offsetScrollbars="x" w={500}>
-            <Flex wrap={true} gap={30}>
-              {map(selectedSKU?.cliparts, (clipart) => (
-                <Card shadow="sm" padding="lg" radius="md" withBorder>
-                  <Card.Section>
-                    <Image
-                      src={clipart.image || "/images/content/not_found_2.jpg"}
-                      h="200px"
-                      w="200px"
-                      alt="Norway"
-                      style={{
-                        objectFit: "contain",
-                      }}
-                    />
-                  </Card.Section>
-                  <Group justify="space-between" mt="md" mb="xs">
-                    <Text fw={500}>{clipart?.name}</Text>
-                  </Group>
-
-                  <List
-                    spacing="lg"
-                    size="sm"
-                    center
-                    icon={
-                      <ThemeIcon color="teal" size={24} radius="xl">
-                        <IconCircleCheck
-                          style={{ width: rem(16), height: rem(16) }}
-                        />
-                      </ThemeIcon>
-                    }
-                  >
-                    {clipart.refLink && (
-                      <List.Item>
-                        Link Cliart:{" "}
-                        <a
-                          style={{
-                            display: "inline-block",
-                            width: "230px",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            textDecoration: "none",
-                            color: "#228be6",
-                            verticalAlign: "middle",
-                          }}
-                          href={clipart.refLink}
-                          target="_blank"
-                        >
-                          {clipart.refLink}
-                        </a>
-                      </List.Item>
-                    )}
-                  </List>
-                </Card>
-              ))}
-            </Flex>
-          </ScrollArea>
+          <Image
+            radius="md"
+            src={
+              selectedSKU?.designInfo?.thumbLink ||
+              "/images/content/not_found_2.jpg"
+            }
+            height={200}
+            fit="contain"
+          />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "10px",
+              fontSize: "18px",
+              alignItems: "center",
+              marginTop: "10px",
+            }}
+          >
+            {selectedSKU?.sku} mới
+          </div>
+          <List
+            spacing="lg"
+            size="sm"
+            center
+            icon={
+              <ThemeIcon color="teal" size={24} radius="xl">
+                <IconCircleCheck style={{ width: rem(16), height: rem(16) }} />
+              </ThemeIcon>
+            }
+          >
+            {
+              <List.Item>
+                Clipart:{" "}
+                <span>{join(map(selectedSKU?.cliparts, "name"), " ,")}</span>
+              </List.Item>
+            }
+            {selectedSKU?.linkDesign && (
+              <List.Item>
+                Link Design (NAS):{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "200px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={selectedSKU?.linkDesign}
+                  target="_blank"
+                >
+                  {selectedSKU?.linkDesign}
+                </a>
+              </List.Item>
+            )}
+            <List.Item>Link Campaign (TIB) - Auto: (Coming soon)</List.Item>
+          </List>
         </Grid.Col>
-
         <Grid.Col span={12}>
           <Editor
-            state={getStringAsEditorState(selectedSKU?.note?.designer)}
-            classEditor={styles.editor}
-            label="Designer Note"
+            state={getStringAsEditorState(selectedSKU?.note?.epm)}
+            label="EPM Note"
             readOnly={true}
           />
         </Grid.Col>
         <Grid.Col span={12}>
           <Flex gap={10}>
             <TextInput
-              placeholder="Output - Link Design (NAS)"
+              placeholder="Output - Link Website"
               style={{
                 flex: "1 1 90%",
               }}
-              value={linkDesign}
-              onChange={(event) => setLinkDesign(event.target.value)}
+              value={linkProduct}
+              onChange={(event) => setLinkProduct(event.target.value)}
             />
             <Button
               style={{
@@ -304,7 +332,7 @@ const ScaleClipart = ({
                 color: "#ffffff",
               }}
               onClick={() => {
-                handleUpdateLinkDesign(selectedSKU?.uid);
+                handleUpdateLinkProduct(selectedSKU?.uid);
               }}
             >
               DONE
@@ -316,4 +344,4 @@ const ScaleClipart = ({
   );
 };
 
-export default ScaleClipart;
+export default Niche;
