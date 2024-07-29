@@ -31,19 +31,21 @@ const ModalPreviewGroupClipart = ({
           const newCliparts = grouppedClipart.cliparts.filter(
             (clipart) => clipart.uid !== uid
           );
-          setSelectedGrouppedClipart({
-            ...selectedGrouppedClipart,
-            cliparts: newCliparts,
-          });
+
           if (newCliparts.length === 0) {
             closeModalPreviewClipart();
             return null;
           }
+          setSelectedGrouppedClipart({
+            ...selectedGrouppedClipart,
+            cliparts: newCliparts,
+          });
           return {
             ...grouppedClipart,
             cliparts: newCliparts,
           };
         }
+        return grouppedClipart;
       })
     );
     if (isEmpty(newGrouppedCliparts)) {

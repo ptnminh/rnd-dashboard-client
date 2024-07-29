@@ -21,7 +21,7 @@ const Row = ({ item, headers, onRemove, headerRemove }) => {
               header === "Design" ||
               header === "Clipart" ||
               header === "Hình Product Base" ||
-              header === "Ref" ? (
+              header === "Ref" || header === "Hình Clipart" ? (
                 <ScrollArea offsetScrollbars="x" w={200}>
                   {Array.isArray(item[header]) ? (
                     <Grid>

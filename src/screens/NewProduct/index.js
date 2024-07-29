@@ -1,18 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./NewCampaigns.module.sass";
 import CampaignInfo from "./CampaignInfo";
 import cn from "classnames";
 import Card from "../../components/Card";
-import {
-  BRIEF_TYPES,
-  BRIEF_VALUES,
-  DESIGNER_MEMBERS,
-  GROUP_WORKS,
-  KEEP_CLIPARTS,
-  LAYOUT_TYPES,
-  MEMBERS,
-  RND_SIZES,
-} from "../../constant";
+import { BRIEF_TYPES, KEEP_CLIPARTS, LAYOUT_TYPES } from "../../constant";
 import Editor from "../../components/Editor";
 import { useForm } from "react-hook-form";
 import { useDisclosure } from "@mantine/hooks";
@@ -30,7 +21,6 @@ import {
   Text,
   Pagination,
   MultiSelect,
-  Tooltip,
   Select,
 } from "@mantine/core";
 import { showNotification } from "../../utils/index";
@@ -50,6 +40,7 @@ import {
   map,
   merge,
   orderBy,
+  random,
   sortBy,
   toLower,
   uniq,
@@ -284,14 +275,14 @@ const generateScaleMixMatch = ({
   rndSortName,
   rndId,
   marketBrief,
-  selectedClipArts,
+  grouppedCliparts,
 }) => {
   const prefix = selectedProductBases[0]?.skuPrefix || "XX";
   const skuAccumulators = selectedProductBases[0]?.skuAccumulators || [];
   const currentRnDAccumulator =
     find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
-  return compact(
-    map(selectedClipArts, (x, index) => {
+  const tables = compact(
+    map(grouppedCliparts, (x, index) => {
       const realRnDAccumulator = currentRnDAccumulator + index + 1;
       const name = `${prefix}-${rndSortName}${String(
         realRnDAccumulator
@@ -301,17 +292,18 @@ const generateScaleMixMatch = ({
         "Hình Product Base":
           selectedProductBases[0]?.image || selectedProductBases[0]?.imageSrc,
         Ref: marketBrief?.imageRef,
-        Clipart: x.imageSrc,
+        "Hình Clipart": map(x.cliparts, "imageSrc"),
         SKU: name,
         Remove: "x",
-        uid: x.uid,
-        clipartId: x?.uid,
+        uid: x.index.toString(),
+        clipartIds: map(x?.cliparts, "uid"),
         designLinkRef: marketBrief?.designLinkRef,
-        nextAccumulator: currentRnDAccumulator + selectedClipArts.length,
+        nextAccumulator: currentRnDAccumulator + grouppedCliparts.length,
         skuPrefix: prefix,
       };
     })
   );
+  return tables;
 };
 const generateScaleProductBaseOnBriefType = ({
   type,
@@ -370,7 +362,7 @@ const generateScaleProductBaseOnBriefType = ({
         selectedProductBases,
         rndSortName,
         rndId,
-        selectedClipArts,
+        grouppedCliparts,
         marketBrief,
       });
     default:
@@ -413,7 +405,7 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
           "No",
           "Hình Product Base",
           "Ref",
-          "Clipart",
+          "Hình Clipart",
           "SKU",
           "Remove",
           "uid",
@@ -939,7 +931,7 @@ const NewCampaigns = () => {
         }),
         ...(briefType === BRIEF_TYPES[5] && {
           productLine: selectedProductBases[0]?.uid,
-          clipart: x.uid,
+          clipartIds: x.clipartIds,
           designLinkRef: x.designLinkRef,
           imageRef: x["Ref"],
         }),
@@ -992,7 +984,7 @@ const NewCampaigns = () => {
     setGrouppedCliparts([
       ...grouppedCliparts,
       {
-        index: grouppedCliparts.length + 1,
+        index: Date.now() + Math.floor(Math.random() * 1000),
         cliparts: selectedClipArts,
       },
     ]);
@@ -1672,6 +1664,37 @@ const NewCampaigns = () => {
                 classSpanTitle={styles.classScaleSpanTitle}
                 title="3. Clipart cần Scale"
                 classTitle={cn("title-green", styles.title)}
+                head={
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "20px",
+                    }}
+                  >
+                    {!isEmpty(selectedClipArts) && (
+                      <Text>
+                        <Button
+                          leftSection={<IconCodePlus />}
+                          onClick={handleMergeClipart}
+                        >
+                          Group
+                        </Button>
+                      </Text>
+                    )}
+                    <Flex gap={10}>
+                      {!isEmpty(grouppedCliparts) && (
+                        <Button
+                          leftSection={<IconEye />}
+                          onClick={openModalPreviewGroupClipart}
+                        >
+                          Preview
+                        </Button>
+                      )}
+                    </Flex>
+                  </div>
+                }
               >
                 <Clipart
                   clipArts={clipArts}
@@ -1823,7 +1846,7 @@ const NewCampaigns = () => {
                     } else {
                       if (
                         isEmpty(marketBrief) &&
-                        isEmpty(selectedClipArts) &&
+                        isEmpty(grouppedCliparts) &&
                         isEmpty(selectedProductBases)
                       ) {
                         showNotification(
@@ -2054,6 +2077,7 @@ const NewCampaigns = () => {
         handleSubmitBrief={handleSubmitBrief}
         marketBrief={marketBrief}
         handleRemoveRow={handleRemoveRow}
+        grouppedCliparts={grouppedCliparts}
       />
       <ModalPreviewGroupClipart
         opened={openedModalPreviewGroupClipart}

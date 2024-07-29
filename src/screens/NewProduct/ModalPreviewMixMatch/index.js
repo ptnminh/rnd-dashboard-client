@@ -17,6 +17,7 @@ const ModalPreviewMixMatch = ({
   isKeepClipArt,
   handleSubmitBrief,
   marketBrief,
+  grouppedCliparts,
 }) => {
   return (
     <Modal
@@ -84,6 +85,7 @@ const ModalPreviewMixMatch = ({
                 selectedProductBases,
                 rndId: find(users, { name: rndMember })?.uid,
                 marketBrief,
+                grouppedCliparts,
               })}
               headers={generateHeaderTable(briefType, isKeepClipArt)?.headers}
               onRemove={handleRemoveRow}
