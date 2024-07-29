@@ -253,7 +253,7 @@ const ScaleClipart = ({
                   >
                     {clipart.refLink && (
                       <List.Item>
-                        Link Cliart:{" "}
+                        Link Clipart:{" "}
                         <a
                           style={{
                             display: "inline-block",

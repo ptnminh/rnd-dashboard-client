@@ -9,6 +9,10 @@ import {
   Flex,
   TextInput,
   Button,
+  ScrollArea,
+  Card,
+  Group,
+  Text,
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -21,7 +25,7 @@ import {
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
 import styles from "./NewDesign.module.sass";
-import { isEmpty } from "lodash";
+import { isEmpty, map } from "lodash";
 const GridWithClipArt = ({ selectedSKU }) => {
   return (
     <>
@@ -190,57 +194,63 @@ const GridWithClipArt = ({ selectedSKU }) => {
         >
           Clipart
         </div>
-        <Image
-          radius="md"
-          src={selectedSKU?.clipart?.image || "/images/content/not_found_2.jpg"}
-          height={200}
-          fit="contain"
-        />
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            padding: "10px",
-            fontSize: "16px",
-            alignItems: "center",
-            marginTop: "10px",
-          }}
-        >
-          {selectedSKU?.clipart?.name}
-        </div>
-        <List
-          spacing="lg"
-          size="sm"
-          center
-          icon={
-            <ThemeIcon color="teal" size={24} radius="xl">
-              <IconCircleCheck style={{ width: rem(16), height: rem(16) }} />
-            </ThemeIcon>
-          }
-        >
-          {selectedSKU?.clipart?.refLink && (
-            <List.Item>
-              Link Clipart (Library):{" "}
-              <a
-                style={{
-                  display: "inline-block",
-                  width: "230px",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  textDecoration: "none",
-                  color: "#228be6",
-                  verticalAlign: "middle",
-                }}
-                href={selectedSKU?.clipart?.refLink}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {selectedSKU?.clipart?.refLink}
-              </a>
-            </List.Item>
-          )}
-        </List>
+        <ScrollArea offsetScrollbars="x" w={500}>
+          <Flex wrap={true} gap={30}>
+            {map(selectedSKU?.cliparts, (clipart) => (
+              <Card shadow="sm" padding="lg" radius="md" withBorder>
+                <Card.Section>
+                  <Image
+                    src={clipart.image || "/images/content/not_found_2.jpg"}
+                    h="200px"
+                    w="200px"
+                    alt="Norway"
+                    style={{
+                      objectFit: "contain",
+                    }}
+                  />
+                </Card.Section>
+                <Group justify="space-between" mt="md" mb="xs">
+                  <Text fw={500}>{clipart?.name}</Text>
+                </Group>
+
+                <List
+                  spacing="lg"
+                  size="sm"
+                  center
+                  icon={
+                    <ThemeIcon color="teal" size={24} radius="xl">
+                      <IconCircleCheck
+                        style={{ width: rem(16), height: rem(16) }}
+                      />
+                    </ThemeIcon>
+                  }
+                >
+                  {clipart.refLink && (
+                    <List.Item>
+                      Link Clipart:{" "}
+                      <a
+                        style={{
+                          display: "inline-block",
+                          width: "230px",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          textDecoration: "none",
+                          color: "#228be6",
+                          verticalAlign: "middle",
+                        }}
+                        href={clipart.refLink}
+                        target="_blank"
+                      >
+                        {clipart.refLink}
+                      </a>
+                    </List.Item>
+                  )}
+                </List>
+              </Card>
+            ))}
+          </Flex>
+        </ScrollArea>
       </Grid.Col>
     </>
   );
@@ -411,7 +421,7 @@ const NewDesign = ({
         blur: 3,
       }}
       radius="md"
-      size={!isEmpty(selectedSKU?.clipart) ? "80%" : "1000px"}
+      size={!isEmpty(selectedSKU?.cliparts) ? "95%" : "1000px"}
     >
       <LoadingOverlay
         visible={loadingUpdateDesignLink}
@@ -478,7 +488,7 @@ const NewDesign = ({
             {selectedSKU?.designer.name}
           </div>
         </Grid.Col>
-        {!isEmpty(selectedSKU?.clipart) ? (
+        {!isEmpty(selectedSKU?.cliparts) ? (
           <GridWithClipArt selectedSKU={selectedSKU} />
         ) : (
           <GridWithNoClipArt selectedSKU={selectedSKU} />

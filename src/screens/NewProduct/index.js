@@ -268,10 +268,10 @@ const generateScaleNewDesign = ({
       return {
         No: index + 1,
         Design: x.imageRef,
-        Clipart: x?.clipart?.imageSrc,
+        Hình: map(x?.clipart, "imageSrc"),
         SKU: name,
         Remove: "x",
-        clipartId: x?.clipart?.uid,
+        clipartIds: map(x?.clipart, "uid"),
         designLinkRef: x?.designLinkRef,
         nextAccumulator: currentRnDAccumulator + designs.length,
         skuPrefix: prefix,
@@ -400,7 +400,7 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
           };
     case BRIEF_TYPES[3]:
       return {
-        headers: ["No", "Design", "Clipart", "SKU", "Remove"],
+        headers: ["No", "Design", "Hình", "SKU", "Remove"],
         removeHeader: "Design",
       };
     case BRIEF_TYPES[4]:
@@ -925,7 +925,7 @@ const NewCampaigns = () => {
         ...(briefType === BRIEF_TYPES[3] && {
           productLine: selectedProductBases[0]?.uid,
           imageRef: x.Design,
-          clipart: x.clipartId || "",
+          clipartIds: x.clipartIds,
           designLinkRef: x.designLinkRef,
         }),
         nextSkuAccumulator: nextAccumulator,

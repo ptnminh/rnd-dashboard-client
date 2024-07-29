@@ -80,7 +80,7 @@ const RefDesign = ({
         if (design.imageRef === selectedDesign.imageRef) {
           return {
             ...design,
-            clipart: selectedClipArts[0],
+            clipart: selectedClipArts,
           };
         }
         return design;
@@ -285,7 +285,7 @@ const RefDesign = ({
                       setDesigns(newDesigns);
                     }}
                   />
-                  {item?.clipart?.name ? (
+                  {item?.clipart[0]?.name ? (
                     <div
                       style={{
                         display: "flex",
@@ -307,7 +307,7 @@ const RefDesign = ({
                           verticalAlign: "middle",
                         }}
                       >
-                        {item?.clipart?.name}
+                        {item?.clipart[0].name}
                       </Text>
                       <span
                         onClick={() => {

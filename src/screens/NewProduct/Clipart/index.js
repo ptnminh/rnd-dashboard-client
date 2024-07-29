@@ -155,6 +155,7 @@ const Clipart = ({
               onClick={() => {
                 if (
                   briefType === BRIEF_TYPES[1] ||
+                  briefType === BRIEF_TYPES[3] ||
                   briefType === BRIEF_TYPES[5]
                 ) {
                   if (includes(map(selectedClipArts, "name"), clipArt.name)) {
@@ -168,8 +169,6 @@ const Clipart = ({
                     ]);
                   }
                 } else if (briefType === BRIEF_TYPES[2]) {
-                  setSelectedClipArts([clipArt]);
-                } else if (briefType === BRIEF_TYPES[3]) {
                   setSelectedClipArts([clipArt]);
                 }
               }}

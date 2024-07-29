@@ -20,6 +20,7 @@ import {
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
 import styles from "./NewDesign.module.sass";
+import { join, map } from "lodash";
 
 const NewDesign = ({
   close,
@@ -260,8 +261,8 @@ const NewDesign = ({
             }
           >
             <List.Item>
-              Clipart
-              <span>{selectedSKU?.clipart?.name}</span>
+              Clipart:{" "}
+              <span>{join(map(selectedSKU?.cliparts, "name"), " ,")}</span>
             </List.Item>
             {selectedSKU?.linkDesign && (
               <List.Item>
