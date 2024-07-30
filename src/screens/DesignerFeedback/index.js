@@ -326,7 +326,8 @@ const DesignerFeedbackScreens = () => {
                 <Image
                   radius="md"
                   src={
-                    selectedSKU?.imageRef || "/images/content/not_found_2.jpg"
+                    selectedSKU?.designInfo?.thumbLink ||
+                    "/images/content/not_found_2.jpg"
                   }
                   height="100%"
                   fit="contain"
@@ -517,7 +518,10 @@ const DesignerFeedbackScreens = () => {
       >
         <Image
           radius="md"
-          src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
+          src={
+            selectedSKU?.designInfo?.thumbLink ||
+            "/images/content/not_found_2.jpg"
+          }
           height="100%"
           fit="contain"
           style={{

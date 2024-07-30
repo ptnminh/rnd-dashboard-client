@@ -22,9 +22,7 @@ const Table = ({
       <div className={cn(styles.table)}>
         <div className={cn(styles.row, { [styles.active]: activeTable })}>
           <div className={styles.col}>Campaign Name</div>
-          <div className={styles.col}>Age Max</div>
-          <div className={styles.col}>Age Min</div>
-          <div className={styles.col}>Locations</div>
+          <div className={styles.col}></div>
         </div>
 
         {map(productLines, (x, index) => (

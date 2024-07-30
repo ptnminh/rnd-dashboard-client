@@ -89,3 +89,13 @@ export function reorderArrayById(items, id) {
 
   return items;
 }
+export function toCamelCase(str) {
+  return str
+    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ""))
+    .replace(/^[A-Z]/, (match) => match.toLowerCase());
+}
+export function toPascalCase(str) {
+  return str
+    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ""))
+    .replace(/^[a-z]/, (match) => match.toUpperCase());
+}
