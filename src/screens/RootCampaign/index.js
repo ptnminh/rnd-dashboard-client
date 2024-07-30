@@ -45,7 +45,7 @@ const SampleSamples = ({
         <Card
           className={styles.card}
           classCardHead={styles.cardHead}
-          title="Account Name"
+          title="Accounts"
           classTitle={cn("title-purple", styles.title)}
           head={
             <div

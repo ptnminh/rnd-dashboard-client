@@ -6,6 +6,7 @@ import {
   Text,
   Image,
   ActionIcon,
+  Tooltip,
 } from "@mantine/core";
 import { compact, isEmpty, map } from "lodash";
 import { IconEye, IconX, IconArrowLeft } from "@tabler/icons-react";
@@ -110,19 +111,21 @@ const ModalPreviewGroupClipart = ({
                           flexDirection: "row",
                         }}
                       >
-                        <span
-                          style={{
-                            border: "1px solid #4E83FD",
-                            borderRadius: "50%",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => {
-                            setSelectedGrouppedClipart(clipart);
-                            openModalPreviewClipart();
-                          }}
-                        >
-                          <IconEye size={48} color="#4E83FD" />
-                        </span>
+                        <Tooltip label="Click to Preview">
+                          <span
+                            style={{
+                              border: "1px solid #4E83FD",
+                              borderRadius: "50%",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => {
+                              setSelectedGrouppedClipart(clipart);
+                              openModalPreviewClipart();
+                            }}
+                          >
+                            <IconEye size={48} color="#4E83FD" />
+                          </span>
+                        </Tooltip>
                       </div>
                       <Text
                         style={{
