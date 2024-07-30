@@ -78,7 +78,7 @@ export const rndServices = {
         const queryString = `filter=${encodeURIComponent(
           JSON.stringify({
             ...(search && { sku: search }),
-            ...(productName && { productName }),
+            ...(productName && { keyword: productName }),
           })
         )}`;
         url = `${hostAPI}/skus?${query}&${queryString}`;

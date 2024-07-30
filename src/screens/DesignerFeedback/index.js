@@ -5,15 +5,7 @@ import Card from "../../components/Card";
 import Details from "./Details";
 import { findIndex, isEmpty, map, sum } from "lodash";
 import { useDisclosure } from "@mantine/hooks";
-import {
-  Modal,
-  Pagination,
-  Grid,
-  Image,
-  Flex,
-  Button,
-  Rating,
-} from "@mantine/core";
+import { Modal, Pagination, Grid, Image, Button, Rating } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
 import Editor from "../../components/Editor";
@@ -44,7 +36,7 @@ const DesignerFeedbackScreens = () => {
   });
   const [query, setQuery] = useState({
     statusValue: "Undone",
-    status: [2],
+    status: [2, 3],
   });
   const [sorting, setSorting] = useState([]);
   const [colorRating, setColorRating] = useState(0);
