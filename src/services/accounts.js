@@ -1,6 +1,7 @@
 import { filter, isEmpty, keys } from "lodash";
 import { hostAPI } from "../constant";
 import axios from "axios";
+import { showNotification } from "../utils/index";
 
 export const accountServices = {
   fetchAllAccounts: async ({ query, page, limit }) => {
@@ -33,6 +34,7 @@ export const accountServices = {
       const response = await axios.put(`${hostAPI}/accounts/${id}`, payload);
       const { data: result } = response;
       if (result?.success === false) {
+        showNotification("Lỗi", "Cập nhật thất bại", "red");
         return false;
       }
       return result;
