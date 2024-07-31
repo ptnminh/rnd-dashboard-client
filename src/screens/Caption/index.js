@@ -333,15 +333,20 @@ const ListCaptions = ({
       <Modal
         opened={opened}
         onClose={() => {
+          if (
+            selectedCaption.productLineInfo?.uid !==
+            selectedProductLines[0]?.uid
+          ) {
+            handleUpdateCaption(selectedCaption);
+          }
           setProductBasePagination({
             currentPage: 1,
             totalPages: 1,
           });
-          handleUpdateCaption(selectedCaption);
-          close();
           setQueryProductLines({
             keyword: "",
           });
+          close();
         }}
         transitionProps={{ transition: "fade", duration: 200 }}
         overlayProps={{
@@ -517,9 +522,10 @@ const Caption = () => {
     const result = await captionServices.createCaption({
       ...caption,
       id: caption.uid,
-      ...(!isEmpty(selectedProductBases) && {
-        productLineId: selectedProductBases[0]?.uid,
-      }),
+      ...(!isEmpty(selectedProductBases) &&
+        caption?.productLineInfo?.uid !== selectedProductBases[0]?.uid && {
+          productLineId: selectedProductBases[0]?.uid,
+        }),
     });
     if (result) {
       setSelectedProductBases([]);

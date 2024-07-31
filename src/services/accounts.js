@@ -27,4 +27,17 @@ export const accountServices = {
       return false;
     }
   },
+  updateAccount: async ({ id, data }) => {
+    try {
+      const response = await axios.put(`${hostAPI}/accounts/${id}`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at updateAccount:", error);
+      return false;
+    }
+  },
 };

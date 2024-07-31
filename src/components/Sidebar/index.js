@@ -52,6 +52,10 @@ const navigation = [
         title: "MKT - Caption",
         url: "/mkt/caption",
       },
+      {
+        title: "MKT - Account",
+        url: "/mkt/account",
+      },
     ],
   },
 ];
