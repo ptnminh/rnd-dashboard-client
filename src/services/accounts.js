@@ -27,9 +27,10 @@ export const accountServices = {
       return false;
     }
   },
-  updateAccount: async ({ id, data }) => {
+  updateAccount: async (data) => {
     try {
-      const response = await axios.put(`${hostAPI}/accounts/${id}`, data);
+      const { id, ...payload } = data;
+      const response = await axios.put(`${hostAPI}/accounts/${id}`, payload);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
