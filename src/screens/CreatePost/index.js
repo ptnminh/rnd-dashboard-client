@@ -86,21 +86,18 @@ const CreatePost = () => {
               if (isEmpty(ads)) {
                 return null;
               }
-              return filter(
-                map(ads, (ad) => ({
-                  uid: ad.uid,
-                  ctaLink: `https://pawfecthouse.com/${x.sku}`,
-                  ...(selectedFanpage && {
-                    pageId: selectedFanpage.uid,
-                  }),
-                  name: `${x.sku} - ${x.batch}`,
-                  image: ad.value,
-                  briefId: x.uid,
-                  sku: x.sku,
-                  postId: ad.postId,
-                })),
-                (x) => !x.postId
-              );
+              return map(ads, (ad) => ({
+                uid: ad.uid,
+                ctaLink: `https://pawfecthouse.com/${x.sku}`,
+                ...(selectedFanpage && {
+                  pageId: selectedFanpage.uid,
+                }),
+                name: `${x.sku} - ${x.batch}`,
+                image: ad.value,
+                briefId: x.uid,
+                sku: x.sku,
+                postId: ad.postId,
+              }));
             })
           )
         )
@@ -127,7 +124,12 @@ const CreatePost = () => {
   }, []);
   useEffect(() => {
     if (!isEmpty(postPayloads)) {
-      setChoosePosts(map(postPayloads, "uid"));
+      setChoosePosts(
+        map(
+          filter(postPayloads, (x) => !x.postId),
+          "uid"
+        )
+      );
     }
   }, [postPayloads]);
   const handleCreatePost = async () => {
@@ -163,7 +165,7 @@ const CreatePost = () => {
       transformedPayloads
     );
     if (createPostResponse) {
-      showNotification("Thành công", "Tạo post thành công", "red");
+      showNotification("Thành công", "Tạo post thành công", "green");
       setChoosePosts([]);
       setSelectedFanpage(null);
     }

@@ -72,9 +72,10 @@ const Ads = ({
         key={uid}
         style={{
           padding: "10px",
-          ...(includes(choosePosts, uid) && {
-            backgroundColor: "#ffecd2",
-          }),
+          ...(includes(choosePosts, uid) &&
+            !postId && {
+              backgroundColor: "#ffecd2",
+            }),
         }}
       >
         <Checkbox.Indicator
