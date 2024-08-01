@@ -92,11 +92,12 @@ const CreatePost = () => {
                 ...(selectedFanpage && {
                   pageId: selectedFanpage.uid,
                 }),
-                name: `${x.sku} - ${x.batch}`,
+                name: ad?.postName || `${x.sku} - ${x.batch}`,
                 image: ad.value,
                 briefId: x.uid,
                 sku: x.sku,
                 postId: ad.postId,
+                caption: ad.caption,
               }));
             })
           )
@@ -159,6 +160,7 @@ const CreatePost = () => {
     // check valid data
     if (isEmpty(transformedPayloads)) {
       showNotification("Thất bại", "Vui lòng xem lại thông tin", "red");
+      setLoadingCreatePost(false);
       return;
     }
     const createPostResponse = await postService.createPost(

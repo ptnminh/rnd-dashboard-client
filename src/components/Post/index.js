@@ -29,7 +29,6 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useState } from "react";
 import Captions from "../Captions";
-import { captionServices } from "../../services";
 
 const Ads = ({
   sku,
@@ -232,7 +231,7 @@ const Ads = ({
                             if (x.uid === uid) {
                               return {
                                 ...x,
-                                caption: event.currentTarget.value,
+                                caption: event.target.value,
                               };
                             }
                             return x;
