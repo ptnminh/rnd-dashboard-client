@@ -32,6 +32,7 @@ import DesignerFeedbackScreens from "./screens/DesignerFeedback";
 import RootCampaign from "./screens/RootCampaign";
 import Caption from "./screens/Caption";
 import ManageAccounts from "./screens/ManageAccounts";
+import CreatePost from "./screens/CreatePost";
 
 function App() {
   return (
@@ -130,6 +131,14 @@ function App() {
           element={
             <Page title="MKT">
               <ManageAccounts />
+            </Page>
+          }
+        />
+        <Route
+          path="/mkt/post"
+          element={
+            <Page title="MKT">
+              <CreatePost />
             </Page>
           }
         />

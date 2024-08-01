@@ -56,6 +56,10 @@ const navigation = [
         title: "MKT - Account",
         url: "/mkt/account",
       },
+      {
+        title: "MKT - Tạo Post",
+        url: "/mkt/post",
+      },
     ],
   },
 ];

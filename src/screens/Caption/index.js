@@ -331,7 +331,6 @@ const ListCaptions = ({
         ))}
       </Grid>
       <Modal
-        opened={opened}
         onClose={() => {
           if (
             selectedCaption.productLineInfo?.uid !==
@@ -348,6 +347,7 @@ const ListCaptions = ({
           });
           close();
         }}
+        opened={opened}
         transitionProps={{ transition: "fade", duration: 200 }}
         overlayProps={{
           backgroundOpacity: 0.55,

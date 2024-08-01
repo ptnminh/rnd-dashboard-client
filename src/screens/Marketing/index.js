@@ -552,7 +552,7 @@ const MKTScreens = () => {
           handleUpdateLinkProduct={handleUpdateLinkProduct}
         />
       )}
-      <PostCamp />
+      {/* <PostCamp /> */}
     </>
   );
 };
