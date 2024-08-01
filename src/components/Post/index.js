@@ -79,12 +79,16 @@ const Ads = ({
       >
         <Checkbox.Indicator
           onClick={() => {
+            if (postId) {
+              return;
+            }
             if (includes(choosePosts, uid)) {
               setChoosePosts(filter(choosePosts, (x) => x !== uid));
             } else {
               setChoosePosts([...choosePosts, uid]);
             }
           }}
+          disabled={!!postId}
         />
         <Grid.Col
           span={12}

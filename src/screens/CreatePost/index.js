@@ -86,17 +86,21 @@ const CreatePost = () => {
               if (isEmpty(ads)) {
                 return null;
               }
-              return map(ads, (ad) => ({
-                uid: ad.uid,
-                ctaLink: `https://pawfecthouse.com/${x.sku}`,
-                ...(selectedFanpage && {
-                  pageId: selectedFanpage.uid,
-                }),
-                name: `${x.sku} - ${x.batch}`,
-                image: ad.value,
-                briefId: x.uid,
-                sku: x.sku,
-              }));
+              return filter(
+                map(ads, (ad) => ({
+                  uid: ad.uid,
+                  ctaLink: `https://pawfecthouse.com/${x.sku}`,
+                  ...(selectedFanpage && {
+                    pageId: selectedFanpage.uid,
+                  }),
+                  name: `${x.sku} - ${x.batch}`,
+                  image: ad.value,
+                  briefId: x.uid,
+                  sku: x.sku,
+                  postId: ad.postId,
+                })),
+                (x) => !x.postId
+              );
             })
           )
         )
