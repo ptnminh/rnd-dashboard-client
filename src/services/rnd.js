@@ -436,7 +436,7 @@ export const rndServices = {
       return false;
     }
   },
-  fetchProductLines: async ({ page, limit, query }) => {
+  fetchProductLines: async ({ page, limit, query, fields }) => {
     try {
       let url = `${hostAPI}/product-lines?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
@@ -449,6 +449,9 @@ export const rndServices = {
           })
         )}`;
         url = `${url}&${queryString}`;
+      }
+      if (fields) {
+        url = `${url}&fields=${fields}`;
       }
       const response = await axios.get(url);
       const { data: result } = response;

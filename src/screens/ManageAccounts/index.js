@@ -20,10 +20,14 @@ import { showNotification } from "../../utils/index";
 import { IconFilterOff, IconSearch } from "@tabler/icons-react";
 import { accountServices } from "../../services/accounts";
 
-const ListAccounts = ({ accounts, handleUpdateAccount, setQueryAccount }) => {
+const ListAccounts = ({
+  accounts,
+  handleUpdateAccount,
+  setQueryAccount,
+  availableStores,
+}) => {
   const [data, setData] = useState(accounts);
   const [searchCaption, setSearchCaption] = useState("");
-  const [selectedCaption, setSelectedCaption] = useState({});
   useEffect(() => {
     setData(accounts);
   }, [accounts]);
@@ -177,18 +181,27 @@ const ListAccounts = ({ accounts, handleUpdateAccount, setQueryAccount }) => {
                       label="Name"
                       placeholder="Name"
                       value={account.name}
+                      readOnly
                       styles={{
                         label: {
                           marginBottom: "5px",
                         },
                       }}
-                      onChange={(event) => {
+                    />
+                    <Select
+                      data={availableStores}
+                      label="Store"
+                      value={account?.attribute?.store}
+                      onChange={(value) => {
                         setData((prev) => {
                           return map(prev, (x) => {
                             if (x.uid === account.uid) {
                               return {
                                 ...x,
-                                name: event.currentTarget.value,
+                                attribute: {
+                                  ...x.attribute,
+                                  store: value,
+                                },
                               };
                             }
                             return x;
@@ -231,6 +244,7 @@ const ManageAccounts = () => {
     totalPages: 1,
   });
   const [accounts, setAccounts] = useState([]);
+  const [availableStores, setAvailableStores] = useState([]);
   const [queryAccount, setQueryAccount] = useState("");
   const [loadingAccount, setLoadingAccount] = useState(false);
 
@@ -257,6 +271,7 @@ const ManageAccounts = () => {
         checked: false,
       })) || []
     );
+    setAvailableStores(metadata.pamStores);
     setAccountsPagination(metadata);
     return;
   };
@@ -298,6 +313,7 @@ const ManageAccounts = () => {
             accounts={accounts}
             handleUpdateAccount={handleUpdateAccount}
             setQueryAccount={setQueryAccount}
+            availableStores={availableStores}
             title="Chọn Product Base"
           />
           <Pagination

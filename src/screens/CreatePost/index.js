@@ -4,7 +4,6 @@ import {
   Checkbox,
   Flex,
   Group,
-  LoadingOverlay,
   Pagination,
   rem,
   Select,
@@ -23,7 +22,11 @@ import { captionServices, postService, rndServices } from "../../services";
 import { useWindowScroll } from "@mantine/hooks";
 import { showNotification } from "../../utils/index";
 
-const CreatePost = () => {
+const CreatePost = ({
+  brief,
+  closeModalCreatePostFromBrief,
+  setTriggerFetchBrief,
+}) => {
   const [query, setQuery] = useState({
     status: [3],
   });
@@ -37,7 +40,8 @@ const CreatePost = () => {
   const [scroll, scrollTo] = useWindowScroll();
   const [fanpages, setFanpages] = useState([]);
   const [captions, setCaptions] = useState([]);
-  const [queryCaption, setQueryCaption] = useState("");
+  const [allProductBases, setAllProductBases] = useState([]);
+  const [queryCaption, setQueryCaption] = useState({});
   const [captionsPagination, setCaptionsPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -66,11 +70,21 @@ const CreatePost = () => {
       sorting: sortingBrief,
       ...query,
     });
-    const { data, metadata } = response;
+    let { data, metadata } = response;
+
+    // if brief props has value
+    if (brief) {
+      data = [brief];
+      metadata = {
+        currentPage: 1,
+        totalPages: 1,
+      };
+    }
+
     if (data) {
       setBriefs(
         map(
-          filter(data, (x) => x.designInfo?.adsLinks),
+          filter(data, (x) => !isEmpty(x.designInfo?.adsLinks)),
           (x) => ({
             ...x,
             ads: x.designInfo?.adsLinks,
@@ -116,12 +130,20 @@ const CreatePost = () => {
     });
     setFanpages(data);
   };
+  const fetchAllProductBases = async () => {
+    const { data } = await rndServices.fetchProductLines({
+      limit: -1,
+      fields: "uid,name",
+    });
+    setAllProductBases(data || []);
+  };
   useEffect(() => {
     fetchBriefs(briefPagination.currentPage);
   }, [query, sortingBrief, briefPagination.currentPage]);
   useEffect(() => {
     fetchUsers();
     fetchFanpages();
+    fetchAllProductBases();
   }, []);
   useEffect(() => {
     if (!isEmpty(postPayloads)) {
@@ -138,6 +160,7 @@ const CreatePost = () => {
     const selectedPosts = filter(postPayloads, (x) =>
       includes(choosePosts, x.uid)
     );
+    let messageError = "";
     const transformedPayloads = filter(
       map(selectedPosts, (x) => ({
         pageId: x.pageId,
@@ -148,18 +171,21 @@ const CreatePost = () => {
         name: x.name,
         briefId: x.briefId,
       })),
-      (x) =>
-        x.pageId &&
-        x.sku &&
-        x.adsUrl &&
-        x.adsId &&
-        x.caption &&
-        x.name &&
-        x.briefId
+      (x) => {
+        if (!x.pageId) {
+          messageError = `Vui lòng chọn Fanpage cho post ${x.name}`;
+          return false;
+        }
+        if (!x.caption) {
+          messageError = `Vui lòng chọn Caption cho post ${x.name}`;
+          return false;
+        }
+        return true;
+      }
     );
     // check valid data
-    if (isEmpty(transformedPayloads)) {
-      showNotification("Thất bại", "Vui lòng xem lại thông tin", "red");
+    if (isEmpty(transformedPayloads) || messageError) {
+      showNotification("Thất bại", messageError, "red");
       setLoadingCreatePost(false);
       return;
     }
@@ -172,8 +198,11 @@ const CreatePost = () => {
       setSelectedFanpage(null);
     }
     setLoadingCreatePost(false);
-
     await fetchBriefs(briefPagination.currentPage);
+    if (brief) {
+      setTriggerFetchBrief(true);
+      closeModalCreatePostFromBrief();
+    }
   };
 
   const fetchCaptions = async (page) => {
@@ -205,6 +234,7 @@ const CreatePost = () => {
   const handlePageChangeCaption = (page) => {
     setCaptionsPagination((prev) => ({ ...prev, currentPage: page }));
   };
+
   return (
     <>
       <Card
@@ -214,240 +244,244 @@ const CreatePost = () => {
         classCardHead={styles.classCardHead}
         classSpanTitle={styles.classScaleSpanTitle}
       >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "10px 5px",
-            gap: "10px",
-            flexWrap: "wrap-reverse",
-          }}
-        >
-          <Flex
+        {isEmpty(brief) && (
+          <div
             style={{
-              gap: "8px",
-              padding: "10px",
-              borderRadius: "10px",
-              backgroundColor: "#EFF0F1",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: "10px 5px",
+              gap: "10px",
+              flexWrap: "wrap-reverse",
             }}
           >
-            <div
+            <Flex
               style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
+                gap: "8px",
+                padding: "10px",
+                borderRadius: "10px",
+                backgroundColor: "#EFF0F1",
               }}
             >
-              <Checkbox
-                size="lg"
-                checked={
-                  choosePosts.length === postPayloads.length &&
-                  !isEmpty(postPayloads)
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Checkbox
+                  size="lg"
+                  checked={
+                    choosePosts.length === postPayloads.length &&
+                    !isEmpty(postPayloads)
+                  }
+                  onChange={() => {
+                    if (!isEmpty(filter(postPayloads, (x) => !x.postId))) {
+                      if (choosePosts.length === postPayloads.length) {
+                        setChoosePosts([]);
+                      } else {
+                        setChoosePosts(map(postPayloads, "uid"));
+                      }
+                    }
+                  }}
+                />
+              </div>
+
+              <TextInput
+                placeholder="Batch"
+                size="sm"
+                width="100px"
+                leftSection={
+                  <span
+                    onClick={() => {
+                      setQuery({ ...query, batch });
+                    }}
+                    style={{
+                      cursor: "pointer",
+                    }}
+                  >
+                    <IconSearch size={16} />
+                  </span>
                 }
-                onChange={() => {
-                  if (choosePosts.length === postPayloads.length) {
-                    setChoosePosts([]);
-                  } else {
-                    setChoosePosts(map(postPayloads, "uid"));
+                styles={{
+                  input: {
+                    width: "100px",
+                  },
+                }}
+                value={batch}
+                onChange={(e) => setBatch(e.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    setQuery({ ...query, batch });
                   }
                 }}
               />
-            </div>
-
-            <TextInput
-              placeholder="Batch"
-              size="sm"
-              width="100px"
-              leftSection={
-                <span
-                  onClick={() => {
-                    setQuery({ ...query, batch });
-                  }}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                >
-                  <IconSearch size={16} />
-                </span>
-              }
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={batch}
-              onChange={(e) => setBatch(e.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  setQuery({ ...query, batch });
+              <TextInput
+                placeholder="SKU"
+                size="sm"
+                width="100px"
+                leftSection={
+                  <span
+                    onClick={() => {
+                      setQuery({ ...query, sku: searchSKU });
+                    }}
+                    style={{
+                      cursor: "pointer",
+                    }}
+                  >
+                    <IconSearch size={16} />
+                  </span>
                 }
-              }}
-            />
-            <TextInput
-              placeholder="SKU"
-              size="sm"
-              width="100px"
-              leftSection={
-                <span
-                  onClick={() => {
+                styles={{
+                  input: {
+                    width: "100px",
+                  },
+                }}
+                value={searchSKU}
+                onChange={(e) => setSearchSKU(e.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
                     setQuery({ ...query, sku: searchSKU });
-                  }}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                >
-                  <IconSearch size={16} />
-                </span>
-              }
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={searchSKU}
-              onChange={(e) => setSearchSKU(e.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  setQuery({ ...query, sku: searchSKU });
+                  }
+                }}
+              />
+              <Select
+                placeholder="Size"
+                data={["Small", "Medium", "Big"]}
+                styles={{
+                  input: {
+                    width: "100px",
+                  },
+                }}
+                value={query?.sizeValue}
+                onChange={(value) =>
+                  setQuery({
+                    ...query,
+                    size: CONVERT_STATUS_TO_NUMBER[value],
+                    sizeValue: value,
+                  })
                 }
-              }}
-            />
-            <Select
-              placeholder="Size"
-              data={["Small", "Medium", "Big"]}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={query?.sizeValue}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  size: CONVERT_STATUS_TO_NUMBER[value],
-                  sizeValue: value,
-                })
-              }
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  size: null,
-                  sizeValue: null,
-                });
-              }}
-            />
-            <Select
-              placeholder="Team"
-              data={["BD1", "BD2", "BD3", "POD-Biz"]}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={query?.rndTeam}
-              onChange={(value) => setQuery({ ...query, rndTeam: value })}
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  rndTeam: null,
-                });
-              }}
-            />
-            <Select
-              placeholder="RND"
-              data={map(filter(users, { role: "rnd" }), "name") || []}
-              styles={{
-                input: {
-                  width: "150px",
-                },
-              }}
-              value={query?.rndName}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  rndName: find(users, { name: value })?.name,
-                  rnd: find(users, { name: value })?.uid,
-                })
-              }
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  rndName: null,
-                  rnd: null,
-                });
-              }}
-            />
-            <Select
-              placeholder="Designer"
-              data={map(filter(users, { role: "designer" }), "name") || []}
-              styles={{
-                input: {
-                  width: "120px",
-                },
-              }}
-              value={query?.designerName}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  designerName: find(users, { name: value })?.name,
-                  designer: find(users, { name: value })?.uid,
-                })
-              }
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  designerName: null,
-                  designer: null,
-                });
-              }}
-            />
-            <Select
-              placeholder="Fanpages"
-              data={map(fanpages, "name") || []}
-              styles={{
-                input: {
-                  width: "200px",
-                },
-              }}
-              value={selectedFanpage?.name || ""}
-              onChange={(value) => {
-                setSelectedFanpage(find(fanpages, { name: value }));
-              }}
-              clearable
-            />
+                clearable
+                onClear={() => {
+                  setQuery({
+                    ...query,
+                    size: null,
+                    sizeValue: null,
+                  });
+                }}
+              />
+              <Select
+                placeholder="Team"
+                data={["BD1", "BD2", "BD3", "POD-Biz"]}
+                styles={{
+                  input: {
+                    width: "100px",
+                  },
+                }}
+                value={query?.rndTeam}
+                onChange={(value) => setQuery({ ...query, rndTeam: value })}
+                clearable
+                onClear={() => {
+                  setQuery({
+                    ...query,
+                    rndTeam: null,
+                  });
+                }}
+              />
+              <Select
+                placeholder="RND"
+                data={map(filter(users, { role: "rnd" }), "name") || []}
+                styles={{
+                  input: {
+                    width: "150px",
+                  },
+                }}
+                value={query?.rndName}
+                onChange={(value) =>
+                  setQuery({
+                    ...query,
+                    rndName: find(users, { name: value })?.name,
+                    rnd: find(users, { name: value })?.uid,
+                  })
+                }
+                clearable
+                onClear={() => {
+                  setQuery({
+                    ...query,
+                    rndName: null,
+                    rnd: null,
+                  });
+                }}
+              />
+              <Select
+                placeholder="Designer"
+                data={map(filter(users, { role: "designer" }), "name") || []}
+                styles={{
+                  input: {
+                    width: "120px",
+                  },
+                }}
+                value={query?.designerName}
+                onChange={(value) =>
+                  setQuery({
+                    ...query,
+                    designerName: find(users, { name: value })?.name,
+                    designer: find(users, { name: value })?.uid,
+                  })
+                }
+                clearable
+                onClear={() => {
+                  setQuery({
+                    ...query,
+                    designerName: null,
+                    designer: null,
+                  });
+                }}
+              />
+              <Select
+                placeholder="Fanpages"
+                data={map(fanpages, "name") || []}
+                styles={{
+                  input: {
+                    width: "200px",
+                  },
+                }}
+                value={selectedFanpage?.name || ""}
+                onChange={(value) => {
+                  setSelectedFanpage(find(fanpages, { name: value }));
+                }}
+                clearable
+              />
 
-            <Button
-              onClick={() => {
-                setSelectedFanpage(null);
-                setQuery({
-                  date: null,
-                  batch: "",
-                  sku: "",
-                  briefType: null,
-                  size: null,
-                  rndTeam: null,
-                  rnd: null,
-                  designer: null,
-                  status: [3],
-                  sizeValue: null,
-                  rndName: null,
-                  designerName: null,
-                  statusValue: null,
-                  dateValue: null,
-                });
-                setBatch("");
-                setSearchSKU("");
-              }}
-            >
-              <IconFilterOff />
-            </Button>
-          </Flex>
-        </div>
+              <Button
+                onClick={() => {
+                  setSelectedFanpage(null);
+                  setQuery({
+                    date: null,
+                    batch: "",
+                    sku: "",
+                    briefType: null,
+                    size: null,
+                    rndTeam: null,
+                    rnd: null,
+                    designer: null,
+                    status: [3],
+                    sizeValue: null,
+                    rndName: null,
+                    designerName: null,
+                    statusValue: null,
+                    dateValue: null,
+                  });
+                  setBatch("");
+                  setSearchSKU("");
+                }}
+              >
+                <IconFilterOff />
+              </Button>
+            </Flex>
+          </div>
+        )}
         <Flex gap={30} direction="column">
           {map(briefs, (brief) => (
             <PostCamp
@@ -462,19 +496,22 @@ const CreatePost = () => {
               setQueryCaption={setQueryCaption}
               handlePageChangeCaption={handlePageChangeCaption}
               captionsPagination={captionsPagination}
+              allProductBases={allProductBases}
             />
           ))}
         </Flex>
       </Card>
-      <Group justify="space-between">
-        <Pagination
-          total={briefPagination.totalPages}
-          page={briefPagination.currentPage}
-          onChange={handleChangePage}
-          color="pink"
-          size="md"
-          style={{ marginTop: "20px", marginRight: "auto" }}
-        />
+      <Group justify={isEmpty(brief) ? "space-between" : "flex-end"}>
+        {isEmpty(brief) && (
+          <Pagination
+            total={briefPagination.totalPages}
+            page={briefPagination.currentPage}
+            onChange={handleChangePage}
+            color="pink"
+            size="md"
+            style={{ marginTop: "20px", marginRight: "auto" }}
+          />
+        )}
         <Button
           color="green"
           onClick={handleCreatePost}

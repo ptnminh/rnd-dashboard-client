@@ -35,7 +35,6 @@ const SampleSamples = ({
   setEditAccountName,
   handleSaveNewAccountName,
   openModalConfirmDeleteSampleCampaign,
-  handleSearchCollections,
   openModalAddCampaign,
   openModalDeleteCampaign,
 }) => {

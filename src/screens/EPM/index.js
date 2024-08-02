@@ -36,7 +36,7 @@ import NewDesign from "./NewDesign";
 import Clipart from "./Clipart";
 import Niche from "./Niche";
 
-const DesignerScreens = () => {
+const EPMScreens = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -642,4 +642,4 @@ const DesignerScreens = () => {
   );
 };
 
-export default DesignerScreens;
+export default EPMScreens;

@@ -19,12 +19,13 @@ import {
   Card as MantineCard,
   Modal,
   Tooltip,
+  Autocomplete,
 } from "@mantine/core";
 import styles from "./Caption.module.sass";
 import cn from "classnames";
 import { useEffect, useState } from "react";
 import Card from "../../components/Card";
-import { isEmpty, map } from "lodash";
+import { isEmpty, map, set } from "lodash";
 import { captionServices, rndServices } from "../../services";
 import ProductBase from "./ProductBase";
 import { showNotification } from "../../utils/index";
@@ -58,11 +59,13 @@ const ListCaptions = ({
   pagination,
   handlePageChange,
   setProductBasePagination,
+  allProductBases,
 }) => {
   const [data, setData] = useState(captions);
   const [searchCaption, setSearchCaption] = useState("");
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedCaption, setSelectedCaption] = useState({});
+  const [searchProductLine, setSearchProductLine] = useState("");
   useEffect(() => {
     setData(captions);
   }, [captions]);
@@ -133,12 +136,50 @@ const ListCaptions = ({
               }
             }}
           />
+          <Autocomplete
+            placeholder="Product Line..."
+            size="sm"
+            data={map(allProductBases, "name")}
+            value={searchProductLine}
+            clearable
+            onChange={(value) => {
+              setSearchProductLine(value);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                setQueryCaption({
+                  productLineId: allProductBases?.find(
+                    (x) => x.name === searchProductLine
+                  )?.uid,
+                });
+              }
+            }}
+            leftSection={
+              <span
+                onClick={() => {
+                  setQueryCaption({
+                    productLineId: allProductBases?.find(
+                      (x) => x.name === searchProductLine
+                    )?.uid,
+                  });
+                }}
+                style={{
+                  cursor: "pointer",
+                }}
+              >
+                <IconSearch size={16} />
+              </span>
+            }
+          />
+
           <Button
             onClick={() => {
               setSearchCaption("");
               setQueryCaption({
                 keyword: "",
+                productLineId: "",
               });
+              setSearchProductLine("");
             }}
           >
             <IconFilterOff />
@@ -401,6 +442,7 @@ const Caption = () => {
   const [queryProductBase, setQueryProductBase] = useState("");
   const [loadingProductBase, setLoadingProductBase] = useState(false);
   const [loadingCreateCaption, setLoadingCreateCaption] = useState(false);
+  const [allProductBases, setAllProductBases] = useState([]);
   const [selectedProductBases, setSelectedProductBases] = useState([]);
 
   const fetchProductBases = async (page) => {
@@ -423,6 +465,13 @@ const Caption = () => {
     setProductBases(data || []);
     setProductBasePagination(metadata);
     return;
+  };
+  const fetchAllProductBases = async () => {
+    const { data } = await rndServices.fetchProductLines({
+      limit: -1,
+      fields: "uid,name",
+    });
+    setAllProductBases(data || []);
   };
   const fetchCaptions = async (page) => {
     setLoadingCaption(true);
@@ -456,6 +505,9 @@ const Caption = () => {
   useEffect(() => {
     fetchCaptions(captionsPagination.currentPage);
   }, [captionsPagination.currentPage, queryCaption]);
+  useEffect(() => {
+    fetchAllProductBases();
+  }, []);
   const handlePageChange = (page) => {
     setProductBasePagination((prev) => ({ ...prev, currentPage: page }));
   };
@@ -463,13 +515,7 @@ const Caption = () => {
     setCaptionsPagination((prev) => ({ ...prev, currentPage: page }));
   };
   const items = charactersList.map((item) => (
-    <Accordion.Item
-      value={item.id}
-      key={item.label}
-      onClick={() => {
-        fetchProductBases(1);
-      }}
-    >
+    <Accordion.Item value={item.id} key={item.label}>
       <Accordion.Control>
         <AccordionLabel {...item} />
       </Accordion.Control>
@@ -646,9 +692,8 @@ const Caption = () => {
                 display: "flex",
                 justifyContent: "flex-end",
               }}
-              onClick={handleCreateCaption}
             >
-              <Button>Tạo</Button>
+              <Button onClick={handleCreateCaption}>Tạo</Button>
             </div>
           </Card>
           <Card
@@ -672,6 +717,7 @@ const Caption = () => {
               handlePageChange={handlePageChange}
               title="Chọn Product Base"
               setProductBasePagination={setProductBasePagination}
+              allProductBases={allProductBases}
             />
             <Pagination
               total={captionsPagination.totalPages}

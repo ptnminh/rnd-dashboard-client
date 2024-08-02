@@ -19,10 +19,9 @@ import {
   IconArrowBigRightLinesFilled,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
-import styles from "./NewDesign.module.sass";
 import { join, map } from "lodash";
 
-const NewDesign = ({
+const Niche = ({
   close,
   selectedSKU,
   linkProduct,
@@ -130,14 +129,11 @@ const NewDesign = ({
               alignItems: "center",
             }}
           >
-            Product Line
+            Ref
           </div>
           <Image
             radius="md"
-            src={
-              selectedSKU?.productLine?.image ||
-              "/images/content/not_found_2.jpg"
-            }
+            src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
             height={200}
             fit="contain"
           />
@@ -151,7 +147,7 @@ const NewDesign = ({
               marginTop: "10px",
             }}
           >
-            {selectedSKU?.productLine?.name}
+            {selectedSKU?.skuRef}
           </div>
           <List
             spacing="lg"
@@ -163,6 +159,28 @@ const NewDesign = ({
               </ThemeIcon>
             }
           >
+            {selectedSKU?.designLinkRef && (
+              <List.Item>
+                Link Design (NAS):{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "200px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={selectedSKU?.designLinkRef}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {selectedSKU?.designLinkRef}
+                </a>
+              </List.Item>
+            )}
             {selectedSKU?.productInfo?.tibSearchCampaignLink && (
               <List.Item>
                 Link Campaign (TIB):{" "}
@@ -227,7 +245,7 @@ const NewDesign = ({
               alignItems: "center",
             }}
           >
-            Design + Clipart
+            Scale
           </div>
           <Image
             radius="md"
@@ -260,10 +278,12 @@ const NewDesign = ({
               </ThemeIcon>
             }
           >
-            <List.Item>
-              Clipart:{" "}
-              <span>{join(map(selectedSKU?.cliparts, "name"), " ,")}</span>
-            </List.Item>
+            {
+              <List.Item>
+                Clipart:{" "}
+                <span>{join(map(selectedSKU?.cliparts, "name"), " ,")}</span>
+              </List.Item>
+            }
             {selectedSKU?.linkDesign && (
               <List.Item>
                 Link Design (NAS):{" "}
@@ -291,7 +311,6 @@ const NewDesign = ({
         <Grid.Col span={12}>
           <Editor
             state={getStringAsEditorState(selectedSKU?.note?.epm)}
-            classEditor={styles.editor}
             label="EPM Note"
             readOnly={true}
           />
@@ -303,8 +322,8 @@ const NewDesign = ({
               style={{
                 flex: "1 1 90%",
               }}
-              value={linkProduct}
               readOnly
+              value={linkProduct}
               onChange={(event) => setLinkProduct(event.target.value)}
             />
             {/* <Button
@@ -326,4 +345,4 @@ const NewDesign = ({
   );
 };
 
-export default NewDesign;
+export default Niche;

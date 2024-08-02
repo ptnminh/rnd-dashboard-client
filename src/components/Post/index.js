@@ -45,6 +45,7 @@ const Ads = ({
   index,
   choosePosts,
   setChoosePosts,
+  allProductBases,
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedAds, setSelectedAds] = useState({});
@@ -253,6 +254,8 @@ const Ads = ({
                       <Group
                         style={{
                           width: "100%",
+                          display: "flex",
+                          alignItems: "flex-end",
                         }}
                       >
                         <TextInput
@@ -260,7 +263,7 @@ const Ads = ({
                           label="CTA Link"
                           value={find(postPayloads, { uid })?.ctaLink || ""}
                           style={{
-                            width: "100%",
+                            flex: 1,
                           }}
                           styles={{
                             label: {
@@ -291,7 +294,40 @@ const Ads = ({
                             });
                           }}
                         />
+                        <div>
+                          <ActionIcon
+                            component="a"
+                            href={`https://pawfecthouse.com/${sku}`}
+                            size="lg"
+                            aria-label="Open in a new tab"
+                            onClick={() => {}}
+                            target="_blank"
+                          >
+                            <IconExternalLink />
+                          </ActionIcon>
+                        </div>
                       </Group>
+
+                      {postId && (
+                        <TextInput
+                          label="Post ID"
+                          value={postId}
+                          readOnly
+                          style={{
+                            width: "100%",
+                          }}
+                          styles={{
+                            label: {
+                              fontSize: "16px",
+                              fontWeight: "bold",
+                              marginBottom: "10px",
+                            },
+                            input: {
+                              width: "100%",
+                            },
+                          }}
+                        />
+                      )}
 
                       <Group
                         style={{
@@ -299,16 +335,6 @@ const Ads = ({
                           justifyContent: "flex-end",
                         }}
                       >
-                        <ActionIcon
-                          component="a"
-                          href={`https://pawfecthouse.com/${sku}`}
-                          size="xl"
-                          aria-label="Open in a new tab"
-                          onClick={() => {}}
-                          target="_blank"
-                        >
-                          <IconExternalLink />
-                        </ActionIcon>
                         {postId && (
                           <CopyButton value={postId}>
                             {({ copied, copy }) => (
@@ -321,6 +347,18 @@ const Ads = ({
                             )}
                           </CopyButton>
                         )}
+                        <CopyButton
+                          value={find(postPayloads, { uid })?.ctaLink}
+                        >
+                          {({ copied, copy }) => (
+                            <Button
+                              color={copied ? "teal" : "blue"}
+                              onClick={copy}
+                            >
+                              {copied ? "Copied CTA Link" : "Copy CTA Link"}
+                            </Button>
+                          )}
+                        </CopyButton>
 
                         <Button variant="filled" color="#646A73" radius="sm">
                           Gắn CTA
@@ -355,6 +393,7 @@ const Ads = ({
           setSelectedValue={setSelectedValue}
           handleChooseCaption={handleChooseCaption}
           closeModalChooseCaption={close}
+          allProductBases={allProductBases}
         />
       </Modal>
     </>
@@ -575,6 +614,7 @@ const PostCamp = ({
   setQueryCaption,
   handlePageChangeCaption,
   captionsPagination,
+  allProductBases,
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedValue, setSelectedValue] = useState([]);
@@ -708,6 +748,7 @@ const PostCamp = ({
                 index={index}
                 choosePosts={choosePosts}
                 setChoosePosts={setChoosePosts}
+                allProductBases={allProductBases}
               />
             ))}
           </Stack>

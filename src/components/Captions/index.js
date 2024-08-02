@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Button,
   Card,
   Checkbox,
@@ -6,9 +7,11 @@ import {
   Flex,
   Grid,
   Group,
+  Image,
   Pagination,
   Stack,
   TagsInput,
+  Text,
   Textarea,
   TextInput,
 } from "@mantine/core";
@@ -23,12 +26,14 @@ const ListCaptions = ({
   setQueryCaption,
   selectedValue,
   setSelectedValue,
+  allProductBases,
 }) => {
   const [data, setData] = useState(captions);
   const [searchCaption, setSearchCaption] = useState("");
   useEffect(() => {
     setData(captions);
   }, [captions]);
+  const [searchProductLine, setSearchProductLine] = useState("");
 
   return (
     <>
@@ -84,12 +89,49 @@ const ListCaptions = ({
               }
             }}
           />
+          <Autocomplete
+            placeholder="Product Line..."
+            size="sm"
+            data={map(allProductBases, "name")}
+            value={searchProductLine}
+            clearable
+            onChange={(value) => {
+              setSearchProductLine(value);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                setQueryCaption({
+                  productLineId: allProductBases?.find(
+                    (x) => x.name === searchProductLine
+                  )?.uid,
+                });
+              }
+            }}
+            leftSection={
+              <span
+                onClick={() => {
+                  setQueryCaption({
+                    productLineId: allProductBases?.find(
+                      (x) => x.name === searchProductLine
+                    )?.uid,
+                  });
+                }}
+                style={{
+                  cursor: "pointer",
+                }}
+              >
+                <IconSearch size={16} />
+              </span>
+            }
+          />
           <Button
             onClick={() => {
               setSearchCaption("");
               setQueryCaption({
                 keyword: "",
+                productLineId: "",
               });
+              setSearchProductLine("");
             }}
           >
             <IconFilterOff />
@@ -167,6 +209,23 @@ const ListCaptions = ({
                           }}
                           maxDropdownHeight="100px"
                         />
+                        {caption?.productLineInfo?.name && (
+                          <Group>
+                            <Image
+                              src={
+                                caption?.productLineInfo?.imageSrc ||
+                                "/images/content/not_found_2.jpg"
+                              }
+                              width="50px"
+                              height="50px"
+                            />
+                            <TextInput
+                              label="Product Line"
+                              readOnly
+                              value={caption?.productLineInfo?.name}
+                            />
+                          </Group>
+                        )}
                       </Flex>
                     </Grid.Col>
                   </Grid>
@@ -190,6 +249,7 @@ const Captions = ({
   setSelectedValue,
   handleChooseCaption,
   closeModalChooseCaption,
+  allProductBases,
 }) => {
   return (
     <Card
@@ -205,8 +265,17 @@ const Captions = ({
         fetchProductLinesLoading={loadingProductBase}
         selectedValue={selectedValue}
         setSelectedValue={setSelectedValue}
+        allProductBases={allProductBases}
       />
       <Group justify="space-between">
+        <Pagination
+          total={captionsPagination.totalPages}
+          page={captionsPagination.currentPage}
+          onChange={handlePageChangeCaption}
+          color="pink"
+          size="md"
+          style={{ marginTop: "20px", marginRight: "auto" }}
+        />
         <Button
           variant="filled"
           onClick={() => {
@@ -217,14 +286,6 @@ const Captions = ({
         >
           Tiếp tục
         </Button>
-        <Pagination
-          total={captionsPagination.totalPages}
-          page={captionsPagination.currentPage}
-          onChange={handlePageChangeCaption}
-          color="pink"
-          size="md"
-          style={{ marginTop: "20px", marginLeft: "auto" }}
-        />
       </Group>
     </Card>
   );

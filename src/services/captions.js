@@ -26,6 +26,7 @@ export const captionServices = {
         const queryString = `filter=${encodeURIComponent(
           JSON.stringify({
             ...(query.keyword && { keyword: query.keyword }),
+            ...(query.productLineId && { productLineId: query.productLineId }),
           })
         )}`;
         url = `${url}&${queryString}`;

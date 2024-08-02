@@ -5,24 +5,19 @@ import {
   Button,
   Flex,
   Image,
+  Modal,
   Select,
   Text,
   TextInput,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import Checkbox from "../../../components/Checkbox";
-
-import { filter, find, includes, isEmpty, keys, map, sumBy } from "lodash";
+import { filter, find, includes, isEmpty, keys, map } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
-import {
-  IconCheck,
-  IconX,
-  IconDeviceFloppy,
-  IconBan,
-} from "@tabler/icons-react";
-import { BRIEF_TYPES, CHOOSE_BRIEF_TYPES } from "../../../constant";
+import { IconCheck, IconX, IconBan } from "@tabler/icons-react";
+import { CHOOSE_BRIEF_TYPES } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -30,6 +25,8 @@ import {
 } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
+import { useDisclosure } from "@mantine/hooks";
+import CreatePost from "../../CreatePost";
 
 const BriefsTable = ({
   productLines,
@@ -141,7 +138,7 @@ const BriefsTable = ({
       },
       {
         accessorKey: "imageRef",
-        header: "HÌNH REF",
+        header: "HÌNH SKU",
         size: 100,
         enableEditing: false,
         enableSorting: false,
@@ -172,20 +169,32 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Cell: ({ row }) => (
-          <Badge
-            color={
-              row?.original?.size?.rnd === 1
-                ? "green"
-                : row?.original?.size?.rnd === 2
-                ? "yellow"
-                : "red"
-            }
-            variant="filled"
-          >
-            {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}
-          </Badge>
-        ),
+        Cell: ({ row }) => {
+          let color = null;
+          switch (row?.original?.value?.rnd) {
+            case 1:
+              color = "#cfcfcf";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "green";
+              break;
+            case 4:
+              color = "#38761C";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}</span>
+          );
+        },
       },
       {
         accessorKey: "size",
@@ -194,20 +203,29 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Cell: ({ row }) => (
-          <Badge
-            color={
-              row?.original?.value?.rnd === 1
-                ? "green"
-                : row?.original?.value?.rnd === 2
-                ? "yellow"
-                : "red"
-            }
-            variant="filled"
-          >
-            {CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}
-          </Badge>
-        ),
+        Cell: ({ row }) => {
+          let color = null;
+          switch (row?.original?.size?.rnd) {
+            case 1:
+              color = "green";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "red";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}</span>
+          );
+        },
       },
       {
         accessorKey: "rndTeam",
@@ -228,48 +246,56 @@ const BriefsTable = ({
       },
       {
         id: "adsImage",
-        accessorFn: (row) => row?.rnd?.name,
+        // accessorFn: (row) =>
+        //   filter(row?.designInfo.adsLinks, (x) => !x.postId).length,
         header: "HÌNH ADS",
         enableEditing: false,
         enableSorting: false,
         size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["ads-image"] },
+        Cell: ({ row }) => {
+          const adsLinksLength = filter(
+            row?.original?.designInfo?.adsLinks,
+            (x) => !x.postId
+          ).length;
+          return (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                ...(adsLinksLength === 0 && {
+                  color: "#8f959f",
+                }),
+                fontWeight: "bold",
+              }}
+            >
+              {adsLinksLength === 0 ? "DONE" : adsLinksLength}
+            </div>
+          );
+        },
       },
       {
         id: "video",
-        accessorFn: (row) => row?.rnd?.name,
+        accessorFn: (row) => 0,
         header: "VIDEO",
         enableEditing: false,
         enableSorting: false,
         size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["ads-image"] },
-      },
-      {
-        accessorKey: "status",
-        header: "DONE",
-        size: 100,
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
-        Cell: (props) => {
-          const { row } = props;
+        Cell: ({ row }) => {
           return (
-            <Button
-              variant="filled"
-              color={row.original.status === 3 ? "red" : "green"}
-              leftSection={
-                row.original.status === 3 ? <IconBan /> : <IconCheck />
-              }
-              disabled={
-                row?.original?.status === 2 &&
-                !row?.original?.linkProduct &&
-                !updateBrief[row.original.uid]?.linkProduct
-              }
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                color: "#8f959f",
+                fontWeight: "bold",
+              }}
             >
-              {row.original.status === 3 ? "Undone" : "Done"}
-            </Button>
+              DONE
+            </div>
           );
         },
       },
@@ -303,35 +329,46 @@ const BriefsTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
-        accessorKey: "remove",
+        accessorKey: "createCamp",
         header: "ACTIONS",
         enableSorting: false,
         mantineTableHeadCellProps: { className: classes["remove"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Edit: ({ cell, column, table }) => (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Button variant="filled" color="red">
-              <IconX />
-            </Button>
-          </div>
-        ),
-        Cell: ({ cell, column, table }) => (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Button variant="filled" color="red" size="sx">
-              <IconX />
-            </Button>
-          </div>
-        ),
+        Cell: ({ row }) => {
+          const adsLinksLength = filter(
+            row?.original?.designInfo?.adsLinks,
+            (x) => !x.postId
+          ).length;
+          const videoLinksLength = filter(
+            row?.original?.designInfo?.videoLinks
+          ).length;
+          return (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              {adsLinksLength === 0 && videoLinksLength === 0 ? (
+                <Button variant="filled" color="#8f959f" size="sx" disabled>
+                  DONE
+                </Button>
+              ) : (
+                <Button
+                  variant="filled"
+                  color="green"
+                  size="sx"
+                  onClick={() => {
+                    setSelectedBrief(row?.original);
+                    open();
+                  }}
+                >
+                  Lên Camp
+                </Button>
+              )}
+            </div>
+          );
+        },
       },
     ],
     [validationErrors]
@@ -360,7 +397,8 @@ const BriefsTable = ({
 
   const [batch, setBatch] = useState("");
   const [searchSKU, setSearchSKU] = useState("");
-
+  const [opened, { open, close }] = useDisclosure(false);
+  const [selectedBrief, setSelectedBrief] = useState(null);
   const table = useMantineReactTable({
     columns,
     data,
@@ -537,7 +575,7 @@ const BriefsTable = ({
             />
             <Select
               placeholder="Team"
-              data={["BD1", "BD2", "BD3"]}
+              data={["BD1", "BD2", "BD3", "POD-Biz"]}
               styles={{
                 input: {
                   width: "100px",
@@ -749,7 +787,30 @@ const BriefsTable = ({
     onSortingChange: setSorting,
   });
 
-  return <MantineReactTable table={table} />;
+  return (
+    <>
+      <MantineReactTable table={table} />
+      {!isEmpty(selectedBrief) && (
+        <Modal
+          opened={opened}
+          onClose={close}
+          transitionProps={{ transition: "fade", duration: 200 }}
+          overlayProps={{
+            backgroundOpacity: 0.55,
+            blur: 3,
+          }}
+          radius="md"
+          size={"95%"}
+        >
+          <CreatePost
+            brief={selectedBrief}
+            closeModalCreatePostFromBrief={close}
+            setTriggerFetchBrief={setTrigger}
+          />
+        </Modal>
+      )}
+    </>
+  );
 };
 
 export default BriefsTable;
