@@ -400,10 +400,11 @@ const Ads = ({
   );
 };
 
-const ModalPreview = ({ opened, close, ads }) => {
+const ModalPreview = ({ opened, close, ads, briefId }) => {
   const [selectedAds, setSelectedAds] = useState(ads[0]);
   useEffect(() => {
-    setSelectedAds(ads[0]);
+    const firstAds = find(ads, { briefId });
+    setSelectedAds(firstAds);
   }, [ads]);
   const handleChangeNextSlide = (uid) => {
     const findCurrentIndex = findIndex(ads, { uid });
@@ -618,6 +619,7 @@ const PostCamp = ({
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedValue, setSelectedValue] = useState([]);
+  const [selectedPreviewAds, setSelectedPreviewAds] = useState({});
   const [chooseFanpage, setChooseFanpage] = useState(selectedFanpage);
 
   useEffect(() => {
@@ -769,13 +771,25 @@ const PostCamp = ({
               width: "100%",
             }}
           >
-            <Button variant="filled" color="#646A73" radius="sm" onClick={open}>
+            <Button
+              variant="filled"
+              color="#646A73"
+              radius="sm"
+              onClick={() => {
+                open();
+              }}
+            >
               Preview
             </Button>
           </Flex>
         </Group>
       </Grid>
-      <ModalPreview opened={opened} close={close} ads={postPayloads} />
+      <ModalPreview
+        opened={opened}
+        close={close}
+        ads={postPayloads}
+        briefId={uid}
+      />
     </>
   );
 };

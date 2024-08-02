@@ -55,7 +55,7 @@ const ListAccounts = ({
           }}
         >
           <TextInput
-            placeholder="Account ..."
+            placeholder="Account/Category/Store ..."
             size="sm"
             leftSection={
               <span
