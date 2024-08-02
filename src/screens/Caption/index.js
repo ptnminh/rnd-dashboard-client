@@ -20,19 +20,20 @@ import {
   Modal,
   Tooltip,
   Autocomplete,
+  Box,
 } from "@mantine/core";
 import styles from "./Caption.module.sass";
 import cn from "classnames";
 import { useEffect, useState } from "react";
 import Card from "../../components/Card";
-import { isEmpty, map, set } from "lodash";
+import { isEmpty, map } from "lodash";
 import { captionServices, rndServices } from "../../services";
 import ProductBase from "./ProductBase";
 import { showNotification } from "../../utils/index";
 import { IconX, IconFilterOff, IconSearch } from "@tabler/icons-react";
 import { modals } from "@mantine/modals";
 import { useDisclosure } from "@mantine/hooks";
-function AccordionLabel({ label, image, description }) {
+const AccordionLabel = ({ label, image, description }) => {
   return (
     <Group wrap="nowrap">
       <Avatar src={image} radius="xl" size="lg" />
@@ -44,7 +45,7 @@ function AccordionLabel({ label, image, description }) {
       </div>
     </Group>
   );
-}
+};
 
 const ListCaptions = ({
   captions,
@@ -587,155 +588,156 @@ const Caption = () => {
   };
   return (
     <>
-      <Tabs color="teal" defaultValue="first">
+      <Box pos="relative">
         <LoadingOverlay
           visible={loadingCreateCaption}
           zIndex={1000}
           overlayProps={{ radius: "sm", blur: 2 }}
         />
-        <Tabs.List>
-          <Tabs.Tab value="first">Tạo Caption</Tabs.Tab>
-        </Tabs.List>
-
-        <Tabs.Panel color="teal" value="first" pt="xs">
-          <Card
-            className={cn(styles.card, styles.clipArtCard)}
-            title="Caption"
-            classTitle="title-green"
-            classCardHead={styles.classCardHead}
-            classSpanTitle={styles.classScaleSpanTitle}
-          >
-            <Fieldset
-              legend="Thông tin"
-              style={{
-                display: "flex",
-                gap: "10px",
-              }}
+        <Tabs color="teal" defaultValue="first">
+          <Tabs.List>
+            <Tabs.Tab value="first">Tạo Caption</Tabs.Tab>
+          </Tabs.List>
+          <Tabs.Panel color="teal" value="first" pt="xs">
+            <Card
+              className={cn(styles.card, styles.clipArtCard)}
+              title="Caption"
+              classTitle="title-green"
+              classCardHead={styles.classCardHead}
+              classSpanTitle={styles.classScaleSpanTitle}
             >
-              <Grid
+              <Fieldset
+                legend="Thông tin"
                 style={{
-                  width: "100%",
+                  display: "flex",
+                  gap: "10px",
                 }}
               >
-                <Grid.Col span={4}>
-                  <Flex direction="column" gap="md">
-                    <TextInput
-                      label="Tên Caption"
-                      placeholder="Tên Caption"
-                      value={captionInfo.name}
+                <Grid
+                  style={{
+                    width: "100%",
+                  }}
+                >
+                  <Grid.Col span={4}>
+                    <Flex direction="column" gap="md">
+                      <TextInput
+                        label="Tên Caption"
+                        placeholder="Tên Caption"
+                        value={captionInfo.name}
+                        onChange={(event) => {
+                          setCaptionInfo({
+                            ...captionInfo,
+                            name: event.currentTarget.value,
+                          });
+                        }}
+                        styles={{
+                          label: {
+                            marginBottom: "5px",
+                          },
+                        }}
+                      />
+                      <TagsInput
+                        label="Tags"
+                        data={captionInfo.tags}
+                        value={captionInfo.tags}
+                        onChange={(value) => {
+                          setCaptionInfo({
+                            ...captionInfo,
+                            tags: value,
+                          });
+                        }}
+                        placeholder="Tags"
+                        splitChars={[",", " ", "|", "\r\n", "\n"]}
+                        clearable
+                        styles={{
+                          label: {
+                            marginBottom: "5px",
+                          },
+                        }}
+                      />
+                    </Flex>
+                  </Grid.Col>
+                  <Grid.Col span={8}>
+                    <Textarea
+                      label="Nội dung"
+                      styles={{
+                        label: {
+                          marginBottom: "5px",
+                        },
+                        input: {
+                          height: "116px",
+                        },
+                      }}
+                      placeholder="Content"
+                      value={captionInfo.content}
                       onChange={(event) => {
                         setCaptionInfo({
                           ...captionInfo,
-                          name: event.currentTarget.value,
+                          content: event.currentTarget.value,
                         });
                       }}
-                      styles={{
-                        label: {
-                          marginBottom: "5px",
-                        },
-                      }}
+                      minRows={7}
+                      maxRows={9}
                     />
-                    <TagsInput
-                      label="Tags"
-                      data={captionInfo.tags}
-                      value={captionInfo.tags}
-                      onChange={(value) => {
-                        setCaptionInfo({
-                          ...captionInfo,
-                          tags: value,
-                        });
-                      }}
-                      placeholder="Tags"
-                      splitChars={[",", " ", "|", "\r\n", "\n"]}
-                      clearable
-                      styles={{
-                        label: {
-                          marginBottom: "5px",
-                        },
-                      }}
-                    />
-                  </Flex>
-                </Grid.Col>
-                <Grid.Col span={8}>
-                  <Textarea
-                    label="Nội dung"
-                    styles={{
-                      label: {
-                        marginBottom: "5px",
-                      },
-                      input: {
-                        height: "116px",
-                      },
-                    }}
-                    placeholder="Content"
-                    value={captionInfo.content}
-                    onChange={(event) => {
-                      setCaptionInfo({
-                        ...captionInfo,
-                        content: event.currentTarget.value,
-                      });
-                    }}
-                    minRows={7}
-                    maxRows={9}
-                  />
-                </Grid.Col>
-                <Grid.Col span={12}>
-                  <Accordion chevronPosition="right" variant="contained">
-                    {items}
-                  </Accordion>
-                </Grid.Col>
-              </Grid>
-            </Fieldset>
-            <div
-              style={{
-                marginTop: "10px",
-                display: "flex",
-                justifyContent: "flex-end",
-              }}
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <Accordion chevronPosition="right" variant="contained">
+                      {items}
+                    </Accordion>
+                  </Grid.Col>
+                </Grid>
+              </Fieldset>
+              <div
+                style={{
+                  marginTop: "10px",
+                  display: "flex",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <Button onClick={handleCreateCaption}>Tạo</Button>
+              </div>
+            </Card>
+            <Card
+              className={cn(styles.card, styles.clipArtCard)}
+              title="Danh sách Caption"
+              classTitle="title-green"
+              classCardHead={styles.classCardHead}
+              classSpanTitle={styles.classScaleSpanTitle}
             >
-              <Button onClick={handleCreateCaption}>Tạo</Button>
-            </div>
-          </Card>
-          <Card
-            className={cn(styles.card, styles.clipArtCard)}
-            title="Danh sách Caption"
-            classTitle="title-green"
-            classCardHead={styles.classCardHead}
-            classSpanTitle={styles.classScaleSpanTitle}
-          >
-            <ListCaptions
-              captions={captions}
-              handleUpdateCaption={handleUpdateCaption}
-              handleRemoveCaption={handleRemoveCaption}
-              setQueryCaption={setQueryCaption}
-              productLines={productBases}
-              selectedProductLines={selectedProductBases}
-              setSelectedProductLines={setSelectedProductBases}
-              fetchProductLinesLoading={loadingProductBase}
-              setQueryProductLines={setQueryProductBase}
-              pagination={productBasePagination}
-              handlePageChange={handlePageChange}
-              title="Chọn Product Base"
-              setProductBasePagination={setProductBasePagination}
-              allProductBases={allProductBases}
-            />
-            <Pagination
-              total={captionsPagination.totalPages}
-              page={captionsPagination.currentPage}
-              onChange={handlePageChangeCaption}
-              color="pink"
-              size="md"
-              style={{ marginTop: "20px", marginLeft: "auto" }}
-            />
-          </Card>
-        </Tabs.Panel>
+              <ListCaptions
+                captions={captions}
+                handleUpdateCaption={handleUpdateCaption}
+                handleRemoveCaption={handleRemoveCaption}
+                setQueryCaption={setQueryCaption}
+                productLines={productBases}
+                selectedProductLines={selectedProductBases}
+                setSelectedProductLines={setSelectedProductBases}
+                fetchProductLinesLoading={loadingProductBase}
+                setQueryProductLines={setQueryProductBase}
+                pagination={productBasePagination}
+                handlePageChange={handlePageChange}
+                title="Chọn Product Base"
+                setProductBasePagination={setProductBasePagination}
+                allProductBases={allProductBases}
+              />
+              <Pagination
+                total={captionsPagination.totalPages}
+                page={captionsPagination.currentPage}
+                onChange={handlePageChangeCaption}
+                color="pink"
+                size="md"
+                style={{ marginTop: "20px", marginLeft: "auto" }}
+              />
+            </Card>
+          </Tabs.Panel>
 
-        <Tabs.Panel color="teal" value="second" pt="xs">
-          <Accordion chevronPosition="left" variant="contained">
-            {items}
-          </Accordion>
-        </Tabs.Panel>
-      </Tabs>
+          <Tabs.Panel color="teal" value="second" pt="xs">
+            <Accordion chevronPosition="left" variant="contained">
+              {items}
+            </Accordion>
+          </Tabs.Panel>
+        </Tabs>
+      </Box>
     </>
   );
 };

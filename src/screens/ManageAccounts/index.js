@@ -202,6 +202,7 @@ const ListAccounts = ({
                                   ...x.attribute,
                                   store: value,
                                 },
+                                store: value,
                               };
                             }
                             return x;
