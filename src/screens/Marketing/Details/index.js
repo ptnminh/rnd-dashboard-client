@@ -197,37 +197,6 @@ const BriefsTable = ({
         },
       },
       {
-        accessorKey: "size",
-        header: "SIZE",
-        size: 100,
-        enableEditing: false,
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Cell: ({ row }) => {
-          let color = null;
-          switch (row?.original?.size?.rnd) {
-            case 1:
-              color = "green";
-              break;
-            case 2:
-              color = "yellow";
-              break;
-            case 3:
-              color = "red";
-              break;
-            default:
-              break;
-          }
-          return color ? (
-            <Badge color={color} variant="filled">
-              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}
-            </Badge>
-          ) : (
-            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}</span>
-          );
-        },
-      },
-      {
         accessorKey: "rndTeam",
         header: "TEAM",
         size: 100,
@@ -363,7 +332,7 @@ const BriefsTable = ({
                     open();
                   }}
                 >
-                  Lên Camp
+                  Lên Post
                 </Button>
               )}
             </div>

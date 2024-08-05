@@ -12,6 +12,7 @@ const navigation = [
     title: "RnD - Tạo Brief",
     slug: "rnd",
     icon: "diamond",
+    arrowDown: true,
     // add: true,
     pathname: "/rnd/brief",
     dropdown: [
@@ -24,6 +25,7 @@ const navigation = [
   {
     title: "Design - Task",
     icon: "diamond",
+    arrowDown: true,
     slug: "/designer",
     pathname: "/designer",
     dropdown: [
@@ -35,30 +37,62 @@ const navigation = [
   },
   {
     title: "Listing - Task",
+    arrowDown: true,
     icon: "diamond",
     url: "/epm",
   },
   {
     title: "MKT - Task",
     icon: "diamond",
+    arrowDown: true,
     slug: "/mkt",
     pathname: "/mkt",
     dropdown: [
       {
-        title: "MKT - Camp Phôi",
-        url: "/mkt/root-campaign",
+        title: "1. Post",
+        arrowDown: true,
+        dropdown: [
+          {
+            title: "1.1 Dashboard",
+            pathname: "/mkt/post/dashboard",
+          },
+          {
+            title: "1.2 Lên Post",
+            pathname: "/mkt/post/create",
+          },
+        ],
       },
       {
-        title: "MKT - Caption",
-        url: "/mkt/caption",
+        title: "2. Camps",
+        arrowDown: true,
+        dropdown: [
+          {
+            title: "2.1 Dashboard",
+            pathname: "/mkt/post/dashboard",
+          },
+          {
+            title: "2.2 Lên Camp",
+            pathname: "/mkt/post/create",
+          },
+        ],
       },
       {
-        title: "MKT - Account",
-        url: "/mkt/account",
-      },
-      {
-        title: "MKT - Tạo Post",
-        url: "/mkt/post",
+        title: "3. Materials",
+        arrowDown: true,
+        dropdown: [
+          {
+            title: "3.1 Accounts",
+            pathname: "/mkt/account",
+          },
+          {
+            title: "3.2 Camp Phôi",
+            pathname: "/mkt/root-campaign",
+          },
+          {
+            title: "3.3 Caption",
+            pathname: "/mkt/caption",
+          },
+        ],
       },
     ],
   },

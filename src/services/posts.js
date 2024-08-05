@@ -44,4 +44,30 @@ export const postService = {
       return false;
     }
   },
+  fetchPosts: async ({
+    limit = 10, page = 1, query = {}, sorting = {}
+  }) => {
+    try {
+      let url = `${hostAPI}/posts?page=${page}&pageSize=${limit}`;
+      const queryKeys = keys(query);
+      const transformedQuery = filter(queryKeys, (key) => query[key]);
+      if (!isEmpty(transformedQuery)) {
+        const queryString = `filter=${encodeURIComponent(
+          JSON.stringify({
+            ...(query.keyword && { keyword: query.keyword }),
+          })
+        )}`;
+        url = `${url}&${queryString}`;
+      }
+      const response = await axios.get(url);
+      const { data: result } = response;
+      if (result?.success === false) {
+        return false;
+      }
+      return result;
+    } catch(error) {
+      console.log("Error at fetchPosts:", error);
+      return false;
+    }
+  }
 };

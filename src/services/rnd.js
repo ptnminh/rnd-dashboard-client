@@ -213,9 +213,11 @@ export const rndServices = {
     designer,
     status,
     date,
+    hasPost,
     epm,
     view = "design",
     sorting,
+    sorted,
   }) => {
     try {
       const filter = {
@@ -230,6 +232,7 @@ export const rndServices = {
         ...(status && { status }),
         ...(date && { startDate: date.startDate, endDate: date.endDate }),
         ...(epm && { epm }),
+        hasPost,
       };
       const sort = !isEmpty(sorting)
         ? {
@@ -251,7 +254,20 @@ export const rndServices = {
         url = `${url}&${queryString}`;
       }
       if (Object.keys(sort).length !== 0) {
-        const queryString = `sort=${encodeURIComponent(JSON.stringify(sort))}`;
+        const queryString = `sort=${encodeURIComponent(
+          JSON.stringify({
+            ...sort,
+            ...(!isEmpty(sorted) && sorted),
+          })
+        )}`;
+        url = `${url}&${queryString}`;
+      }
+      if (keys(sorted).length !== 0) {
+        const queryString = `sort=${encodeURIComponent(
+          JSON.stringify({
+            ...(!isEmpty(sorted) && sorted),
+          })
+        )}`;
         url = `${url}&${queryString}`;
       }
 

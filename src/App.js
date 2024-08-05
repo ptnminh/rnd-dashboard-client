@@ -111,6 +111,22 @@ function App() {
           }
         />
         <Route
+          path="/mkt/post"
+          element={
+            <Page title="MKT">
+              <MKTScreens />
+            </Page>
+          }
+        />
+        <Route
+          path="/mkt/post/create"
+          element={
+            <Page title="MKT">
+              <CreatePost />
+            </Page>
+          }
+        />
+        <Route
           path="/mkt/root-campaign"
           element={
             <Page title="MKT">
@@ -131,6 +147,22 @@ function App() {
           element={
             <Page title="MKT">
               <ManageAccounts />
+            </Page>
+          }
+        />
+        <Route
+          path="/mkt/post"
+          element={
+            <Page title="MKT">
+              <CreatePost />
+            </Page>
+          }
+        />
+        <Route
+          path="/mkt/post/dashboard"
+          element={
+            <Page title="MKT">
+              <MKTScreens />
             </Page>
           }
         />

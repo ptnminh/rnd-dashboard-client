@@ -7,6 +7,7 @@ import {
   Pagination,
   rem,
   Select,
+  Tabs,
   TextInput,
   Transition,
 } from "@mantine/core";
@@ -21,6 +22,7 @@ import { compact, filter, find, flatMap, includes, isEmpty, map } from "lodash";
 import { captionServices, postService, rndServices } from "../../services";
 import { useWindowScroll } from "@mantine/hooks";
 import { showNotification } from "../../utils/index";
+import { BRIEF_SORTINGS, CONVERT_BRIEF_SORTINGS } from "../../constant/briefs";
 
 const CreatePost = ({
   brief,
@@ -29,8 +31,11 @@ const CreatePost = ({
 }) => {
   const [query, setQuery] = useState({
     status: [3],
+    hasPost: false,
+    view: "epm",
   });
   const [batch, setBatch] = useState("");
+  const [activeTab, setActiveTab] = useState("readyPost");
   const [searchSKU, setSearchSKU] = useState("");
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
   const [loadingCreatePost, setLoadingCreatePost] = useState(false);
@@ -42,7 +47,12 @@ const CreatePost = ({
   const [captions, setCaptions] = useState([]);
   const [allProductBases, setAllProductBases] = useState([]);
   const [queryCaption, setQueryCaption] = useState({});
+  const [posts, setPosts] = useState([]);
   const [captionsPagination, setCaptionsPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+  });
+  const [postsPagination, setPostsPagination] = useState({
     currentPage: 1,
     totalPages: 1,
   });
@@ -67,7 +77,7 @@ const CreatePost = ({
     const response = await rndServices.fetchBriefs({
       page,
       limit: 10,
-      sorting: sortingBrief,
+      sorted: sortingBrief,
       ...query,
     });
     let { data, metadata } = response;
@@ -228,314 +238,666 @@ const CreatePost = ({
     setCaptionsPagination(metadata);
     return;
   };
+
   useEffect(() => {
     fetchCaptions(captionsPagination.currentPage);
   }, [captionsPagination.currentPage, queryCaption]);
+
   const handlePageChangeCaption = (page) => {
     setCaptionsPagination((prev) => ({ ...prev, currentPage: page }));
   };
 
+  useEffect(() => {
+    const resetQuery = {
+      date: null,
+      batch: "",
+      sku: "",
+      briefType: null,
+      size: null,
+      rndTeam: null,
+      rnd: null,
+      designer: null,
+      status: [3],
+      sizeValue: null,
+      rndName: null,
+      designerName: null,
+      statusValue: null,
+      dateValue: null,
+    };
+    if (activeTab === "createdPost") {
+      setQuery({
+        ...resetQuery,
+        hasPost: true,
+      });
+    } else {
+      setQuery({
+        ...resetQuery,
+        hasPost: false,
+      });
+    }
+    setBriefPagination({
+      currentPage: 1,
+      totalPages: 1,
+    });
+  }, [activeTab]);
   return (
     <>
-      <Card
-        className={cn(styles.card, styles.clipArtCard)}
-        title="Tạo Post"
-        classTitle="title-green"
-        classCardHead={styles.classCardHead}
-        classSpanTitle={styles.classScaleSpanTitle}
-      >
-        {isEmpty(brief) && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "10px 5px",
-              gap: "10px",
-              flexWrap: "wrap-reverse",
-            }}
+      <Tabs value={activeTab} onChange={setActiveTab}>
+        <Tabs.List>
+          <Tabs.Tab value="readyPost">Ready Post</Tabs.Tab>
+          {isEmpty(brief) && (
+            <Tabs.Tab value="createdPost">Created Post</Tabs.Tab>
+          )}
+        </Tabs.List>
+
+        <Tabs.Panel value="readyPost">
+          <Card
+            className={cn(styles.card, styles.clipArtCard)}
+            title="Tạo Post"
+            classTitle="title-green"
+            classCardHead={styles.classCardHead}
+            classSpanTitle={styles.classScaleSpanTitle}
           >
-            <Flex
-              style={{
-                gap: "8px",
-                padding: "10px",
-                borderRadius: "10px",
-                backgroundColor: "#EFF0F1",
-              }}
-            >
+            {isEmpty(brief) && (
               <div
                 style={{
                   display: "flex",
-                  justifyContent: "center",
+                  justifyContent: "space-between",
                   alignItems: "center",
+                  padding: "10px 5px",
+                  gap: "10px",
+                  flexWrap: "wrap-reverse",
                 }}
               >
-                <Checkbox
-                  size="lg"
-                  checked={
-                    choosePosts.length === postPayloads.length &&
-                    !isEmpty(postPayloads)
-                  }
-                  onChange={() => {
-                    if (!isEmpty(filter(postPayloads, (x) => !x.postId))) {
-                      if (choosePosts.length === postPayloads.length) {
-                        setChoosePosts([]);
-                      } else {
-                        setChoosePosts(map(postPayloads, "uid"));
-                      }
-                    }
+                <Flex
+                  style={{
+                    gap: "8px",
+                    padding: "10px",
+                    borderRadius: "10px",
+                    backgroundColor: "#EFF0F1",
                   }}
-                />
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Checkbox
+                      size="lg"
+                      checked={
+                        choosePosts.length === postPayloads.length &&
+                        !isEmpty(postPayloads)
+                      }
+                      onChange={() => {
+                        if (!isEmpty(filter(postPayloads, (x) => !x.postId))) {
+                          if (choosePosts.length === postPayloads.length) {
+                            setChoosePosts([]);
+                          } else {
+                            setChoosePosts(map(postPayloads, "uid"));
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+
+                  <TextInput
+                    placeholder="Batch"
+                    size="sm"
+                    width="100px"
+                    leftSection={
+                      <span
+                        onClick={() => {
+                          setQuery({ ...query, batch });
+                        }}
+                        style={{
+                          cursor: "pointer",
+                        }}
+                      >
+                        <IconSearch size={16} />
+                      </span>
+                    }
+                    styles={{
+                      input: {
+                        width: "100px",
+                      },
+                    }}
+                    value={batch}
+                    onChange={(e) => setBatch(e.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        setQuery({ ...query, batch });
+                      }
+                    }}
+                  />
+                  <TextInput
+                    placeholder="SKU"
+                    size="sm"
+                    width="100px"
+                    leftSection={
+                      <span
+                        onClick={() => {
+                          setQuery({ ...query, sku: searchSKU });
+                        }}
+                        style={{
+                          cursor: "pointer",
+                        }}
+                      >
+                        <IconSearch size={16} />
+                      </span>
+                    }
+                    styles={{
+                      input: {
+                        width: "100px",
+                      },
+                    }}
+                    value={searchSKU}
+                    onChange={(e) => setSearchSKU(e.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        setQuery({ ...query, sku: searchSKU });
+                      }
+                    }}
+                  />
+                  <Select
+                    placeholder="Size"
+                    data={["Small", "Medium", "Big"]}
+                    styles={{
+                      input: {
+                        width: "100px",
+                      },
+                    }}
+                    value={query?.sizeValue}
+                    onChange={(value) =>
+                      setQuery({
+                        ...query,
+                        size: CONVERT_STATUS_TO_NUMBER[value],
+                        sizeValue: value,
+                      })
+                    }
+                    clearable
+                    onClear={() => {
+                      setQuery({
+                        ...query,
+                        size: null,
+                        sizeValue: null,
+                      });
+                    }}
+                  />
+                  <Select
+                    placeholder="Team"
+                    data={["BD1", "BD2", "BD3", "POD-Biz"]}
+                    styles={{
+                      input: {
+                        width: "100px",
+                      },
+                    }}
+                    value={query?.rndTeam}
+                    onChange={(value) => setQuery({ ...query, rndTeam: value })}
+                    clearable
+                    onClear={() => {
+                      setQuery({
+                        ...query,
+                        rndTeam: null,
+                      });
+                    }}
+                  />
+                  <Select
+                    placeholder="RND"
+                    data={map(filter(users, { role: "rnd" }), "name") || []}
+                    styles={{
+                      input: {
+                        width: "150px",
+                      },
+                    }}
+                    value={query?.rndName}
+                    onChange={(value) =>
+                      setQuery({
+                        ...query,
+                        rndName: find(users, { name: value })?.name,
+                        rnd: find(users, { name: value })?.uid,
+                      })
+                    }
+                    clearable
+                    onClear={() => {
+                      setQuery({
+                        ...query,
+                        rndName: null,
+                        rnd: null,
+                      });
+                    }}
+                  />
+                  <Select
+                    placeholder="Designer"
+                    data={
+                      map(filter(users, { role: "designer" }), "name") || []
+                    }
+                    styles={{
+                      input: {
+                        width: "120px",
+                      },
+                    }}
+                    value={query?.designerName}
+                    onChange={(value) =>
+                      setQuery({
+                        ...query,
+                        designerName: find(users, { name: value })?.name,
+                        designer: find(users, { name: value })?.uid,
+                      })
+                    }
+                    clearable
+                    onClear={() => {
+                      setQuery({
+                        ...query,
+                        designerName: null,
+                        designer: null,
+                      });
+                    }}
+                  />
+                  <Select
+                    placeholder="Fanpages"
+                    data={map(fanpages, "name") || []}
+                    styles={{
+                      input: {
+                        width: "200px",
+                      },
+                    }}
+                    value={selectedFanpage?.name || ""}
+                    onChange={(value) => {
+                      setSelectedFanpage(find(fanpages, { name: value }));
+                    }}
+                    clearable
+                  />
+                  <Select
+                    placeholder="Sorting"
+                    data={BRIEF_SORTINGS}
+                    styles={{
+                      input: {
+                        width: "200px",
+                      },
+                    }}
+                    value={CONVERT_BRIEF_SORTINGS[sortingBrief?.value] || ""}
+                    onChange={(value) =>
+                      setSortingBrief({
+                        ...sortingBrief,
+                        value: value === BRIEF_SORTINGS[0] ? "asc" : "desc",
+                      })
+                    }
+                    clearable
+                    onClear={() => {
+                      setSortingBrief({});
+                    }}
+                  />
+
+                  <Button
+                    onClick={() => {
+                      setSelectedFanpage(null);
+                      setQuery({
+                        date: null,
+                        batch: "",
+                        sku: "",
+                        view: "epm",
+                        briefType: null,
+                        size: null,
+                        rndTeam: null,
+                        rnd: null,
+                        designer: null,
+                        status: [3],
+                        sizeValue: null,
+                        rndName: null,
+                        designerName: null,
+                        statusValue: null,
+                        dateValue: null,
+                        hasPost: activeTab === "createdPost" ? true : false,
+                      });
+                      setBatch("");
+                      setSortingBrief({});
+                      setSearchSKU("");
+                    }}
+                  >
+                    <IconFilterOff />
+                  </Button>
+                </Flex>
               </div>
-
-              <TextInput
-                placeholder="Batch"
-                size="sm"
-                width="100px"
-                leftSection={
-                  <span
-                    onClick={() => {
-                      setQuery({ ...query, batch });
-                    }}
-                    style={{
-                      cursor: "pointer",
-                    }}
-                  >
-                    <IconSearch size={16} />
-                  </span>
-                }
-                styles={{
-                  input: {
-                    width: "100px",
-                  },
-                }}
-                value={batch}
-                onChange={(e) => setBatch(e.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    setQuery({ ...query, batch });
+            )}
+            <Flex gap={30} direction="column">
+              {map(briefs, (brief) => (
+                <PostCamp
+                  {...brief}
+                  postPayloads={postPayloads}
+                  setPostPayloads={setPostPayloads}
+                  selectedFanpage={selectedFanpage}
+                  fanpages={fanpages}
+                  choosePosts={choosePosts}
+                  setChoosePosts={setChoosePosts}
+                  captions={captions}
+                  setQueryCaption={setQueryCaption}
+                  handlePageChangeCaption={handlePageChangeCaption}
+                  captionsPagination={captionsPagination}
+                  allProductBases={allProductBases}
+                />
+              ))}
+            </Flex>
+          </Card>
+          <Group justify={isEmpty(brief) ? "space-between" : "flex-end"}>
+            {isEmpty(brief) && (
+              <Pagination
+                total={briefPagination.totalPages}
+                page={briefPagination.currentPage}
+                onChange={handleChangePage}
+                color="pink"
+                size="md"
+                style={{ marginTop: "20px", marginRight: "auto" }}
+              />
+            )}
+            <Button
+              color="green"
+              onClick={handleCreatePost}
+              loading={loadingCreatePost}
+            >
+              Create Post
+            </Button>
+          </Group>
+          <Affix position={{ bottom: 20, right: 200 }}>
+            <Transition transition="slide-up" mounted={scroll.y > 0}>
+              {(transitionStyles) => (
+                <Button
+                  leftSection={
+                    <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
                   }
-                }}
-              />
-              <TextInput
-                placeholder="SKU"
-                size="sm"
-                width="100px"
-                leftSection={
-                  <span
-                    onClick={() => {
-                      setQuery({ ...query, sku: searchSKU });
-                    }}
-                    style={{
-                      cursor: "pointer",
-                    }}
-                  >
-                    <IconSearch size={16} />
-                  </span>
-                }
-                styles={{
-                  input: {
-                    width: "100px",
-                  },
-                }}
-                value={searchSKU}
-                onChange={(e) => setSearchSKU(e.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    setQuery({ ...query, sku: searchSKU });
-                  }
-                }}
-              />
-              <Select
-                placeholder="Size"
-                data={["Small", "Medium", "Big"]}
-                styles={{
-                  input: {
-                    width: "100px",
-                  },
-                }}
-                value={query?.sizeValue}
-                onChange={(value) =>
-                  setQuery({
-                    ...query,
-                    size: CONVERT_STATUS_TO_NUMBER[value],
-                    sizeValue: value,
-                  })
-                }
-                clearable
-                onClear={() => {
-                  setQuery({
-                    ...query,
-                    size: null,
-                    sizeValue: null,
-                  });
-                }}
-              />
-              <Select
-                placeholder="Team"
-                data={["BD1", "BD2", "BD3", "POD-Biz"]}
-                styles={{
-                  input: {
-                    width: "100px",
-                  },
-                }}
-                value={query?.rndTeam}
-                onChange={(value) => setQuery({ ...query, rndTeam: value })}
-                clearable
-                onClear={() => {
-                  setQuery({
-                    ...query,
-                    rndTeam: null,
-                  });
-                }}
-              />
-              <Select
-                placeholder="RND"
-                data={map(filter(users, { role: "rnd" }), "name") || []}
-                styles={{
-                  input: {
-                    width: "150px",
-                  },
-                }}
-                value={query?.rndName}
-                onChange={(value) =>
-                  setQuery({
-                    ...query,
-                    rndName: find(users, { name: value })?.name,
-                    rnd: find(users, { name: value })?.uid,
-                  })
-                }
-                clearable
-                onClear={() => {
-                  setQuery({
-                    ...query,
-                    rndName: null,
-                    rnd: null,
-                  });
-                }}
-              />
-              <Select
-                placeholder="Designer"
-                data={map(filter(users, { role: "designer" }), "name") || []}
-                styles={{
-                  input: {
-                    width: "120px",
-                  },
-                }}
-                value={query?.designerName}
-                onChange={(value) =>
-                  setQuery({
-                    ...query,
-                    designerName: find(users, { name: value })?.name,
-                    designer: find(users, { name: value })?.uid,
-                  })
-                }
-                clearable
-                onClear={() => {
-                  setQuery({
-                    ...query,
-                    designerName: null,
-                    designer: null,
-                  });
-                }}
-              />
-              <Select
-                placeholder="Fanpages"
-                data={map(fanpages, "name") || []}
-                styles={{
-                  input: {
-                    width: "200px",
-                  },
-                }}
-                value={selectedFanpage?.name || ""}
-                onChange={(value) => {
-                  setSelectedFanpage(find(fanpages, { name: value }));
-                }}
-                clearable
-              />
-
-              <Button
-                onClick={() => {
-                  setSelectedFanpage(null);
-                  setQuery({
-                    date: null,
-                    batch: "",
-                    sku: "",
-                    briefType: null,
-                    size: null,
-                    rndTeam: null,
-                    rnd: null,
-                    designer: null,
-                    status: [3],
-                    sizeValue: null,
-                    rndName: null,
-                    designerName: null,
-                    statusValue: null,
-                    dateValue: null,
-                  });
-                  setBatch("");
-                  setSearchSKU("");
+                  style={transitionStyles}
+                  onClick={() => scrollTo({ y: 0 })}
+                >
+                  Scroll to top
+                </Button>
+              )}
+            </Transition>
+          </Affix>
+        </Tabs.Panel>
+        <Tabs.Panel value="createdPost">
+          <Card
+            className={cn(styles.card, styles.clipArtCard)}
+            title="Tạo Post"
+            classTitle="title-green"
+            classCardHead={styles.classCardHead}
+            classSpanTitle={styles.classScaleSpanTitle}
+          >
+            {isEmpty(brief) && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "10px 5px",
+                  gap: "10px",
+                  flexWrap: "wrap-reverse",
                 }}
               >
-                <IconFilterOff />
-              </Button>
-            </Flex>
-          </div>
-        )}
-        <Flex gap={30} direction="column">
-          {map(briefs, (brief) => (
-            <PostCamp
-              {...brief}
-              postPayloads={postPayloads}
-              setPostPayloads={setPostPayloads}
-              selectedFanpage={selectedFanpage}
-              fanpages={fanpages}
-              choosePosts={choosePosts}
-              setChoosePosts={setChoosePosts}
-              captions={captions}
-              setQueryCaption={setQueryCaption}
-              handlePageChangeCaption={handlePageChangeCaption}
-              captionsPagination={captionsPagination}
-              allProductBases={allProductBases}
-            />
-          ))}
-        </Flex>
-      </Card>
-      <Group justify={isEmpty(brief) ? "space-between" : "flex-end"}>
-        {isEmpty(brief) && (
-          <Pagination
-            total={briefPagination.totalPages}
-            page={briefPagination.currentPage}
-            onChange={handleChangePage}
-            color="pink"
-            size="md"
-            style={{ marginTop: "20px", marginRight: "auto" }}
-          />
-        )}
-        <Button
-          color="green"
-          onClick={handleCreatePost}
-          loading={loadingCreatePost}
-        >
-          Create Post
-        </Button>
-      </Group>
+                <Flex
+                  style={{
+                    gap: "8px",
+                    padding: "10px",
+                    borderRadius: "10px",
+                    backgroundColor: "#EFF0F1",
+                  }}
+                >
+                  <TextInput
+                    placeholder="Batch"
+                    size="sm"
+                    width="100px"
+                    leftSection={
+                      <span
+                        onClick={() => {
+                          setQuery({ ...query, batch });
+                        }}
+                        style={{
+                          cursor: "pointer",
+                        }}
+                      >
+                        <IconSearch size={16} />
+                      </span>
+                    }
+                    styles={{
+                      input: {
+                        width: "100px",
+                      },
+                    }}
+                    value={batch}
+                    onChange={(e) => setBatch(e.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        setQuery({ ...query, batch });
+                      }
+                    }}
+                  />
+                  <TextInput
+                    placeholder="SKU"
+                    size="sm"
+                    width="100px"
+                    leftSection={
+                      <span
+                        onClick={() => {
+                          setQuery({ ...query, sku: searchSKU });
+                        }}
+                        style={{
+                          cursor: "pointer",
+                        }}
+                      >
+                        <IconSearch size={16} />
+                      </span>
+                    }
+                    styles={{
+                      input: {
+                        width: "100px",
+                      },
+                    }}
+                    value={searchSKU}
+                    onChange={(e) => setSearchSKU(e.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        setQuery({ ...query, sku: searchSKU });
+                      }
+                    }}
+                  />
+                  <Select
+                    placeholder="Size"
+                    data={["Small", "Medium", "Big"]}
+                    styles={{
+                      input: {
+                        width: "100px",
+                      },
+                    }}
+                    value={query?.sizeValue}
+                    onChange={(value) =>
+                      setQuery({
+                        ...query,
+                        size: CONVERT_STATUS_TO_NUMBER[value],
+                        sizeValue: value,
+                      })
+                    }
+                    clearable
+                    onClear={() => {
+                      setQuery({
+                        ...query,
+                        size: null,
+                        sizeValue: null,
+                      });
+                    }}
+                  />
+                  <Select
+                    placeholder="Team"
+                    data={["BD1", "BD2", "BD3", "POD-Biz"]}
+                    styles={{
+                      input: {
+                        width: "100px",
+                      },
+                    }}
+                    value={query?.rndTeam}
+                    onChange={(value) => setQuery({ ...query, rndTeam: value })}
+                    clearable
+                    onClear={() => {
+                      setQuery({
+                        ...query,
+                        rndTeam: null,
+                      });
+                    }}
+                  />
+                  <Select
+                    placeholder="RND"
+                    data={map(filter(users, { role: "rnd" }), "name") || []}
+                    styles={{
+                      input: {
+                        width: "150px",
+                      },
+                    }}
+                    value={query?.rndName}
+                    onChange={(value) =>
+                      setQuery({
+                        ...query,
+                        rndName: find(users, { name: value })?.name,
+                        rnd: find(users, { name: value })?.uid,
+                      })
+                    }
+                    clearable
+                    onClear={() => {
+                      setQuery({
+                        ...query,
+                        rndName: null,
+                        rnd: null,
+                      });
+                    }}
+                  />
+                  <Select
+                    placeholder="Designer"
+                    data={
+                      map(filter(users, { role: "designer" }), "name") || []
+                    }
+                    styles={{
+                      input: {
+                        width: "120px",
+                      },
+                    }}
+                    value={query?.designerName}
+                    onChange={(value) =>
+                      setQuery({
+                        ...query,
+                        designerName: find(users, { name: value })?.name,
+                        designer: find(users, { name: value })?.uid,
+                      })
+                    }
+                    clearable
+                    onClear={() => {
+                      setQuery({
+                        ...query,
+                        designerName: null,
+                        designer: null,
+                      });
+                    }}
+                  />
+                  <Select
+                    placeholder="Sorting"
+                    data={BRIEF_SORTINGS}
+                    styles={{
+                      input: {
+                        width: "200px",
+                      },
+                    }}
+                    value={CONVERT_BRIEF_SORTINGS[sortingBrief?.value] || ""}
+                    onChange={(value) =>
+                      setSortingBrief({
+                        ...sortingBrief,
+                        value: value === BRIEF_SORTINGS[0] ? "asc" : "desc",
+                      })
+                    }
+                    clearable
+                    onClear={() => {
+                      setSortingBrief({});
+                    }}
+                  />
 
-      <Affix position={{ bottom: 20, right: 200 }}>
-        <Transition transition="slide-up" mounted={scroll.y > 0}>
-          {(transitionStyles) => (
-            <Button
-              leftSection={
-                <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
-              }
-              style={transitionStyles}
-              onClick={() => scrollTo({ y: 0 })}
-            >
-              Scroll to top
-            </Button>
-          )}
-        </Transition>
-      </Affix>
+                  <Button
+                    onClick={() => {
+                      setSelectedFanpage(null);
+                      setQuery({
+                        date: null,
+                        batch: "",
+                        sku: "",
+                        view: "epm",
+                        briefType: null,
+                        size: null,
+                        rndTeam: null,
+                        rnd: null,
+                        designer: null,
+                        status: [3],
+                        sizeValue: null,
+                        rndName: null,
+                        designerName: null,
+                        statusValue: null,
+                        dateValue: null,
+                        hasPost: activeTab === "createdPost" ? true : false,
+                      });
+                      setBatch("");
+                      setSearchSKU("");
+                      setSortingBrief({});
+                    }}
+                  >
+                    <IconFilterOff />
+                  </Button>
+                </Flex>
+              </div>
+            )}
+            <Flex gap={30} direction="column">
+              {map(briefs, (brief) => (
+                <PostCamp
+                  {...brief}
+                  postPayloads={postPayloads}
+                  setPostPayloads={setPostPayloads}
+                  selectedFanpage={find(fanpages, {
+                    uid: brief?.designInfo?.adsLinks[0]?.pageId,
+                  })}
+                  fanpages={fanpages}
+                  choosePosts={choosePosts}
+                  setChoosePosts={setChoosePosts}
+                  captions={captions}
+                  setQueryCaption={setQueryCaption}
+                  handlePageChangeCaption={handlePageChangeCaption}
+                  captionsPagination={captionsPagination}
+                  allProductBases={allProductBases}
+                />
+              ))}
+            </Flex>
+          </Card>
+          <Group justify={isEmpty(brief) ? "space-between" : "flex-end"}>
+            {isEmpty(brief) && (
+              <Pagination
+                total={briefPagination.totalPages}
+                page={briefPagination.currentPage}
+                onChange={handleChangePage}
+                color="pink"
+                size="md"
+                style={{ marginTop: "20px", marginRight: "auto" }}
+              />
+            )}
+          </Group>
+
+          <Affix position={{ bottom: 20, right: 200 }}>
+            <Transition transition="slide-up" mounted={scroll.y > 0}>
+              {(transitionStyles) => (
+                <Button
+                  leftSection={
+                    <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
+                  }
+                  style={transitionStyles}
+                  onClick={() => scrollTo({ y: 0 })}
+                >
+                  Scroll to top
+                </Button>
+              )}
+            </Transition>
+          </Affix>
+        </Tabs.Panel>
+      </Tabs>
     </>
   );
 };

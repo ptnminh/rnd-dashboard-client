@@ -25,6 +25,7 @@ import {
   IconChevronLeft,
   IconExternalLink,
   IconPlus,
+  IconCopy,
 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useState } from "react";
@@ -294,7 +295,12 @@ const Ads = ({
                             });
                           }}
                         />
-                        <div>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "5px",
+                          }}
+                        >
                           <ActionIcon
                             component="a"
                             href={`https://pawfecthouse.com/${sku}`}
@@ -305,29 +311,75 @@ const Ads = ({
                           >
                             <IconExternalLink />
                           </ActionIcon>
+                          <CopyButton value={`https://pawfecthouse.com/${sku}`}>
+                            {({ copied, copy }) => (
+                              <ActionIcon
+                                color={copied ? "teal" : "blue"}
+                                onClick={copy}
+                                size="lg"
+                              >
+                                <IconCopy />
+                              </ActionIcon>
+                            )}
+                          </CopyButton>
                         </div>
                       </Group>
-
-                      {postId && (
-                        <TextInput
-                          label="Post ID"
-                          value={postId}
-                          readOnly
+                      <Group
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          alignItems: "flex-end",
+                        }}
+                      >
+                        {postId && (
+                          <TextInput
+                            label="Post ID"
+                            value={postId}
+                            readOnly
+                            style={{
+                              flex: 1,
+                            }}
+                            styles={{
+                              label: {
+                                fontSize: "16px",
+                                fontWeight: "bold",
+                                marginBottom: "10px",
+                              },
+                              input: {
+                                width: "100%",
+                              },
+                            }}
+                          />
+                        )}
+                        <div
                           style={{
-                            width: "100%",
+                            display: "flex",
+                            gap: "5px",
                           }}
-                          styles={{
-                            label: {
-                              fontSize: "16px",
-                              fontWeight: "bold",
-                              marginBottom: "10px",
-                            },
-                            input: {
-                              width: "100%",
-                            },
-                          }}
-                        />
-                      )}
+                        >
+                          <ActionIcon
+                            component="a"
+                            href={`https://facebook.com/${postId}`}
+                            size="lg"
+                            aria-label="Open in a new tab"
+                            onClick={() => {}}
+                            target="_blank"
+                          >
+                            <IconExternalLink />
+                          </ActionIcon>
+                          <CopyButton value={postId}>
+                            {({ copied, copy }) => (
+                              <ActionIcon
+                                color={copied ? "teal" : "blue"}
+                                onClick={copy}
+                                size="lg"
+                              >
+                                <IconCopy />
+                              </ActionIcon>
+                            )}
+                          </CopyButton>
+                        </div>
+                      </Group>
 
                       <Group
                         style={{
@@ -335,31 +387,6 @@ const Ads = ({
                           justifyContent: "flex-end",
                         }}
                       >
-                        {postId && (
-                          <CopyButton value={postId}>
-                            {({ copied, copy }) => (
-                              <Button
-                                color={copied ? "teal" : "blue"}
-                                onClick={copy}
-                              >
-                                {copied ? "Copied Post ID" : "Copy Post ID"}
-                              </Button>
-                            )}
-                          </CopyButton>
-                        )}
-                        <CopyButton
-                          value={find(postPayloads, { uid })?.ctaLink}
-                        >
-                          {({ copied, copy }) => (
-                            <Button
-                              color={copied ? "teal" : "blue"}
-                              onClick={copy}
-                            >
-                              {copied ? "Copied CTA Link" : "Copy CTA Link"}
-                            </Button>
-                          )}
-                        </CopyButton>
-
                         <Button variant="filled" color="#646A73" radius="sm">
                           Gắn CTA
                         </Button>
@@ -619,7 +646,6 @@ const PostCamp = ({
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedValue, setSelectedValue] = useState([]);
-  const [selectedPreviewAds, setSelectedPreviewAds] = useState({});
   const [chooseFanpage, setChooseFanpage] = useState(selectedFanpage);
 
   useEffect(() => {
@@ -756,7 +782,7 @@ const PostCamp = ({
           </Stack>
         </Checkbox.Group>
 
-        <Group
+        {/* <Group
           style={{
             marginTop: "30px",
             width: "100%",
@@ -782,7 +808,7 @@ const PostCamp = ({
               Preview
             </Button>
           </Flex>
-        </Group>
+        </Group> */}
       </Grid>
       <ModalPreview
         opened={opened}

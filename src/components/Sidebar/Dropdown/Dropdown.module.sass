@@ -190,7 +190,7 @@
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 14 14'%3E%3Cpath d='M1 1v4a8 8 0 0 0 8 8h4' stroke='%23272B30' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
     svg
         margin-left: auto
-        opacity: 0
+        opacity: 1
         fill: $n7
         transition: opacity .2s
         +dark
@@ -220,4 +220,54 @@
     color: $n7
 
 
-    
+.nestedDropdown
+    margin-left: 12px
+
+.nestedDropdownLink
+    position: relative
+    display: flex
+    align-items: center
+    height: 48px
+    padding: 0 12px
+    border-radius: 12px
+    color: $n4
+    -webkit-tap-highlight-color: rgba(0,0,0,0)
+    transition: background .2s, box-shadow .2s, color .2s
+    &:before
+        content: ""
+        position: absolute
+        top: 12px
+        left: -25px
+        width: 12px
+        height: 12px
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 14 14'%3E%3Cpath d='M1 1v4a8 8 0 0 0 8 8h4' stroke='%23efefef' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat 50% 50% / 100% auto
+        +dark
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 14 14'%3E%3Cpath d='M1 1v4a8 8 0 0 0 8 8h4' stroke='%23272B30' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E")
+    svg
+        margin-left: auto
+        opacity: 0
+        fill: $n7
+        transition: opacity .2s
+        +dark
+            fill: $n1
+    &:hover
+        color: $n7
+        +dark
+            color: $n1
+    &.active
+        background: $n3
+        box-shadow: inset 0px -2px 1px rgba(0, 0, 0, 0.05), inset 0px 1px 1px #FFFFFF
+        color: $n7
+        +dark
+            background: $n6
+            box-shadow: inset 0px -2px 1px rgba(0, 0, 0, 0.4), inset 0px 1px 1px rgba(255, 255, 255, 0.11)
+            color: $n1
+        svg
+            opacity: 1
+
+
+.iconDropdown
+    position: absolute
+    top: 6px
+    right: 5%
+    opacity: 1
