@@ -279,7 +279,9 @@ const CreatePost = ({
       currentPage: 1,
       totalPages: 1,
     });
+    setSortingBrief({});
   }, [activeTab]);
+  console.log("sortingBrief", sortingBrief);
   return (
     <>
       <Tabs value={activeTab} onChange={setActiveTab}>
@@ -517,13 +519,19 @@ const CreatePost = ({
                         width: "200px",
                       },
                     }}
-                    value={CONVERT_BRIEF_SORTINGS[sortingBrief?.value] || ""}
-                    onChange={(value) =>
-                      setSortingBrief({
-                        ...sortingBrief,
-                        value: value === BRIEF_SORTINGS[0] ? "asc" : "desc",
-                      })
+                    value={
+                      !isEmpty(sortingBrief?.value)
+                        ? CONVERT_BRIEF_SORTINGS[sortingBrief?.value]
+                        : ""
                     }
+                    onChange={(value) => {
+                      if (value) {
+                        setSortingBrief({
+                          ...sortingBrief,
+                          value: value === BRIEF_SORTINGS[0] ? "asc" : "desc",
+                        });
+                      }
+                    }}
                     clearable
                     onClear={() => {
                       setSortingBrief({});
@@ -532,6 +540,7 @@ const CreatePost = ({
 
                   <Button
                     onClick={() => {
+                      setSortingBrief({});
                       setSelectedFanpage(null);
                       setQuery({
                         date: null,
@@ -552,7 +561,6 @@ const CreatePost = ({
                         hasPost: activeTab === "createdPost" ? true : false,
                       });
                       setBatch("");
-                      setSortingBrief({});
                       setSearchSKU("");
                     }}
                   >
@@ -803,13 +811,19 @@ const CreatePost = ({
                         width: "200px",
                       },
                     }}
-                    value={CONVERT_BRIEF_SORTINGS[sortingBrief?.value] || ""}
-                    onChange={(value) =>
-                      setSortingBrief({
-                        ...sortingBrief,
-                        value: value === BRIEF_SORTINGS[0] ? "asc" : "desc",
-                      })
+                    value={
+                      !isEmpty(sortingBrief?.value)
+                        ? CONVERT_BRIEF_SORTINGS[sortingBrief?.value]
+                        : ""
                     }
+                    onChange={(value) => {
+                      if (value) {
+                        setSortingBrief({
+                          ...sortingBrief,
+                          value: value === BRIEF_SORTINGS[0] ? "asc" : "desc",
+                        });
+                      }
+                    }}
                     clearable
                     onClear={() => {
                       setSortingBrief({});

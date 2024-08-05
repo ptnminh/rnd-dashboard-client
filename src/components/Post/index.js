@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Badge,
   Button,
   Checkbox,
   CopyButton,
@@ -12,6 +13,7 @@ import {
   rem,
   Select,
   Stack,
+  Text,
   Textarea,
   TextInput,
   ThemeIcon,
@@ -30,6 +32,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useState } from "react";
 import Captions from "../Captions";
+import { CONVERT_NUMBER_TO_STATUS } from "../../utils";
 
 const Ads = ({
   sku,
@@ -324,14 +327,14 @@ const Ads = ({
                           </CopyButton>
                         </div>
                       </Group>
-                      <Group
-                        style={{
-                          width: "100%",
-                          display: "flex",
-                          alignItems: "flex-end",
-                        }}
-                      >
-                        {postId && (
+                      {postId && (
+                        <Group
+                          style={{
+                            width: "100%",
+                            display: "flex",
+                            alignItems: "flex-end",
+                          }}
+                        >
                           <TextInput
                             label="Post ID"
                             value={postId}
@@ -350,36 +353,36 @@ const Ads = ({
                               },
                             }}
                           />
-                        )}
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "5px",
-                          }}
-                        >
-                          <ActionIcon
-                            component="a"
-                            href={`https://facebook.com/${postId}`}
-                            size="lg"
-                            aria-label="Open in a new tab"
-                            onClick={() => {}}
-                            target="_blank"
+                          <div
+                            style={{
+                              display: "flex",
+                              gap: "5px",
+                            }}
                           >
-                            <IconExternalLink />
-                          </ActionIcon>
-                          <CopyButton value={postId}>
-                            {({ copied, copy }) => (
-                              <ActionIcon
-                                color={copied ? "teal" : "blue"}
-                                onClick={copy}
-                                size="lg"
-                              >
-                                <IconCopy />
-                              </ActionIcon>
-                            )}
-                          </CopyButton>
-                        </div>
-                      </Group>
+                            <ActionIcon
+                              component="a"
+                              href={`https://facebook.com/${postId}`}
+                              size="lg"
+                              aria-label="Open in a new tab"
+                              onClick={() => {}}
+                              target="_blank"
+                            >
+                              <IconExternalLink />
+                            </ActionIcon>
+                            <CopyButton value={postId}>
+                              {({ copied, copy }) => (
+                                <ActionIcon
+                                  color={copied ? "teal" : "blue"}
+                                  onClick={copy}
+                                  size="lg"
+                                >
+                                  <IconCopy />
+                                </ActionIcon>
+                              )}
+                            </CopyButton>
+                          </div>
+                        </Group>
+                      )}
 
                       <Group
                         style={{
@@ -629,6 +632,7 @@ const PostCamp = ({
   rndTeam,
   sku,
   batch,
+  value,
   ads,
   postPayloads,
   setPostPayloads,
@@ -667,7 +671,23 @@ const PostCamp = ({
       });
     });
   }, [chooseFanpage]);
-
+  let valueColor = null;
+  switch (value?.rnd) {
+    case 1:
+      valueColor = "#cfcfcf";
+      break;
+    case 2:
+      valueColor = "yellow";
+      break;
+    case 3:
+      valueColor = "green";
+      break;
+    case 4:
+      valueColor = "#38761C";
+      break;
+    default:
+      break;
+  }
   return (
     <>
       <Grid
@@ -716,7 +736,7 @@ const PostCamp = ({
             >
               {rndTeam} - {sku} - {batch}
             </Flex>
-            <Flex gap={30}>
+            <Flex gap={30} align="center">
               <Select
                 label="Page"
                 placeholder="Choose page"
@@ -749,6 +769,21 @@ const PostCamp = ({
                   });
                 }}
               />
+              <Text>
+                <span
+                  style={{
+                    fontWeight: "bold",
+                  }}
+                >
+                  Value
+                </span>
+                :{" "}
+                {
+                  <Badge color={valueColor} variant="filled">
+                    {CONVERT_NUMBER_TO_STATUS[value?.rnd]}
+                  </Badge>
+                }
+              </Text>
             </Flex>
           </Flex>
         </Grid.Col>
