@@ -1,65 +1,61 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import {
+  Autocomplete,
   Badge,
   Button,
   Flex,
+  Group,
   Image,
   Modal,
+  rem,
   Select,
-  Text,
   TextInput,
 } from "@mantine/core";
-import { modals } from "@mantine/modals";
 import Checkbox from "../../../components/Checkbox";
-import { filter, find, includes, isEmpty, keys, map } from "lodash";
-import { IconSearch, IconFilterOff } from "@tabler/icons-react";
+import { filter, find, flatMap, isEmpty, map, toNumber } from "lodash";
+import {
+  IconSearch,
+  IconFilterOff,
+  IconCurrencyDollar,
+} from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
-import { CHOOSE_BRIEF_TYPES } from "../../../constant";
+import { CREATE_CAMP_FLOWS } from "../../../constant";
 import moment from "moment-timezone";
-import {
-  CONVERT_NUMBER_TO_STATUS,
-  CONVERT_STATUS_TO_NUMBER,
-} from "../../../utils";
+import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 import { useDisclosure } from "@mantine/hooks";
-import CreatePost from "../../CreatePost";
+import RunFlows from "../RunFlows";
 
 const BriefsTable = ({
-  productLines,
+  briefs,
   name,
   query,
   setQuery,
   setSelectedSKU,
   openModal,
-  users,
-  setEditingCell,
-  setUpdateBrief,
-  updateBrief,
   loadingFetchBrief,
   setTrigger,
-  setLinkProduct,
   sorting,
   setSorting,
+  accounts,
+  setCampsPayload,
+  campsPayload,
+  sampleCampaigns,
+  openModalPreview,
+  setSelectedCreateCampPayload,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
-  const [data, setData] = useState(productLines || []);
+  const [selectedCreateCustomCamp, setSelectedCreateCustomCamp] = useState({});
+  const [data, setData] = useState(briefs || []);
   const [templateName, setTemplateName] = useState(name);
   useEffect(() => {
-    setData(productLines);
+    setData(briefs);
     setTemplateName(name);
-  }, [productLines, templateName]);
-  const handleUpdateStatus = async ({ uid, status }) => {
-    await rndServices.updateBrief({
-      uid,
-      data: {
-        status: status === 2 ? 3 : 2,
-      },
-    });
-    setTrigger(true);
-  };
+  }, [briefs, templateName]);
+
   const handleUpdatePriority = async ({ uid, priority }) => {
     await rndServices.updateBrief({
       uid,
@@ -114,7 +110,6 @@ const BriefsTable = ({
             }}
             onClick={() => {
               setSelectedSKU(row.original);
-              setLinkProduct(row.original.linkProduct);
               openModal();
             }}
           >
@@ -180,8 +175,6 @@ const BriefsTable = ({
       },
       {
         id: "adsImage",
-        // accessorFn: (row) =>
-        //   filter(row?.designInfo.adsLinks, (x) => !x.postId).length,
         header: "HÌNH ADS",
         enableEditing: false,
         enableSorting: false,
@@ -263,80 +256,240 @@ const BriefsTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
+        id: "facebookAccount",
+        header: "FB Acc",
+        enableEditing: false,
+        enableSorting: false,
+        size: 150,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["ads-image"] },
+        Cell: ({ row }) => {
+          return (
+            <Autocomplete
+              data={map(accounts, "name")}
+              placeholder="FB Account"
+              value={
+                find(campsPayload, { sku: row.original.sku })?.account?.name
+              }
+              onChange={(value) => {
+                setCampsPayload((prev) => {
+                  const payloads = map(prev, (x) => {
+                    if (x.sku === row.original.sku) {
+                      return {
+                        ...x,
+                        account: find(accounts, { name: value }),
+                      };
+                    }
+                    return x;
+                  });
+                  return payloads;
+                });
+              }}
+            />
+          );
+        },
+      },
+      {
+        id: "runFlows",
+        accessorFn: (row) => 0,
+        header: "Cách chạy",
+        enableEditing: false,
+        enableSorting: false,
+        size: 200,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["ads-image"] },
+        Cell: ({ row }) => {
+          return (
+            <Autocomplete
+              data={map(CREATE_CAMP_FLOWS, "title")}
+              placeholder="Chọn cách chạy"
+              value={find(campsPayload, { sku: row.original.sku })?.runFlow}
+              onChange={(value) => {
+                setCampsPayload((prev) => {
+                  return map(prev, (x) => {
+                    if (x.sku === row.original.sku) {
+                      return {
+                        ...x,
+                        runFlow: value,
+                      };
+                    }
+                    return x;
+                  });
+                });
+              }}
+            />
+          );
+        },
+      },
+      {
+        id: "budget",
+        accessorFn: (row) => 0,
+        header: "Budget",
+        enableEditing: false,
+        enableSorting: false,
+        size: 130,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["ads-image"] },
+        Cell: ({ row }) => {
+          return (
+            <TextInput
+              placeholder="Budget"
+              type="number"
+              size="sm"
+              styles={{
+                input: {
+                  width: "100px",
+                },
+              }}
+              leftSection={
+                <IconCurrencyDollar
+                  style={{ width: rem(16), height: rem(16) }}
+                />
+              }
+              value={find(campsPayload, { sku: row.original.sku })?.budget}
+              onChange={(event) => {
+                setCampsPayload((prev) => {
+                  return map(prev, (x) => {
+                    if (x.sku === row.original.sku) {
+                      return {
+                        ...x,
+                        budget: toNumber(event.target.value),
+                      };
+                    }
+                    return x;
+                  });
+                });
+              }}
+            />
+          );
+        },
+      },
+      {
+        id: "rootCampaign",
+        accessorFn: (row) => 0,
+        header: "Camp phôi",
+        enableEditing: false,
+        enableSorting: false,
+        size: 200,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["ads-image"] },
+        Cell: ({ row }) => {
+          return (
+            <Autocomplete
+              data={map(sampleCampaigns, (campaign) => {
+                return {
+                  group: campaign?.accountInfo?.name,
+                  items: map(campaign?.campaigns, "campaignName"),
+                };
+              })}
+              placeholder="Chọn Camp phôi"
+              value={
+                find(campsPayload, { sku: row.original.sku })?.rootCampaign
+                  ?.campaignName
+              }
+              onChange={(value) => {
+                setCampsPayload((prev) => {
+                  return map(prev, (x) => {
+                    if (x.sku === row.original.sku) {
+                      return {
+                        ...x,
+                        rootCampaign: find(
+                          flatMap(map(sampleCampaigns, "campaigns")),
+                          (camp) => {
+                            return camp?.campaignName === value;
+                          }
+                        ),
+                      };
+                    }
+                    return x;
+                  });
+                });
+              }}
+            />
+          );
+        },
+      },
+      {
         accessorKey: "createCamp",
         header: "ACTIONS",
         enableSorting: false,
+        enableEditing: false,
+        size: 300,
         mantineTableHeadCellProps: { className: classes["remove"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => {
-          const adsLinksLength = filter(
-            row?.original?.designInfo?.adsLinks,
-            (x) => !x.postId
-          ).length;
-          const videoLinksLength = filter(
-            row?.original?.designInfo?.videoLinks
-          ).length;
           return (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              {adsLinksLength === 0 && videoLinksLength === 0 ? (
-                <Button variant="filled" color="#8f959f" size="sx" disabled>
-                  DONE
-                </Button>
-              ) : (
-                <Button
-                  variant="filled"
-                  color="green"
-                  size="sx"
-                  onClick={() => {
-                    setSelectedBrief(row?.original);
-                    open();
-                  }}
-                >
-                  Lên Post
-                </Button>
-              )}
-            </div>
+            <Group>
+              <Button
+                variant="filled"
+                color="green"
+                size="sx"
+                onClick={() => {
+                  const sku = row.original.sku;
+                  const foundSKUPayload = find(campsPayload, { sku });
+                  if (isEmpty(foundSKUPayload.account)) {
+                    showNotification(
+                      "Thất bại",
+                      `Vui lòng chọn Account Facebook cho ${sku}`,
+                      "red"
+                    );
+                    return;
+                  } else if (isEmpty(foundSKUPayload.rootCampaign)) {
+                    showNotification(
+                      "Thất bại",
+                      `Vui lòng chọn Camp phôi cho ${sku}`,
+                      "red"
+                    );
+                    return;
+                  } else if (!foundSKUPayload.budget) {
+                    showNotification(
+                      "Thất bại",
+                      `Vui lòng nhập Budget cho ${sku}`,
+                      "red"
+                    );
+                    return;
+                  } else if (isEmpty(foundSKUPayload.runFlow)) {
+                    showNotification(
+                      "Thất bại",
+                      `Vui lòng chọn cách chạy cho ${sku}`,
+                      "red"
+                    );
+                    return;
+                  }
+                  setSelectedCreateCampPayload(foundSKUPayload);
+                  openModalPreview();
+                }}
+              >
+                Lên Camp
+              </Button>
+              <Button
+                variant="filled"
+                color="#BBBFC4"
+                size="sx"
+                onClick={() => {
+                  const sku = row.original.sku;
+                  const foundSKUPayload = find(campsPayload, { sku });
+                  setSelectedCreateCustomCamp(foundSKUPayload);
+                  open();
+                }}
+              >
+                Custom Camp
+              </Button>
+            </Group>
           );
         },
       },
     ],
-    [validationErrors]
+    [validationErrors, accounts, sampleCampaigns, briefs, campsPayload]
   );
 
-  //DELETE action
-  const openDeleteConfirmModal = (row) =>
-    modals.openConfirmModal({
-      title: "Are you sure you want to delete this SKU?",
-      centered: true,
-      children: (
-        <Text>
-          Are you sure you want to delete {row.original.sku}? This action cannot
-          be revert.
-        </Text>
-      ),
-      labels: { confirm: "Delete", cancel: "Cancel" },
-      confirmProps: { color: "red" },
-      onConfirm: () => handleDeleteBrief(row.original.uid),
-    });
-
-  const handleDeleteBrief = async (uid) => {
-    await rndServices.deleteBrief(uid);
-    setTrigger(true);
-  };
-
-  const [batch, setBatch] = useState("");
   const [searchSKU, setSearchSKU] = useState("");
   const [opened, { open, close }] = useDisclosure(false);
-  const [selectedBrief, setSelectedBrief] = useState(null);
+
   const table = useMantineReactTable({
     columns,
     data,
-    editDisplayMode: "cell", // ('modal', 'cell', 'table', and 'custom' are also available)
+    editDisplayMode: "cell",
     enableEditing: true,
     enablePagination: false,
     getRowId: (row) => row.id,
@@ -480,7 +633,6 @@ const BriefsTable = ({
                   statusValue: null,
                   dateValue: null,
                 });
-                setBatch("");
                 setSearchSKU("");
               }}
             >
@@ -494,30 +646,9 @@ const BriefsTable = ({
       showProgressBars: loadingFetchBrief,
       sorting,
     },
-    mantineTableBodyCellProps: ({ row, table, cell }) => ({
+    mantineTableBodyCellProps: ({ row, cell }) => ({
       className: classes["body-cells"],
-      onDoubleClick: (event) => {
-        console.log(`cell----`, cell);
-        console.info(row.original);
-        if (cell && cell.column.id === "linkProduct") {
-          setEditingCell(true);
-          table.setEditingCell(cell);
-        }
-      },
-      onClick: (event) => {
-        if (cell && cell.column.id === "status") {
-          handleUpdateStatus({
-            uid: row.original.uid,
-            status: row.original.status,
-          }).then((response) => {
-            console.log(response);
-          });
-          return;
-        }
-        if (cell && cell.column.id === "remove") {
-          openDeleteConfirmModal(row);
-          return;
-        }
+      onClick: () => {
         if (cell && cell.column.id === "priority") {
           handleUpdatePriority({
             uid: row.original.uid,
@@ -526,52 +657,6 @@ const BriefsTable = ({
             console.log(response);
           });
           return;
-        }
-      },
-      // when leaving the cell, we want to reset the editing cell
-      onBlur: (event) => {
-        if (isEmpty(updateBrief.linkDesigns)) {
-          setEditingCell(false);
-        }
-        const uidKeys = keys(updateBrief);
-        const newData = map(data, (x) => {
-          if (includes(uidKeys, x.uid)) {
-            return {
-              ...x,
-              ...updateBrief[x.uid],
-            };
-          }
-          return x;
-        });
-        const uid = uidKeys[0];
-        if (uid && updateBrief[uid] && updateBrief[uid].linkProduct) {
-          const urlPattern =
-            /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
-
-          if (!urlPattern.test(updateBrief[uid].linkProduct)) {
-            showNotification("Thất bại", "Link Design không hợp lệ", "red");
-            setUpdateBrief({
-              ...updateBrief,
-              [uid]: {
-                ...updateBrief[uid],
-                linkProduct: "",
-              },
-            });
-            table.setEditingCell(null);
-            return;
-          }
-          rndServices
-            .updateBrief({
-              uid,
-              data: updateBrief[uid],
-            })
-            .then((response) => {
-              console.log(response);
-            });
-          setData(newData);
-          table.setEditingCell(null);
-        } else {
-          table.setEditingCell(null);
         }
       },
       sx: {
@@ -584,7 +669,7 @@ const BriefsTable = ({
   return (
     <>
       <MantineReactTable table={table} />
-      {!isEmpty(selectedBrief) && (
+      {!isEmpty(selectedCreateCustomCamp) && (
         <Modal
           opened={opened}
           onClose={close}
@@ -594,13 +679,9 @@ const BriefsTable = ({
             blur: 3,
           }}
           radius="md"
-          size={"95%"}
+          size="lg"
         >
-          <CreatePost
-            brief={selectedBrief}
-            closeModalCreatePostFromBrief={close}
-            setTriggerFetchBrief={setTrigger}
-          />
+          <RunFlows selectedPayload={selectedCreateCustomCamp} />
         </Modal>
       )}
     </>

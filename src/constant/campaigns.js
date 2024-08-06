@@ -118,3 +118,18 @@ export const MAPPED_STRATEGY = {
 
 export const CTA_LINK =
   "https://adsmanager.facebook.com/adsmanager/manage/ads/edit?act=222657127518910&business_id=2266543650269835&global_scope_id=2266543650269835&nav_entry_point=am_local_scope_selector&columns=name%2Cdelivery%2Ccampaign_name%2Cbid%2Cbudget%2Clast_significant_edit%2Cattribution_setting%2Cresults%2Creach%2Cimpressions%2Ccost_per_result%2Cquality_score_organic%2Cquality_score_ectr%2Cquality_score_ecvr%2Cspend%2Cend_time%2Cschedule%2Ccreated_time&attribution_windows=default&filter_set=SEARCH_BY_CAMPAIGN_GROUP_NAME-STRING%1ECONTAIN%1E%22IT%22&selected_campaign_ids=120209308981790378&selected_ad_ids=120209308981930378&is_reload_from_account_change&breakdown_regrouping=true&nav_source=no_referrer&current_step=0";
+
+export const CREATE_CAMP_FLOWS = [
+  {
+    id: 1,
+    title: "1 camp - N post",
+  },
+  {
+    id: 2,
+    title: "1 camp hình - 1 camp video",
+  },
+  {
+    id: 3,
+    title: "1 camp - 1 post",
+  },
+];

@@ -4,7 +4,6 @@ import cn from "classnames";
 import Card from "../../components/Card";
 import Details from "./Details";
 import { map } from "lodash";
-
 import { useDisclosure } from "@mantine/hooks";
 import { IconCircleCheck } from "@tabler/icons-react";
 import {
@@ -27,23 +26,24 @@ import {
   CONVERT_NUMBER_TO_STATUS,
   getStringAsEditorState,
 } from "../../utils";
-import { rndServices } from "../../services";
-import { showNotification } from "../../utils/index";
+import { campaignServices, rndServices } from "../../services";
 import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
-import { BRIEF_TYPES, STATUS } from "../../constant";
+import { BRIEF_TYPES } from "../../constant";
 import NewDesign from "./NewDesign";
 import Clipart from "./Clipart";
 import Niche from "./Niche";
+import { accountServices } from "../../services/accounts";
+import PreviewCamps from "./PreviewCamps";
 
 const CreateCampsScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
   const queryParams = new URLSearchParams(location.search);
   const initialSearch = queryParams.get("search") || "";
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
-  const [productLines, setProductLines] = useState([]);
+  const [campsPayload, setCampsPayload] = useState([]);
+  const [briefs, setBriefs] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({
@@ -53,6 +53,7 @@ const CreateCampsScreen = () => {
   const [query, setQuery] = useState({
     statusValue: "Undone",
     status: [3],
+    hasPost: true,
   });
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
@@ -60,8 +61,18 @@ const CreateCampsScreen = () => {
   const [selectedCollection, setSelectedCollection] = useState();
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
+  const [selectedCreateCampPayload, setSelectedCreateCampPayload] = useState(
+    {}
+  );
   const [trigger, setTrigger] = useState(false);
+  const [accounts, setAccounts] = useState([]);
+  const [querySampleCampaigns, setQuerySampleCampaigns] = useState({});
+  const [sampleCampaigns, setSampleCampaigns] = useState([]);
   const [linkProduct, setLinkProduct] = useState("");
+  const [
+    openedModalPreview,
+    { open: openModalPreview, close: closeModalPreview },
+  ] = useDisclosure(false);
 
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
   const [loadingUpdateProductLink, setLoadingUpdateProductLink] =
@@ -79,7 +90,7 @@ const CreateCampsScreen = () => {
     });
     const { data, metadata } = response;
     if (data) {
-      setProductLines(
+      setBriefs(
         map(data, (x, index) => {
           return {
             ...x,
@@ -95,13 +106,33 @@ const CreateCampsScreen = () => {
           };
         })
       );
+      setCampsPayload(
+        map(data, (x) => ({
+          sku: x.sku,
+          ads: x?.designInfo?.adsLinks,
+        }))
+      );
       setPagination(metadata);
       setSelectedCollection(data[0]);
     } else {
-      setProductLines([]);
+      setBriefs([]);
     }
     setLoadingFetchBrief(false);
     setTrigger(false);
+  };
+  const fetchSampleCampaigns = async (page = 1) => {
+    const { data } = await campaignServices.fetchSampleCampaigns({
+      query: querySampleCampaigns,
+      page,
+      limit: -1,
+    });
+    setSampleCampaigns(data);
+  };
+  const fetchAccounts = async () => {
+    const { data } = await accountServices.fetchAllAccounts({
+      limit: -1,
+    });
+    setAccounts(data);
   };
   const fetchUsers = async () => {
     const { data } = await rndServices.getUsers({
@@ -116,9 +147,11 @@ const CreateCampsScreen = () => {
   useEffect(() => {
     fetchBriefs(pagination.currentPage);
   }, [search, pagination.currentPage, query, trigger, sorting]);
+  useEffect(() => {
+    fetchSampleCampaigns();
+  }, [querySampleCampaigns]);
 
   useEffect(() => {
-    // Update the URL when search or page changes
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (pagination.currentPage !== 1)
@@ -128,42 +161,9 @@ const CreateCampsScreen = () => {
 
   useEffect(() => {
     fetchUsers();
+    fetchAccounts();
   }, []);
 
-  const handleUpdateLinkProduct = async (uid) => {
-    setLoadingUpdateProductLink(true);
-    if (!linkProduct) {
-      setLoadingUpdateProductLink(false);
-      showNotification("Thất bại", "Link Product không được để trống", "red");
-      return;
-    }
-    const urlPattern =
-      /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
-    if (!urlPattern.test(linkProduct)) {
-      showNotification("Thất bại", "Link Product không hợp lệ", "red");
-      setLoadingUpdateProductLink(false);
-      return;
-    }
-    if (linkProduct) {
-      const updateResponse = await rndServices.updateBrief({
-        uid,
-        data: {
-          linkProduct,
-          status: STATUS.LISTED,
-        },
-      });
-      if (updateResponse) {
-        showNotification(
-          "Thành công",
-          "Update Link Product thành công",
-          "green"
-        );
-        await fetchBriefs(pagination.currentPage);
-      }
-    }
-    close();
-    setLoadingUpdateProductLink(false);
-  };
   return (
     <>
       <Card
@@ -175,7 +175,7 @@ const CreateCampsScreen = () => {
         <Details
           className={styles.details}
           onClose={() => setVisible(false)}
-          productLines={productLines}
+          briefs={briefs}
           name={selectedCollection?.name}
           query={query}
           setQuery={setQuery}
@@ -192,6 +192,15 @@ const CreateCampsScreen = () => {
           setLinkProduct={setLinkProduct}
           setSorting={setSorting}
           sorting={sorting}
+          accounts={accounts}
+          setCampsPayload={setCampsPayload}
+          campsPayload={campsPayload}
+          querySampleCampaigns={querySampleCampaigns}
+          setQuerySampleCampaigns={setQuerySampleCampaigns}
+          sampleCampaigns={sampleCampaigns}
+          openModalPreview={openModalPreview}
+          setSelectedCreateCampPayload={setSelectedCreateCampPayload}
+          selectedCreateCampPayload={selectedCreateCampPayload}
         />
       </Card>
       <Pagination
@@ -556,7 +565,6 @@ const CreateCampsScreen = () => {
           linkProduct={linkProduct}
           loadingUpdateProductLink={loadingUpdateProductLink}
           setLinkProduct={setLinkProduct}
-          handleUpdateLinkProduct={handleUpdateLinkProduct}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[2] && (
@@ -567,7 +575,6 @@ const CreateCampsScreen = () => {
           linkProduct={linkProduct}
           loadingUpdateProductLink={loadingUpdateProductLink}
           setLinkProduct={setLinkProduct}
-          handleUpdateLinkProduct={handleUpdateLinkProduct}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[3] && (
@@ -578,8 +585,22 @@ const CreateCampsScreen = () => {
           linkProduct={linkProduct}
           loadingUpdateProductLink={loadingUpdateProductLink}
           setLinkProduct={setLinkProduct}
-          handleUpdateLinkProduct={handleUpdateLinkProduct}
         />
+      )}
+      {true && (
+        <Modal
+          opened={openedModalPreview}
+          onClose={closeModalPreview}
+          transitionProps={{ transition: "fade", duration: 200 }}
+          overlayProps={{
+            backgroundOpacity: 0.55,
+            blur: 3,
+          }}
+          radius="md"
+          size="1000px"
+        >
+          <PreviewCamps selectedPayload={selectedCreateCampPayload} />
+        </Modal>
       )}
     </>
   );

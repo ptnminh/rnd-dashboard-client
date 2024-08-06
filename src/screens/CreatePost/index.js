@@ -101,32 +101,38 @@ const CreatePost = ({
           })
         )
       );
-      setPostPayloads(
-        flatMap(
-          compact(
-            map(data, (x) => {
-              const { designInfo } = x;
-              const ads = designInfo?.adsLinks;
-              if (isEmpty(ads)) {
-                return null;
+      const ads = flatMap(
+        compact(
+          map(data, (x) => {
+            const { designInfo } = x;
+            const ads = designInfo?.adsLinks;
+            if (isEmpty(ads)) {
+              return null;
+            }
+            const filteredAds = filter(ads, (ad) => {
+              if (activeTab === "createdPost") {
+                return ad.postId;
+              } else {
+                return !ad.postId;
               }
-              return map(ads, (ad) => ({
-                uid: ad.uid,
-                ctaLink: `https://pawfecthouse.com/${x.sku}`,
-                ...(selectedFanpage && {
-                  pageId: selectedFanpage.uid,
-                }),
-                name: ad?.postName || `${x.sku} - ${x.batch}`,
-                image: ad.value,
-                briefId: x.uid,
-                sku: x.sku,
-                postId: ad.postId,
-                caption: ad.caption,
-              }));
-            })
-          )
+            });
+            return map(filteredAds, (ad) => ({
+              uid: ad.uid,
+              ctaLink: `https://pawfecthouse.com/${x.sku}`,
+              ...(selectedFanpage && {
+                pageId: selectedFanpage.uid,
+              }),
+              name: ad?.postName || `${x.sku} - ${x.batch}`,
+              image: ad.value,
+              briefId: x.uid,
+              sku: x.sku,
+              postId: ad.postId,
+              caption: ad.caption,
+            }));
+          })
         )
       );
+      setPostPayloads(ads);
       setBriefPagination(metadata);
     } else {
       setBriefs([]);

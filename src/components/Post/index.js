@@ -36,6 +36,7 @@ import { CTA_LINK } from "../../constant";
 
 const Ads = ({
   sku,
+  type,
   postId,
   captions,
   setQueryCaption,
@@ -184,16 +185,29 @@ const Ads = ({
                   >
                     Hình Ads
                   </div>
-                  <Image
-                    src={
-                      find(postPayloads, { uid })?.image ||
-                      "/images/content/not_found_2.jpg"
-                    }
-                    alt="Post-Camp"
-                    height="100%"
-                    fit="contain"
-                    radius="md"
-                  />
+                  {type === "video" ? (
+                    <Image
+                      src={
+                        find(postPayloads, { uid })?.image ||
+                        "/images/content/not_found_2.jpg"
+                      }
+                      alt="Post-Camp"
+                      height="100%"
+                      fit="contain"
+                      radius="md"
+                    />
+                  ) : (
+                    <Image
+                      src={
+                        find(postPayloads, { uid })?.image ||
+                        "/images/content/not_found_2.jpg"
+                      }
+                      alt="Post-Camp"
+                      height="100%"
+                      fit="contain"
+                      radius="md"
+                    />
+                  )}
                 </Grid.Col>
                 <Grid.Col span={11}>
                   <Flex gap={20} wrap={true}>
@@ -802,56 +816,31 @@ const PostCamp = ({
           }}
         >
           <Stack pt="md" gap="xs">
-            {map(ads, (x, index) => (
-              <Ads
-                {...x}
-                sku={sku}
-                batch={batch}
-                captions={captions}
-                setQueryCaption={setQueryCaption}
-                handlePageChangeCaption={handlePageChangeCaption}
-                captionsPagination={captionsPagination}
-                selectedValue={selectedValue}
-                setSelectedValue={setSelectedValue}
-                setPostPayloads={setPostPayloads}
-                postPayloads={postPayloads}
-                closeModalChooseCaption={close}
-                index={index}
-                choosePosts={choosePosts}
-                setChoosePosts={setChoosePosts}
-                allProductBases={allProductBases}
-              />
-            ))}
+            {map(
+              filter(ads, (ad) => includes(map(postPayloads, "uid"), ad?.uid)),
+              (x, index) => (
+                <Ads
+                  {...x}
+                  sku={sku}
+                  batch={batch}
+                  captions={captions}
+                  setQueryCaption={setQueryCaption}
+                  handlePageChangeCaption={handlePageChangeCaption}
+                  captionsPagination={captionsPagination}
+                  selectedValue={selectedValue}
+                  setSelectedValue={setSelectedValue}
+                  setPostPayloads={setPostPayloads}
+                  postPayloads={postPayloads}
+                  closeModalChooseCaption={close}
+                  index={index}
+                  choosePosts={choosePosts}
+                  setChoosePosts={setChoosePosts}
+                  allProductBases={allProductBases}
+                />
+              )
+            )}
           </Stack>
         </Checkbox.Group>
-
-        {/* <Group
-          style={{
-            marginTop: "30px",
-            width: "100%",
-            marginBottom: "20px",
-            marginRight: "20px",
-          }}
-        >
-          <Flex
-            gap={20}
-            justify="flex-end"
-            style={{
-              width: "100%",
-            }}
-          >
-            <Button
-              variant="filled"
-              color="#646A73"
-              radius="sm"
-              onClick={() => {
-                open();
-              }}
-            >
-              Preview
-            </Button>
-          </Flex>
-        </Group> */}
       </Grid>
       <ModalPreview
         opened={opened}

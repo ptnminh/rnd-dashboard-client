@@ -8,7 +8,6 @@ import {
   ThemeIcon,
   Flex,
   TextInput,
-  Button,
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -27,7 +26,6 @@ const Clipart = ({
   linkProduct,
   loadingUpdateProductLink,
   setLinkProduct,
-  handleUpdateLinkProduct,
   opened,
 }) => {
   return (
