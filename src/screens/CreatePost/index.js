@@ -318,6 +318,7 @@ const CreatePost = ({
                     borderRadius: "10px",
                     backgroundColor: "#EFF0F1",
                   }}
+                  wrap={true}
                 >
                   <div
                     style={{
@@ -450,7 +451,7 @@ const CreatePost = ({
                     data={map(filter(users, { role: "rnd" }), "name") || []}
                     styles={{
                       input: {
-                        width: "150px",
+                        width: "100px",
                       },
                     }}
                     value={query?.rndName}
@@ -471,38 +472,11 @@ const CreatePost = ({
                     }}
                   />
                   <Select
-                    placeholder="Designer"
-                    data={
-                      map(filter(users, { role: "designer" }), "name") || []
-                    }
-                    styles={{
-                      input: {
-                        width: "120px",
-                      },
-                    }}
-                    value={query?.designerName}
-                    onChange={(value) =>
-                      setQuery({
-                        ...query,
-                        designerName: find(users, { name: value })?.name,
-                        designer: find(users, { name: value })?.uid,
-                      })
-                    }
-                    clearable
-                    onClear={() => {
-                      setQuery({
-                        ...query,
-                        designerName: null,
-                        designer: null,
-                      });
-                    }}
-                  />
-                  <Select
                     placeholder="Fanpages"
                     data={map(fanpages, "name") || []}
                     styles={{
                       input: {
-                        width: "200px",
+                        width: "150px",
                       },
                     }}
                     value={selectedFanpage?.name || ""}
@@ -516,7 +490,7 @@ const CreatePost = ({
                     data={BRIEF_SORTINGS}
                     styles={{
                       input: {
-                        width: "200px",
+                        width: "150px",
                       },
                     }}
                     value={
@@ -588,7 +562,12 @@ const CreatePost = ({
               ))}
             </Flex>
           </Card>
-          <Group justify={isEmpty(brief) ? "space-between" : "flex-end"}>
+          <Group
+            justify={isEmpty(brief) ? "space-between" : "flex-end"}
+            style={{
+              marginRight: "20px",
+            }}
+          >
             {isEmpty(brief) && (
               <Pagination
                 total={briefPagination.totalPages}
@@ -776,39 +755,13 @@ const CreatePost = ({
                       });
                     }}
                   />
-                  <Select
-                    placeholder="Designer"
-                    data={
-                      map(filter(users, { role: "designer" }), "name") || []
-                    }
-                    styles={{
-                      input: {
-                        width: "120px",
-                      },
-                    }}
-                    value={query?.designerName}
-                    onChange={(value) =>
-                      setQuery({
-                        ...query,
-                        designerName: find(users, { name: value })?.name,
-                        designer: find(users, { name: value })?.uid,
-                      })
-                    }
-                    clearable
-                    onClear={() => {
-                      setQuery({
-                        ...query,
-                        designerName: null,
-                        designer: null,
-                      });
-                    }}
-                  />
+
                   <Select
                     placeholder="Sorting"
                     data={BRIEF_SORTINGS}
                     styles={{
                       input: {
-                        width: "200px",
+                        width: "150px",
                       },
                     }}
                     value={
