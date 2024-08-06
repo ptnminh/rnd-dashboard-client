@@ -5,24 +5,18 @@ import {
   Button,
   Flex,
   Image,
+  Modal,
   Select,
   Text,
   TextInput,
 } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import Checkbox from "../../../components/Checkbox";
-
 import { filter, find, includes, isEmpty, keys, map } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
-import {
-  IconCheck,
-  IconX,
-  IconDeviceFloppy,
-  IconBan,
-} from "@tabler/icons-react";
-import { BRIEF_TYPES, CHOOSE_BRIEF_TYPES } from "../../../constant";
+import { CHOOSE_BRIEF_TYPES } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -30,8 +24,10 @@ import {
 } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
+import { useDisclosure } from "@mantine/hooks";
+import CreatePost from "../../CreatePost";
 
-const KeywordTable = ({
+const BriefsTable = ({
   productLines,
   name,
   query,
@@ -42,10 +38,9 @@ const KeywordTable = ({
   setEditingCell,
   setUpdateBrief,
   updateBrief,
-  editingCell,
   loadingFetchBrief,
   setTrigger,
-  setLinkDesign,
+  setLinkProduct,
   sorting,
   setSorting,
 }) => {
@@ -60,7 +55,7 @@ const KeywordTable = ({
     await rndServices.updateBrief({
       uid,
       data: {
-        status: status === 1 ? 2 : 1,
+        status: status === 2 ? 3 : 2,
       },
     });
     setTrigger(true);
@@ -92,16 +87,8 @@ const KeywordTable = ({
         header: "DATE",
         size: 120,
         enableEditing: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
         enableSorting: true,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-      },
-      {
-        accessorKey: "batch",
-        header: "BATCH",
-        size: 100,
-        enableEditing: false,
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         accessorKey: "sku",
@@ -127,7 +114,7 @@ const KeywordTable = ({
             }}
             onClick={() => {
               setSelectedSKU(row.original);
-              setLinkDesign(row.original.linkDesign);
+              setLinkProduct(row.original.linkProduct);
               openModal();
             }}
           >
@@ -140,7 +127,7 @@ const KeywordTable = ({
       },
       {
         accessorKey: "imageRef",
-        header: "HÌNH REF",
+        header: "HÌNH SKU",
         size: 100,
         enableEditing: false,
         enableSorting: false,
@@ -148,18 +135,14 @@ const KeywordTable = ({
         Cell: ({ row }) => (
           <Image
             radius="md"
-            src={row?.original?.imageRef || "/images/content/not_found_2.jpg"}
-            height="100%"
+            src={
+              row?.original?.designInfo?.thumbLink ||
+              "/images/content/not_found_2.jpg"
+            }
+            height={100}
             fit="contain"
           />
         ),
-      },
-      {
-        accessorKey: "briefType",
-        header: "LOẠI BRIEF",
-        enableEditing: false,
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
         accessorKey: "value",
@@ -196,130 +179,57 @@ const KeywordTable = ({
         },
       },
       {
-        accessorKey: "size",
-        header: "SIZE",
-        size: 100,
+        id: "adsImage",
+        // accessorFn: (row) =>
+        //   filter(row?.designInfo.adsLinks, (x) => !x.postId).length,
+        header: "HÌNH ADS",
         enableEditing: false,
         enableSorting: false,
+        size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
-          let color = null;
-          switch (row?.original?.size?.rnd) {
-            case 1:
-              color = "green";
-              break;
-            case 2:
-              color = "yellow";
-              break;
-            case 3:
-              color = "red";
-              break;
-            default:
-              break;
-          }
-          return color ? (
-            <Badge color={color} variant="filled">
-              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}
-            </Badge>
-          ) : (
-            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}</span>
-          );
-        },
-      },
-      {
-        accessorKey: "rndTeam",
-        header: "TEAM",
-        size: 100,
-        enableEditing: false,
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-      },
-      {
-        id: "rndName",
-        accessorFn: (row) => row?.rnd?.name,
-        header: "RND",
-        enableEditing: false,
-        enableSorting: false,
-        size: 130,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-      },
-      {
-        id: "designer",
-        accessorFn: (row) => row?.designer?.name,
-        header: "DESIGNER",
-        enableEditing: false,
-        enableSorting: false,
-        size: 130,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-      },
-      {
-        accessorKey: "linkDesign",
-        header: "LINK DESIGN",
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
-        size: 100,
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Edit: ({ row }) => {
+          const adsLinksLength = filter(
+            row?.original?.designInfo?.adsLinks,
+            (x) => !x.postId
+          ).length;
           return (
-            <TextInput
-              value={updateBrief[row.original.uid]?.linkDesign}
-              onChange={(e) => {
-                setUpdateBrief({
-                  ...updateBrief,
-                  [row.original.uid]: {
-                    ...updateBrief[row.original.uid],
-                    linkDesign: e.target.value,
-                  },
-                });
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                ...(adsLinksLength === 0 && {
+                  color: "#8f959f",
+                }),
+                fontWeight: "bold",
               }}
-            />
+            >
+              {adsLinksLength === 0 ? "DONE" : adsLinksLength}
+            </div>
           );
         },
-        Cell: ({ row }) => (
-          <a
-            style={{
-              cursor: "pointer",
-            }}
-            target="_blank"
-            href={
-              row.original.linkDesign ||
-              updateBrief[row.original.uid]?.linkDesign
-            }
-          >
-            {row.original.linkDesign ||
-            updateBrief[row.original.uid]?.linkDesign ? (
-              <Badge color="blue" variant="filled">
-                {" "}
-                <u>Link</u>{" "}
-              </Badge>
-            ) : null}
-          </a>
-        ),
       },
       {
-        accessorKey: "status",
-        header: "DONE",
-        size: 100,
+        id: "video",
+        accessorFn: (row) => 0,
+        header: "VIDEO",
+        enableEditing: false,
         enableSorting: false,
+        size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
-        Cell: (props) => {
-          const { row } = props;
+        mantineTableHeadCellProps: { className: classes["ads-image"] },
+        Cell: ({ row }) => {
           return (
-            <Button
-              variant="filled"
-              color={row.original.status === 2 ? "red" : "green"}
-              leftSection={
-                row.original.status === 2 ? <IconBan /> : <IconCheck />
-              }
-              disabled={
-                row?.original?.status === 1 &&
-                !row?.original?.linkDesign &&
-                !updateBrief[row.original.uid]?.linkDesign
-              }
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                color: "#8f959f",
+                fontWeight: "bold",
+              }}
             >
-              {row.original.status === 2 ? "Undone" : "Done"}
-            </Button>
+              DONE
+            </div>
           );
         },
       },
@@ -345,44 +255,54 @@ const KeywordTable = ({
       },
       {
         id: "time",
-        accessorFn: (row) => row?.designInfo?.time,
+        accessorFn: (row) => row?.productInfo?.time,
         header: "TIME",
-        enableSorting: true,
         mantineTableHeadCellProps: { className: classes["head-cells"] },
         enableEditing: false,
         size: 50,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
-        accessorKey: "remove",
+        accessorKey: "createCamp",
         header: "ACTIONS",
         enableSorting: false,
         mantineTableHeadCellProps: { className: classes["remove"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Edit: ({ cell, column, table }) => (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Button variant="filled" color="red">
-              <IconX />
-            </Button>
-          </div>
-        ),
-        Cell: ({ cell, column, table }) => (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Button variant="filled" color="red" size="sx">
-              <IconX />
-            </Button>
-          </div>
-        ),
+        Cell: ({ row }) => {
+          const adsLinksLength = filter(
+            row?.original?.designInfo?.adsLinks,
+            (x) => !x.postId
+          ).length;
+          const videoLinksLength = filter(
+            row?.original?.designInfo?.videoLinks
+          ).length;
+          return (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              {adsLinksLength === 0 && videoLinksLength === 0 ? (
+                <Button variant="filled" color="#8f959f" size="sx" disabled>
+                  DONE
+                </Button>
+              ) : (
+                <Button
+                  variant="filled"
+                  color="green"
+                  size="sx"
+                  onClick={() => {
+                    setSelectedBrief(row?.original);
+                    open();
+                  }}
+                >
+                  Lên Post
+                </Button>
+              )}
+            </div>
+          );
+        },
       },
     ],
     [validationErrors]
@@ -411,7 +331,8 @@ const KeywordTable = ({
 
   const [batch, setBatch] = useState("");
   const [searchSKU, setSearchSKU] = useState("");
-
+  const [opened, { open, close }] = useDisclosure(false);
+  const [selectedBrief, setSelectedBrief] = useState(null);
   const table = useMantineReactTable({
     columns,
     data,
@@ -440,10 +361,6 @@ const KeywordTable = ({
             padding: "10px 5px",
             gap: "10px",
             flexWrap: "wrap-reverse",
-            position: "sticky",
-            top: 0,
-            right: 0,
-            zIndex: 100,
           }}
         >
           <Flex
@@ -452,38 +369,8 @@ const KeywordTable = ({
               padding: "10px",
               borderRadius: "10px",
               backgroundColor: "#EFF0F1",
-              flexWrap: "wrap",
             }}
           >
-            <TextInput
-              placeholder="Batch"
-              size="sm"
-              width="100px"
-              leftSection={
-                <span
-                  onClick={() => {
-                    setQuery({ ...query, batch });
-                  }}
-                  style={{
-                    cursor: "pointer",
-                  }}
-                >
-                  <IconSearch size={16} />
-                </span>
-              }
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={batch}
-              onChange={(e) => setBatch(e.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  setQuery({ ...query, batch });
-                }
-              }}
-            />
             <TextInput
               placeholder="SKU"
               size="sm"
@@ -537,7 +424,7 @@ const KeywordTable = ({
                   date: null,
                 });
               }}
-              onShortcutClick={(shortcut, event) => {
+              onShortcutClick={(shortcut) => {
                 setQuery({
                   ...query,
                   dateValue: shortcut.value,
@@ -545,117 +432,6 @@ const KeywordTable = ({
                     startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
                     endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
                   },
-                });
-              }}
-            />
-            <Select
-              placeholder="Loại Brief"
-              data={CHOOSE_BRIEF_TYPES}
-              styles={{
-                input: {
-                  width: "150px",
-                },
-              }}
-              value={query?.briefType}
-              onChange={(value) => setQuery({ ...query, briefType: value })}
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  briefType: null,
-                });
-              }}
-            />
-            <Select
-              placeholder="Size"
-              data={["Small", "Medium", "Big"]}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={query?.sizeValue}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  size: CONVERT_STATUS_TO_NUMBER[value],
-                  sizeValue: value,
-                })
-              }
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  size: null,
-                  sizeValue: null,
-                });
-              }}
-            />
-            <Select
-              placeholder="Team"
-              data={["BD1", "BD2", "BD3", "POD-Biz"]}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={query?.rndTeam}
-              onChange={(value) => setQuery({ ...query, rndTeam: value })}
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  rndTeam: null,
-                });
-              }}
-            />
-            <Select
-              placeholder="RND"
-              data={map(filter(users, { role: "rnd" }), "name") || []}
-              styles={{
-                input: {
-                  width: "150px",
-                },
-              }}
-              value={query?.rndName}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  rndName: find(users, { name: value })?.name,
-                  rnd: find(users, { name: value })?.uid,
-                })
-              }
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  rndName: null,
-                  rnd: null,
-                });
-              }}
-            />
-            <Select
-              placeholder="Designer"
-              data={map(filter(users, { role: "designer" }), "name") || []}
-              styles={{
-                input: {
-                  width: "120px",
-                },
-              }}
-              value={query?.designerName}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  designerName: find(users, { name: value })?.name,
-                  designer: find(users, { name: value })?.uid,
-                })
-              }
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  designerName: null,
-                  designer: null,
                 });
               }}
             />
@@ -671,7 +447,7 @@ const KeywordTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  status: value === "Done" ? [2] : [1],
+                  status: value === "Done" ? [3] : [2],
                   statusValue: value,
                 })
               }
@@ -679,7 +455,7 @@ const KeywordTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [1, 2],
+                  status: [2, 3],
                   statusValue: null,
                 });
               }}
@@ -694,11 +470,13 @@ const KeywordTable = ({
                   size: null,
                   rndTeam: null,
                   rnd: null,
+                  epm: null,
                   designer: null,
-                  status: [1, 2],
+                  status: [3],
                   sizeValue: null,
                   rndName: null,
                   designerName: null,
+                  epmName: null,
                   statusValue: null,
                   dateValue: null,
                 });
@@ -709,43 +487,6 @@ const KeywordTable = ({
               <IconFilterOff />
             </Button>
           </Flex>
-          <Flex
-            style={{
-              gap: "30px",
-              padding: "10px",
-              borderRadius: "10px",
-              backgroundColor: "#EFF0F1",
-            }}
-            justify="end"
-          >
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Undone: {filter(data, { status: 1 }).length}
-            </div>
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Time to done: {filter(data, { status: 1 }).length}h
-            </div>
-          </Flex>
-          {editingCell && !isEmpty(updateBrief.linkDesigns) && (
-            <Flex>
-              <Button
-                variant="filled"
-                color="blue"
-                leftSection={<IconDeviceFloppy />}
-              >
-                Save
-              </Button>
-            </Flex>
-          )}
         </div>
       );
     },
@@ -758,7 +499,7 @@ const KeywordTable = ({
       onDoubleClick: (event) => {
         console.log(`cell----`, cell);
         console.info(row.original);
-        if (cell && cell.column.id === "linkDesign") {
+        if (cell && cell.column.id === "linkProduct") {
           setEditingCell(true);
           table.setEditingCell(cell);
         }
@@ -803,17 +544,17 @@ const KeywordTable = ({
           return x;
         });
         const uid = uidKeys[0];
-        if (uid && updateBrief[uid] && updateBrief[uid].linkDesign) {
+        if (uid && updateBrief[uid] && updateBrief[uid].linkProduct) {
           const urlPattern =
             /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
 
-          if (!urlPattern.test(updateBrief[uid].linkDesign)) {
+          if (!urlPattern.test(updateBrief[uid].linkProduct)) {
             showNotification("Thất bại", "Link Design không hợp lệ", "red");
             setUpdateBrief({
               ...updateBrief,
               [uid]: {
                 ...updateBrief[uid],
-                linkDesign: "",
+                linkProduct: "",
               },
             });
             table.setEditingCell(null);
@@ -838,10 +579,32 @@ const KeywordTable = ({
       },
     }),
     onSortingChange: setSorting,
-    enableStickyHeader: true,
   });
 
-  return <MantineReactTable table={table} />;
+  return (
+    <>
+      <MantineReactTable table={table} />
+      {!isEmpty(selectedBrief) && (
+        <Modal
+          opened={opened}
+          onClose={close}
+          transitionProps={{ transition: "fade", duration: 200 }}
+          overlayProps={{
+            backgroundOpacity: 0.55,
+            blur: 3,
+          }}
+          radius="md"
+          size={"95%"}
+        >
+          <CreatePost
+            brief={selectedBrief}
+            closeModalCreatePostFromBrief={close}
+            setTriggerFetchBrief={setTrigger}
+          />
+        </Modal>
+      )}
+    </>
+  );
 };
 
-export default KeywordTable;
+export default BriefsTable;

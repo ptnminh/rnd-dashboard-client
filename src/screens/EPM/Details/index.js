@@ -545,13 +545,13 @@ const BriefsTable = ({
                   date: null,
                 });
               }}
-              onShortcutClick={(shorcut, event) => {
+              onShortcutClick={(shortcut, event) => {
                 setQuery({
                   ...query,
-                  dateValue: shorcut.value,
+                  dateValue: shortcut.value,
                   date: {
-                    startDate: moment(shorcut.value[0]).format("YYYY-MM-DD"),
-                    endDate: moment(shorcut.value[1]).format("YYYY-MM-DD"),
+                    startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
+                    endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
                   },
                 });
               }}

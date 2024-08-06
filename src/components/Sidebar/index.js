@@ -13,7 +13,6 @@ const navigation = [
     slug: "rnd",
     icon: "diamond",
     arrowDown: true,
-    // add: true,
     pathname: "/rnd/brief",
     dropdown: [
       {
@@ -68,7 +67,7 @@ const navigation = [
         dropdown: [
           {
             title: "2.1 Dashboard",
-            pathname: "/mkt/post/dashboard",
+            pathname: "/mkt/camp/dashboard",
           },
           {
             title: "2.2 Lên Camp",

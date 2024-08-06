@@ -18,7 +18,6 @@ import {
   TextInput,
   ThemeIcon,
 } from "@mantine/core";
-import styles from "./PostCamp.module.sass";
 import { filter, find, findIndex, includes, isEmpty, map } from "lodash";
 import {
   IconCircleCheck,
@@ -33,6 +32,7 @@ import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useState } from "react";
 import Captions from "../Captions";
 import { CONVERT_NUMBER_TO_STATUS } from "../../utils";
+import { CTA_LINK } from "../../constant";
 
 const Ads = ({
   sku,
@@ -390,7 +390,15 @@ const Ads = ({
                           justifyContent: "flex-end",
                         }}
                       >
-                        <Button variant="filled" color="#646A73" radius="sm">
+                        <Button
+                          variant="filled"
+                          color="#646A73"
+                          radius="sm"
+                          onClick={() => {
+                            // redirect to CTA link
+                            window.open(CTA_LINK, "_blank");
+                          }}
+                        >
                           Gắn CTA
                         </Button>
                       </Group>

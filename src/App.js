@@ -33,6 +33,7 @@ import RootCampaign from "./screens/RootCampaign";
 import Caption from "./screens/Caption";
 import ManageAccounts from "./screens/ManageAccounts";
 import CreatePost from "./screens/CreatePost";
+import CreateCampsScreen from "./screens/CreateCamps";
 
 function App() {
   return (
@@ -171,6 +172,14 @@ function App() {
           element={
             <Page title="MKT">
               <CreatePost />
+            </Page>
+          }
+        />
+        <Route
+          path="/mkt/camp/dashboard"
+          element={
+            <Page title="MKT">
+              <CreateCampsScreen />
             </Page>
           }
         />
