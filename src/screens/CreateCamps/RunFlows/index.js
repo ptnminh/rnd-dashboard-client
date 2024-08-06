@@ -60,7 +60,6 @@ const RunFlows = ({ selectedPayload }) => {
       <Grid.Col span={12}>
         <Flex gap={8}>
           <TextInput
-            readOnly
             placeholder="Campaign Name"
             styles={{
               root: {
@@ -80,7 +79,6 @@ const RunFlows = ({ selectedPayload }) => {
             leftSection={
               <IconCurrencyDollar style={{ width: rem(16), height: rem(16) }} />
             }
-            readOnly
             placeholder="Budget"
             styles={{
               root: {

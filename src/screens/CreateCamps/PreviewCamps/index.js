@@ -125,7 +125,7 @@ const PreviewCamps = ({ selectedPayload }) => {
             <u>{selectedPayload?.sku || "AH-Q054"}</u>
           </Badge>
           <Badge color="blue" variant="filled">
-            3 Campaigns
+            {previews.length} Campaigns
           </Badge>
         </Flex>
       </Grid.Col>
