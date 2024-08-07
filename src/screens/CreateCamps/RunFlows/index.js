@@ -17,13 +17,14 @@ import {
   TextInput,
   Tooltip,
 } from "@mantine/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   IconCurrencyDollar,
   IconExternalLink,
   IconCopy,
 } from "@tabler/icons-react";
-import { filter, map } from "lodash";
+import { compact, concat, filter, includes, isEmpty, map, round } from "lodash";
+import { showNotification } from "../../../utils/index";
 const RUN_FLOWS = {
   sameCamps: "Chung Camp",
   diffCamps: "Khác Camp",
@@ -31,8 +32,71 @@ const RUN_FLOWS = {
 
 const RunFlows = ({ selectedPayload }) => {
   const [runflowValue, setRunFlowValue] = useState(RUN_FLOWS.sameCamps);
-  const [selectedAds, setSelectedAds] = useState([]);
+  const [totalBudget, setTotalBudget] = useState(null);
+  const [selectedImages, setSelectedImages] = useState([]);
   const [selectedVideos, setSelectedVideos] = useState([]);
+
+  const [payloads, setPayloads] = useState([]);
+
+  useEffect(() => {
+    if (runflowValue === RUN_FLOWS.sameCamps) {
+      const mergedSelectedAdIds = compact(
+        concat(selectedImages, selectedVideos)
+      );
+      const selectedAds = filter(selectedPayload?.ads, (x) =>
+        includes(mergedSelectedAdIds, x.uid)
+      );
+      const transformedPayloads = [
+        {
+          rootCampId: selectedPayload?.rootCampaign?.campaignId,
+          campInfo: {
+            budget: totalBudget,
+          },
+          adsInfo: map(selectedAds, (x) => ({
+            name: x.postName,
+            objectStoryId: `${x.pageId}_${x.postId}`,
+          })),
+        },
+      ];
+      setPayloads(transformedPayloads);
+    } else {
+      const mergedSelectedAdIds = compact(
+        concat(selectedImages, selectedVideos)
+      );
+      const selectedAds = filter(selectedPayload?.ads, (x) =>
+        includes(mergedSelectedAdIds, x.uid)
+      );
+      const budgetPerCamp = round(totalBudget / selectedAds.length, 0);
+      const transformedPayloads = map(selectedAds, (x) => ({
+        rootCampId: selectedPayload?.rootCampaign?.campaignId,
+        campInfo: {
+          budget: budgetPerCamp,
+        },
+        adsInfo: [
+          {
+            name: x.postName,
+            objectStoryId: `${x.pageId}_${x.postId}`,
+          },
+        ],
+      }));
+      setPayloads(transformedPayloads);
+    }
+  }, [runflowValue, selectedImages, selectedVideos, totalBudget]);
+  const handleCreateCampaign = () => {
+    if (!totalBudget) {
+      showNotification("Thất bại", "Vui lòng nhập Budget", "red");
+      return;
+    }
+    if (isEmpty(selectedImages) && isEmpty(selectedVideos)) {
+      showNotification(
+        "Thất bại",
+        "Vui lòng chọn ít nhất 1 hình hoặc 1 video",
+        "red"
+      );
+      return;
+    }
+    console.log(`payloads`, payloads);
+  };
   return (
     <Grid>
       <Grid.Col span={12}>
@@ -60,7 +124,7 @@ const RunFlows = ({ selectedPayload }) => {
       <Grid.Col span={12}>
         <Flex gap={8}>
           <TextInput
-            placeholder="Campaign Name"
+            placeholder="Root Campaign Name"
             styles={{
               root: {
                 alignItems: "center",
@@ -72,7 +136,7 @@ const RunFlows = ({ selectedPayload }) => {
                 marginBottom: "10px",
               },
             }}
-            label="Campaign Name"
+            label="Root Campaign Name"
             value={selectedPayload?.rootCampaign?.campaignName}
           />
           <NumberInput
@@ -92,7 +156,8 @@ const RunFlows = ({ selectedPayload }) => {
               },
             }}
             label="Budget"
-            value={selectedPayload?.budget}
+            value={totalBudget}
+            onChange={setTotalBudget}
           />
         </Flex>
       </Grid.Col>
@@ -111,7 +176,7 @@ const RunFlows = ({ selectedPayload }) => {
           scrollbarSize={4}
           scrollHideDelay={1000}
         >
-          <Checkbox.Group value={selectedAds} onChange={setSelectedAds}>
+          <Checkbox.Group value={selectedImages}>
             <Stack pt="md" gap="xs">
               {map(
                 filter(
@@ -121,18 +186,35 @@ const RunFlows = ({ selectedPayload }) => {
                 (item, index) => (
                   <Checkbox.Card
                     radius="md"
-                    value={item.name}
+                    value={item.uid}
                     key={index}
                     withBorder={false}
                   >
                     <Group wrap="nowrap" align="center">
-                      <Checkbox.Indicator />
+                      <Checkbox.Indicator
+                        onClick={() => {
+                          setSelectedImages((prev) => {
+                            if (includes(prev, item.uid)) {
+                              return filter(prev, (x) => x !== item.uid);
+                            }
+                            return [...prev, item.uid];
+                          });
+                        }}
+                      />
                       <Group>
                         <Image
                           src={item.value || "/images/content/not_found_2.jpg"}
                           width="80px"
                           height="80px"
                           radius="md"
+                          onClick={() => {
+                            setSelectedImages((prev) => {
+                              if (includes(prev, item.uid)) {
+                                return filter(prev, (x) => x !== item.uid);
+                              }
+                              return [...prev, item.uid];
+                            });
+                          }}
                         />
                         <Flex direction="column" gap={8}>
                           <Text size="sm">{item.postName}</Text>
@@ -187,7 +269,7 @@ const RunFlows = ({ selectedPayload }) => {
         >
           Post Video
         </Text>
-        <Checkbox.Group value={selectedVideos} onChange={setSelectedVideos}>
+        <Checkbox.Group value={selectedVideos}>
           <Stack pt="md" gap="xs">
             {map(
               filter(
@@ -209,6 +291,7 @@ const RunFlows = ({ selectedPayload }) => {
                         width="80px"
                         height="80px"
                         radius="md"
+                        onChange={setSelectedVideos}
                       />
                       <Text>{`Ad Image ${index + 1}`}</Text>
                     </Group>
@@ -221,7 +304,12 @@ const RunFlows = ({ selectedPayload }) => {
       </Grid.Col>
       <Grid.Col span={12}>
         <Flex justify="center">
-          <Button variant="filled" color="green" size="sx">
+          <Button
+            variant="filled"
+            color="green"
+            size="sx"
+            onClick={handleCreateCampaign}
+          >
             Lên Camp
           </Button>
         </Flex>

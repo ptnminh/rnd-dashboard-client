@@ -213,7 +213,7 @@ export const rndServices = {
     designer,
     status,
     date,
-    hasPost,
+    postStatus,
     epm,
     view = "design",
     sorting,
@@ -232,7 +232,7 @@ export const rndServices = {
         ...(status && { status }),
         ...(date && { startDate: date.startDate, endDate: date.endDate }),
         ...(epm && { epm }),
-        hasPost,
+        ...(postStatus && { postStatus }),
       };
       const sort = !isEmpty(sorting)
         ? {

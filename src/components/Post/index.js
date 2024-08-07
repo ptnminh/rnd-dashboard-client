@@ -68,6 +68,12 @@ const Ads = ({
       });
     });
   };
+  console.log(
+    "🚀 ~ file: index.js ~ line 47 ~ Ads ~ selectedAds",
+    find(postPayloads, {
+      uid,
+    })?.name
+  );
 
   return (
     <>
@@ -124,12 +130,11 @@ const Ads = ({
                 }}
               >
                 <TextInput
-                  placeholder="CB-M0508 - M0001 - Test1"
                   size="sm"
                   value={
                     find(postPayloads, {
                       uid,
-                    })?.name || ""
+                    })?.name || null
                   }
                   label={`Ad${index + 1}: `}
                   styles={{
@@ -675,9 +680,7 @@ const PostCamp = ({
   const [chooseFanpage, setChooseFanpage] = useState(selectedFanpage);
 
   useEffect(() => {
-    if (!isEmpty(selectedFanpage)) {
-      setChooseFanpage(selectedFanpage);
-    }
+    setChooseFanpage(selectedFanpage);
   }, [selectedFanpage]);
 
   useEffect(() => {
@@ -775,7 +778,9 @@ const PostCamp = ({
                     gap: "10px",
                   },
                 }}
-                value={chooseFanpage?.name}
+                value={
+                  !isEmpty(chooseFanpage?.name) ? chooseFanpage?.name : null
+                }
                 clearable
                 onChange={(value) => {
                   setChooseFanpage(find(fanpages, { name: value }));

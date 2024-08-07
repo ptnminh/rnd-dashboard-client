@@ -54,6 +54,7 @@ const MTKScreens = () => {
   const [query, setQuery] = useState({
     statusValue: "Undone",
     status: [3],
+    postStatus: ["partial", "unfulfilled"],
   });
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);

@@ -16,7 +16,7 @@ import PostCamp from "../../components/Post";
 import { IconFilterOff, IconSearch, IconArrowUp } from "@tabler/icons-react";
 import styles from "./CreatePost.module.sass";
 import cn from "classnames";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CONVERT_STATUS_TO_NUMBER } from "../../utils";
 import { compact, filter, find, flatMap, includes, isEmpty, map } from "lodash";
 import { captionServices, postService, rndServices } from "../../services";
@@ -31,9 +31,10 @@ const CreatePost = ({
 }) => {
   const [query, setQuery] = useState({
     status: [3],
-    hasPost: false,
+    postStatus: ["unfulfilled", "partial"],
     view: "epm",
   });
+  const hasSetChoosePosts = useRef(false);
   const [batch, setBatch] = useState("");
   const [activeTab, setActiveTab] = useState("readyPost");
   const [searchSKU, setSearchSKU] = useState("");
@@ -47,12 +48,7 @@ const CreatePost = ({
   const [captions, setCaptions] = useState([]);
   const [allProductBases, setAllProductBases] = useState([]);
   const [queryCaption, setQueryCaption] = useState({});
-  const [posts, setPosts] = useState([]);
   const [captionsPagination, setCaptionsPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-  });
-  const [postsPagination, setPostsPagination] = useState({
     currentPage: 1,
     totalPages: 1,
   });
@@ -116,13 +112,17 @@ const CreatePost = ({
                 return !ad.postId;
               }
             });
-            return map(filteredAds, (ad) => ({
+            return map(filteredAds, (ad, index) => ({
               uid: ad.uid,
               ctaLink: `https://pawfecthouse.com/${x.sku}`,
               ...(selectedFanpage && {
                 pageId: selectedFanpage.uid,
               }),
-              name: ad?.postName || `${x.sku} - ${x.batch}`,
+              name:
+                ad?.postName ||
+                `${x.sku} - ${x.batch} - ${
+                  ad.type === "image" || !ad.type ? "Image" : "Video"
+                }${index + 1}`,
               image: ad.value,
               briefId: x.uid,
               sku: x.sku,
@@ -161,16 +161,6 @@ const CreatePost = ({
     fetchFanpages();
     fetchAllProductBases();
   }, []);
-  useEffect(() => {
-    if (!isEmpty(postPayloads)) {
-      setChoosePosts(
-        map(
-          filter(postPayloads, (x) => !x.postId),
-          "uid"
-        )
-      );
-    }
-  }, [postPayloads]);
   const handleCreatePost = async () => {
     setLoadingCreatePost(true);
     const selectedPosts = filter(postPayloads, (x) =>
@@ -273,12 +263,12 @@ const CreatePost = ({
     if (activeTab === "createdPost") {
       setQuery({
         ...resetQuery,
-        hasPost: true,
+        postStatus: ["fulfilled", "partial"],
       });
     } else {
       setQuery({
         ...resetQuery,
-        hasPost: false,
+        postStatus: ["unfulfilled", "partial"],
       });
     }
     setBriefPagination({
@@ -287,7 +277,21 @@ const CreatePost = ({
     });
     setSortingBrief({});
   }, [activeTab]);
-  console.log("sortingBrief", sortingBrief);
+  useEffect(() => {
+    if (
+      !hasSetChoosePosts.current &&
+      !isEmpty(postPayloads) &&
+      activeTab === "readyPost"
+    ) {
+      setChoosePosts(
+        map(
+          filter(postPayloads, (x) => !x.postId),
+          "uid"
+        )
+      );
+      hasSetChoosePosts.current = true;
+    }
+  }, [postPayloads, activeTab]);
   return (
     <>
       <Tabs value={activeTab} onChange={setActiveTab}>
@@ -485,11 +489,14 @@ const CreatePost = ({
                         width: "150px",
                       },
                     }}
-                    value={selectedFanpage?.name || ""}
+                    value={selectedFanpage?.name || null}
                     onChange={(value) => {
                       setSelectedFanpage(find(fanpages, { name: value }));
                     }}
                     clearable
+                    onClear={() => {
+                      setSelectedFanpage(null);
+                    }}
                   />
                   <Select
                     placeholder="Sorting"
@@ -502,7 +509,7 @@ const CreatePost = ({
                     value={
                       !isEmpty(sortingBrief?.value)
                         ? CONVERT_BRIEF_SORTINGS[sortingBrief?.value]
-                        : ""
+                        : null
                     }
                     onChange={(value) => {
                       if (value) {
@@ -538,7 +545,10 @@ const CreatePost = ({
                         designerName: null,
                         statusValue: null,
                         dateValue: null,
-                        hasPost: activeTab === "createdPost" ? true : false,
+                        postStatus:
+                          activeTab === "createdPost"
+                            ? ["fulfilled", "partial"]
+                            : ["unfulfilled", "partial"],
                       });
                       setBatch("");
                       setSearchSKU("");
@@ -773,15 +783,13 @@ const CreatePost = ({
                     value={
                       !isEmpty(sortingBrief?.value)
                         ? CONVERT_BRIEF_SORTINGS[sortingBrief?.value]
-                        : ""
+                        : null
                     }
                     onChange={(value) => {
-                      if (value) {
-                        setSortingBrief({
-                          ...sortingBrief,
-                          value: value === BRIEF_SORTINGS[0] ? "asc" : "desc",
-                        });
-                      }
+                      setSortingBrief({
+                        ...sortingBrief,
+                        value: value === BRIEF_SORTINGS[0] ? "asc" : "desc",
+                      });
                     }}
                     clearable
                     onClear={() => {
@@ -808,11 +816,14 @@ const CreatePost = ({
                         designerName: null,
                         statusValue: null,
                         dateValue: null,
-                        hasPost: activeTab === "createdPost" ? true : false,
+                        postStatus:
+                          activeTab === "createdPost"
+                            ? ["fulfilled", "partial"]
+                            : ["unfulfilled", "partial"],
                       });
                       setBatch("");
                       setSearchSKU("");
-                      setSortingBrief({});
+                      setSortingBrief(null);
                     }}
                   >
                     <IconFilterOff />

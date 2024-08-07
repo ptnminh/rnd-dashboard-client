@@ -622,7 +622,10 @@ const BriefsTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  status: value === "Done" ? [3] : [2],
+                  postStatus:
+                    value === "Done"
+                      ? ["fulfilled"]
+                      : ["partial", "unfulfilled"],
                   statusValue: value,
                 })
               }
@@ -630,7 +633,7 @@ const BriefsTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [2, 3],
+                  postStatus: ["fulfilled", "partial", "unfulfilled"],
                   statusValue: null,
                 });
               }}
@@ -648,6 +651,7 @@ const BriefsTable = ({
                   epm: null,
                   designer: null,
                   status: [3],
+                  postStatus: ["fulfilled", "partial", "unfulfilled"],
                   sizeValue: null,
                   rndName: null,
                   designerName: null,

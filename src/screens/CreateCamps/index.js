@@ -53,7 +53,7 @@ const CreateCampsScreen = () => {
   const [query, setQuery] = useState({
     statusValue: "Undone",
     status: [3],
-    hasPost: true,
+    postStatus: ["fulfilled"],
   });
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);

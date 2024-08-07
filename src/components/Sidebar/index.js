@@ -66,12 +66,12 @@ const navigation = [
         arrowDown: true,
         dropdown: [
           {
-            title: "2.1 Dashboard",
+            title: "2.1 Tạo",
             pathname: "/mkt/camp/dashboard",
           },
           {
-            title: "2.2 Lên Camp",
-            pathname: "/mkt/post/create",
+            title: "2.2 Đã tạo",
+            pathname: "/mkt/camp/created",
           },
         ],
       },

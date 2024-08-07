@@ -13,7 +13,17 @@ import {
   TextInput,
 } from "@mantine/core";
 import Checkbox from "../../../components/Checkbox";
-import { filter, find, flatMap, isEmpty, map, toNumber } from "lodash";
+import {
+  cloneDeep,
+  compact,
+  filter,
+  find,
+  flatMap,
+  isEmpty,
+  map,
+  omit,
+  toNumber,
+} from "lodash";
 import {
   IconSearch,
   IconFilterOff,
@@ -175,7 +185,7 @@ const BriefsTable = ({
       },
       {
         id: "adsImage",
-        header: "HÌNH ADS",
+        header: "POST HÌNH",
         enableEditing: false,
         enableSorting: false,
         size: 130,
@@ -184,7 +194,7 @@ const BriefsTable = ({
         Cell: ({ row }) => {
           const adsLinksLength = filter(
             row?.original?.designInfo?.adsLinks,
-            (x) => !x.postId
+            (x) => x.postId && (x.type === "image" || !x.type)
           ).length;
           return (
             <div
@@ -197,21 +207,24 @@ const BriefsTable = ({
                 fontWeight: "bold",
               }}
             >
-              {adsLinksLength === 0 ? "DONE" : adsLinksLength}
+              {adsLinksLength}
             </div>
           );
         },
       },
       {
         id: "video",
-        accessorFn: (row) => 0,
-        header: "VIDEO",
+        header: "POST VIDEO",
         enableEditing: false,
         enableSorting: false,
         size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
+          const adsLinksLength = filter(
+            row?.original?.designInfo?.adsLinks,
+            (x) => x.postId && x.type === "video"
+          ).length;
           return (
             <div
               style={{
@@ -221,7 +234,7 @@ const BriefsTable = ({
                 fontWeight: "bold",
               }}
             >
-              DONE
+              {adsLinksLength}
             </div>
           );
         },
@@ -269,7 +282,8 @@ const BriefsTable = ({
               data={map(accounts, "name")}
               placeholder="FB Account"
               value={
-                find(campsPayload, { sku: row.original.sku })?.account?.name
+                find(campsPayload, { sku: row.original.sku })?.account?.name ||
+                null
               }
               onChange={(value) => {
                 setCampsPayload((prev) => {
@@ -300,10 +314,12 @@ const BriefsTable = ({
         mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
           return (
-            <Autocomplete
+            <Select
               data={map(CREATE_CAMP_FLOWS, "title")}
               placeholder="Chọn cách chạy"
-              value={find(campsPayload, { sku: row.original.sku })?.runFlow}
+              value={
+                find(campsPayload, { sku: row.original.sku })?.runFlow || null
+              }
               onChange={(value) => {
                 setCampsPayload((prev) => {
                   return map(prev, (x) => {
@@ -312,6 +328,18 @@ const BriefsTable = ({
                         ...x,
                         runFlow: value,
                       };
+                    }
+                    return x;
+                  });
+                });
+              }}
+              clearable
+              onClear={() => {
+                setCampsPayload((prev) => {
+                  return map(prev, (x) => {
+                    if (x.sku === row.original.sku) {
+                      const newPayload = omit(x, ["runFlow"]);
+                      return newPayload;
                     }
                     return x;
                   });
@@ -376,12 +404,31 @@ const BriefsTable = ({
         Cell: ({ row }) => {
           return (
             <Autocomplete
-              data={map(sampleCampaigns, (campaign) => {
-                return {
-                  group: campaign?.accountInfo?.name,
-                  items: map(campaign?.campaigns, "campaignName"),
-                };
-              })}
+              data={
+                compact(
+                  map(sampleCampaigns, (campaign) => {
+                    const foundAccountId = find(campsPayload, {
+                      sku: row.original.sku,
+                    })?.account?.uid;
+                    if (
+                      foundAccountId &&
+                      foundAccountId !== campaign?.accountInfo?.uid
+                    ) {
+                      return null;
+                    }
+                    return {
+                      group: campaign?.accountInfo?.name,
+                      items: map(campaign?.campaigns, "campaignName"),
+                    };
+                  })
+                ) ||
+                map(sampleCampaigns, (campaign) => {
+                  return {
+                    group: campaign?.accountInfo?.name,
+                    items: map(campaign?.campaigns, "campaignName"),
+                  };
+                })
+              }
               placeholder="Chọn Camp phôi"
               value={
                 find(campsPayload, { sku: row.original.sku })?.rootCampaign
@@ -469,6 +516,21 @@ const BriefsTable = ({
                 onClick={() => {
                   const sku = row.original.sku;
                   const foundSKUPayload = find(campsPayload, { sku });
+                  if (isEmpty(foundSKUPayload.account)) {
+                    showNotification(
+                      "Thất bại",
+                      `Vui lòng chọn Account Facebook cho ${sku}`,
+                      "red"
+                    );
+                    return;
+                  } else if (isEmpty(foundSKUPayload.rootCampaign)) {
+                    showNotification(
+                      "Thất bại",
+                      `Vui lòng chọn Camp phôi cho ${sku}`,
+                      "red"
+                    );
+                    return;
+                  }
                   setSelectedCreateCustomCamp(foundSKUPayload);
                   open();
                 }}
@@ -585,31 +647,6 @@ const BriefsTable = ({
                     startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
                     endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
                   },
-                });
-              }}
-            />
-            <Select
-              placeholder="Status"
-              data={["Done", "Undone"]}
-              styles={{
-                input: {
-                  width: "120px",
-                },
-              }}
-              value={query?.statusValue}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  status: value === "Done" ? [3] : [2],
-                  statusValue: value,
-                })
-              }
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  status: [2, 3],
-                  statusValue: null,
                 });
               }}
             />
