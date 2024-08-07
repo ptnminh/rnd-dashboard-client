@@ -23,6 +23,30 @@ export const campaignServices = {
       return false;
     }
   },
+  fetchCampaigns: async ({ page, limit, query }) => {
+    try {
+      let url = `${hostAPI}/campaigns?page=${page}&pageSize=${limit}`;
+      const queryKeys = keys(query);
+      const transformedQuery = filter(queryKeys, (key) => query[key]);
+      if (!isEmpty(transformedQuery)) {
+        const queryString = `filter=${encodeURIComponent(
+          JSON.stringify({
+            ...query,
+          })
+        )}`;
+        url = `${url}&${queryString}`;
+      }
+      const response = await axios.get(url);
+      const { data: result } = response;
+      if (result?.success === false) {
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at fetchProductLines:", error);
+      return false;
+    }
+  },
   getCampaignHistories: async ({ search, page }) => {
     try {
       const response = await axios.post(`${hostAPI}/api/campaigns/histories`, {

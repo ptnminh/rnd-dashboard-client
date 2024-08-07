@@ -1,28 +1,16 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import {
-  Autocomplete,
   Badge,
   Button,
   Flex,
-  Group,
   Image,
   rem,
   Select,
   Text,
   TextInput,
 } from "@mantine/core";
-import Checkbox from "../../../components/Checkbox";
-import {
-  compact,
-  filter,
-  find,
-  flatMap,
-  isEmpty,
-  keys,
-  map,
-  toNumber,
-} from "lodash";
+import { keys, map, toNumber } from "lodash";
 import {
   IconSearch,
   IconFilterOff,
@@ -30,15 +18,12 @@ import {
 } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
-import { CREATE_CAMP_FLOWS } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
 } from "../../../utils";
 import { rndServices } from "../../../services";
-import { showNotification } from "../../../utils/index";
-import { useDisclosure } from "@mantine/hooks";
 
 const CampaignsTable = ({
   campaigns,
@@ -78,7 +63,7 @@ const CampaignsTable = ({
         mantineTableHeadCellProps: {
           align: "right",
         },
-        size: 50, //small column
+        size: 50,
         header: "NO",
         enableEditing: false,
         enableSorting: false,
@@ -86,6 +71,7 @@ const CampaignsTable = ({
       },
       {
         accessorKey: "date",
+        accessorFn: (row) => moment(row?.date).format("DD/MM/YYYY"),
         header: "DATE",
         size: 120,
         enableEditing: false,
@@ -101,7 +87,7 @@ const CampaignsTable = ({
         enableSorting: false,
       },
       {
-        accessorKey: "postName",
+        accessorKey: "adsName",
         header: "AD",
         size: 120,
         enableEditing: false,
@@ -133,7 +119,7 @@ const CampaignsTable = ({
           >
             <Badge color="blue" variant="filled">
               {" "}
-              <u>{row.original.sku}</u>{" "}
+              <u>{row?.original?.briefInfo?.sku}</u>{" "}
             </Badge>
           </div>
         ),
@@ -149,7 +135,7 @@ const CampaignsTable = ({
           <Image
             radius="md"
             src={
-              row?.original?.designInfo?.thumbLink ||
+              row?.original?.briefInfo?.designInfo?.thumbLink ||
               "/images/content/not_found_2.jpg"
             }
             height={100}
@@ -166,7 +152,7 @@ const CampaignsTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => {
           let color = null;
-          switch (row?.original?.value?.rnd) {
+          switch (row?.original?.briefInfo?.value?.rnd) {
             case 1:
               color = "#cfcfcf";
               break;
@@ -184,15 +170,18 @@ const CampaignsTable = ({
           }
           return color ? (
             <Badge color={color} variant="filled">
-              {CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}
+              {CONVERT_NUMBER_TO_STATUS[row?.original?.briefInfo?.value?.rnd]}
             </Badge>
           ) : (
-            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}</span>
+            <span>
+              {CONVERT_NUMBER_TO_STATUS[row?.original?.briefInfo?.value?.rnd]}
+            </span>
           );
         },
       },
       {
         accessorKey: "rndTeam",
+        accessorFn: (row) => row?.briefInfo?.rndTeam,
         header: "TEAM",
         size: 100,
         enableEditing: false,
@@ -213,6 +202,7 @@ const CampaignsTable = ({
               cursor: "pointer",
             }}
             target="_blank"
+            href={row?.original?.linkAds}
           >
             <Badge color="blue" variant="filled">
               {" "}
@@ -223,7 +213,6 @@ const CampaignsTable = ({
       },
       {
         id: "budget",
-        accessorFn: (row) => 0,
         header: "BUDGET",
         enableEditing: false,
         enableSorting: false,
@@ -246,7 +235,7 @@ const CampaignsTable = ({
                   style={{ width: rem(16), height: rem(16) }}
                 />
               }
-              value={find(campsPayload, { sku: row.original.sku })?.budget}
+              value={row?.original?.budget}
               onChange={(event) => {
                 setCampsPayload((prev) => {
                   return map(prev, (x) => {

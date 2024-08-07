@@ -33,7 +33,6 @@ const CreatedCampsScreen = () => {
     postStatus: ["fulfilled"],
   });
   const [sorting, setSorting] = useState([]);
-  const [opened, { open, close }] = useDisclosure(false);
   const [selectedCollection, setSelectedCollection] = useState();
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
@@ -45,38 +44,19 @@ const CreatedCampsScreen = () => {
 
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
 
-  const fetchBriefs = async (page = 1) => {
+  const fetchCampaigns = async (page = 1) => {
     setLoadingFetchBrief(true);
-    const response = await rndServices.fetchBriefs({
+    const response = await campaignServices.fetchCampaigns({
       search,
       page,
-      limit: 30,
-      view: "epm",
-      sorting,
-      ...query,
+      query,
     });
     const { data, metadata } = response;
     if (data) {
       setCampaigns(
-        map(data, (x, index) => {
-          return {
-            ...x,
-            id: index + 1,
-            date: moment(x.createdAt)
-              .tz("Asia/Ho_Chi_Minh")
-              .format("DD/MM/YYYY"),
-            time: Math.floor(
-              moment()
-                .tz("Asia/Ho_Chi_Minh")
-                .diff(moment(x.createdAt), "hours", true)
-            ),
-          };
-        })
-      );
-      setCampsPayload(
-        map(data, (x) => ({
-          sku: x.sku,
-          ads: x?.designInfo?.adsLinks,
+        map(data, (x, index) => ({
+          ...x,
+          id: index + 1,
         }))
       );
       setPagination(metadata);
@@ -112,7 +92,7 @@ const CreatedCampsScreen = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   useEffect(() => {
-    fetchBriefs(pagination.currentPage);
+    fetchCampaigns(pagination.currentPage);
   }, [search, pagination.currentPage, query, trigger, sorting]);
   useEffect(() => {
     fetchSampleCampaigns();
@@ -146,7 +126,6 @@ const CreatedCampsScreen = () => {
           name={selectedCollection?.name}
           query={query}
           setQuery={setQuery}
-          openModal={open}
           users={users}
           setUpdateBrief={setUpdateBrief}
           updateBrief={updateBrief}
