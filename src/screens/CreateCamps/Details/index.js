@@ -18,6 +18,7 @@ import {
   filter,
   find,
   flatMap,
+  includes,
   isEmpty,
   map,
   omit,
@@ -27,6 +28,7 @@ import {
   IconSearch,
   IconFilterOff,
   IconCurrencyDollar,
+  IconX,
 } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
@@ -276,14 +278,32 @@ const BriefsTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
+          const accountValue =
+            find(campsPayload, { sku: row.original.sku })?.account?.name || "";
           return (
             <Autocomplete
               data={map(accounts, "name")}
               placeholder="FB Account"
-              value={
-                find(campsPayload, { sku: row.original.sku })?.account?.name ||
-                null
+              rightSection={
+                accountValue && (
+                  <IconX
+                    size={14}
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setCampsPayload((prevCampsPayload) =>
+                        prevCampsPayload.map((prev) =>
+                          prev.sku === row.original.sku
+                            ? omit(prev, ["account"])
+                            : prev
+                        )
+                      );
+                    }}
+                  />
+                )
               }
+              value={accountValue}
               onChange={(value) => {
                 setCampsPayload((prev) => {
                   const payloads = map(prev, (x) => {
@@ -304,7 +324,6 @@ const BriefsTable = ({
       },
       {
         id: "runFlows",
-        accessorFn: (row) => 0,
         header: "Cách chạy",
         enableEditing: false,
         enableSorting: false,
@@ -401,6 +420,9 @@ const BriefsTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
+          const rootCampaignValue =
+            find(campsPayload, { sku: row.original.sku })?.rootCampaign
+              ?.campaignName || "";
           return (
             <Autocomplete
               data={
@@ -428,11 +450,27 @@ const BriefsTable = ({
                   };
                 })
               }
-              placeholder="Chọn Camp phôi"
-              value={
-                find(campsPayload, { sku: row.original.sku })?.rootCampaign
-                  ?.campaignName
+              rightSection={
+                rootCampaignValue && (
+                  <IconX
+                    size={14}
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setCampsPayload((prevCampsPayload) =>
+                        prevCampsPayload.map((prev) =>
+                          prev.sku === row.original.sku
+                            ? omit(prev, ["rootCampaign"])
+                            : prev
+                        )
+                      );
+                    }}
+                  />
+                )
               }
+              placeholder="Chọn Camp phôi"
+              value={rootCampaignValue}
               onChange={(value) => {
                 setCampsPayload((prev) => {
                   return map(prev, (x) => {
@@ -450,6 +488,27 @@ const BriefsTable = ({
                     return x;
                   });
                 });
+              }}
+              onOptionSubmit={(value) => {
+                const sku = row.original.sku;
+                const foundSKU = find(campsPayload, { sku });
+                if (isEmpty(foundSKU.account)) {
+                  const accountId = find(sampleCampaigns, (campaign) =>
+                    includes(map(campaign.campaigns, "campaignName"), value)
+                  )?.accountId;
+                  const foundAccount = find(accounts, { uid: accountId });
+                  setCampsPayload((prev) => {
+                    return map(prev, (x) => {
+                      if (x.sku === sku) {
+                        return {
+                          ...x,
+                          account: foundAccount,
+                        };
+                      }
+                      return x;
+                    });
+                  });
+                }
               }}
             />
           );

@@ -27,7 +27,7 @@ import PageList from "./screens/PageList";
 import DesignerScreens from "./screens/Designer";
 import EPMScreens from "./screens/EPM";
 import { ProductLine } from "./screens/ProductLine";
-import MKTScreens from "./screens/Marketing";
+import { CreateWaitingPosts, MKTScreens } from "./screens/Marketing";
 import DesignerFeedbackScreens from "./screens/DesignerFeedback";
 import RootCampaign from "./screens/RootCampaign";
 import Caption from "./screens/Caption";
@@ -164,7 +164,7 @@ function App() {
           path="/mkt/post/dashboard"
           element={
             <Page title="MKT">
-              <MKTScreens />
+              <CreateWaitingPosts />
             </Page>
           }
         />

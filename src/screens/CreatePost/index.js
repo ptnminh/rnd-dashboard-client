@@ -5,6 +5,7 @@ import {
   Flex,
   Group,
   Pagination,
+  Progress,
   rem,
   Select,
   Tabs,
@@ -59,6 +60,8 @@ const CreatePost = ({
     currentPage: 1,
     totalPages: 1,
   });
+  const [progressValue, setProgressValue] = useState(50);
+
   const handleChangePage = (page) => {
     setBriefPagination({ ...briefPagination, currentPage: page });
   };
@@ -70,6 +73,10 @@ const CreatePost = ({
   };
   const fetchBriefs = async (page) => {
     setLoadingFetchBrief(true);
+    setProgressValue(0); // Start at 0%
+
+    // Simulate a short delay to show progress
+    setTimeout(() => setProgressValue(50), 100); // Set to 50% after request is sent
     const response = await rndServices.fetchBriefs({
       page,
       limit: 10,
@@ -139,6 +146,7 @@ const CreatePost = ({
       setBriefPagination({ currentPage: 1, totalPages: 1 });
     }
     setLoadingFetchBrief(false);
+    setProgressValue(100); // Set to 100% when request completes
   };
   const fetchFanpages = async () => {
     const { data } = await postService.fetchFanpages({
@@ -294,6 +302,15 @@ const CreatePost = ({
   }, [postPayloads, activeTab]);
   return (
     <>
+      {progressValue < 100 && (
+        <Progress
+          value={progressValue}
+          size="sm"
+          transitionDuration={200}
+          striped
+          animated
+        />
+      )}
       <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
           <Tabs.Tab value="readyPost">Ready Post</Tabs.Tab>
@@ -301,7 +318,6 @@ const CreatePost = ({
             <Tabs.Tab value="createdPost">Created Post</Tabs.Tab>
           )}
         </Tabs.List>
-
         <Tabs.Panel value="readyPost">
           <Card
             className={cn(styles.card, styles.clipArtCard)}
@@ -414,27 +430,27 @@ const CreatePost = ({
                     }}
                   />
                   <Select
-                    placeholder="Size"
-                    data={["Small", "Medium", "Big"]}
+                    placeholder="Value"
+                    data={["Small", "Medium", "Big", "Super Big"]}
                     styles={{
                       input: {
                         width: "100px",
                       },
                     }}
-                    value={query?.sizeValue}
+                    value={query?.valueName}
                     onChange={(value) =>
                       setQuery({
                         ...query,
-                        size: CONVERT_STATUS_TO_NUMBER[value],
-                        sizeValue: value,
+                        value: CONVERT_STATUS_TO_NUMBER[value],
+                        valueName: value,
                       })
                     }
                     clearable
                     onClear={() => {
                       setQuery({
                         ...query,
-                        size: null,
-                        sizeValue: null,
+                        value: null,
+                        valueName: null,
                       });
                     }}
                   />
@@ -540,7 +556,8 @@ const CreatePost = ({
                         rnd: null,
                         designer: null,
                         status: [3],
-                        sizeValue: null,
+                        valueName: null,
+                        value: null,
                         rndName: null,
                         designerName: null,
                         statusValue: null,
@@ -705,27 +722,27 @@ const CreatePost = ({
                     }}
                   />
                   <Select
-                    placeholder="Size"
-                    data={["Small", "Medium", "Big"]}
+                    placeholder="Value"
+                    data={["Small", "Medium", "Big", "Super Big"]}
                     styles={{
                       input: {
                         width: "100px",
                       },
                     }}
-                    value={query?.sizeValue}
+                    value={query?.valueName}
                     onChange={(value) =>
                       setQuery({
                         ...query,
-                        size: CONVERT_STATUS_TO_NUMBER[value],
-                        sizeValue: value,
+                        value: CONVERT_STATUS_TO_NUMBER[value],
+                        valueName: value,
                       })
                     }
                     clearable
                     onClear={() => {
                       setQuery({
                         ...query,
-                        size: null,
-                        sizeValue: null,
+                        value: null,
+                        valueName: null,
                       });
                     }}
                   />
@@ -807,7 +824,8 @@ const CreatePost = ({
                         sku: "",
                         view: "epm",
                         briefType: null,
-                        size: null,
+                        valueName: null,
+                        value: null,
                         rndTeam: null,
                         rnd: null,
                         designer: null,

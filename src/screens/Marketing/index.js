@@ -37,7 +37,7 @@ import Clipart from "./Clipart";
 import Niche from "./Niche";
 import CreateCampsScreen from "../CreateCamps";
 
-const CreatePosts = () => {
+export const CreateWaitingPosts = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -601,7 +601,7 @@ const CreatePosts = () => {
   );
 };
 
-const MTKScreens = () => {
+export const MKTScreens = () => {
   const [activeTab, setActiveTab] = useState("post");
   return (
     <Tabs value={activeTab} onChange={setActiveTab}>
@@ -610,7 +610,7 @@ const MTKScreens = () => {
         <Tabs.Tab value="camp">Camp</Tabs.Tab>
       </Tabs.List>
       <Tabs.Panel value="post">
-        <CreatePosts />
+        <CreateWaitingPosts />
       </Tabs.Panel>
       <Tabs.Panel value="camp">
         <CreateCampsScreen />
@@ -618,5 +618,3 @@ const MTKScreens = () => {
     </Tabs>
   );
 };
-
-export default MTKScreens;
