@@ -108,6 +108,9 @@ const CreateCampsScreen = () => {
       );
       setCampsPayload(
         map(data, (x) => ({
+          batch: x.batch,
+          briefId: x.uid,
+          team: x.rndTeam,
           sku: x.sku,
           ads: x?.designInfo?.adsLinks,
         }))

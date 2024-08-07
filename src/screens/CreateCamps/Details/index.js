@@ -279,7 +279,7 @@ const BriefsTable = ({
         mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
           const accountValue =
-            find(campsPayload, { sku: row.original.sku })?.account?.name || "";
+            find(campsPayload, { sku: row.original.sku })?.accountName || "";
           return (
             <Autocomplete
               data={map(accounts, "name")}
@@ -295,7 +295,7 @@ const BriefsTable = ({
                       setCampsPayload((prevCampsPayload) =>
                         prevCampsPayload.map((prev) =>
                           prev.sku === row.original.sku
-                            ? omit(prev, ["account"])
+                            ? omit(prev, ["account", "accountName"])
                             : prev
                         )
                       );
@@ -311,6 +311,7 @@ const BriefsTable = ({
                       return {
                         ...x,
                         account: find(accounts, { name: value }),
+                        accountName: value,
                       };
                     }
                     return x;
@@ -412,7 +413,6 @@ const BriefsTable = ({
       },
       {
         id: "rootCampaign",
-        accessorFn: (row) => 0,
         header: "Camp phôi",
         enableEditing: false,
         enableSorting: false,
@@ -421,8 +421,8 @@ const BriefsTable = ({
         mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
           const rootCampaignValue =
-            find(campsPayload, { sku: row.original.sku })?.rootCampaign
-              ?.campaignName || "";
+            find(campsPayload, { sku: row.original.sku })?.rootCampaignName ||
+            "";
           return (
             <Autocomplete
               data={
@@ -461,7 +461,7 @@ const BriefsTable = ({
                       setCampsPayload((prevCampsPayload) =>
                         prevCampsPayload.map((prev) =>
                           prev.sku === row.original.sku
-                            ? omit(prev, ["rootCampaign"])
+                            ? omit(prev, ["rootCampaign", "rootCampaignName"])
                             : prev
                         )
                       );
@@ -483,6 +483,7 @@ const BriefsTable = ({
                             return camp?.campaignName === value;
                           }
                         ),
+                        rootCampaignName: value,
                       };
                     }
                     return x;
@@ -554,7 +555,9 @@ const BriefsTable = ({
                     );
                     return;
                   }
-                  setSelectedCreateCampPayload(foundSKUPayload);
+                  setSelectedCreateCampPayload(
+                    omit(foundSKUPayload, ["accountName", "rootCampaignName"])
+                  );
                   openModalPreview();
                 }}
               >
@@ -575,7 +578,9 @@ const BriefsTable = ({
                     );
                     return;
                   }
-                  setSelectedCreateCustomCamp(foundSKUPayload);
+                  setSelectedCreateCustomCamp(
+                    omit(foundSKUPayload, ["accountName", "rootCampaignName"])
+                  );
                   open();
                 }}
               >

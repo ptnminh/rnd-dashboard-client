@@ -25,6 +25,7 @@ import {
 } from "@tabler/icons-react";
 import { compact, concat, filter, includes, isEmpty, map, round } from "lodash";
 import { showNotification } from "../../../utils/index";
+import { campaignServices } from "../../../services";
 const RUN_FLOWS = {
   sameCamps: "Chung Camp",
   diffCamps: "Khác Camp",
@@ -34,6 +35,7 @@ const RunFlows = ({ selectedPayload }) => {
   const [runflowValue, setRunFlowValue] = useState(RUN_FLOWS.sameCamps);
   const [totalBudget, setTotalBudget] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [loadingCreateCampaign, setLoadingCreateCampaign] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState([]);
 
   const [payloads, setPayloads] = useState([]);
@@ -48,13 +50,16 @@ const RunFlows = ({ selectedPayload }) => {
       );
       const transformedPayloads = [
         {
+          briefId: selectedPayload?.briefId,
           rootCampId: selectedPayload?.rootCampaign?.campaignId,
           campInfo: {
             budget: totalBudget,
+            name: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch} - Test1`,
           },
           adsInfo: map(selectedAds, (x) => ({
             name: x.postName,
-            objectStoryId: `${x.pageId}_${x.postId}`,
+            // objectStoryId: `${x.pageId}_${x.postId}`,
+            objectStoryId: `102286709170123_483748387740655`,
           })),
         },
       ];
@@ -67,22 +72,28 @@ const RunFlows = ({ selectedPayload }) => {
         includes(mergedSelectedAdIds, x.uid)
       );
       const budgetPerCamp = round(totalBudget / selectedAds.length, 0);
-      const transformedPayloads = map(selectedAds, (x) => ({
+      const transformedPayloads = map(selectedAds, (x, index) => ({
+        briefId: selectedPayload?.briefId,
         rootCampId: selectedPayload?.rootCampaign?.campaignId,
         campInfo: {
+          name: `${selectedPayload.team} - ${selectedPayload.sku} - ${
+            selectedPayload.batch
+          } - Test${index + 1}`,
           budget: budgetPerCamp,
         },
         adsInfo: [
           {
             name: x.postName,
-            objectStoryId: `${x.pageId}_${x.postId}`,
+            // objectStoryId: `${x.pageId}_${x.postId}`,
+            objectStoryId: `102286709170123_483748387740655`,
           },
         ],
       }));
       setPayloads(transformedPayloads);
     }
   }, [runflowValue, selectedImages, selectedVideos, totalBudget]);
-  const handleCreateCampaign = () => {
+  const handleCreateCampaign = async () => {
+    setLoadingCreateCampaign(true);
     if (!totalBudget) {
       showNotification("Thất bại", "Vui lòng nhập Budget", "red");
       return;
@@ -95,7 +106,16 @@ const RunFlows = ({ selectedPayload }) => {
       );
       return;
     }
+    const createCampResponse = await campaignServices.createCamps({
+      payloads,
+    });
+    if (!createCampResponse) {
+      setLoadingCreateCampaign(false);
+      return;
+    }
+    showNotification("Thành công", "Tạo Campaign thành công", "green");
     console.log(`payloads`, payloads);
+    setLoadingCreateCampaign(false);
   };
   return (
     <Grid>
@@ -309,6 +329,7 @@ const RunFlows = ({ selectedPayload }) => {
             color="green"
             size="sx"
             onClick={handleCreateCampaign}
+            loading={loadingCreateCampaign}
           >
             Lên Camp
           </Button>

@@ -20,34 +20,41 @@ import {
   IconCopy,
   IconExternalLink,
 } from "@tabler/icons-react";
-import { groupBy, isEmpty, keys, map } from "lodash";
+import { groupBy, isEmpty, keys, map, round } from "lodash";
 import { useEffect, useState } from "react";
 import { CREATE_CAMP_FLOWS } from "../../../constant";
+import { campaignServices } from "../../../services";
+import { showNotification } from "../../../utils/index";
 
 const PreviewCamps = ({ selectedPayload }) => {
   const [payloads, setPayloads] = useState([]);
   const [previews, setPreviews] = useState([]);
+  const [loadingCreateCampaign, setLoadingCreateCampaign] = useState(false);
+
   useEffect(() => {
     if (!isEmpty(selectedPayload)) {
       switch (selectedPayload?.runFlow) {
         case CREATE_CAMP_FLOWS[0].title: {
           setPayloads([
             {
+              briefId: selectedPayload?.briefId,
               rootCampId: selectedPayload?.rootCampaign?.campaignId,
               campInfo: {
                 dailyBudget: selectedPayload?.budget,
+                name: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch} - Test1`,
               },
               adsInfo: map(selectedPayload.ads, (ad) => {
                 return {
                   name: ad.postName,
-                  objectStoryId: `${ad.pageId}_${ad.postId}`,
+                  // objectStoryId: `${ad.pageId}_${ad.postId}`,
+                  objectStoryId: `102286709170123_483748387740655`,
                 };
               }),
             },
           ]);
           const transformedPreviews = [
             {
-              rootCampName: selectedPayload?.rootCampaign?.campaignName,
+              rootCampName: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch} - Test1`,
               budget: selectedPayload?.budget,
               ads: selectedPayload.ads,
             },
@@ -58,17 +65,26 @@ const PreviewCamps = ({ selectedPayload }) => {
         case CREATE_CAMP_FLOWS[1].title: {
           const groupedAds = groupBy(selectedPayload.ads, "type");
           const keyTypes = keys(groupedAds);
-          const transformedPayloads = map(keyTypes, (type) => {
+          const budgetPerCamp = round(
+            selectedPayload?.budget / keyTypes.length,
+            0
+          );
+          const transformedPayloads = map(keyTypes, (type, index) => {
             const ads = groupedAds[type];
             return {
+              briefId: selectedPayload?.briefId,
               rootCampId: selectedPayload?.rootCampaign?.campaignId,
               campInfo: {
-                dailyBudget: selectedPayload?.budget,
+                dailyBudget: budgetPerCamp,
+                name: `${selectedPayload.team} - ${selectedPayload.sku} - ${
+                  selectedPayload.batch
+                } - Test${index + 1}`,
               },
               adsInfo: map(ads, (ad) => {
                 return {
                   name: ad.postName,
-                  objectStoryId: `${ad.pageId}_${ad.postId}`,
+                  // objectStoryId: `${ad.pageId}_${ad.postId}`,
+                  objectStoryId: `102286709170123_483748387740655`,
                 };
               }),
             };
@@ -76,8 +92,10 @@ const PreviewCamps = ({ selectedPayload }) => {
           const transformedPreviews = map(keyTypes, (type, index) => {
             const ads = groupedAds[type];
             return {
-              rootCampName: selectedPayload?.rootCampaign?.campaignName,
-              budget: selectedPayload?.budget,
+              rootCampName: `${selectedPayload.team} - ${
+                selectedPayload.sku
+              } - ${selectedPayload.batch} - Test${index + 1}`,
+              budget: budgetPerCamp,
               ads,
             };
           });
@@ -86,24 +104,35 @@ const PreviewCamps = ({ selectedPayload }) => {
           break;
         }
         case CREATE_CAMP_FLOWS[2].title: {
-          const transformedPayloads = map(selectedPayload.ads, (ad) => {
+          const budgetPerCamp = round(
+            selectedPayload?.budget / selectedPayload.ads.length,
+            0
+          );
+          const transformedPayloads = map(selectedPayload.ads, (ad, index) => {
             return {
+              briefId: selectedPayload?.briefId,
               rootCampId: selectedPayload?.rootCampaign?.campaignId,
               campInfo: {
-                dailyBudget: selectedPayload?.budget,
+                dailyBudget: budgetPerCamp,
+                name: `${selectedPayload.team} - ${selectedPayload.sku} - ${
+                  selectedPayload.batch
+                } - Test${index + 1}`,
               },
               adsInfo: [
                 {
                   name: ad.postName,
-                  objectStoryId: `${ad.pageId}_${ad.postId}`,
+                  // objectStoryId: `${ad.pageId}_${ad.postId}`,
+                  objectStoryId: `102286709170123_483748387740655`,
                 },
               ],
             };
           });
-          const transformedPreviews = map(selectedPayload.ads, (ad) => {
+          const transformedPreviews = map(selectedPayload.ads, (ad, index) => {
             return {
-              rootCampName: selectedPayload?.rootCampaign?.campaignName,
-              budget: selectedPayload?.budget,
+              rootCampName: `${selectedPayload.team} - ${
+                selectedPayload.sku
+              } - ${selectedPayload.batch} - Test${index + 1}`,
+              budget: budgetPerCamp,
               ads: [ad],
             };
           });
@@ -117,6 +146,19 @@ const PreviewCamps = ({ selectedPayload }) => {
       }
     }
   }, [selectedPayload]);
+  const handleCreateCampaign = async () => {
+    setLoadingCreateCampaign(true);
+    const createCampResponse = await campaignServices.createCamps({
+      payloads,
+    });
+    if (!createCampResponse) {
+      setLoadingCreateCampaign(false);
+      return;
+    }
+    showNotification("Thành công", "Tạo Campaign thành công", "green");
+    console.log(`payloads`, payloads);
+    setLoadingCreateCampaign(false);
+  };
   return (
     <Grid>
       <Grid.Col span={12}>
@@ -191,7 +233,7 @@ const PreviewCamps = ({ selectedPayload }) => {
                 <Stack key={index} gap="md">
                   <Flex align="center" justify="space-between">
                     <Text style={{ fontWeight: "bold" }}>
-                      Campaign {index + 1}
+                      {preview?.rootCampName}
                     </Text>
                   </Flex>
                   <Flex
@@ -258,9 +300,8 @@ const PreviewCamps = ({ selectedPayload }) => {
             variant="filled"
             color="green"
             size="sx"
-            onClick={() => {
-              console.log("Create Campaigns", payloads);
-            }}
+            onClick={handleCreateCampaign}
+            loading={loadingCreateCampaign}
           >
             Tạo
           </Button>

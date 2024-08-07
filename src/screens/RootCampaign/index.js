@@ -318,7 +318,7 @@ const RootCampaign = () => {
     }
   };
   const handleAddCampaign = async () => {
-    console.log(campaignInfo);
+    setLoadingCreateCampaign(true);
     if (!campaignInfo.campaignIds.length) {
       showNotification("Thất bại", "Vui lòng nhập đủ thông tin", "red");
       return;
@@ -420,7 +420,7 @@ const RootCampaign = () => {
             }}
             onClick={handleCreateCampaign}
           >
-            <Button>Tạo</Button>
+            <Button loading={loadingCreateCampaign}>Tạo</Button>
           </div>
         </Card>
       </Modal>
@@ -468,7 +468,7 @@ const RootCampaign = () => {
             }}
             onClick={handleAddCampaign}
           >
-            <Button>Tạo</Button>
+            <Button loading={loadingCreateCampaign}>Tạo</Button>
           </div>
         </Card>
       </Modal>

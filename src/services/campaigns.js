@@ -1,15 +1,23 @@
 import axios from "axios";
 import { hostAPI } from "../constant";
 import { filter, isEmpty, keys } from "lodash";
+import { showNotification } from "../utils/index";
 
 export const campaignServices = {
   createCamps: async (data) => {
     try {
-      const response = await axios.post(`${hostAPI}/api/campaigns/v2/create`, {
-        data,
-      });
+      const response = await axios.post(`${hostAPI}/campaigns/batch`, data);
       const { data: result } = response;
-      return isEmpty(result?.data) ? false : result?.data;
+      if (result?.success === false) {
+        showNotification(
+          "Thất bại",
+          result?.message || "Tạo Campaign thất bại",
+          "red"
+        );
+
+        return false;
+      }
+      return result;
     } catch (error) {
       console.log("Error at syncPortfolio:", error);
       return false;
