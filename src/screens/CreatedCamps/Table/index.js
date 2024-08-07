@@ -235,21 +235,9 @@ const CampaignsTable = ({
                   style={{ width: rem(16), height: rem(16) }}
                 />
               }
-              value={row?.original?.budget}
-              onChange={(event) => {
-                setCampsPayload((prev) => {
-                  return map(prev, (x) => {
-                    if (x.sku === row.original.sku) {
-                      return {
-                        ...x,
-                        budget: toNumber(event.target.value),
-                      };
-                    }
-                    return x;
-                  });
-                });
-              }}
-            />
+            >
+              {row?.original?.attribute?.campaignData?.dailyBudget}
+            </Text>
           );
         },
       },
