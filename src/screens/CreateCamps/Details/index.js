@@ -14,7 +14,6 @@ import {
 } from "@mantine/core";
 import Checkbox from "../../../components/Checkbox";
 import {
-  cloneDeep,
   compact,
   filter,
   find,
@@ -474,14 +473,7 @@ const BriefsTable = ({
                 onClick={() => {
                   const sku = row.original.sku;
                   const foundSKUPayload = find(campsPayload, { sku });
-                  if (isEmpty(foundSKUPayload.account)) {
-                    showNotification(
-                      "Thất bại",
-                      `Vui lòng chọn Account Facebook cho ${sku}`,
-                      "red"
-                    );
-                    return;
-                  } else if (isEmpty(foundSKUPayload.rootCampaign)) {
+                  if (isEmpty(foundSKUPayload.rootCampaign)) {
                     showNotification(
                       "Thất bại",
                       `Vui lòng chọn Camp phôi cho ${sku}`,
@@ -516,14 +508,7 @@ const BriefsTable = ({
                 onClick={() => {
                   const sku = row.original.sku;
                   const foundSKUPayload = find(campsPayload, { sku });
-                  if (isEmpty(foundSKUPayload.account)) {
-                    showNotification(
-                      "Thất bại",
-                      `Vui lòng chọn Account Facebook cho ${sku}`,
-                      "red"
-                    );
-                    return;
-                  } else if (isEmpty(foundSKUPayload.rootCampaign)) {
+                  if (isEmpty(foundSKUPayload.rootCampaign)) {
                     showNotification(
                       "Thất bại",
                       `Vui lòng chọn Camp phôi cho ${sku}`,

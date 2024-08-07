@@ -17,8 +17,8 @@ import {
   rem,
   Flex,
   TextInput,
-  Button,
   LoadingOverlay,
+  Tabs,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
@@ -35,8 +35,9 @@ import { BRIEF_TYPES, STATUS } from "../../constant";
 import NewDesign from "./NewDesign";
 import Clipart from "./Clipart";
 import Niche from "./Niche";
+import CreateCampsScreen from "../CreateCamps";
 
-const MTKScreens = () => {
+const CreatePosts = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -73,7 +74,7 @@ const MTKScreens = () => {
 
   const [collections, setCollections] = useState([]);
 
-  const fetchCollections = async (page = 1) => {
+  const fetchBriefs = async (page = 1) => {
     setLoadingFetchBrief(true);
     const response = await rndServices.fetchBriefs({
       search,
@@ -123,7 +124,7 @@ const MTKScreens = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   useEffect(() => {
-    fetchCollections(pagination.currentPage);
+    fetchBriefs(pagination.currentPage);
   }, [search, pagination.currentPage, query, trigger, sorting]);
 
   useEffect(() => {
@@ -173,7 +174,7 @@ const MTKScreens = () => {
           "Update Link Product thành công",
           "green"
         );
-        await fetchCollections(pagination.currentPage);
+        await fetchBriefs(pagination.currentPage);
       }
     }
     close();
@@ -597,6 +598,24 @@ const MTKScreens = () => {
         />
       )}
     </>
+  );
+};
+
+const MTKScreens = () => {
+  const [activeTab, setActiveTab] = useState("post");
+  return (
+    <Tabs value={activeTab} onChange={setActiveTab}>
+      <Tabs.List>
+        <Tabs.Tab value="post">Post</Tabs.Tab>
+        <Tabs.Tab value="camp">Camp</Tabs.Tab>
+      </Tabs.List>
+      <Tabs.Panel value="post">
+        <CreatePosts />
+      </Tabs.Panel>
+      <Tabs.Panel value="camp">
+        <CreateCampsScreen />
+      </Tabs.Panel>
+    </Tabs>
   );
 };
 

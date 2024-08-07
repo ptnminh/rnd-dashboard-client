@@ -404,6 +404,7 @@ const BriefsTable = ({
               padding: "10px",
               borderRadius: "10px",
               backgroundColor: "#EFF0F1",
+              flexWrap: "wrap",
             }}
           >
             <TextInput
