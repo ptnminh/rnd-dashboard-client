@@ -20,7 +20,7 @@ import {
   IconCopy,
   IconExternalLink,
 } from "@tabler/icons-react";
-import { groupBy, isEmpty, keys, map, round } from "lodash";
+import { filter, groupBy, isEmpty, keys, map, round } from "lodash";
 import { useEffect, useState } from "react";
 import { CREATE_CAMP_FLOWS } from "../../../constant";
 import { campaignServices } from "../../../services";
@@ -33,6 +33,10 @@ const PreviewCamps = ({ selectedPayload, closeModal }) => {
 
   useEffect(() => {
     if (!isEmpty(selectedPayload)) {
+      const ads = filter(
+        selectedPayload.ads,
+        (ad) => ad.postId && ad.pageId && !ad.campaignId
+      );
       switch (selectedPayload?.runFlow) {
         case CREATE_CAMP_FLOWS[0].title: {
           setPayloads([
@@ -43,7 +47,7 @@ const PreviewCamps = ({ selectedPayload, closeModal }) => {
                 dailyBudget: selectedPayload?.budget,
                 name: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch} - Test1`,
               },
-              adsInfo: map(selectedPayload.ads, (ad) => {
+              adsInfo: map(ads, (ad) => {
                 return {
                   name: ad.postName,
                   // objectStoryId: `${ad.pageId}_${ad.postId}`,
@@ -56,14 +60,14 @@ const PreviewCamps = ({ selectedPayload, closeModal }) => {
             {
               rootCampName: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch} - Test1`,
               budget: selectedPayload?.budget,
-              ads: selectedPayload.ads,
+              ads: ads,
             },
           ];
           setPreviews(transformedPreviews);
           break;
         }
         case CREATE_CAMP_FLOWS[1].title: {
-          const groupedAds = groupBy(selectedPayload.ads, "type");
+          const groupedAds = groupBy(ads, "type");
           const keyTypes = keys(groupedAds);
           const budgetPerCamp = round(
             selectedPayload?.budget / keyTypes.length,
@@ -104,11 +108,8 @@ const PreviewCamps = ({ selectedPayload, closeModal }) => {
           break;
         }
         case CREATE_CAMP_FLOWS[2].title: {
-          const budgetPerCamp = round(
-            selectedPayload?.budget / selectedPayload.ads.length,
-            0
-          );
-          const transformedPayloads = map(selectedPayload.ads, (ad, index) => {
+          const budgetPerCamp = round(selectedPayload?.budget / ads.length, 0);
+          const transformedPayloads = map(ads, (ad, index) => {
             return {
               briefId: selectedPayload?.briefId,
               rootCampId: selectedPayload?.rootCampaign?.campaignId,
@@ -127,7 +128,7 @@ const PreviewCamps = ({ selectedPayload, closeModal }) => {
               ],
             };
           });
-          const transformedPreviews = map(selectedPayload.ads, (ad, index) => {
+          const transformedPreviews = map(ads, (ad, index) => {
             return {
               rootCampName: `${selectedPayload.team} - ${
                 selectedPayload.sku

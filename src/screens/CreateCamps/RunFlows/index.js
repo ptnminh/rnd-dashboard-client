@@ -96,6 +96,7 @@ const RunFlows = ({ selectedPayload, closeModal }) => {
     setLoadingCreateCampaign(true);
     if (!totalBudget) {
       showNotification("Thất bại", "Vui lòng nhập Budget", "red");
+      setLoadingCreateCampaign(false);
       return;
     }
     if (isEmpty(selectedImages) && isEmpty(selectedVideos)) {
@@ -104,6 +105,7 @@ const RunFlows = ({ selectedPayload, closeModal }) => {
         "Vui lòng chọn ít nhất 1 hình hoặc 1 video",
         "red"
       );
+      setLoadingCreateCampaign(false);
       return;
     }
     const createCampResponse = await campaignServices.createCamps({
@@ -202,7 +204,8 @@ const RunFlows = ({ selectedPayload, closeModal }) => {
               {map(
                 filter(
                   selectedPayload?.ads,
-                  (x) => (x.type === "image" || !x.type) && x.postId
+                  (x) =>
+                    (x.type === "image" || !x.type) && x.postId && !x.campaignId
                 ),
                 (item, index) => (
                   <Checkbox.Card
@@ -295,7 +298,7 @@ const RunFlows = ({ selectedPayload, closeModal }) => {
             {map(
               filter(
                 selectedPayload?.ads,
-                (x) => x.type === "video" && x.postId
+                (x) => x.type === "video" && x.postId && !x.campaignId
               ),
               (item, index) => (
                 <Checkbox.Card

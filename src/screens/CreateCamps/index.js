@@ -52,7 +52,8 @@ const CreateCampsScreen = () => {
   });
   const [query, setQuery] = useState({
     status: [3],
-    campStatus: ["unfulfilled", "partial"],
+    campaignStatus: ["unfulfilled", "partial"],
+    postStatus: ["fulfilled", "partial"],
   });
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);

@@ -195,7 +195,7 @@ const BriefsTable = ({
         Cell: ({ row }) => {
           const adsLinksLength = filter(
             row?.original?.designInfo?.adsLinks,
-            (x) => x.postId && (x.type === "image" || !x.type)
+            (x) => x.postId && (x.type === "image" || !x.type) && !x.campaignId
           ).length;
           return (
             <div
@@ -224,7 +224,7 @@ const BriefsTable = ({
         Cell: ({ row }) => {
           const adsLinksLength = filter(
             row?.original?.designInfo?.adsLinks,
-            (x) => x.postId && x.type === "video"
+            (x) => x.postId && x.type === "video" && !x.campaignId
           ).length;
           return (
             <div
@@ -712,6 +712,8 @@ const BriefsTable = ({
                   epm: null,
                   designer: null,
                   status: [3],
+                  postStatus: ["fulfilled", "partial"],
+                  campaignStatus: ["unfulfilled", "partial"],
                   sizeValue: null,
                   rndName: null,
                   designerName: null,
