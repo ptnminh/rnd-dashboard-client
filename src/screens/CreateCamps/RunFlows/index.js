@@ -23,16 +23,7 @@ import {
   IconExternalLink,
   IconCopy,
 } from "@tabler/icons-react";
-import {
-  ceil,
-  compact,
-  concat,
-  filter,
-  includes,
-  isEmpty,
-  map,
-  round,
-} from "lodash";
+import { ceil, compact, concat, filter, includes, isEmpty, map } from "lodash";
 import { showNotification } from "../../../utils/index";
 import { campaignServices } from "../../../services";
 const RUN_FLOWS = {
@@ -40,7 +31,7 @@ const RUN_FLOWS = {
   diffCamps: "Khác Camp",
 };
 
-const RunFlows = ({ selectedPayload, closeModal }) => {
+const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
   const [runflowValue, setRunFlowValue] = useState(RUN_FLOWS.sameCamps);
   const [totalBudget, setTotalBudget] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -127,6 +118,7 @@ const RunFlows = ({ selectedPayload, closeModal }) => {
     showNotification("Thành công", "Tạo Campaign thành công", "green");
     console.log(`payloads`, payloads);
     setLoadingCreateCampaign(false);
+    setTrigger(true);
     closeModal();
   };
   return (

@@ -604,6 +604,7 @@ const CreateCampsScreen = () => {
         <PreviewCamps
           selectedPayload={selectedCreateCampPayload}
           closeModal={closeModalPreview}
+          setTrigger={setTrigger}
         />
       </Modal>
     </>

@@ -20,13 +20,13 @@ import {
   IconCopy,
   IconExternalLink,
 } from "@tabler/icons-react";
-import { ceil, filter, groupBy, isEmpty, keys, map, round } from "lodash";
+import { ceil, filter, groupBy, isEmpty, keys, map } from "lodash";
 import { useEffect, useState } from "react";
 import { CREATE_CAMP_FLOWS } from "../../../constant";
 import { campaignServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 
-const PreviewCamps = ({ selectedPayload, closeModal }) => {
+const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
   const [payloads, setPayloads] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [loadingCreateCampaign, setLoadingCreateCampaign] = useState(false);
@@ -159,6 +159,7 @@ const PreviewCamps = ({ selectedPayload, closeModal }) => {
     showNotification("Thành công", "Tạo Campaign thành công", "green");
     console.log(`payloads`, payloads);
     setLoadingCreateCampaign(false);
+    setTrigger(true);
     closeModal();
   };
   return (

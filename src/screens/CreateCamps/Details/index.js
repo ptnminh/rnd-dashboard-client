@@ -772,6 +772,7 @@ const BriefsTable = ({
           <RunFlows
             selectedPayload={selectedCreateCustomCamp}
             closeModal={close}
+            setTrigger={setTrigger}
           />
         </Modal>
       )}
