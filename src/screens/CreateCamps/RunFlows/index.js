@@ -53,7 +53,7 @@ const RunFlows = ({ selectedPayload, closeModal }) => {
           briefId: selectedPayload?.briefId,
           rootCampId: selectedPayload?.rootCampaign?.campaignId,
           campInfo: {
-            budget: totalBudget,
+            dailyBudget: totalBudget,
             name: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch} - Test1`,
           },
           adsInfo: map(selectedAds, (x) => ({
@@ -79,7 +79,7 @@ const RunFlows = ({ selectedPayload, closeModal }) => {
           name: `${selectedPayload.team} - ${selectedPayload.sku} - ${
             selectedPayload.batch
           } - Test${index + 1}`,
-          budget: budgetPerCamp,
+          dailyBudget: budgetPerCamp,
         },
         adsInfo: [
           {
