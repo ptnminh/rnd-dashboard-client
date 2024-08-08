@@ -126,8 +126,8 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
       const postNames = map(selectedPayload?.ads, (x) => x.postName);
       const errorList = compact(
         map(createCampResponse?.errorList, (x) => {
-          const { code, message } = x;
-          const foundName = postNames.find((name) => message?.includes(name));
+          const { code, message, adName } = x;
+          const foundName = postNames.find((name) => name === adName);
           if (foundName) {
             return {
               postName: foundName,
