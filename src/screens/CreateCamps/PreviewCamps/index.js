@@ -20,7 +20,16 @@ import {
   IconCopy,
   IconExternalLink,
 } from "@tabler/icons-react";
-import { ceil, filter, groupBy, isEmpty, keys, map } from "lodash";
+import {
+  ceil,
+  compact,
+  filter,
+  find,
+  groupBy,
+  isEmpty,
+  keys,
+  map,
+} from "lodash";
 import { useEffect, useState } from "react";
 import { CREATE_CAMP_FLOWS } from "../../../constant";
 import { campaignServices } from "../../../services";
@@ -30,7 +39,7 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
   const [payloads, setPayloads] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [loadingCreateCampaign, setLoadingCreateCampaign] = useState(false);
-
+  const [errors, setErrors] = useState([]);
   useEffect(() => {
     if (!isEmpty(selectedPayload)) {
       const ads = filter(
@@ -69,10 +78,7 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
         case CREATE_CAMP_FLOWS[1].title: {
           const groupedAds = groupBy(ads, "type");
           const keyTypes = keys(groupedAds);
-          const budgetPerCamp = ceil(
-            selectedPayload?.budget / keyTypes.length,
-            0
-          );
+          const budgetPerCamp = ceil(selectedPayload?.budget / keyTypes.length);
           const transformedPayloads = map(keyTypes, (type, index) => {
             const ads = groupedAds[type];
             return {
@@ -108,7 +114,7 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
           break;
         }
         case CREATE_CAMP_FLOWS[2].title: {
-          const budgetPerCamp = ceil(selectedPayload?.budget / ads.length, 0);
+          const budgetPerCamp = ceil(selectedPayload?.budget / ads.length);
           const transformedPayloads = map(ads, (ad, index) => {
             return {
               briefId: selectedPayload?.briefId,
@@ -152,7 +158,21 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
     const createCampResponse = await campaignServices.createCamps({
       payloads,
     });
-    if (!createCampResponse) {
+    if (createCampResponse?.success === false) {
+      const postNames = map(selectedPayload?.ads, (x) => x.postName);
+      const errorList = compact(
+        map(createCampResponse?.errorList, (x) => {
+          const foundName = postNames.find((name) => x?.includes(name));
+          if (foundName) {
+            return {
+              postName: foundName,
+              message: x,
+            };
+          }
+          return null;
+        })
+      );
+      setErrors(errorList);
       setLoadingCreateCampaign(false);
       return;
     }
@@ -254,7 +274,15 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
                           radius="md"
                         />
                         <Flex gap={8} direction="column">
-                          <Text size="sm">{ad?.postName}</Text>
+                          <TextInput
+                            size="sm"
+                            readOnly
+                            value={ad.postName}
+                            error={
+                              find(errors, (x) => x.postName === ad.postName)
+                                ?.message || ""
+                            }
+                          />
                           <span
                             style={{
                               display: "flex",

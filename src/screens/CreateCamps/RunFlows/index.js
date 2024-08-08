@@ -23,7 +23,16 @@ import {
   IconExternalLink,
   IconCopy,
 } from "@tabler/icons-react";
-import { ceil, compact, concat, filter, includes, isEmpty, map } from "lodash";
+import {
+  ceil,
+  compact,
+  concat,
+  filter,
+  find,
+  includes,
+  isEmpty,
+  map,
+} from "lodash";
 import { showNotification } from "../../../utils/index";
 import { campaignServices } from "../../../services";
 const RUN_FLOWS = {
@@ -37,6 +46,7 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [loadingCreateCampaign, setLoadingCreateCampaign] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState([]);
+  const [errors, setErrors] = useState([]);
 
   const [payloads, setPayloads] = useState([]);
 
@@ -71,7 +81,7 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
       const selectedAds = filter(selectedPayload?.ads, (x) =>
         includes(mergedSelectedAdIds, x.uid)
       );
-      const budgetPerCamp = ceil(totalBudget / selectedAds.length, 0);
+      const budgetPerCamp = ceil(totalBudget / selectedAds.length);
       const transformedPayloads = map(selectedAds, (x, index) => ({
         briefId: selectedPayload?.briefId,
         rootCampId: selectedPayload?.rootCampaign?.campaignId,
@@ -111,7 +121,21 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
     const createCampResponse = await campaignServices.createCamps({
       payloads,
     });
-    if (!createCampResponse) {
+    if (createCampResponse?.success === false) {
+      const postNames = map(selectedPayload?.ads, (x) => x.postName);
+      const errorList = compact(
+        map(createCampResponse?.errorList, (x) => {
+          const foundName = postNames.find((name) => x?.includes(name));
+          if (foundName) {
+            return {
+              postName: foundName,
+              message: x,
+            };
+          }
+          return null;
+        })
+      );
+      setErrors(errorList);
       setLoadingCreateCampaign(false);
       return;
     }
@@ -242,7 +266,15 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
                           }}
                         />
                         <Flex direction="column" gap={8}>
-                          <Text size="sm">{item.postName}</Text>
+                          <TextInput
+                            size="sm"
+                            readOnly
+                            value={item.postName}
+                            error={
+                              find(errors, (x) => x.postName === item.postName)
+                                ?.message || ""
+                            }
+                          />
                           <span
                             style={{
                               display: "flex",

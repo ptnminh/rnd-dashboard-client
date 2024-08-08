@@ -15,7 +15,7 @@ export const campaignServices = {
           "red"
         );
 
-        return false;
+        return result;
       }
       return result;
     } catch (error) {

@@ -767,7 +767,7 @@ const BriefsTable = ({
             blur: 3,
           }}
           radius="md"
-          size="lg"
+          size="1000px"
         >
           <RunFlows
             selectedPayload={selectedCreateCustomCamp}
