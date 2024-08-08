@@ -42,6 +42,7 @@ const CreatedCampsScreen = () => {
       limit: 20,
       page,
       query,
+      sorting,
     });
     const { data, metadata } = response;
     if (data) {

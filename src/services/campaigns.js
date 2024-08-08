@@ -1,6 +1,6 @@
 import axios from "axios";
 import { hostAPI } from "../constant";
-import { filter, isEmpty, keys, omit, pick } from "lodash";
+import { filter, isEmpty, keys, map, omit, pick, reduce } from "lodash";
 import { showNotification } from "../utils/index";
 
 export const campaignServices = {
@@ -23,11 +23,19 @@ export const campaignServices = {
       return false;
     }
   },
-  fetchCampaigns: async ({ page, limit, query }) => {
+  fetchCampaigns: async ({ page, limit, query, sorting }) => {
     try {
       let url = `${hostAPI}/campaigns?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
+      const sort = reduce(
+        sorting,
+        (acc, item) => {
+          acc[item.id] = item.desc ? "desc" : "asc";
+          return acc;
+        },
+        {}
+      );
       if (!isEmpty(transformedQuery)) {
         let pickQuery = pick(query, transformedQuery);
         pickQuery = omit(pickQuery, ["statusValue", "valueName", "dateValue"]);
@@ -37,6 +45,10 @@ export const campaignServices = {
           })
         )}`;
         url = `${url}&${queryString}`;
+      }
+      if (!isEmpty(sort)) {
+        const sortString = `sort=${encodeURIComponent(JSON.stringify(sort))}`;
+        url = `${url}&${sortString}`;
       }
       const response = await axios.get(url);
       const { data: result } = response;

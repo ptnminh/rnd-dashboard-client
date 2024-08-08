@@ -149,7 +149,7 @@ const CampaignsTable = ({
         header: "VALUE",
         size: 100,
         enableEditing: false,
-        enableSorting: false,
+        enableSorting: true,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => {
           let color = null;
@@ -213,34 +213,35 @@ const CampaignsTable = ({
         ),
       },
       {
-        id: "budget",
+        id: "dailyBudget",
         header: "BUDGET",
+        accessorFn: (row) => row?.attribute?.campaignData?.dailyBudget,
         enableEditing: false,
-        enableSorting: false,
-        size: 130,
+        enableSorting: true,
+        size: 100,
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Cell: ({ row }) => {
-          return (
-            <Text
-              placeholder="Budget"
-              type="number"
-              size="sm"
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              leftSection={
-                <IconCurrencyDollar
-                  style={{ width: rem(16), height: rem(16) }}
-                />
-              }
-            >
-              {row?.original?.attribute?.campaignData?.dailyBudget}
-            </Text>
-          );
-        },
+        // Cell: ({ row }) => {
+        //   return (
+        //     <Text
+        //       placeholder="Budget"
+        //       type="number"
+        //       size="sm"
+        //       styles={{
+        //         input: {
+        //           width: "100px",
+        //         },
+        //       }}
+        //       leftSection={
+        //         <IconCurrencyDollar
+        //           style={{ width: rem(16), height: rem(16) }}
+        //         />
+        //       }
+        //     >
+        //       {row?.original?.attribute?.campaignData?.dailyBudget}
+        //     </Text>
+        //   );
+        // },
       },
     ],
     [validationErrors, accounts, sampleCampaigns, campaigns, campsPayload]
