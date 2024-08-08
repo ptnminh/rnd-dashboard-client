@@ -219,6 +219,7 @@ export const rndServices = {
     view = "design",
     sorting,
     sorted,
+    campStatus,
   }) => {
     try {
       const filter = {
@@ -235,6 +236,7 @@ export const rndServices = {
         ...(date && { startDate: date.startDate, endDate: date.endDate }),
         ...(epm && { epm }),
         ...(postStatus && { postStatus }),
+        ...(campStatus && { campStatus }),
       };
       const sort = !isEmpty(sorting)
         ? {

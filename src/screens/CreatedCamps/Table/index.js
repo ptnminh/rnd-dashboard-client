@@ -10,7 +10,7 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { keys, map, toNumber } from "lodash";
+import { keys } from "lodash";
 import {
   IconSearch,
   IconFilterOff,
@@ -71,7 +71,8 @@ const CampaignsTable = ({
       },
       {
         accessorKey: "date",
-        accessorFn: (row) => moment(row?.date).format("DD/MM/YYYY"),
+        accessorFn: (row) =>
+          moment(row?.createdAt).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY"),
         header: "DATE",
         size: 120,
         enableEditing: false,
@@ -351,7 +352,7 @@ const CampaignsTable = ({
               leftSection={
                 <span
                   onClick={() => {
-                    setQuery({ ...query, postName: searchAdName });
+                    setQuery({ ...query, adsName: searchAdName });
                   }}
                   style={{
                     cursor: "pointer",
@@ -369,7 +370,7 @@ const CampaignsTable = ({
               onChange={(e) => setSearchAdName(e.target.value)}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
-                  setQuery({ ...query, postName: searchAdName });
+                  setQuery({ ...query, adsName: searchAdName });
                 }
               }}
             />
@@ -427,34 +428,32 @@ const CampaignsTable = ({
                 setQuery({
                   ...query,
                   dateValue: value,
-                  date: {
-                    startDate: moment(value[0]).format("YYYY-MM-DD"),
-                    endDate: moment(value[1]).format("YYYY-MM-DD"),
-                  },
+                  startDate: moment(value[0]).format("YYYY-MM-DD"),
+                  endDate: moment(value[1]).format("YYYY-MM-DD"),
                 })
               }
               onClean={() => {
                 setQuery({
                   ...query,
                   dateValue: null,
-                  date: null,
+                  startDate: null,
+                  endDate: null,
                 });
               }}
               onShortcutClick={(shortcut) => {
                 setQuery({
                   ...query,
                   dateValue: shortcut.value,
-                  date: {
-                    startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
-                    endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
-                  },
+                  startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
+                  endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
                 });
               }}
             />
             <Button
               onClick={() => {
                 setQuery({
-                  date: null,
+                  startDate: null,
+                  endDate: null,
                   valueName: null,
                   rndTeam: null,
                   rnd: null,

@@ -26,7 +26,7 @@ import { CREATE_CAMP_FLOWS } from "../../../constant";
 import { campaignServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 
-const PreviewCamps = ({ selectedPayload }) => {
+const PreviewCamps = ({ selectedPayload, closeModal }) => {
   const [payloads, setPayloads] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [loadingCreateCampaign, setLoadingCreateCampaign] = useState(false);
@@ -158,6 +158,7 @@ const PreviewCamps = ({ selectedPayload }) => {
     showNotification("Thành công", "Tạo Campaign thành công", "green");
     console.log(`payloads`, payloads);
     setLoadingCreateCampaign(false);
+    closeModal();
   };
   return (
     <Grid>

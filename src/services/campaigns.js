@@ -1,6 +1,6 @@
 import axios from "axios";
 import { hostAPI } from "../constant";
-import { filter, isEmpty, keys } from "lodash";
+import { filter, isEmpty, keys, omit, pick } from "lodash";
 import { showNotification } from "../utils/index";
 
 export const campaignServices = {
@@ -29,9 +29,11 @@ export const campaignServices = {
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
+        let pickQuery = pick(query, transformedQuery);
+        pickQuery = omit(pickQuery, ["statusValue", "valueName", "dateValue"]);
         const queryString = `filter=${encodeURIComponent(
           JSON.stringify({
-            ...query,
+            ...pickQuery,
           })
         )}`;
         url = `${url}&${queryString}`;

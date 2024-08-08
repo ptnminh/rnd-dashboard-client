@@ -4,10 +4,8 @@ import cn from "classnames";
 import Card from "../../components/Card";
 import Table from "./Table";
 import { map } from "lodash";
-import { useDisclosure } from "@mantine/hooks";
 import { Pagination } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
-import moment from "moment-timezone";
 
 import { campaignServices, rndServices } from "../../services";
 import { accountServices } from "../../services/accounts";
@@ -16,8 +14,6 @@ const CreatedCampsScreen = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
-  const initialSearch = queryParams.get("search") || "";
-  const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
   const [campsPayload, setCampsPayload] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
@@ -27,11 +23,7 @@ const CreatedCampsScreen = () => {
     currentPage: initialPage,
     totalPages: 1,
   });
-  const [query, setQuery] = useState({
-    statusValue: "Undone",
-    status: [3],
-    postStatus: ["fulfilled"],
-  });
+  const [query, setQuery] = useState({});
   const [sorting, setSorting] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState();
   const [updateBrief, setUpdateBrief] = useState({});
@@ -47,7 +39,7 @@ const CreatedCampsScreen = () => {
   const fetchCampaigns = async (page = 1) => {
     setLoadingFetchBrief(true);
     const response = await campaignServices.fetchCampaigns({
-      search,
+      limit: 20,
       page,
       query,
     });
@@ -93,18 +85,17 @@ const CreatedCampsScreen = () => {
   };
   useEffect(() => {
     fetchCampaigns(pagination.currentPage);
-  }, [search, pagination.currentPage, query, trigger, sorting]);
+  }, [pagination.currentPage, query, trigger, sorting]);
   useEffect(() => {
     fetchSampleCampaigns();
   }, [querySampleCampaigns]);
 
   useEffect(() => {
     const params = new URLSearchParams();
-    if (search) params.set("search", search);
     if (pagination.currentPage !== 1)
       params.set("page", pagination.currentPage);
     navigate(`?${params.toString()}`, { replace: true });
-  }, [search, pagination.currentPage, navigate]);
+  }, [pagination.currentPage, navigate]);
 
   useEffect(() => {
     fetchUsers();

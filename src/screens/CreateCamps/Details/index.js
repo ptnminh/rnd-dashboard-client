@@ -767,7 +767,10 @@ const BriefsTable = ({
           radius="md"
           size="lg"
         >
-          <RunFlows selectedPayload={selectedCreateCustomCamp} />
+          <RunFlows
+            selectedPayload={selectedCreateCustomCamp}
+            closeModal={close}
+          />
         </Modal>
       )}
     </>

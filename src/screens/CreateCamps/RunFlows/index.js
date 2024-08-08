@@ -31,7 +31,7 @@ const RUN_FLOWS = {
   diffCamps: "Khác Camp",
 };
 
-const RunFlows = ({ selectedPayload }) => {
+const RunFlows = ({ selectedPayload, closeModal }) => {
   const [runflowValue, setRunFlowValue] = useState(RUN_FLOWS.sameCamps);
   const [totalBudget, setTotalBudget] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
@@ -116,6 +116,7 @@ const RunFlows = ({ selectedPayload }) => {
     showNotification("Thành công", "Tạo Campaign thành công", "green");
     console.log(`payloads`, payloads);
     setLoadingCreateCampaign(false);
+    closeModal();
   };
   return (
     <Grid>

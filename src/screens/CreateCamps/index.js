@@ -51,9 +51,8 @@ const CreateCampsScreen = () => {
     totalPages: 1,
   });
   const [query, setQuery] = useState({
-    statusValue: "Undone",
     status: [3],
-    postStatus: ["fulfilled"],
+    campStatus: ["unfulfilled", "partial"],
   });
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
@@ -590,21 +589,22 @@ const CreateCampsScreen = () => {
           setLinkProduct={setLinkProduct}
         />
       )}
-      {true && (
-        <Modal
-          opened={openedModalPreview}
-          onClose={closeModalPreview}
-          transitionProps={{ transition: "fade", duration: 200 }}
-          overlayProps={{
-            backgroundOpacity: 0.55,
-            blur: 3,
-          }}
-          radius="md"
-          size="1000px"
-        >
-          <PreviewCamps selectedPayload={selectedCreateCampPayload} />
-        </Modal>
-      )}
+      <Modal
+        opened={openedModalPreview}
+        onClose={closeModalPreview}
+        transitionProps={{ transition: "fade", duration: 200 }}
+        overlayProps={{
+          backgroundOpacity: 0.55,
+          blur: 3,
+        }}
+        radius="md"
+        size="1000px"
+      >
+        <PreviewCamps
+          selectedPayload={selectedCreateCampPayload}
+          closeModal={closeModalPreview}
+        />
+      </Modal>
     </>
   );
 };
