@@ -619,21 +619,6 @@ const CreatePost = ({
               Create Post
             </Button>
           </Group>
-          <Affix position={{ bottom: 20, right: 200 }}>
-            <Transition transition="slide-up" mounted={scroll.y > 0}>
-              {(transitionStyles) => (
-                <Button
-                  leftSection={
-                    <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
-                  }
-                  style={transitionStyles}
-                  onClick={() => scrollTo({ y: 0 })}
-                >
-                  Scroll to top
-                </Button>
-              )}
-            </Transition>
-          </Affix>
         </Tabs.Panel>
         <Tabs.Panel value="createdPost">
           <Card
@@ -884,7 +869,7 @@ const CreatePost = ({
             )}
           </Group>
 
-          <Affix position={{ bottom: 20, right: 200 }}>
+          <Affix position={{ bottom: 20, left: 100 }}>
             <Transition transition="slide-up" mounted={scroll.y > 0}>
               {(transitionStyles) => (
                 <Button
