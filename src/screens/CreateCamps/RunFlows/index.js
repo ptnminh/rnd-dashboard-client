@@ -23,7 +23,16 @@ import {
   IconExternalLink,
   IconCopy,
 } from "@tabler/icons-react";
-import { compact, concat, filter, includes, isEmpty, map, round } from "lodash";
+import {
+  ceil,
+  compact,
+  concat,
+  filter,
+  includes,
+  isEmpty,
+  map,
+  round,
+} from "lodash";
 import { showNotification } from "../../../utils/index";
 import { campaignServices } from "../../../services";
 const RUN_FLOWS = {
@@ -71,7 +80,7 @@ const RunFlows = ({ selectedPayload, closeModal }) => {
       const selectedAds = filter(selectedPayload?.ads, (x) =>
         includes(mergedSelectedAdIds, x.uid)
       );
-      const budgetPerCamp = round(totalBudget / selectedAds.length, 0);
+      const budgetPerCamp = ceil(totalBudget / selectedAds.length, 0);
       const transformedPayloads = map(selectedAds, (x, index) => ({
         briefId: selectedPayload?.briefId,
         rootCampId: selectedPayload?.rootCampaign?.campaignId,

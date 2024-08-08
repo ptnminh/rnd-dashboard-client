@@ -20,7 +20,7 @@ import {
   IconCopy,
   IconExternalLink,
 } from "@tabler/icons-react";
-import { filter, groupBy, isEmpty, keys, map, round } from "lodash";
+import { ceil, filter, groupBy, isEmpty, keys, map, round } from "lodash";
 import { useEffect, useState } from "react";
 import { CREATE_CAMP_FLOWS } from "../../../constant";
 import { campaignServices } from "../../../services";
@@ -69,7 +69,7 @@ const PreviewCamps = ({ selectedPayload, closeModal }) => {
         case CREATE_CAMP_FLOWS[1].title: {
           const groupedAds = groupBy(ads, "type");
           const keyTypes = keys(groupedAds);
-          const budgetPerCamp = round(
+          const budgetPerCamp = ceil(
             selectedPayload?.budget / keyTypes.length,
             0
           );
@@ -108,7 +108,7 @@ const PreviewCamps = ({ selectedPayload, closeModal }) => {
           break;
         }
         case CREATE_CAMP_FLOWS[2].title: {
-          const budgetPerCamp = round(selectedPayload?.budget / ads.length, 0);
+          const budgetPerCamp = ceil(selectedPayload?.budget / ads.length, 0);
           const transformedPayloads = map(ads, (ad, index) => {
             return {
               briefId: selectedPayload?.briefId,
