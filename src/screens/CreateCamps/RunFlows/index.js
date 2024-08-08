@@ -35,6 +35,7 @@ import {
 } from "lodash";
 import { showNotification } from "../../../utils/index";
 import { campaignServices } from "../../../services";
+import { CREATE_CAMP_ERRORS } from "../../../constant/errors";
 const RUN_FLOWS = {
   sameCamps: "Chung Camp",
   diffCamps: "Khác Camp",
@@ -125,11 +126,12 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
       const postNames = map(selectedPayload?.ads, (x) => x.postName);
       const errorList = compact(
         map(createCampResponse?.errorList, (x) => {
-          const foundName = postNames.find((name) => x?.includes(name));
+          const { code, message } = x;
+          const foundName = postNames.find((name) => message?.includes(name));
           if (foundName) {
             return {
               postName: foundName,
-              message: x,
+              message: CREATE_CAMP_ERRORS[code] || message,
             };
           }
           return null;

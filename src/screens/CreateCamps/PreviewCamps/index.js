@@ -34,6 +34,7 @@ import { useEffect, useState } from "react";
 import { CREATE_CAMP_FLOWS } from "../../../constant";
 import { campaignServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
+import { CREATE_CAMP_ERRORS } from "../../../constant/errors";
 
 const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
   const [payloads, setPayloads] = useState([]);
@@ -162,11 +163,12 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
       const postNames = map(selectedPayload?.ads, (x) => x.postName);
       const errorList = compact(
         map(createCampResponse?.errorList, (x) => {
-          const foundName = postNames.find((name) => x?.includes(name));
+          const { code, message } = x;
+          const foundName = postNames.find((name) => message?.includes(name));
           if (foundName) {
             return {
               postName: foundName,
-              message: x,
+              message: CREATE_CAMP_ERRORS[code] || message,
             };
           }
           return null;
