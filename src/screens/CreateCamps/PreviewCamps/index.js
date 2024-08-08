@@ -50,8 +50,8 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
               adsInfo: map(ads, (ad) => {
                 return {
                   name: ad.postName,
-                  // objectStoryId: `${ad.pageId}_${ad.postId}`,
-                  objectStoryId: `102286709170123_483748387740655`,
+                  objectStoryId: `${ad.pageId}_${ad.postId}`,
+                  // objectStoryId: `102286709170123_483748387740655`,
                 };
               }),
             },
@@ -87,8 +87,8 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
               adsInfo: map(ads, (ad) => {
                 return {
                   name: ad.postName,
-                  // objectStoryId: `${ad.pageId}_${ad.postId}`,
-                  objectStoryId: `102286709170123_483748387740655`,
+                  objectStoryId: `${ad.pageId}_${ad.postId}`,
+                  // objectStoryId: `102286709170123_483748387740655`,
                 };
               }),
             };
@@ -122,8 +122,8 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
               adsInfo: [
                 {
                   name: ad.postName,
-                  // objectStoryId: `${ad.pageId}_${ad.postId}`,
-                  objectStoryId: `102286709170123_483748387740655`,
+                  objectStoryId: `${ad.pageId}_${ad.postId}`,
+                  // objectStoryId: `102286709170123_483748387740655`,
                 },
               ],
             };

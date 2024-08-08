@@ -58,8 +58,8 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
           },
           adsInfo: map(selectedAds, (x) => ({
             name: x.postName,
-            // objectStoryId: `${x.pageId}_${x.postId}`,
-            objectStoryId: `102286709170123_483748387740655`,
+            objectStoryId: `${x.pageId}_${x.postId}`,
+            // objectStoryId: `102286709170123_483748387740655`,
           })),
         },
       ];
@@ -84,8 +84,8 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
         adsInfo: [
           {
             name: x.postName,
-            // objectStoryId: `${x.pageId}_${x.postId}`,
-            objectStoryId: `102286709170123_483748387740655`,
+            objectStoryId: `${x.pageId}_${x.postId}`,
+            // objectStoryId: `102286709170123_483748387740655`,
           },
         ],
       }));
