@@ -34,8 +34,12 @@ import {
   map,
 } from "lodash";
 import { showNotification } from "../../../utils/index";
-import { campaignServices } from "../../../services";
-import { CREATE_CAMP_ERRORS } from "../../../constant/errors";
+import { campaignServices, postService } from "../../../services";
+import {
+  CREATE_CAMP_ERRORS,
+  CREATE_CAMP_ERRORS_CODES,
+} from "../../../constant/errors";
+import { CTA_LINK } from "../../../constant";
 const RUN_FLOWS = {
   sameCamps: "Chung Camp",
   diffCamps: "Khác Camp",
@@ -48,7 +52,28 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
   const [loadingCreateCampaign, setLoadingCreateCampaign] = useState(false);
   const [selectedVideos, setSelectedVideos] = useState([]);
   const [errors, setErrors] = useState([]);
-
+  const [addPostsCTA, setAddPostsCTA] = useState([]);
+  const handleUpdatePostCTA = async (uid) => {
+    const payload = {
+      addCta: true,
+    };
+    const updatePostCTAResponse = await postService.updatePost(uid, payload);
+    if (updatePostCTAResponse) {
+      showNotification("Thành công", "Gắn CTA thành công", "green");
+      setAddPostsCTA((prev) => filter(prev, (x) => x.uid !== uid));
+      setErrors((prev) =>
+        filter(prev, (x) => {
+          if (
+            x.postName ===
+            find(selectedPayload?.ads, (x) => x.uid === uid)?.postName
+          ) {
+            return false;
+          }
+          return true;
+        })
+      );
+    }
+  };
   const [payloads, setPayloads] = useState([]);
 
   useEffect(() => {
@@ -129,6 +154,19 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
           const { code, message, adName } = x;
           const foundName = postNames.find((name) => name === adName);
           if (foundName) {
+            if (code === CREATE_CAMP_ERRORS_CODES.POST_NOT_HAVE_CTA) {
+              const postUID = find(
+                selectedPayload?.ads,
+                (x) => x.postName === foundName
+              )?.uid;
+              setAddPostsCTA((prev) => [
+                ...prev,
+                {
+                  uid: postUID,
+                  onClick: false,
+                },
+              ]);
+            }
             return {
               postName: foundName,
               message: CREATE_CAMP_ERRORS[code] || message,
@@ -308,6 +346,48 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
                                 </Tooltip>
                               )}
                             </CopyButton>
+                            {includes(map(addPostsCTA, "uid"), item.uid) && (
+                              <Group justify="center">
+                                {find(addPostsCTA, (x) => x.uid === item.uid)
+                                  ?.onClick ? (
+                                  <Button
+                                    color="green"
+                                    variant="filled"
+                                    radius="sm"
+                                    size="xs"
+                                    onClick={() => {
+                                      handleUpdatePostCTA(item.uid);
+                                    }}
+                                  >
+                                    Confirm
+                                  </Button>
+                                ) : (
+                                  <Button
+                                    variant="filled"
+                                    color="#646A73"
+                                    radius="sm"
+                                    size="xs"
+                                    onClick={() => {
+                                      // redirect to CTA link
+                                      setAddPostsCTA((prev) => {
+                                        return map(prev, (x) => {
+                                          if (x.uid === item.uid) {
+                                            return {
+                                              uid: x.uid,
+                                              onClick: true,
+                                            };
+                                          }
+                                          return x;
+                                        });
+                                      });
+                                      window.open(CTA_LINK, "_blank");
+                                    }}
+                                  >
+                                    Gắn CTA
+                                  </Button>
+                                )}
+                              </Group>
+                            )}
                           </span>
                         </Flex>
                       </Group>

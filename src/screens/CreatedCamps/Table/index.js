@@ -10,7 +10,7 @@ import {
   Text,
   TextInput,
 } from "@mantine/core";
-import { keys } from "lodash";
+import { ceil, keys } from "lodash";
 import {
   IconSearch,
   IconFilterOff,
@@ -206,7 +206,6 @@ const CampaignsTable = ({
             href={row?.original?.linkAds}
           >
             <Badge color="blue" variant="filled">
-              {" "}
               <u>Link</u>{" "}
             </Badge>
           </a>
@@ -215,33 +214,13 @@ const CampaignsTable = ({
       {
         id: "dailyBudget",
         header: "BUDGET",
-        accessorFn: (row) => row?.attribute?.campaignData?.dailyBudget,
+        accessorFn: (row) =>
+          `${ceil(row?.attribute?.campaignData?.dailyBudget / 100)}💲`,
         enableEditing: false,
         enableSorting: true,
         size: 100,
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        // Cell: ({ row }) => {
-        //   return (
-        //     <Text
-        //       placeholder="Budget"
-        //       type="number"
-        //       size="sm"
-        //       styles={{
-        //         input: {
-        //           width: "100px",
-        //         },
-        //       }}
-        //       leftSection={
-        //         <IconCurrencyDollar
-        //           style={{ width: rem(16), height: rem(16) }}
-        //         />
-        //       }
-        //     >
-        //       {row?.original?.attribute?.campaignData?.dailyBudget}
-        //     </Text>
-        //   );
-        // },
       },
     ],
     [validationErrors, accounts, sampleCampaigns, campaigns, campsPayload]

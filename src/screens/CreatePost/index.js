@@ -135,7 +135,7 @@ const CreatePost = ({
               sku: x.sku,
               postId: ad.postId,
               caption: ad.caption,
-              addCTA: ad.addCTA,
+              addCta: ad.addCta,
             }));
           })
         )
@@ -624,7 +624,7 @@ const CreatePost = ({
         <Tabs.Panel value="createdPost">
           <Card
             className={cn(styles.card, styles.clipArtCard)}
-            title="Tạo Post"
+            title="Post đã tạo"
             classTitle="title-green"
             classCardHead={styles.classCardHead}
             classSpanTitle={styles.classScaleSpanTitle}
@@ -775,7 +775,31 @@ const CreatePost = ({
                       });
                     }}
                   />
-
+                  <Select
+                    placeholder="CTA"
+                    data={["Đã gắn CTA", "Chưa gắn CTA"]}
+                    styles={{
+                      input: {
+                        width: "100px",
+                      },
+                    }}
+                    value={query?.valueName}
+                    onChange={(value) =>
+                      setQuery({
+                        ...query,
+                        value: CONVERT_STATUS_TO_NUMBER[value],
+                        valueName: value,
+                      })
+                    }
+                    clearable
+                    onClear={() => {
+                      setQuery({
+                        ...query,
+                        value: null,
+                        valueName: null,
+                      });
+                    }}
+                  />
                   <Select
                     placeholder="Sorting"
                     data={BRIEF_SORTINGS}

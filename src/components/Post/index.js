@@ -39,7 +39,7 @@ const Ads = ({
   sku,
   type,
   postId,
-  addCTA,
+  addCta,
   captions,
   setQueryCaption,
   handlePageChangeCaption,
@@ -56,7 +56,7 @@ const Ads = ({
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedAds, setSelectedAds] = useState({});
-  const [isAddCTA, setIsAddCTA] = useState(addCTA);
+  const [isAddCTA, setIsAddCTA] = useState(addCta);
   const [isClickOnCTA, setIsClickOnCTA] = useState(false);
   const handleChooseCaption = (caption) => {
     if (isEmpty(caption)) return;
@@ -74,7 +74,7 @@ const Ads = ({
   };
   const handleUpdatePostCTA = async () => {
     const payload = {
-      addCTA: true,
+      addCta: true,
     };
     const updatePostCTAResponse = await postService.updatePost(uid, payload);
     if (updatePostCTAResponse) {
@@ -82,8 +82,8 @@ const Ads = ({
     }
   };
   useEffect(() => {
-    setIsAddCTA(addCTA);
-  }, [addCTA]);
+    setIsAddCTA(addCta);
+  }, [addCta]);
   return (
     <>
       <Checkbox.Card
@@ -156,6 +156,7 @@ const Ads = ({
                     label: {
                       fontWeight: "bold",
                     },
+                    error: {},
                   }}
                   onChange={(e) => {
                     setPostPayloads((prev) => {
@@ -173,6 +174,7 @@ const Ads = ({
                       return [...prev];
                     });
                   }}
+                  // error="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nonne merninisti licere mihi ista probare, quae sunt a te dicta?"
                 />
               </span>
             </Flex>
@@ -708,9 +710,6 @@ const PostCamp = ({
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedValue, setSelectedValue] = useState([]);
   const [chooseFanpage, setChooseFanpage] = useState(selectedFanpage);
-  if (map(ads, "uid").includes("e63b54495b726107dc4218a7c28350d7")) {
-    console.log("e63b54495b726107dc4218a7c28350d7");
-  }
   useEffect(() => {
     setChooseFanpage(selectedFanpage);
   }, [selectedFanpage]);

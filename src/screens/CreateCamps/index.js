@@ -3,7 +3,7 @@ import styles from "./CreateCamps.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Details from "./Details";
-import { map } from "lodash";
+import { filter, map } from "lodash";
 import { useDisclosure } from "@mantine/hooks";
 import { IconCircleCheck } from "@tabler/icons-react";
 import {
@@ -90,8 +90,19 @@ const CreateCampsScreen = () => {
     });
     const { data, metadata } = response;
     if (data) {
+      const filteredData = filter(data, (x) => {
+        const adsLinksLength = filter(
+          x.designInfo?.adsLinks,
+          (x) => x.postId && (x.type === "image" || !x.type) && !x.campaignId
+        ).length;
+        const videoLinksLength = filter(
+          x?.designInfo?.adsLinks,
+          (x) => x.postId && x.type === "video" && !x.campaignId
+        ).length;
+        return adsLinksLength > 0 || videoLinksLength > 0;
+      });
       setBriefs(
-        map(data, (x, index) => {
+        map(filteredData, (x, index) => {
           return {
             ...x,
             id: index + 1,
