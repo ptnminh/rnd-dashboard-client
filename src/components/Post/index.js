@@ -708,6 +708,7 @@ const PostCamp = ({
   captionsPagination,
   allProductBases,
   postErrors,
+  setFilterCta,
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedValue, setSelectedValue] = useState([]);

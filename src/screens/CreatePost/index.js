@@ -19,7 +19,16 @@ import styles from "./CreatePost.module.sass";
 import cn from "classnames";
 import { useEffect, useRef, useState } from "react";
 import { CONVERT_STATUS_TO_NUMBER } from "../../utils";
-import { compact, filter, find, flatMap, includes, isEmpty, map } from "lodash";
+import {
+  compact,
+  filter,
+  find,
+  flatMap,
+  includes,
+  isEmpty,
+  map,
+  values,
+} from "lodash";
 import { captionServices, postService, rndServices } from "../../services";
 import { useWindowScroll } from "@mantine/hooks";
 import { showNotification } from "../../utils/index";
@@ -40,7 +49,7 @@ const CreatePost = ({
   const [batch, setBatch] = useState("");
   const [activeTab, setActiveTab] = useState("readyPost");
   const [searchSKU, setSearchSKU] = useState("");
-  const [filterCta, setFilterCta] = useState(null);
+  const [filterCta, setFilterCta] = useState(CTA_STATUS.ASSIGNED);
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
   const [loadingCreatePost, setLoadingCreatePost] = useState(false);
   const [sortingBrief, setSortingBrief] = useState({});
@@ -100,7 +109,19 @@ const CreatePost = ({
     if (data) {
       setBriefs(
         map(
-          filter(data, (x) => !isEmpty(x.designInfo?.adsLinks)),
+          filter(data, (x) => {
+            const ads = x?.designInfo?.adsLinks;
+            let filteredAds = ads;
+            if (filterCta !== null && activeTab === "createdPost") {
+              if (filterCta === CTA_STATUS.ASSIGNED) {
+                filteredAds = filter(filteredAds, (ad) => ad.addCta);
+              } else {
+                filteredAds = filter(filteredAds, (ad) => !ad.addCta);
+              }
+              return isEmpty(filteredAds) ? false : true;
+            }
+            return isEmpty(x.designInfo?.adsLinks) ? false : true;
+          }),
           (x) => ({
             ...x,
             ads: x.designInfo?.adsLinks,
@@ -123,7 +144,7 @@ const CreatePost = ({
                 return !ad.postId;
               }
             });
-            if (filterCta !== null) {
+            if (filterCta !== null && activeTab === "createdPost") {
               if (filterCta === CTA_STATUS.ASSIGNED) {
                 filteredAds = filter(filteredAds, (ad) => ad.addCta);
               } else {
@@ -798,27 +819,17 @@ const CreatePost = ({
                   />
                   <Select
                     placeholder="CTA"
-                    data={["Đã gắn CTA", "Chưa gắn CTA"]}
+                    data={values(CTA_STATUS)}
                     styles={{
                       input: {
                         width: "100px",
                       },
                     }}
-                    value={query?.valueName}
-                    onChange={(value) =>
-                      setQuery({
-                        ...query,
-                        value: CONVERT_STATUS_TO_NUMBER[value],
-                        valueName: value,
-                      })
-                    }
+                    value={filterCta}
+                    onChange={(value) => setFilterCta(value)}
                     clearable
                     onClear={() => {
-                      setQuery({
-                        ...query,
-                        value: null,
-                        valueName: null,
-                      });
+                      setFilterCta(null);
                     }}
                   />
                   <Select
@@ -874,6 +885,7 @@ const CreatePost = ({
                       setBatch("");
                       setSearchSKU("");
                       setSortingBrief(null);
+                      setFilterCta(null);
                     }}
                   >
                     <IconFilterOff />
