@@ -24,6 +24,7 @@ import { captionServices, postService, rndServices } from "../../services";
 import { useWindowScroll } from "@mantine/hooks";
 import { showNotification } from "../../utils/index";
 import { BRIEF_SORTINGS, CONVERT_BRIEF_SORTINGS } from "../../constant/briefs";
+import { CTA_STATUS } from "../../constant";
 
 const CreatePost = ({
   brief,
@@ -39,6 +40,7 @@ const CreatePost = ({
   const [batch, setBatch] = useState("");
   const [activeTab, setActiveTab] = useState("readyPost");
   const [searchSKU, setSearchSKU] = useState("");
+  const [filterCta, setFilterCta] = useState(null);
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
   const [loadingCreatePost, setLoadingCreatePost] = useState(false);
   const [sortingBrief, setSortingBrief] = useState({});
@@ -110,16 +112,24 @@ const CreatePost = ({
           map(data, (x) => {
             const { designInfo } = x;
             const ads = designInfo?.adsLinks;
+
             if (isEmpty(ads)) {
               return null;
             }
-            const filteredAds = filter(ads, (ad) => {
+            let filteredAds = filter(ads, (ad) => {
               if (activeTab === "createdPost") {
                 return ad.postId;
               } else {
                 return !ad.postId;
               }
             });
+            if (filterCta !== null) {
+              if (filterCta === CTA_STATUS.ASSIGNED) {
+                filteredAds = filter(filteredAds, (ad) => ad.addCta);
+              } else {
+                filteredAds = filter(filteredAds, (ad) => !ad.addCta);
+              }
+            }
             return map(filteredAds, (ad, index) => ({
               uid: ad.uid,
               ctaLink: `https://pawfecthouse.com/${x.sku}`,
@@ -165,7 +175,7 @@ const CreatePost = ({
   };
   useEffect(() => {
     fetchBriefs(briefPagination.currentPage);
-  }, [query, sortingBrief, briefPagination.currentPage]);
+  }, [query, sortingBrief, briefPagination.currentPage, filterCta]);
   useEffect(() => {
     fetchUsers();
     fetchFanpages();
