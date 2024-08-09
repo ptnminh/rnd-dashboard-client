@@ -135,6 +135,7 @@ const CreatePost = ({
               sku: x.sku,
               postId: ad.postId,
               caption: ad.caption,
+              addCTA: ad.addCTA,
             }));
           })
         )
@@ -199,7 +200,7 @@ const CreatePost = ({
     );
     // check valid data
     if (isEmpty(transformedPayloads) || messageError) {
-      showNotification("Thất bại", messageError, "red");
+      showNotification("Thất bại", messageError || "Vui lòng chọn Post", "red");
       setLoadingCreatePost(false);
       return;
     }
@@ -869,7 +870,7 @@ const CreatePost = ({
             )}
           </Group>
 
-          <Affix position={{ bottom: 20, left: 100 }}>
+          <Affix position={{ bottom: 10, left: 50 }}>
             <Transition transition="slide-up" mounted={scroll.y > 0}>
               {(transitionStyles) => (
                 <Button

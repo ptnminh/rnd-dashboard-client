@@ -44,9 +44,7 @@ export const postService = {
       return false;
     }
   },
-  fetchPosts: async ({
-    limit = 10, page = 1, query = {}, sorting = {}
-  }) => {
+  fetchPosts: async ({ limit = 10, page = 1, query = {}, sorting = {} }) => {
     try {
       let url = `${hostAPI}/posts?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
@@ -65,9 +63,27 @@ export const postService = {
         return false;
       }
       return result;
-    } catch(error) {
+    } catch (error) {
       console.log("Error at fetchPosts:", error);
       return false;
     }
-  }
+  },
+  updatePost: async (id, data) => {
+    try {
+      const response = await axios.put(`${hostAPI}/posts/${id}`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification(
+          "Thất bại",
+          result?.message || "Cập nhật thất bại",
+          "red"
+        );
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at updatePost:", error);
+      return false;
+    }
+  },
 };

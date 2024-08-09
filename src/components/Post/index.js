@@ -33,11 +33,13 @@ import { useEffect, useState } from "react";
 import Captions from "../Captions";
 import { CONVERT_NUMBER_TO_STATUS } from "../../utils";
 import { CTA_LINK } from "../../constant";
+import { postService } from "../../services";
 
 const Ads = ({
   sku,
   type,
   postId,
+  addCTA,
   captions,
   setQueryCaption,
   handlePageChangeCaption,
@@ -54,6 +56,8 @@ const Ads = ({
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedAds, setSelectedAds] = useState({});
+  const [isAddCTA, setIsAddCTA] = useState(addCTA);
+  const [isClickOnCTA, setIsClickOnCTA] = useState(false);
   const handleChooseCaption = (caption) => {
     if (isEmpty(caption)) return;
     setPostPayloads((prev) => {
@@ -68,13 +72,18 @@ const Ads = ({
       });
     });
   };
-  console.log(
-    "🚀 ~ file: index.js ~ line 47 ~ Ads ~ selectedAds",
-    find(postPayloads, {
-      uid,
-    })?.name
-  );
-
+  const handleUpdatePostCTA = async () => {
+    const payload = {
+      addCTA: true,
+    };
+    const updatePostCTAResponse = await postService.updatePost(uid, payload);
+    if (updatePostCTAResponse) {
+      setIsAddCTA(true);
+    }
+  };
+  useEffect(() => {
+    setIsAddCTA(addCTA);
+  }, [addCTA]);
   return (
     <>
       <Checkbox.Card
@@ -402,25 +411,46 @@ const Ads = ({
                           </div>
                         </Group>
                       )}
-
-                      <Group
-                        style={{
-                          width: "100%",
-                          justifyContent: "flex-end",
-                        }}
-                      >
-                        <Button
-                          variant="filled"
-                          color="#646A73"
-                          radius="sm"
-                          onClick={() => {
-                            // redirect to CTA link
-                            window.open(CTA_LINK, "_blank");
+                      {postId && (
+                        <Group
+                          style={{
+                            width: "100%",
+                            justifyContent: "flex-end",
                           }}
                         >
-                          Gắn CTA
-                        </Button>
-                      </Group>
+                          {isAddCTA ? (
+                            <Button variant="filled" color="lime" radius="sm">
+                              Đã gắn CTA
+                            </Button>
+                          ) : (
+                            <Group justify="center">
+                              {isClickOnCTA ? (
+                                <Button
+                                  color="green"
+                                  variant="filled"
+                                  radius="sm"
+                                  onClick={handleUpdatePostCTA}
+                                >
+                                  Confirm
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="filled"
+                                  color="#646A73"
+                                  radius="sm"
+                                  onClick={() => {
+                                    // redirect to CTA link
+                                    setIsClickOnCTA(true);
+                                    window.open(CTA_LINK, "_blank");
+                                  }}
+                                >
+                                  Gắn CTA
+                                </Button>
+                              )}
+                            </Group>
+                          )}
+                        </Group>
+                      )}
                     </Group>
                   </Flex>
                 </Grid.Col>
@@ -678,7 +708,9 @@ const PostCamp = ({
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedValue, setSelectedValue] = useState([]);
   const [chooseFanpage, setChooseFanpage] = useState(selectedFanpage);
-
+  if (map(ads, "uid").includes("e63b54495b726107dc4218a7c28350d7")) {
+    console.log("e63b54495b726107dc4218a7c28350d7");
+  }
   useEffect(() => {
     setChooseFanpage(selectedFanpage);
   }, [selectedFanpage]);
