@@ -53,6 +53,7 @@ const Ads = ({
   choosePosts,
   setChoosePosts,
   allProductBases,
+  postErrors,
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedAds, setSelectedAds] = useState({});
@@ -174,7 +175,7 @@ const Ads = ({
                       return [...prev];
                     });
                   }}
-                  // error="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nonne merninisti licere mihi ista probare, quae sunt a te dicta?"
+                  error={find(postErrors, { adsId: uid })?.message}
                 />
               </span>
             </Flex>
@@ -706,6 +707,7 @@ const PostCamp = ({
   handlePageChangeCaption,
   captionsPagination,
   allProductBases,
+  postErrors,
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedValue, setSelectedValue] = useState([]);
@@ -872,6 +874,7 @@ const PostCamp = ({
                   choosePosts={choosePosts}
                   setChoosePosts={setChoosePosts}
                   allProductBases={allProductBases}
+                  postErrors={postErrors}
                 />
               )
             )}

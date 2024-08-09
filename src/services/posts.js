@@ -34,10 +34,6 @@ export const postService = {
         payloads: data,
       });
       const { data: result } = response;
-      if (result?.success === false) {
-        showNotification("Thất bại", result?.message, "red");
-        return false;
-      }
       return result;
     } catch (error) {
       console.log("Error at createPost:", error);

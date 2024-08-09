@@ -55,6 +55,7 @@ const CreatePost = ({
   });
   const [choosePosts, setChoosePosts] = useState([]);
   const [selectedFanpage, setSelectedFanpage] = useState(null);
+  const [postErrors, setPostErrors] = useState([]);
   const [postPayloads, setPostPayloads] = useState([]);
   const [briefPagination, setBriefPagination] = useState({
     currentPage: 1,
@@ -207,17 +208,26 @@ const CreatePost = ({
     const createPostResponse = await postService.createPost(
       transformedPayloads
     );
-    if (createPostResponse) {
+    if (createPostResponse?.success === false) {
+      showNotification(
+        "Thất bại",
+        createPostResponse?.message || "Tạo post thất bại",
+        "red"
+      );
+      const errors = createPostResponse?.errorList || [];
+      setPostErrors(errors);
+    } else {
       showNotification("Thành công", "Tạo post thành công", "green");
       setChoosePosts([]);
       setSelectedFanpage(null);
+      setPostErrors([]);
+      await fetchBriefs(briefPagination.currentPage);
+      if (brief) {
+        setTriggerFetchBrief(true);
+        closeModalCreatePostFromBrief();
+      }
     }
     setLoadingCreatePost(false);
-    await fetchBriefs(briefPagination.currentPage);
-    if (brief) {
-      setTriggerFetchBrief(true);
-      closeModalCreatePostFromBrief();
-    }
   };
 
   const fetchCaptions = async (page) => {
@@ -592,6 +602,7 @@ const CreatePost = ({
                   handlePageChangeCaption={handlePageChangeCaption}
                   captionsPagination={captionsPagination}
                   allProductBases={allProductBases}
+                  postErrors={postErrors}
                 />
               ))}
             </Flex>
@@ -877,6 +888,7 @@ const CreatePost = ({
                   handlePageChangeCaption={handlePageChangeCaption}
                   captionsPagination={captionsPagination}
                   allProductBases={allProductBases}
+                  postErrors={postErrors}
                 />
               ))}
             </Flex>
