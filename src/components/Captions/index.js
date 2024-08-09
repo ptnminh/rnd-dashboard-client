@@ -11,7 +11,6 @@ import {
   Pagination,
   Stack,
   TagsInput,
-  Text,
   Textarea,
   TextInput,
 } from "@mantine/core";
@@ -27,6 +26,8 @@ const ListCaptions = ({
   selectedValue,
   setSelectedValue,
   allProductBases,
+  handleChooseCaption,
+  closeModalChooseCaption,
 }) => {
   const [data, setData] = useState(captions);
   const [searchCaption, setSearchCaption] = useState("");
@@ -47,6 +48,9 @@ const ListCaptions = ({
           backgroundColor: "#EFF0F1",
           borderRadius: "10px",
           marginBottom: "10px",
+          zIndex: 9999,
+          position: "sticky",
+          top: "60px",
         }}
       >
         <Flex
@@ -135,6 +139,22 @@ const ListCaptions = ({
             }}
           >
             <IconFilterOff />
+          </Button>
+        </Flex>
+        <Flex
+          style={{
+            marginRight: "10px",
+          }}
+        >
+          <Button
+            variant="filled"
+            onClick={() => {
+              const caption = find(captions, { uid: selectedValue[0] });
+              handleChooseCaption(caption);
+              closeModalChooseCaption();
+            }}
+          >
+            Tiếp tục
           </Button>
         </Flex>
       </div>
@@ -251,6 +271,9 @@ const Captions = ({
   closeModalChooseCaption,
   allProductBases,
 }) => {
+  useEffect(() => {
+    handlePageChangeCaption(1);
+  }, []);
   return (
     <Card
       className={cn(styles.card, styles.clipArtCard)}
@@ -266,6 +289,8 @@ const Captions = ({
         selectedValue={selectedValue}
         setSelectedValue={setSelectedValue}
         allProductBases={allProductBases}
+        handleChooseCaption={handleChooseCaption}
+        closeModalChooseCaption={closeModalChooseCaption}
       />
       <Group justify="space-between">
         <Pagination
@@ -276,16 +301,6 @@ const Captions = ({
           size="md"
           style={{ marginTop: "20px", marginRight: "auto" }}
         />
-        <Button
-          variant="filled"
-          onClick={() => {
-            const caption = find(captions, { uid: selectedValue[0] });
-            handleChooseCaption(caption);
-            closeModalChooseCaption();
-          }}
-        >
-          Tiếp tục
-        </Button>
       </Group>
     </Card>
   );

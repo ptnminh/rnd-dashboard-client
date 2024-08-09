@@ -9,6 +9,7 @@ import {
   rem,
   Select,
   Tabs,
+  Text,
   TextInput,
   Transition,
 } from "@mantine/core";
@@ -34,6 +35,7 @@ import { useWindowScroll } from "@mantine/hooks";
 import { showNotification } from "../../utils/index";
 import { BRIEF_SORTINGS, CONVERT_BRIEF_SORTINGS } from "../../constant/briefs";
 import { CTA_STATUS } from "../../constant";
+import { modals } from "@mantine/modals";
 
 const CreatePost = ({
   brief,
@@ -49,7 +51,7 @@ const CreatePost = ({
   const [batch, setBatch] = useState("");
   const [activeTab, setActiveTab] = useState("readyPost");
   const [searchSKU, setSearchSKU] = useState("");
-  const [filterCta, setFilterCta] = useState(CTA_STATUS.ASSIGNED);
+  const [filterCta, setFilterCta] = useState(CTA_STATUS.UN_ASSIGNED);
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
   const [loadingCreatePost, setLoadingCreatePost] = useState(false);
   const [sortingBrief, setSortingBrief] = useState({});
@@ -72,7 +74,7 @@ const CreatePost = ({
     currentPage: 1,
     totalPages: 1,
   });
-  const [progressValue, setProgressValue] = useState(50);
+  const [progressValue, setProgressValue] = useState(100);
 
   const handleChangePage = (page) => {
     setBriefPagination({ ...briefPagination, currentPage: page });
@@ -85,10 +87,6 @@ const CreatePost = ({
   };
   const fetchBriefs = async (page) => {
     setLoadingFetchBrief(true);
-    setProgressValue(0); // Start at 0%
-
-    // Simulate a short delay to show progress
-    setTimeout(() => setProgressValue(50), 100); // Set to 50% after request is sent
     const response = await rndServices.fetchBriefs({
       page,
       limit: 10,
@@ -178,8 +176,8 @@ const CreatePost = ({
       setBriefs([]);
       setBriefPagination({ currentPage: 1, totalPages: 1 });
     }
+    setProgressValue(0); // Set to 100% when request completes
     setLoadingFetchBrief(false);
-    setProgressValue(100); // Set to 100% when request completes
   };
   const fetchFanpages = async () => {
     const { data } = await postService.fetchFanpages({
@@ -257,6 +255,10 @@ const CreatePost = ({
         setTriggerFetchBrief(true);
         closeModalCreatePostFromBrief();
       }
+      if (!brief) {
+        openModalConfirmAddCta();
+        window.scrollTo(0, 0);
+      }
     }
     setLoadingCreatePost(false);
   };
@@ -315,7 +317,7 @@ const CreatePost = ({
         ...resetQuery,
         postStatus: ["fulfilled", "partial"],
       });
-      setFilterCta(CTA_STATUS.ASSIGNED);
+      setFilterCta(CTA_STATUS.UN_ASSIGNED);
     } else {
       setQuery({
         ...resetQuery,
@@ -327,6 +329,7 @@ const CreatePost = ({
       totalPages: 1,
     });
     setSortingBrief({});
+    setProgressValue(100);
   }, [activeTab]);
   useEffect(() => {
     if (
@@ -343,16 +346,18 @@ const CreatePost = ({
       hasSetChoosePosts.current = true;
     }
   }, [postPayloads, activeTab]);
+  const openModalConfirmAddCta = () =>
+    modals.openConfirmModal({
+      title: "Gắn CTA !!!!",
+      children: <Text size="sm">Nhớ gắn cta cho post hình nha!</Text>,
+      labels: { confirm: "Confirm", cancel: "Cancel" },
+      onCancel: () => console.log("Cancel"),
+      onConfirm: () => setActiveTab("createdPost"),
+    });
   return (
     <>
-      {progressValue < 100 && (
-        <Progress
-          value={progressValue}
-          size="sm"
-          transitionDuration={200}
-          striped
-          animated
-        />
+      {progressValue === 100 && (
+        <Progress value={progressValue} size="sm" striped animated />
       )}
       <Tabs value={activeTab} onChange={setActiveTab}>
         <Tabs.List>
