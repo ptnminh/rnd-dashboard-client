@@ -315,6 +315,7 @@ const CreatePost = ({
         ...resetQuery,
         postStatus: ["fulfilled", "partial"],
       });
+      setFilterCta(CTA_STATUS.ASSIGNED);
     } else {
       setQuery({
         ...resetQuery,
