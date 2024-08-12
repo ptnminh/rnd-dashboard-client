@@ -90,12 +90,13 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
           rootCampId: selectedPayload?.rootCampaign?.campaignId,
           campInfo: {
             dailyBudget: totalBudget,
-            name: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch} - Test1`,
+            name: `${selectedPayload.team} - ${selectedPayload.sku} - ${
+              selectedPayload.batch
+            } - Test${selectedPayload.exCampIds.length + 1}`,
           },
           adsInfo: map(selectedAds, (x) => ({
             name: x.postName,
             objectStoryId: `${x.pageId}_${x.postId}`,
-            // objectStoryId: `102286709170123_483748387740655`,
           })),
         },
       ];
@@ -114,14 +115,13 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
         campInfo: {
           name: `${selectedPayload.team} - ${selectedPayload.sku} - ${
             selectedPayload.batch
-          } - Test${index + 1}`,
+          } - Test${selectedPayload.exCampIds.length + index + 1}`,
           dailyBudget: budgetPerCamp,
         },
         adsInfo: [
           {
             name: x.postName,
             objectStoryId: `${x.pageId}_${x.postId}`,
-            // objectStoryId: `102286709170123_483748387740655`,
           },
         ],
       }));

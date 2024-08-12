@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
-import styles from "./CreateCamps.module.sass";
+import styles from "./VideoScreens.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Details from "./Details";
-import { filter, map } from "lodash";
+import { map } from "lodash";
+
 import { useDisclosure } from "@mantine/hooks";
-import { IconCircleCheck } from "@tabler/icons-react";
+import {
+  IconCircleCheck,
+  IconCopy,
+  IconCopyCheckFilled,
+} from "@tabler/icons-react";
 import {
   Modal,
   Pagination,
@@ -16,7 +21,10 @@ import {
   rem,
   Flex,
   TextInput,
+  Button,
   LoadingOverlay,
+  Card as MantineCard,
+  CopyButton,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
@@ -26,23 +34,24 @@ import {
   CONVERT_NUMBER_TO_STATUS,
   getStringAsEditorState,
 } from "../../utils";
-import { campaignServices, rndServices } from "../../services";
+import { rndServices } from "../../services";
+import { showNotification } from "../../utils/index";
 import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
-import { BRIEF_TYPES } from "../../constant";
+import { BRIEF_TYPES, STATUS } from "../../constant";
 import NewDesign from "./NewDesign";
-import Clipart from "./Clipart";
-import Niche from "./Niche";
-import { accountServices } from "../../services/accounts";
-import PreviewCamps from "./PreviewCamps";
+import ScaleDesign from "./ScaleDesign";
+import ScaleMixMatch from "./ScaleMixMatch";
+import ScaleClipart from "./ScaleCliparts";
+import ScaleNiche from "./Niche";
 
-const CreateCampsScreen = () => {
+const VideoScreens = () => {
   const navigate = useNavigate();
   const location = useLocation();
+
   const queryParams = new URLSearchParams(location.search);
   const initialSearch = queryParams.get("search") || "";
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
-  const [campsPayload, setCampsPayload] = useState([]);
   const [briefs, setBriefs] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
   const [users, setUsers] = useState([]);
@@ -50,33 +59,19 @@ const CreateCampsScreen = () => {
     currentPage: initialPage,
     totalPages: 1,
   });
-  const [query, setQuery] = useState({
-    status: [3],
-    campaignStatus: ["unfulfilled", "partial"],
-    postStatus: ["fulfilled", "partial"],
-  });
+  const [query, setQuery] = useState({});
   const [sorting, setSorting] = useState([]);
+
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedSKU, setSelectedSKU] = useState();
-  const [selectedCollection, setSelectedCollection] = useState();
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
-  const [selectedCreateCampPayload, setSelectedCreateCampPayload] = useState(
-    {}
-  );
   const [trigger, setTrigger] = useState(false);
-  const [accounts, setAccounts] = useState([]);
-  const [querySampleCampaigns, setQuerySampleCampaigns] = useState({});
-  const [sampleCampaigns, setSampleCampaigns] = useState([]);
-  const [linkProduct, setLinkProduct] = useState("");
-  const [
-    openedModalPreview,
-    { open: openModalPreview, close: closeModalPreview },
-  ] = useDisclosure(false);
+  const [metadata, setMetadata] = useState({});
+  const [linkDesign, setLinkDesign] = useState("");
 
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
-  const [loadingUpdateProductLink, setLoadingUpdateProductLink] =
-    useState(false);
+  const [loadingUpdateDesignLink, setLoadingUpdateDesignLink] = useState(false);
 
   const fetchBriefs = async (page = 1) => {
     setLoadingFetchBrief(true);
@@ -84,25 +79,13 @@ const CreateCampsScreen = () => {
       search,
       page,
       limit: 30,
-      view: "epm",
       sorting,
       ...query,
     });
     const { data, metadata } = response;
     if (data) {
-      const filteredData = filter(data, (x) => {
-        const adsLinksLength = filter(
-          x.designInfo?.adsLinks,
-          (x) => x.postId && (x.type === "image" || !x.type) && !x.campaignId
-        ).length;
-        const videoLinksLength = filter(
-          x?.designInfo?.adsLinks,
-          (x) => x.postId && x.type === "video" && !x.campaignId
-        ).length;
-        return adsLinksLength > 0 || videoLinksLength > 0;
-      });
       setBriefs(
-        map(filteredData, (x, index) => {
+        map(data, (x, index) => {
           return {
             ...x,
             id: index + 1,
@@ -117,39 +100,13 @@ const CreateCampsScreen = () => {
           };
         })
       );
-      setCampsPayload(
-        map(data, (x) => ({
-          batch: x.batch,
-          briefId: x.uid,
-          team: x.rndTeam,
-          sku: x.sku,
-          ads: x?.designInfo?.adsLinks,
-          exCampIds: map(
-            filter(x?.designInfo?.adsLinks, (link) => link.campaignId),
-            "campaignId"
-          ),
-        }))
-      );
       setPagination(metadata);
+      setMetadata(metadata);
     } else {
       setBriefs([]);
     }
     setLoadingFetchBrief(false);
     setTrigger(false);
-  };
-  const fetchSampleCampaigns = async (page = 1) => {
-    const { data } = await campaignServices.fetchSampleCampaigns({
-      query: querySampleCampaigns,
-      page,
-      limit: -1,
-    });
-    setSampleCampaigns(data);
-  };
-  const fetchAccounts = async () => {
-    const { data } = await accountServices.fetchAllAccounts({
-      limit: -1,
-    });
-    setAccounts(data);
   };
   const fetchUsers = async () => {
     const { data } = await rndServices.getUsers({
@@ -164,11 +121,9 @@ const CreateCampsScreen = () => {
   useEffect(() => {
     fetchBriefs(pagination.currentPage);
   }, [search, pagination.currentPage, query, trigger, sorting]);
-  useEffect(() => {
-    fetchSampleCampaigns();
-  }, [querySampleCampaigns]);
 
   useEffect(() => {
+    // Update the URL when search or page changes
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (pagination.currentPage !== 1)
@@ -178,16 +133,79 @@ const CreateCampsScreen = () => {
 
   useEffect(() => {
     fetchUsers();
-    fetchAccounts();
   }, []);
 
+  const handleUpdateLinkDesign = async (uid) => {
+    setLoadingUpdateDesignLink(true);
+    if (!linkDesign) {
+      showNotification("Thất bại", "Link Design không được để trống", "red");
+      setLoadingUpdateDesignLink(false);
+      return;
+    }
+    const urlPattern =
+      /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
+    if (!urlPattern.test(linkDesign)) {
+      showNotification("Thất bại", "Link Design không hợp lệ", "red");
+      setLoadingUpdateDesignLink(false);
+      return;
+    }
+    if (linkDesign) {
+      const updateResponse = await rndServices.updateBrief({
+        uid,
+        data: {
+          linkDesign,
+          status: STATUS.DESIGNED,
+        },
+      });
+      if (updateResponse) {
+        showNotification(
+          "Thành công",
+          "Update Link Design thành công",
+          "green"
+        );
+        await fetchBriefs(pagination.currentPage);
+      }
+    }
+    close();
+    setLoadingUpdateDesignLink(false);
+  };
   return (
     <>
       <Card
         className={styles.card}
-        title="List Camps đang đợi"
+        title="VIDEO TASK"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
+        head={
+          <>
+            <Flex
+              style={{
+                gap: "30px",
+                padding: "10px",
+                borderRadius: "10px",
+                backgroundColor: "#EFF0F1",
+              }}
+              justify="end"
+            >
+              <div
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                }}
+              >
+                Undone: {metadata?.totalUndoneBriefs}
+              </div>
+              <div
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                }}
+              >
+                Time to done: {metadata?.totalTimeToDoneBriefs}h
+              </div>
+            </Flex>
+          </>
+        }
       >
         <Details
           className={styles.details}
@@ -205,18 +223,9 @@ const CreateCampsScreen = () => {
           loadingFetchBrief={loadingFetchBrief}
           setLoadingFetchBrief={setLoadingFetchBrief}
           setTrigger={setTrigger}
-          setLinkProduct={setLinkProduct}
+          setLinkDesign={setLinkDesign}
           setSorting={setSorting}
           sorting={sorting}
-          accounts={accounts}
-          setCampsPayload={setCampsPayload}
-          campsPayload={campsPayload}
-          querySampleCampaigns={querySampleCampaigns}
-          setQuerySampleCampaigns={setQuerySampleCampaigns}
-          sampleCampaigns={sampleCampaigns}
-          openModalPreview={openModalPreview}
-          setSelectedCreateCampPayload={setSelectedCreateCampPayload}
-          selectedCreateCampPayload={selectedCreateCampPayload}
         />
       </Card>
       <Pagination
@@ -230,7 +239,9 @@ const CreateCampsScreen = () => {
       {selectedSKU &&
         selectedSKU?.briefType !== BRIEF_TYPES[1] &&
         selectedSKU?.briefType !== BRIEF_TYPES[2] &&
-        selectedSKU?.briefType !== BRIEF_TYPES[3] && (
+        selectedSKU?.briefType !== BRIEF_TYPES[3] &&
+        selectedSKU?.briefType !== BRIEF_TYPES[4] &&
+        selectedSKU?.briefType !== BRIEF_TYPES[5] && (
           <Modal
             opened={opened}
             onClose={close}
@@ -243,7 +254,7 @@ const CreateCampsScreen = () => {
             size="1000px"
           >
             <LoadingOverlay
-              visible={loadingUpdateProductLink}
+              visible={loadingUpdateDesignLink}
               zIndex={1000}
               overlayProps={{ radius: "sm", blur: 2 }}
             />
@@ -263,7 +274,7 @@ const CreateCampsScreen = () => {
                     borderRadius: "12px",
                   }}
                 >
-                  {selectedSKU?.briefType}
+                  {selectedSKU?.briefType} - từ {selectedSKU?.skuRef}
                 </div>
               </Grid.Col>
               <Grid.Col span={5}>
@@ -306,31 +317,18 @@ const CreateCampsScreen = () => {
                   {selectedSKU?.rndTeam} - RnD {selectedSKU?.rnd.name} -
                   Designer {selectedSKU?.designer.name}
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-start",
-                    padding: "5px",
-                    fontSize: "14px",
-                  }}
-                >
-                  EPM {selectedSKU?.epm.name}
-                </div>
               </Grid.Col>
               <Grid.Col span={5}>
                 <div
                   style={{
                     display: "flex",
                     justifyContent: "center",
-                    padding: "10px",
+                    padding: "5px",
                     fontSize: "18px",
                     alignItems: "center",
                   }}
                 >
-                  {selectedSKU?.briefType === BRIEF_TYPES[5]
-                    ? "Product Line"
-                    : "Ref"}
+                  REF
                 </div>
                 <Image
                   radius="md"
@@ -350,9 +348,7 @@ const CreateCampsScreen = () => {
                     marginTop: "10px",
                   }}
                 >
-                  {selectedSKU?.briefType === BRIEF_TYPES[5]
-                    ? selectedSKU?.productLine?.name
-                    : selectedSKU?.skuRef}
+                  {selectedSKU?.skuRef}
                 </div>
                 <List
                   spacing="lg"
@@ -366,61 +362,9 @@ const CreateCampsScreen = () => {
                     </ThemeIcon>
                   }
                 >
-                  {selectedSKU?.designLinkRef && (
-                    <List.Item>
-                      {selectedSKU?.briefType === BRIEF_TYPES[5]
-                        ? "Link Product (Market):"
-                        : "Link Design (NAS):"}{" "}
-                      <a
-                        style={{
-                          display: "inline-block",
-                          width: "200px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textDecoration: "none",
-                          color: "#228be6",
-                          verticalAlign: "middle",
-                        }}
-                        href={
-                          selectedSKU?.briefType === BRIEF_TYPES[5]
-                            ? `https://${selectedSKU.designLinkRef.replace(
-                                /^(https?:\/\/)?/,
-                                ""
-                              )}`
-                            : selectedSKU?.designLinkRef
-                        }
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {selectedSKU?.designLinkRef}
-                      </a>
-                    </List.Item>
-                  )}
-                  {selectedSKU?.productInfo?.tibSearchCampaignLink && (
-                    <List.Item>
-                      Link Campaign (TIB):{" "}
-                      <a
-                        style={{
-                          display: "inline-block",
-                          width: "200px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textDecoration: "none",
-                          color: "#228be6",
-                          verticalAlign: "middle",
-                        }}
-                        href={selectedSKU?.productInfo?.tibSearchCampaignLink}
-                        target="_blank"
-                      >
-                        {selectedSKU?.productInfo?.tibSearchCampaignLink}
-                      </a>
-                    </List.Item>
-                  )}
                   {selectedSKU?.linkProductRef && (
                     <List.Item>
-                      Link Store:{" "}
+                      Link Product:{" "}
                       <a
                         style={{
                           display: "inline-block",
@@ -434,8 +378,31 @@ const CreateCampsScreen = () => {
                         }}
                         href={selectedSKU?.linkProductRef}
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
                         {selectedSKU?.linkProductRef}
+                      </a>
+                    </List.Item>
+                  )}
+                  {selectedSKU?.designLinkRef && (
+                    <List.Item>
+                      Link Design:{" "}
+                      <a
+                        style={{
+                          display: "inline-block",
+                          width: "230px",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          textDecoration: "none",
+                          color: "#228be6",
+                          verticalAlign: "middle",
+                        }}
+                        href={selectedSKU?.designLinkRef}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {selectedSKU?.designLinkRef}
                       </a>
                     </List.Item>
                   )}
@@ -461,31 +428,45 @@ const CreateCampsScreen = () => {
                     alignItems: "center",
                   }}
                 >
-                  {selectedSKU?.briefType === BRIEF_TYPES[5]
-                    ? "Design + Clipart"
-                    : "Scale"}
+                  Scale
                 </div>
-                <Image
-                  radius="md"
-                  src={
-                    selectedSKU?.designInfo?.thumbLink ||
-                    "/images/content/not_found_2.jpg"
-                  }
-                  height={200}
-                  fit="contain"
-                />
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    padding: "10px",
-                    fontSize: "18px",
-                    alignItems: "center",
-                    marginTop: "10px",
-                  }}
-                >
-                  {selectedSKU?.sku} mới
-                </div>
+                {selectedSKU?.briefType === BRIEF_TYPES[0] ||
+                selectedSKU?.briefType === BRIEF_TYPES[1] ||
+                (selectedSKU?.briefType === BRIEF_TYPES[2] &&
+                  selectedSKU?.clipart.name) ? (
+                  <>
+                    <Image
+                      radius="md"
+                      src={
+                        selectedSKU[
+                          CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                            selectedSKU?.briefType
+                          ]
+                        ]?.image || "/images/content/not_found_2.jpg"
+                      }
+                      height={200}
+                      fit="contain"
+                    />
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        padding: "10px",
+                        fontSize: "18px",
+                        alignItems: "center",
+                        marginTop: "10px",
+                      }}
+                    >
+                      {
+                        selectedSKU[
+                          CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                            selectedSKU?.briefType
+                          ]
+                        ]?.name
+                      }
+                    </div>
+                  </>
+                ) : null}
                 <List
                   spacing="lg"
                   size="sm"
@@ -498,39 +479,15 @@ const CreateCampsScreen = () => {
                     </ThemeIcon>
                   }
                 >
-                  {selectedSKU?.briefType === BRIEF_TYPES[4] ||
-                  selectedSKU?.briefType === BRIEF_TYPES[5] ? (
+                  {selectedSKU[
+                    CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
+                  ]?.refLink && (
                     <List.Item>
-                      Product Base: {""}
-                      <span>
-                        {selectedSKU?.skuInfo.name ||
-                          selectedSKU?.productLine?.name}
-                      </span>
-                    </List.Item>
-                  ) : (
-                    <List.Item>
-                      {selectedSKU?.briefType === BRIEF_TYPES[0]
-                        ? "Product Base"
-                        : "Clipart"}
-                      :{" "}
-                      <span>
-                        {
-                          selectedSKU?.[
-                            CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                              selectedSKU?.briefType
-                            ]
-                          ]?.name
-                        }
-                      </span>
-                    </List.Item>
-                  )}
-                  {selectedSKU?.linkDesign && (
-                    <List.Item>
-                      Link Design (NAS):{" "}
+                      Link Mockup:{" "}
                       <a
                         style={{
                           display: "inline-block",
-                          width: "200px",
+                          width: "230px",
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
@@ -538,59 +495,149 @@ const CreateCampsScreen = () => {
                           color: "#228be6",
                           verticalAlign: "middle",
                         }}
-                        href={selectedSKU?.linkDesign}
+                        href={
+                          selectedSKU[
+                            CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                              selectedSKU?.briefType
+                            ]
+                          ]?.refLink
+                        }
                         target="_blank"
                       >
-                        {selectedSKU?.linkDesign}
+                        {
+                          selectedSKU[
+                            CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                              selectedSKU?.briefType
+                            ]
+                          ]?.refLink
+                        }
                       </a>
                     </List.Item>
                   )}
-                  <List.Item>
-                    Link Campaign (TIB) - Auto: (Coming soon)
-                  </List.Item>
                 </List>
+                {selectedSKU?.briefType === BRIEF_TYPES[2] && (
+                  <MantineCard
+                    shadow="sm"
+                    padding="sm"
+                    style={{
+                      cursor: "pointer",
+                      position: "relative",
+                      marginTop: "10px",
+                    }}
+                  >
+                    <MantineCard.Section>
+                      <div
+                        style={{
+                          cursor: "pointer",
+                          width: "100%",
+                          height: "200px",
+                          padding: "10px",
+                          position: "relative",
+                        }}
+                      >
+                        {selectedSKU?.niche?.quote}
+                        {true && (
+                          <>
+                            <div
+                              style={{
+                                padding: "5px",
+                                position: "absolute",
+                                bottom: "10px",
+                                right: "13px",
+                                borderRadius: "50%",
+                                zIndex: 2,
+                              }}
+                            >
+                              <CopyButton
+                                value={selectedSKU?.niche?.quote}
+                                color
+                              >
+                                {({ copied, copy }) => (
+                                  <Button color="#62D256" onClick={copy}>
+                                    {copied ? (
+                                      <IconCopyCheckFilled color="#ffffff" />
+                                    ) : (
+                                      <IconCopy color="#ffffff" />
+                                    )}
+                                  </Button>
+                                )}
+                              </CopyButton>
+                            </div>
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "9px",
+                                right: "0",
+                                height: "94%",
+                                width: "99%",
+                                cursor: "pointer",
+                                padding: "10px",
+                                borderRadius: "10px",
+                                zIndex: 1,
+                              }}
+                            ></div>
+                          </>
+                        )}
+                      </div>
+                    </MantineCard.Section>
+                  </MantineCard>
+                )}
               </Grid.Col>
               <Grid.Col span={12}>
                 <Editor
-                  state={getStringAsEditorState(selectedSKU?.note?.epm)}
+                  state={getStringAsEditorState(selectedSKU?.note?.designer)}
                   classEditor={styles.editor}
-                  label="EPM Note"
+                  label="Designer Note"
                   readOnly={true}
                 />
               </Grid.Col>
               <Grid.Col span={12}>
                 <Flex gap={10}>
                   <TextInput
-                    placeholder="Output - Link Website"
+                    placeholder="Output - Link Design (NAS)"
                     style={{
                       flex: "1 1 90%",
                     }}
-                    value={linkProduct}
-                    onChange={(event) => setLinkProduct(event.target.value)}
+                    value={linkDesign}
+                    onChange={(event) => setLinkDesign(event.target.value)}
                   />
+                  <Button
+                    style={{
+                      flex: "1 1 10%",
+                      backgroundColor: "#62D256",
+                      color: "#ffffff",
+                    }}
+                    onClick={() => {
+                      handleUpdateLinkDesign(selectedSKU?.uid);
+                    }}
+                  >
+                    DONE
+                  </Button>
                 </Flex>
               </Grid.Col>
             </Grid>
           </Modal>
         )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[1] && (
-        <Clipart
+        <ScaleClipart
           opened={opened}
           close={close}
           selectedSKU={selectedSKU}
-          linkProduct={linkProduct}
-          loadingUpdateProductLink={loadingUpdateProductLink}
-          setLinkProduct={setLinkProduct}
+          linkDesign={linkDesign}
+          loadingUpdateDesignLink={loadingUpdateDesignLink}
+          setLinkDesign={setLinkDesign}
+          handleUpdateLinkDesign={handleUpdateLinkDesign}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[2] && (
-        <Niche
+        <ScaleNiche
           opened={opened}
           close={close}
           selectedSKU={selectedSKU}
-          linkProduct={linkProduct}
-          loadingUpdateProductLink={loadingUpdateProductLink}
-          setLinkProduct={setLinkProduct}
+          linkDesign={linkDesign}
+          loadingUpdateDesignLink={loadingUpdateDesignLink}
+          setLinkDesign={setLinkDesign}
+          handleUpdateLinkDesign={handleUpdateLinkDesign}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[3] && (
@@ -598,30 +645,36 @@ const CreateCampsScreen = () => {
           opened={opened}
           close={close}
           selectedSKU={selectedSKU}
-          linkProduct={linkProduct}
-          loadingUpdateProductLink={loadingUpdateProductLink}
-          setLinkProduct={setLinkProduct}
+          linkDesign={linkDesign}
+          loadingUpdateDesignLink={loadingUpdateDesignLink}
+          setLinkDesign={setLinkDesign}
+          handleUpdateLinkDesign={handleUpdateLinkDesign}
         />
       )}
-      <Modal
-        opened={openedModalPreview}
-        onClose={closeModalPreview}
-        transitionProps={{ transition: "fade", duration: 200 }}
-        overlayProps={{
-          backgroundOpacity: 0.55,
-          blur: 3,
-        }}
-        radius="md"
-        size="1000px"
-      >
-        <PreviewCamps
-          selectedPayload={selectedCreateCampPayload}
-          closeModal={closeModalPreview}
-          setTrigger={setTrigger}
+      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[4] && (
+        <ScaleDesign
+          opened={opened}
+          close={close}
+          selectedSKU={selectedSKU}
+          linkDesign={linkDesign}
+          loadingUpdateDesignLink={loadingUpdateDesignLink}
+          setLinkDesign={setLinkDesign}
+          handleUpdateLinkDesign={handleUpdateLinkDesign}
         />
-      </Modal>
+      )}
+      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[5] && (
+        <ScaleMixMatch
+          opened={opened}
+          close={close}
+          selectedSKU={selectedSKU}
+          linkDesign={linkDesign}
+          loadingUpdateDesignLink={loadingUpdateDesignLink}
+          setLinkDesign={setLinkDesign}
+          handleUpdateLinkDesign={handleUpdateLinkDesign}
+        />
+      )}
     </>
   );
 };
 
-export default CreateCampsScreen;
+export default VideoScreens;

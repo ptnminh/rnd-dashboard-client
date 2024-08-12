@@ -237,6 +237,7 @@ export const rndServices = {
         ...(epm && { epm }),
         ...(postStatus && { postStatus }),
         ...(campaignStatus && { campaignStatus }),
+        ...(view && { view }),
       };
       const sort = !isEmpty(sorting)
         ? {

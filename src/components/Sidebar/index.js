@@ -32,6 +32,10 @@ const navigation = [
         title: "Design - Feedback",
         url: "/designer/feedback",
       },
+      {
+        title: "Video - Submit",
+        url: "/designer/video",
+      },
     ],
   },
   {

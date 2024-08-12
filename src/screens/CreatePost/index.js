@@ -4,6 +4,7 @@ import {
   Checkbox,
   Flex,
   Group,
+  Image,
   Pagination,
   Progress,
   rem,
@@ -105,32 +106,34 @@ const CreatePost = ({
     }
 
     if (data) {
-      setBriefs(
-        map(
-          filter(data, (x) => {
-            const ads = x?.designInfo?.adsLinks;
-            let filteredAds = ads;
-            if (filterCta !== null && activeTab === "createdPost") {
-              if (filterCta === CTA_STATUS.ASSIGNED) {
-                filteredAds = filter(filteredAds, (ad) => ad.addCta);
-              } else {
-                filteredAds = filter(filteredAds, (ad) => !ad.addCta);
-              }
-              return isEmpty(filteredAds) ? false : true;
+      const filteredData = map(
+        filter(data, (x) => {
+          const ads = x?.designInfo?.adsLinks;
+          let filteredAds = ads;
+          if (filterCta !== null && activeTab === "createdPost") {
+            if (filterCta === CTA_STATUS.ASSIGNED) {
+              filteredAds = filter(filteredAds, (ad) => ad.addCta);
+            } else {
+              filteredAds = filter(filteredAds, (ad) => !ad.addCta);
             }
-            return isEmpty(x.designInfo?.adsLinks) ? false : true;
-          }),
-          (x) => ({
-            ...x,
-            ads: x.designInfo?.adsLinks,
-          })
-        )
+            return isEmpty(filteredAds) ? false : true;
+          }
+          return isEmpty(x.designInfo?.adsLinks) ? false : true;
+        }),
+        (x) => ({
+          ...x,
+          ads: x.designInfo?.adsLinks,
+        })
       );
+      setBriefs(filteredData);
       const ads = flatMap(
         compact(
           map(data, (x) => {
             const { designInfo } = x;
-            const ads = designInfo?.adsLinks;
+            const ads = map(designInfo?.adsLinks, (ad, index) => ({
+              ...ad,
+              index: index + 1,
+            }));
 
             if (isEmpty(ads)) {
               return null;
@@ -149,7 +152,7 @@ const CreatePost = ({
                 filteredAds = filter(filteredAds, (ad) => !ad.addCta);
               }
             }
-            return map(filteredAds, (ad, index) => ({
+            return map(filteredAds, (ad) => ({
               uid: ad.uid,
               ctaLink: `https://pawfecthouse.com/${x.sku}`,
               ...(selectedFanpage && {
@@ -159,7 +162,7 @@ const CreatePost = ({
                 ad?.postName ||
                 `${x.sku} - ${x.batch} - ${
                   ad.type === "image" || !ad.type ? "Image" : "Video"
-                }${index + 1}`,
+                }${ad.index}`,
               image: ad.value,
               briefId: x.uid,
               sku: x.sku,
@@ -624,25 +627,34 @@ const CreatePost = ({
                 </Flex>
               </div>
             )}
-            <Flex gap={30} direction="column">
-              {map(briefs, (brief) => (
-                <PostCamp
-                  {...brief}
-                  postPayloads={postPayloads}
-                  setPostPayloads={setPostPayloads}
-                  selectedFanpage={selectedFanpage}
-                  fanpages={fanpages}
-                  choosePosts={choosePosts}
-                  setChoosePosts={setChoosePosts}
-                  captions={captions}
-                  setQueryCaption={setQueryCaption}
-                  handlePageChangeCaption={handlePageChangeCaption}
-                  captionsPagination={captionsPagination}
-                  allProductBases={allProductBases}
-                  postErrors={postErrors}
-                />
-              ))}
-            </Flex>
+            {!isEmpty(briefs) ? (
+              <Flex gap={30} direction="column">
+                {map(briefs, (brief) => (
+                  <PostCamp
+                    {...brief}
+                    postPayloads={postPayloads}
+                    setPostPayloads={setPostPayloads}
+                    selectedFanpage={selectedFanpage}
+                    fanpages={fanpages}
+                    choosePosts={choosePosts}
+                    setChoosePosts={setChoosePosts}
+                    captions={captions}
+                    setQueryCaption={setQueryCaption}
+                    handlePageChangeCaption={handlePageChangeCaption}
+                    captionsPagination={captionsPagination}
+                    allProductBases={allProductBases}
+                    postErrors={postErrors}
+                  />
+                ))}
+              </Flex>
+            ) : (
+              <Image
+                src="/images/content/not_found_2.jpg"
+                h={400}
+                fit="contain"
+                w="100%"
+              />
+            )}
           </Card>
           <Group
             justify={isEmpty(brief) ? "space-between" : "flex-end"}

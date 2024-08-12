@@ -42,7 +42,6 @@ import RunFlows from "../RunFlows";
 
 const BriefsTable = ({
   briefs,
-  name,
   query,
   setQuery,
   setSelectedSKU,
@@ -61,11 +60,9 @@ const BriefsTable = ({
   const [validationErrors, setValidationErrors] = useState({});
   const [selectedCreateCustomCamp, setSelectedCreateCustomCamp] = useState({});
   const [data, setData] = useState(briefs || []);
-  const [templateName, setTemplateName] = useState(name);
   useEffect(() => {
     setData(briefs);
-    setTemplateName(name);
-  }, [briefs, templateName]);
+  }, [briefs]);
 
   const handleUpdatePriority = async ({ uid, priority }) => {
     await rndServices.updateBrief({
