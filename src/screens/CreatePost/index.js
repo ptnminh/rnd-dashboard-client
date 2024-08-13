@@ -224,7 +224,7 @@ const CreatePost = ({
         ...(x.type === "image" && {
           adsUrl: x.image,
         }),
-        adsId: x.uid,
+        uid: x.uid,
         caption: x.caption,
         name: x.name,
         briefId: x.briefId,

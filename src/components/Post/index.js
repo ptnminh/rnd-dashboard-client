@@ -87,7 +87,7 @@ const Ads = ({
     setIsAddCTA(addCta);
   }, [addCta]);
   useEffect(() => {
-    if (find(postErrors, { adsId: uid })?.message && textInputRef.current) {
+    if (find(postErrors, { uid })?.message && textInputRef.current) {
       textInputRef.current.scrollIntoView({
         behavior: "smooth",
         block: "center",
@@ -185,7 +185,7 @@ const Ads = ({
                       return [...prev];
                     });
                   }}
-                  error={find(postErrors, { adsId: uid })?.message}
+                  error={find(postErrors, { uid })?.message}
                 />
               </span>
             </Flex>
