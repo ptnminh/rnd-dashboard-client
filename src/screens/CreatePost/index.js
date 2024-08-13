@@ -126,13 +126,15 @@ const CreatePost = ({
         })
       );
       setBriefs(filteredData);
+      let imageLength = 1;
+      let videoLength = 1;
       const ads = flatMap(
         compact(
           map(data, (x) => {
             const { designInfo } = x;
             const ads = map(designInfo?.adsLinks, (ad, index) => ({
               ...ad,
-              index: index + 1,
+              index: ad.type === "video" ? videoLength++ : imageLength++,
             }));
 
             if (isEmpty(ads)) {
@@ -152,6 +154,8 @@ const CreatePost = ({
                 filteredAds = filter(filteredAds, (ad) => !ad.addCta);
               }
             }
+            videoLength = 1;
+            imageLength = 1;
             return map(filteredAds, (ad) => ({
               uid: ad.uid,
               ctaLink: `https://pawfecthouse.com/${x.sku}`,
@@ -167,8 +171,12 @@ const CreatePost = ({
               briefId: x.uid,
               sku: x.sku,
               postId: ad.postId,
-              caption: ad.caption,
-              addCta: ad.addCta,
+              caption: ad?.caption,
+              addCta: ad?.addCta,
+              type: ad?.type,
+              videoLink: ad?.value,
+              thumbLink: x?.designInfo?.thumbLink,
+              ctaDescription: ad?.ctaDescription,
             }));
           })
         )
@@ -213,11 +221,22 @@ const CreatePost = ({
       map(selectedPosts, (x) => ({
         pageId: x.pageId,
         sku: x.sku,
-        adsUrl: x.image,
+        ...(x.type === "image" ||
+          (!x.type && {
+            adsUrl: x.image,
+          })),
         adsId: x.uid,
         caption: x.caption,
         name: x.name,
         briefId: x.briefId,
+        ...(x.type &&
+          x.type === "video" && {
+            type: "video",
+            videoLink: x.videoLink,
+            ctaDescription: x?.ctaDescription || "",
+            adsUrl: x.thumbLink,
+            ctaLink: x.ctaLink,
+          }),
       })),
       (x) => {
         if (!x.pageId) {

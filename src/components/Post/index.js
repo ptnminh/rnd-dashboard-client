@@ -29,7 +29,7 @@ import {
   IconCopy,
 } from "@tabler/icons-react";
 import { useDisclosure } from "@mantine/hooks";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Captions from "../Captions";
 import { CONVERT_NUMBER_TO_STATUS } from "../../utils";
 import { CTA_LINK } from "../../constant";
@@ -56,6 +56,7 @@ const Ads = ({
   postErrors,
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
+  const textInputRef = useRef(null);
   const [selectedAds, setSelectedAds] = useState({});
   const [isAddCTA, setIsAddCTA] = useState(addCta);
   const [isClickOnCTA, setIsClickOnCTA] = useState(false);
@@ -85,6 +86,14 @@ const Ads = ({
   useEffect(() => {
     setIsAddCTA(addCta);
   }, [addCta]);
+  useEffect(() => {
+    if (find(postErrors, { adsId: uid })?.message && textInputRef.current) {
+      textInputRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [postErrors]);
   return (
     <>
       <Checkbox.Card
@@ -141,6 +150,7 @@ const Ads = ({
               >
                 <TextInput
                   size="sm"
+                  ref={textInputRef}
                   value={
                     find(postPayloads, {
                       uid,
@@ -190,7 +200,7 @@ const Ads = ({
                 }}
               >
                 <Grid.Col
-                  span={1}
+                  span={type === "image" || !type ? 1 : 3}
                   style={{
                     height: "80%",
                   }}
@@ -200,19 +210,28 @@ const Ads = ({
                       marginBottom: "10px",
                     }}
                   >
-                    Hình Ads
+                    {type === "image" || !type ? "Hình" : "Video"} Ads
                   </div>
                   {type === "video" ? (
-                    <Image
-                      src={
-                        find(postPayloads, { uid })?.image ||
-                        "/images/content/not_found_2.jpg"
-                      }
-                      alt="Post-Camp"
+                    <video
+                      width="100%"
                       height="100%"
-                      fit="contain"
-                      radius="md"
-                    />
+                      controls
+                      id="video"
+                      style={{
+                        display: "block",
+                      }}
+                      autoPlay
+                      muted
+                    >
+                      <source
+                        src={
+                          find(postPayloads, { uid })?.videoLink ||
+                          "/images/content/not_found_2.jpg"
+                        }
+                        type="video/mp4"
+                      />
+                    </video>
                   ) : (
                     <Image
                       src={
@@ -226,7 +245,7 @@ const Ads = ({
                     />
                   )}
                 </Grid.Col>
-                <Grid.Col span={11}>
+                <Grid.Col span={type === "image" || !type ? 11 : 9}>
                   <Flex gap={20} wrap={true}>
                     <Textarea
                       label="Nội dung"
@@ -280,6 +299,7 @@ const Ads = ({
 
                     <Group
                       style={{
+                        width: "100%",
                         display: "flex",
                         flexDirection: "column",
                         flex: 1,
@@ -358,6 +378,47 @@ const Ads = ({
                           </CopyButton>
                         </div>
                       </Group>
+                      {type === "video" && (
+                        <Textarea
+                          label="CTA Description"
+                          styles={{
+                            root: {
+                              width: "100%",
+                            },
+                            label: {
+                              marginBottom: "5px",
+                              fontWeight: "bold",
+                            },
+                            input: {
+                              width: "100%",
+                              height: "100px",
+                            },
+                          }}
+                          style={{
+                            flexGrow: 1,
+                          }}
+                          autosize
+                          placeholder="Content"
+                          value={
+                            find(postPayloads, { uid })?.ctaDescription || ""
+                          }
+                          onChange={(event) => {
+                            setPostPayloads((prev) => {
+                              return map(prev, (x) => {
+                                if (x.uid === uid) {
+                                  return {
+                                    ...x,
+                                    ctaDescription: event.target.value,
+                                  };
+                                }
+                                return x;
+                              });
+                            });
+                          }}
+                          minRows={4}
+                          maxRows={4}
+                        />
+                      )}
                       {postId && (
                         <Group
                           style={{

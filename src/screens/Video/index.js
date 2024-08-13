@@ -3,7 +3,7 @@ import styles from "./VideoScreens.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Details from "./Details";
-import { map } from "lodash";
+import { map, values } from "lodash";
 
 import { useDisclosure } from "@mantine/hooks";
 import {
@@ -59,7 +59,9 @@ const VideoScreens = () => {
     currentPage: initialPage,
     totalPages: 1,
   });
-  const [query, setQuery] = useState({});
+  const [query, setQuery] = useState({
+    status: values(STATUS),
+  });
   const [sorting, setSorting] = useState([]);
 
   const [opened, { open, close }] = useDisclosure(false);

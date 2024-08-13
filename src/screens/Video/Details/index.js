@@ -50,7 +50,7 @@ const KeywordTable = ({
       map(briefs, (x) => {
         return {
           uid: x.uid,
-          linkVideos: [],
+          linkVideos: map(x?.designInfo?.linkVideos, "value") || [],
         };
       })
     );
