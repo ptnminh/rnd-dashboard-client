@@ -356,12 +356,27 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
                   >
                     {map(preview?.ads, (ad) => (
                       <Group>
-                        <Image
-                          src={ad?.value || "/images/content/not_found_2.jpg"}
-                          width="80px"
-                          height="80px"
-                          radius="md"
-                        />
+                        {ad?.type === "video" ? (
+                          <video
+                            width="80px"
+                            height="80px"
+                            controls
+                            style={{
+                              display: "block",
+                            }}
+                            autoPlay
+                            muted
+                          >
+                            <source src={ad?.value} type="video/mp4" />
+                          </video>
+                        ) : (
+                          <Image
+                            src={ad?.value || "/images/content/not_found_2.jpg"}
+                            width="80px"
+                            height="80px"
+                            radius="md"
+                          />
+                        )}
                         <Flex gap={8} direction="column">
                           <TextInput
                             size="sm"

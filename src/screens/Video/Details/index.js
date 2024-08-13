@@ -50,7 +50,8 @@ const KeywordTable = ({
       map(briefs, (x) => {
         return {
           uid: x.uid,
-          linkVideos: map(x?.designInfo?.linkVideos, "value") || [],
+          linkVideos:
+            map(filter(x?.adsLinks, { type: "video" }), "value") || [],
         };
       })
     );

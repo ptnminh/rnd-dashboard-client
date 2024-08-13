@@ -108,7 +108,7 @@ const CreatePost = ({
     if (data) {
       const filteredData = map(
         filter(data, (x) => {
-          const ads = x?.designInfo?.adsLinks;
+          const ads = x?.adsLinks;
           let filteredAds = ads;
           if (filterCta !== null && activeTab === "createdPost") {
             if (filterCta === CTA_STATUS.ASSIGNED) {
@@ -118,11 +118,11 @@ const CreatePost = ({
             }
             return isEmpty(filteredAds) ? false : true;
           }
-          return isEmpty(x.designInfo?.adsLinks) ? false : true;
+          return isEmpty(x?.adsLinks) ? false : true;
         }),
         (x) => ({
           ...x,
-          ads: x.designInfo?.adsLinks,
+          ads: x?.adsLinks,
         })
       );
       setBriefs(filteredData);
@@ -131,8 +131,8 @@ const CreatePost = ({
       const ads = flatMap(
         compact(
           map(data, (x) => {
-            const { designInfo } = x;
-            const ads = map(designInfo?.adsLinks, (ad) => ({
+            const { adsLinks } = x;
+            const ads = map(adsLinks, (ad) => ({
               ...ad,
               index: ad.type === "video" ? videoLength++ : imageLength++,
             }));
@@ -221,10 +221,9 @@ const CreatePost = ({
       map(selectedPosts, (x) => ({
         pageId: x.pageId,
         sku: x.sku,
-        ...(x.type === "image" ||
-          (!x.type && {
-            adsUrl: x.image,
-          })),
+        ...(x.type === "image" && {
+          adsUrl: x.image,
+        }),
         adsId: x.uid,
         caption: x.caption,
         name: x.name,
@@ -937,7 +936,7 @@ const CreatePost = ({
                   postPayloads={postPayloads}
                   setPostPayloads={setPostPayloads}
                   selectedFanpage={find(fanpages, {
-                    uid: brief?.designInfo?.adsLinks[0]?.pageId,
+                    uid: brief?.adsLinks[0]?.pageId,
                   })}
                   fanpages={fanpages}
                   choosePosts={choosePosts}

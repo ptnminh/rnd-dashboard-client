@@ -58,7 +58,6 @@ const CreateCampsScreen = () => {
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedSKU, setSelectedSKU] = useState();
-  const [selectedCollection, setSelectedCollection] = useState();
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
   const [selectedCreateCampPayload, setSelectedCreateCampPayload] = useState(
@@ -92,11 +91,11 @@ const CreateCampsScreen = () => {
     if (data) {
       const filteredData = filter(data, (x) => {
         const adsLinksLength = filter(
-          x.designInfo?.adsLinks,
+          x?.adsLinks,
           (x) => x.postId && (x.type === "image" || !x.type) && !x.campaignId
         ).length;
         const videoLinksLength = filter(
-          x?.designInfo?.adsLinks,
+          x?.adsLinks,
           (x) => x.postId && x.type === "video" && !x.campaignId
         ).length;
         return adsLinksLength > 0 || videoLinksLength > 0;
@@ -123,9 +122,9 @@ const CreateCampsScreen = () => {
           briefId: x.uid,
           team: x.rndTeam,
           sku: x.sku,
-          ads: x?.designInfo?.adsLinks,
+          ads: x?.adsLinks,
           exCampIds: map(
-            filter(x?.designInfo?.adsLinks, (link) => link.campaignId),
+            filter(x?.adsLinks, (link) => link.campaignId),
             "campaignId"
           ),
         }))

@@ -191,7 +191,7 @@ const BriefsTable = ({
         mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
           const adsLinksLength = filter(
-            row?.original?.designInfo?.adsLinks,
+            row?.original?.adsLinks,
             (x) => x.postId && (x.type === "image" || !x.type) && !x.campaignId
           ).length;
           return (
@@ -220,7 +220,7 @@ const BriefsTable = ({
         mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
           const adsLinksLength = filter(
-            row?.original?.designInfo?.adsLinks,
+            row?.original?.adsLinks,
             (x) => x.postId && x.type === "video" && !x.campaignId
           ).length;
           return (
@@ -228,7 +228,9 @@ const BriefsTable = ({
               style={{
                 display: "flex",
                 justifyContent: "center",
-                color: "#8f959f",
+                ...(adsLinksLength === 0 && {
+                  color: "#8f959f",
+                }),
                 fontWeight: "bold",
               }}
             >

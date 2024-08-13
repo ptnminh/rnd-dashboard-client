@@ -225,7 +225,7 @@ const BriefsTable = ({
         mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
           const adsLinksLength = filter(
-            row?.original?.designInfo?.adsLinks,
+            row?.original?.adsLinks,
             (x) => !x.postId && (x.type === "image" || !x.type)
           ).length;
           return (
@@ -254,7 +254,7 @@ const BriefsTable = ({
         mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
           const adsLinksLength = filter(
-            row?.original?.designInfo?.adsLinks,
+            row?.original?.adsLinks,
             (x) => !x.postId && x.type === "video"
           ).length;
           return (
@@ -310,11 +310,12 @@ const BriefsTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => {
           const adsLinksLength = filter(
-            row?.original?.designInfo?.adsLinks,
-            (x) => !x.postId
+            row?.original?.adsLinks,
+            (x) => !x.postId && x.type === "image"
           ).length;
           const videoLinksLength = filter(
-            row?.original?.designInfo?.videoLinks
+            row?.original?.adsLinks,
+            (x) => !x.postId && x.type === "video"
           ).length;
           return (
             <div
