@@ -276,7 +276,9 @@ const BriefsTable = ({
         mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
           const accountValue =
-            find(campsPayload, { sku: row.original.sku })?.accountName || "";
+            find(campsPayload, { sku: row.original.sku })?.accountName ||
+            find(campsPayload, { sku: row.original.sku })?.account?.name ||
+            "";
           return (
             <Autocomplete
               data={map(accounts, "name")}
@@ -458,7 +460,12 @@ const BriefsTable = ({
                       setCampsPayload((prevCampsPayload) =>
                         prevCampsPayload.map((prev) =>
                           prev.sku === row.original.sku
-                            ? omit(prev, ["rootCampaign", "rootCampaignName"])
+                            ? omit(prev, [
+                                "rootCampaign",
+                                "rootCampaignName",
+                                "account",
+                                "accountName",
+                              ])
                             : prev
                         )
                       );
@@ -489,12 +496,11 @@ const BriefsTable = ({
               }}
               onOptionSubmit={(value) => {
                 const sku = row.original.sku;
-                const foundSKU = find(campsPayload, { sku });
-                if (isEmpty(foundSKU.account)) {
-                  const accountId = find(sampleCampaigns, (campaign) =>
-                    includes(map(campaign.campaigns, "campaignName"), value)
-                  )?.accountId;
-                  const foundAccount = find(accounts, { uid: accountId });
+                const accountId = find(sampleCampaigns, (campaign) =>
+                  includes(map(campaign.campaigns, "campaignName"), value)
+                )?.accountId;
+                const foundAccount = find(accounts, { uid: accountId });
+                if (!isEmpty(foundAccount)) {
                   setCampsPayload((prev) => {
                     return map(prev, (x) => {
                       if (x.sku === sku) {

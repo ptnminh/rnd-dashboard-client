@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import cn from "classnames";
 import styles from "./Page.module.sass";
 import Sidebar from "../Sidebar";
-import Header from "../Header";
 
 const Page = ({ wide, children, title }) => {
   const [visible, setVisible] = useState(false);
@@ -14,7 +13,6 @@ const Page = ({ wide, children, title }) => {
           className={cn(styles.sidebar, { [styles.visible]: visible })}
           onClose={() => setVisible(false)}
         />
-        {/* <Header onOpen={() => setVisible(true)} /> */}
         <div className={styles.inner}>
           <div
             className={cn(styles.container, {

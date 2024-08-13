@@ -132,7 +132,7 @@ const CreatePost = ({
         compact(
           map(data, (x) => {
             const { designInfo } = x;
-            const ads = map(designInfo?.adsLinks, (ad, index) => ({
+            const ads = map(designInfo?.adsLinks, (ad) => ({
               ...ad,
               index: ad.type === "video" ? videoLength++ : imageLength++,
             }));

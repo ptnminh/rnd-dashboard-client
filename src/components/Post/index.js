@@ -215,7 +215,7 @@ const Ads = ({
                   {type === "video" ? (
                     <video
                       width="100%"
-                      height="100%"
+                      height="200px"
                       controls
                       id="video"
                       style={{

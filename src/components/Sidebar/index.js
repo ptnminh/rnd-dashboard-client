@@ -4,8 +4,9 @@ import { Link, NavLink } from "react-router-dom";
 import cn from "classnames";
 import Icon from "../Icon";
 import Dropdown from "./Dropdown";
-import Help from "./Help";
 import { Logo } from "./logo";
+import { ActionIcon, Avatar, Group, Tooltip } from "@mantine/core";
+import { IconLogout } from "@tabler/icons-react";
 
 const navigation = [
   {
@@ -102,7 +103,6 @@ const navigation = [
 ];
 
 const Sidebar = ({ className, onClose }) => {
-  const [visibleHelp, setVisibleHelp] = useState(false);
   const [visible, setVisible] = useState(false);
 
   return (
@@ -149,15 +149,37 @@ const Sidebar = ({ className, onClose }) => {
           <Icon name="close" size="24" />
         </button>
       </div>
-      <Help
-        visible={visibleHelp}
-        setVisible={setVisibleHelp}
-        onClose={onClose}
-      />
       <div
-        className={cn(styles.overlay, { [styles.active]: visible })}
-        onClick={() => setVisible(false)}
-      ></div>
+        style={{
+          position: "fixed",
+          left: 0,
+          bottom: "30px",
+          cursor: "pointer",
+          width: "290px",
+          padding: "24px",
+        }}
+      >
+        <Group
+          style={{
+            justifyContent: "space-between",
+          }}
+        >
+          <Tooltip label="Phan Tài Nhật Minh" withArrow>
+            <Avatar
+              color="cyan"
+              variant="filled"
+              radius="xl"
+              size="lg"
+              src="/images/content/avatar-1.jpg"
+            />
+          </Tooltip>
+          <Tooltip label="Đăng xuất" withArrow>
+            <ActionIcon variant="filled" size="xl" color="#EFEFEF">
+              <IconLogout color="#1A1D1F" />
+            </ActionIcon>
+          </Tooltip>
+        </Group>
+      </div>
     </>
   );
 };

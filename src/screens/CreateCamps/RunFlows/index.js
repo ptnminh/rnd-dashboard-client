@@ -32,6 +32,7 @@ import {
   includes,
   isEmpty,
   map,
+  toNumber,
 } from "lodash";
 import { showNotification } from "../../../utils/index";
 import { campaignServices, postService } from "../../../services";
@@ -49,7 +50,9 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
   const [runflowValue, setRunFlowValue] = useState(RUN_FLOWS.sameCamps);
   const [totalBudget, setTotalBudget] = useState(null);
   const [selectedImages, setSelectedImages] = useState([]);
+  const [visiblePreview, setVisiblePreview] = useState(false);
   const [loadingCreateCampaign, setLoadingCreateCampaign] = useState(false);
+  const [previews, setPreviews] = useState([]);
   const [selectedVideos, setSelectedVideos] = useState([]);
   const [errors, setErrors] = useState([]);
   const [addPostsCTA, setAddPostsCTA] = useState([]);
@@ -101,6 +104,20 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
         },
       ];
       setPayloads(transformedPayloads);
+      const transformedPreviews =
+        isEmpty(selectedAds) || !totalBudget
+          ? []
+          : [
+              {
+                rootCampName: `${selectedPayload.team} - ${
+                  selectedPayload.sku
+                } - ${selectedPayload.batch} - Test${
+                  selectedPayload.exCampIds.length + 1
+                }`,
+                budget: totalBudget,
+              },
+            ];
+      setPreviews(transformedPreviews);
     } else {
       const mergedSelectedAdIds = compact(
         concat(selectedImages, selectedVideos)
@@ -125,9 +142,27 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
           },
         ],
       }));
+      const transformedPreviews =
+        isEmpty(selectedAds) || !totalBudget
+          ? []
+          : map(selectedAds, (x, index) => ({
+              rootCampName: `${selectedPayload.team} - ${
+                selectedPayload.sku
+              } - ${selectedPayload.batch} - Test${
+                selectedPayload.exCampIds.length + index + 1
+              }`,
+              budget: budgetPerCamp,
+            }));
+      setPreviews(transformedPreviews);
       setPayloads(transformedPayloads);
     }
-  }, [runflowValue, selectedImages, selectedVideos, totalBudget]);
+  }, [
+    runflowValue,
+    selectedImages,
+    selectedVideos,
+    totalBudget,
+    visiblePreview,
+  ]);
   const handleCreateCampaign = async () => {
     setLoadingCreateCampaign(true);
     if (!totalBudget) {
@@ -413,26 +448,115 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
             {map(
               filter(
                 selectedPayload?.ads,
-                (x) => x.type === "video" && x.postId && !x.campaignId
+                (x) => x.type && x.type === "video" && x.postId && !x.campaignId
               ),
               (item, index) => (
                 <Checkbox.Card
                   radius="md"
-                  value={item.name}
+                  value={item.uid}
                   key={index}
                   withBorder={false}
                 >
                   <Group wrap="nowrap" align="center">
-                    <Checkbox.Indicator />
+                    <Checkbox.Indicator
+                      onClick={() => {
+                        setSelectedVideos((prev) => {
+                          if (includes(prev, item.uid)) {
+                            return filter(prev, (x) => x !== item.uid);
+                          }
+                          return [...prev, item.uid];
+                        });
+                      }}
+                    />
                     <Group>
-                      <Image
-                        src={item?.value || "/images/content/not_found_2.jpg"}
-                        width="80px"
-                        height="80px"
-                        radius="md"
-                        onChange={setSelectedVideos}
-                      />
-                      <Text>{`Ad Image ${index + 1}`}</Text>
+                      <video width="80px" height="80px" controls autoPlay muted>
+                        <source src={item.value} type="video/mp4" />
+                      </video>
+                      <Flex direction="column" gap={8}>
+                        <TextInput
+                          size="sm"
+                          readOnly
+                          value={item.postName}
+                          error={
+                            find(errors, (x) => x?.postName === item?.postName)
+                              ?.message || ""
+                          }
+                        />
+                        <span
+                          style={{
+                            display: "flex",
+                            gap: "10px",
+                          }}
+                        >
+                          <Tooltip label="To Post">
+                            <ActionIcon
+                              component="a"
+                              href={`https://facebook.com/${item?.postId}`}
+                              size="sx"
+                              aria-label="Open in a new tab"
+                              onClick={() => {}}
+                              target="_blank"
+                            >
+                              <IconExternalLink />
+                            </ActionIcon>
+                          </Tooltip>
+                          <CopyButton value={item.postId}>
+                            {({ copied, copy }) => (
+                              <Tooltip label="Copy Post Id">
+                                <ActionIcon
+                                  color={copied ? "teal" : "blue"}
+                                  onClick={copy}
+                                  size="sx"
+                                >
+                                  <IconCopy />
+                                </ActionIcon>
+                              </Tooltip>
+                            )}
+                          </CopyButton>
+                          {includes(map(addPostsCTA, "uid"), item.uid) && (
+                            <Group justify="center">
+                              {find(addPostsCTA, (x) => x.uid === item.uid)
+                                ?.onClick ? (
+                                <Button
+                                  color="green"
+                                  variant="filled"
+                                  radius="sm"
+                                  size="xs"
+                                  onClick={() => {
+                                    handleUpdatePostCTA(item.uid);
+                                  }}
+                                >
+                                  Confirm
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="filled"
+                                  color="#646A73"
+                                  radius="sm"
+                                  size="xs"
+                                  onClick={() => {
+                                    // redirect to CTA link
+                                    setAddPostsCTA((prev) => {
+                                      return map(prev, (x) => {
+                                        if (x.uid === item.uid) {
+                                          return {
+                                            uid: x.uid,
+                                            onClick: true,
+                                          };
+                                        }
+                                        return x;
+                                      });
+                                    });
+                                    window.open(CTA_LINK, "_blank");
+                                  }}
+                                >
+                                  Gắn CTA
+                                </Button>
+                              )}
+                            </Group>
+                          )}
+                        </span>
+                      </Flex>
                     </Group>
                   </Group>
                 </Checkbox.Card>
@@ -441,8 +565,145 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
           </Stack>
         </Checkbox.Group>
       </Grid.Col>
+      {visiblePreview && (
+        <Grid.Col span={12}>
+          <Text
+            style={{
+              fontWeight: "bold",
+              textAlign: "center",
+            }}
+          >
+            Preview
+          </Text>
+          <ScrollArea
+            h={300}
+            scrollbars="y"
+            scrollbarSize={4}
+            scrollHideDelay={1000}
+          >
+            <Stack>
+              {map(previews, (preview, index) => {
+                return (
+                  <Stack key={index} gap="md">
+                    <Flex align="center" justify="space-between" gap={10}>
+                      <TextInput
+                        placeholder="Campaign Name"
+                        label="Campaign Name"
+                        styles={{
+                          root: {
+                            alignItems: "center",
+                            gap: "10px",
+                            flex: 1,
+                          },
+                          label: {
+                            fontWeight: "bold",
+                            marginBottom: "10px",
+                          },
+                        }}
+                        value={preview?.rootCampName}
+                        onChange={(event) => {
+                          setPreviews((prev) => {
+                            return map(prev, (x, i) => {
+                              if (i === index) {
+                                return {
+                                  ...x,
+                                  rootCampName: event.target.value,
+                                };
+                              }
+                              return x;
+                            });
+                          });
+                          setPayloads((prev) => {
+                            return map(prev, (x, i) => {
+                              if (i === index) {
+                                return {
+                                  ...x,
+                                  campInfo: {
+                                    ...x.campInfo,
+                                    name: event.target.value,
+                                  },
+                                };
+                              }
+                              return x;
+                            });
+                          });
+                        }}
+                      />
+                      <NumberInput
+                        leftSection={
+                          <IconCurrencyDollar
+                            style={{ width: rem(16), height: rem(16) }}
+                          />
+                        }
+                        placeholder="Budget"
+                        styles={{
+                          root: {
+                            alignItems: "center",
+                            gap: "10px",
+                            flex: 1,
+                          },
+                          label: {
+                            fontWeight: "bold",
+                            marginBottom: "10px",
+                          },
+                        }}
+                        label="Budget"
+                        value={preview?.budget}
+                        onChange={(value) => {
+                          setPreviews((prev) => {
+                            return map(prev, (x, i) => {
+                              if (i === index) {
+                                return {
+                                  ...x,
+                                  budget: toNumber(value),
+                                };
+                              }
+                              return x;
+                            });
+                          });
+                          setPayloads((prev) => {
+                            return map(prev, (x, i) => {
+                              if (i === index) {
+                                return {
+                                  ...x,
+                                  campInfo: {
+                                    ...x.campInfo,
+                                    dailyBudget: toNumber(value),
+                                  },
+                                };
+                              }
+                              return x;
+                            });
+                          });
+                        }}
+                      />
+                    </Flex>
+                    <Flex
+                      style={{
+                        flexWrap: "wrap",
+                      }}
+                      gap="md"
+                    >
+                      {map(preview?.ads, (ad) => (
+                        <Group>
+                          <Image
+                            src={ad?.value || "/images/content/not_found_2.jpg"}
+                            width="80px"
+                            height="80px"
+                            radius="md"
+                          />
+                        </Group>
+                      ))}
+                    </Flex>
+                  </Stack>
+                );
+              })}
+            </Stack>
+          </ScrollArea>
+        </Grid.Col>
+      )}
       <Grid.Col span={12}>
-        <Flex justify="center">
+        <Flex justify="center" gap={5}>
           <Button
             variant="filled"
             color="green"
@@ -451,6 +712,31 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
             loading={loadingCreateCampaign}
           >
             Lên Camp
+          </Button>
+          <Button
+            variant="filled"
+            color={visiblePreview ? "red" : "blue"}
+            size="sx"
+            onClick={() => {
+              const mergedSelectedAdIds = compact(
+                concat(selectedImages, selectedVideos)
+              );
+              if (isEmpty(mergedSelectedAdIds)) {
+                showNotification(
+                  "Thất bại",
+                  "Vui lòng chọn ít nhất 1 hình hoặc 1 video",
+                  "red"
+                );
+                return;
+              }
+              if (!totalBudget) {
+                showNotification("Thất bại", "Vui lòng nhập Budget", "red");
+                return;
+              }
+              setVisiblePreview(!visiblePreview);
+            }}
+          >
+            {visiblePreview ? "Ẩn Preview" : "Preview"}
           </Button>
         </Flex>
       </Grid.Col>

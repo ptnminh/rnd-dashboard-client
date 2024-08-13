@@ -89,7 +89,6 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
                 return {
                   name: ad.postName,
                   objectStoryId: `${ad.pageId}_${ad.postId}`,
-                  // objectStoryId: `102286709170123_483748387740655`,
                 };
               }),
             },
@@ -239,7 +238,9 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
             <u>{selectedPayload?.sku || "AH-Q054"}</u>
           </Badge>
           <Badge color="blue" variant="filled">
-            {previews.length} Campaigns
+            {previews.length === 1
+              ? `1 Campaign`
+              : `${previews.length} Campaigns`}
           </Badge>
         </Flex>
       </Grid.Col>
@@ -259,7 +260,7 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
                 marginBottom: "10px",
               },
             }}
-            label="Campaign Name"
+            label="Root Campaign Name"
             value={selectedPayload?.rootCampaign?.campaignName}
           />
           <NumberInput
@@ -304,9 +305,48 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
               return (
                 <Stack key={index} gap="md">
                   <Flex align="center" justify="space-between">
-                    <Text style={{ fontWeight: "bold" }}>
-                      {preview?.rootCampName}
-                    </Text>
+                    <TextInput
+                      placeholder="Campaign Name"
+                      styles={{
+                        root: {
+                          alignItems: "center",
+                          gap: "10px",
+                          flex: 1,
+                        },
+                        label: {
+                          fontWeight: "bold",
+                          marginBottom: "10px",
+                        },
+                      }}
+                      value={preview?.rootCampName}
+                      onChange={(event) => {
+                        setPreviews((prev) => {
+                          return map(prev, (x, i) => {
+                            if (i === index) {
+                              return {
+                                ...x,
+                                rootCampName: event.target.value,
+                              };
+                            }
+                            return x;
+                          });
+                        });
+                        setPayloads((prev) => {
+                          return map(prev, (x, i) => {
+                            if (i === index) {
+                              return {
+                                ...x,
+                                campInfo: {
+                                  ...x.campInfo,
+                                  name: event.target.value,
+                                },
+                              };
+                            }
+                            return x;
+                          });
+                        });
+                      }}
+                    />
                   </Flex>
                   <Flex
                     style={{
@@ -314,7 +354,7 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
                     }}
                     gap="md"
                   >
-                    {map(preview?.ads, (ad, index) => (
+                    {map(preview?.ads, (ad) => (
                       <Group>
                         <Image
                           src={ad?.value || "/images/content/not_found_2.jpg"}
