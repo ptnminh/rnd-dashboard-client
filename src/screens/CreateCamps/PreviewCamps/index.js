@@ -87,6 +87,7 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
               },
               adsInfo: map(ads, (ad) => {
                 return {
+                  adsLinkId: ad.uid,
                   name: ad.postName,
                   objectStoryId: `${ad.pageId}_${ad.postId}`,
                 };
@@ -124,6 +125,7 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
               },
               adsInfo: map(ads, (ad) => {
                 return {
+                  adsLinkId: ad.uid,
                   name: ad.postName,
                   objectStoryId: `${ad.pageId}_${ad.postId}`,
                 };
@@ -160,6 +162,7 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
               },
               adsInfo: [
                 {
+                  adsLinkId: ad.uid,
                   name: ad.postName,
                   objectStoryId: `${ad.pageId}_${ad.postId}`,
                 },

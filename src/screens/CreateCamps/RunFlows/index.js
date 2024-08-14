@@ -98,6 +98,7 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
             } - Test${selectedPayload.exCampIds.length + 1}`,
           },
           adsInfo: map(selectedAds, (x) => ({
+            adsLinkId: x.uid,
             name: x.postName,
             objectStoryId: `${x.pageId}_${x.postId}`,
           })),
@@ -137,6 +138,7 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
         },
         adsInfo: [
           {
+            adsLinkId: x.uid,
             name: x.postName,
             objectStoryId: `${x.pageId}_${x.postId}`,
           },
