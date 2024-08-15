@@ -3,7 +3,7 @@ import styles from "./CreateCamps.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Details from "./Details";
-import { filter, map } from "lodash";
+import { filter, map, mapKeys, toLower, toNumber } from "lodash";
 import { useDisclosure } from "@mantine/hooks";
 import { IconCircleCheck } from "@tabler/icons-react";
 import {
@@ -60,6 +60,7 @@ const CreateCampsScreen = () => {
   const [selectedSKU, setSelectedSKU] = useState();
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
+  const [metadata, setMetadata] = useState({});
   const [selectedCreateCampPayload, setSelectedCreateCampPayload] = useState(
     {}
   );
@@ -83,7 +84,7 @@ const CreateCampsScreen = () => {
       search,
       page,
       limit: 30,
-      view: "epm",
+      view: "mkt",
       sorting,
       ...query,
     });
@@ -116,6 +117,10 @@ const CreateCampsScreen = () => {
           };
         })
       );
+      const budgetSetting = mapKeys(
+        metadata?.setting?.attribute?.budget,
+        (value, key) => toLower(key)
+      );
       setCampsPayload(
         map(data, (x) => ({
           batch: x.batch,
@@ -127,9 +132,15 @@ const CreateCampsScreen = () => {
             filter(x?.adsLinks, (link) => link.campaignId),
             "campaignId"
           ),
+          ...(metadata?.setting?.attribute?.budget && {
+            budget: toNumber(
+              budgetSetting[toLower(CONVERT_NUMBER_TO_STATUS[x?.value?.rnd])]
+            ),
+          }),
         }))
       );
       setPagination(metadata);
+      setMetadata(metadata);
     } else {
       setBriefs([]);
     }
@@ -216,6 +227,7 @@ const CreateCampsScreen = () => {
           openModalPreview={openModalPreview}
           setSelectedCreateCampPayload={setSelectedCreateCampPayload}
           selectedCreateCampPayload={selectedCreateCampPayload}
+          metadata={metadata}
         />
       </Card>
       <Pagination

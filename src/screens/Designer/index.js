@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./TemplateKW.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
-import Details from "./Details";
+import Table from "./Details";
 import { map } from "lodash";
 
 import { useDisclosure } from "@mantine/hooks";
@@ -52,7 +52,7 @@ const DesignerScreens = () => {
   const initialSearch = queryParams.get("search") || "";
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
-  const [productLines, setProductLines] = useState([]);
+  const [briefs, setBriefs] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({
@@ -74,13 +74,10 @@ const DesignerScreens = () => {
   const [metadata, setMetadata] = useState({});
   const [linkDesign, setLinkDesign] = useState("");
 
-  const [collectionNameInput, setCollectionNameInput] = useState("");
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
   const [loadingUpdateDesignLink, setLoadingUpdateDesignLink] = useState(false);
 
-  const [collections, setCollections] = useState([]);
-
-  const fetchCollections = async (page = 1) => {
+  const fetchBriefs = async (page = 1) => {
     setLoadingFetchBrief(true);
     const response = await rndServices.fetchBriefs({
       search,
@@ -91,8 +88,7 @@ const DesignerScreens = () => {
     });
     const { data, metadata } = response;
     if (data) {
-      setCollections(data);
-      setProductLines(
+      setBriefs(
         map(data, (x, index) => {
           return {
             ...x,
@@ -110,10 +106,8 @@ const DesignerScreens = () => {
       );
       setPagination(metadata);
       setMetadata(metadata);
-      setSelectedCollection(data[0]);
     } else {
-      setCollections([]);
-      setProductLines([]);
+      setBriefs([]);
     }
     setLoadingFetchBrief(false);
     setTrigger(false);
@@ -129,7 +123,7 @@ const DesignerScreens = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   useEffect(() => {
-    fetchCollections(pagination.currentPage);
+    fetchBriefs(pagination.currentPage);
   }, [search, pagination.currentPage, query, trigger, sorting]);
 
   useEffect(() => {
@@ -140,12 +134,6 @@ const DesignerScreens = () => {
       params.set("page", pagination.currentPage);
     navigate(`?${params.toString()}`, { replace: true });
   }, [search, pagination.currentPage, navigate]);
-
-  useEffect(() => {
-    if (selectedCollection) {
-      setCollectionNameInput(selectedCollection.name);
-    }
-  }, [selectedCollection]);
 
   useEffect(() => {
     fetchUsers();
@@ -179,7 +167,7 @@ const DesignerScreens = () => {
           "Update Link Design thành công",
           "green"
         );
-        await fetchCollections(pagination.currentPage);
+        await fetchBriefs(pagination.currentPage);
       }
     }
     close();
@@ -223,11 +211,10 @@ const DesignerScreens = () => {
           </>
         }
       >
-        <Details
+        <Table
           className={styles.details}
           onClose={() => setVisible(false)}
-          productLines={productLines}
-          name={selectedCollection?.name}
+          briefs={briefs}
           query={query}
           setQuery={setQuery}
           setSelectedSKU={setSelectedSKU}
@@ -243,6 +230,7 @@ const DesignerScreens = () => {
           setLinkDesign={setLinkDesign}
           setSorting={setSorting}
           sorting={sorting}
+          metadata={metadata}
         />
       </Card>
       <Pagination

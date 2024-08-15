@@ -32,8 +32,7 @@ import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 
 const KeywordTable = ({
-  productLines,
-  name,
+  briefs,
   query,
   setQuery,
   setSelectedSKU,
@@ -48,14 +47,13 @@ const KeywordTable = ({
   setLinkDesign,
   sorting,
   setSorting,
+  metadata,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
-  const [data, setData] = useState(productLines || []);
-  const [templateName, setTemplateName] = useState(name);
+  const [data, setData] = useState(briefs || []);
   useEffect(() => {
-    setData(productLines);
-    setTemplateName(name);
-  }, [productLines, templateName]);
+    setData(briefs);
+  }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
     await rndServices.updateBrief({
       uid,
@@ -724,7 +722,7 @@ const KeywordTable = ({
                 fontSize: "16px",
               }}
             >
-              Undone: {filter(data, { status: 1 }).length}
+              Undone: {metadata?.totalUndoneBriefsWithFilter}
             </div>
             <div
               style={{
@@ -732,7 +730,7 @@ const KeywordTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: {filter(data, { status: 1 }).length}h
+              Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
             </div>
           </Flex>
           {editingCell && !isEmpty(updateBrief.linkDesigns) && (

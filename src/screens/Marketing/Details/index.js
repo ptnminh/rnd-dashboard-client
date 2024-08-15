@@ -29,8 +29,7 @@ import { useDisclosure } from "@mantine/hooks";
 import CreatePost from "../../CreatePost";
 
 const BriefsTable = ({
-  productLines,
-  name,
+  briefs,
   query,
   setQuery,
   setSelectedSKU,
@@ -39,21 +38,17 @@ const BriefsTable = ({
   setEditingCell,
   setUpdateBrief,
   updateBrief,
-  editingCell,
   loadingFetchBrief,
-  setLoadingFetchBrief,
   setTrigger,
   setLinkProduct,
   sorting,
   setSorting,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
-  const [data, setData] = useState(productLines || []);
-  const [templateName, setTemplateName] = useState(name);
+  const [data, setData] = useState(briefs || []);
   useEffect(() => {
-    setData(productLines);
-    setTemplateName(name);
-  }, [productLines, templateName]);
+    setData(briefs);
+  }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
     await rndServices.updateBrief({
       uid,

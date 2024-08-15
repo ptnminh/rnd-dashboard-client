@@ -16,28 +16,19 @@ import { filter, find, includes, isEmpty, keys, map } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
-import {
-  IconCheck,
-  IconX,
-  IconDeviceFloppy,
-  IconBan,
-  IconHeart,
-  IconMoon,
-} from "@tabler/icons-react";
-import { BRIEF_TYPES, CHOOSE_BRIEF_TYPES } from "../../../constant";
+import { IconX, IconHeart } from "@tabler/icons-react";
+import { CHOOSE_BRIEF_TYPES } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
   getStringAsEditorState,
-  reorderArrayById,
 } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 
-const KeywordTable = ({
-  productLines,
-  name,
+const Table = ({
+  briefs,
   query,
   setQuery,
   setSelectedSKU,
@@ -46,7 +37,6 @@ const KeywordTable = ({
   setEditingCell,
   setUpdateBrief,
   updateBrief,
-  editingCell,
   loadingFetchBrief,
   setTrigger,
   setLinkDesign,
@@ -59,12 +49,10 @@ const KeywordTable = ({
   setLayoutRating,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
-  const [data, setData] = useState(productLines || []);
-  const [templateName, setTemplateName] = useState(name);
+  const [data, setData] = useState(briefs || []);
   useEffect(() => {
-    setData(productLines);
-    setTemplateName(name);
-  }, [productLines, templateName]);
+    setData(briefs);
+  }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
     await rndServices.updateBrief({
       uid,
@@ -738,4 +726,4 @@ const KeywordTable = ({
   return <MantineReactTable table={table} />;
 };
 
-export default KeywordTable;
+export default Table;

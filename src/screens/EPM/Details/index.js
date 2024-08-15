@@ -32,8 +32,7 @@ import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 
 const BriefsTable = ({
-  productLines,
-  name,
+  briefs,
   query,
   setQuery,
   setSelectedSKU,
@@ -44,19 +43,17 @@ const BriefsTable = ({
   updateBrief,
   editingCell,
   loadingFetchBrief,
-  setLoadingFetchBrief,
   setTrigger,
   setLinkProduct,
   sorting,
   setSorting,
+  metadata,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
-  const [data, setData] = useState(productLines || []);
-  const [templateName, setTemplateName] = useState(name);
+  const [data, setData] = useState(briefs || []);
   useEffect(() => {
-    setData(productLines);
-    setTemplateName(name);
-  }, [productLines, templateName]);
+    setData(briefs);
+  }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
     await rndServices.updateBrief({
       uid,
@@ -442,7 +439,7 @@ const BriefsTable = ({
     onCreatingRowCancel: () => setValidationErrors({}),
     onEditingRowCancel: () => setValidationErrors({}),
     enableDensityToggle: false,
-    renderTopToolbar: ({ table }) => {
+    renderTopToolbar: () => {
       return (
         <div
           style={{
@@ -545,7 +542,7 @@ const BriefsTable = ({
                   date: null,
                 });
               }}
-              onShortcutClick={(shortcut, event) => {
+              onShortcutClick={(shortcut) => {
                 setQuery({
                   ...query,
                   dateValue: shortcut.value,
@@ -759,7 +756,7 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Undone: {filter(data, { status: 2 }).length}
+              Undone: {metadata?.totalUndoneBriefsWithFilter}
             </div>
             <div
               style={{
@@ -767,7 +764,7 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: {filter(data, { status: 2 }).length}h
+              Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
             </div>
           </Flex>
           {editingCell && !isEmpty(updateBrief.linkDesigns) && (

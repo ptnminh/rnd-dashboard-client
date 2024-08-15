@@ -18,6 +18,7 @@ import VideoScreens from "./screens/Video";
 import Auth0LoginScreen from "./screens/Auth0Login";
 import Page404 from "./screens/NotFound";
 import ForbiddenPage from "./components/ForbiddenPage";
+import Setting from "./screens/Setting";
 
 function App() {
   return (
@@ -170,7 +171,31 @@ function App() {
         path="/mkt/setting"
         element={
           <Page title="MKT">
-            <CreatedCampsScreen />
+            <Setting name="mkt" />
+          </Page>
+        }
+      />
+      <Route
+        path="/video/setting"
+        element={
+          <Page title="MKT">
+            <Setting name="design" />
+          </Page>
+        }
+      />
+      <Route
+        path="/designer/setting"
+        element={
+          <Page title="MKT">
+            <Setting name="design" />
+          </Page>
+        }
+      />
+      <Route
+        path="/epm/setting"
+        element={
+          <Page title="MKT">
+            <Setting name="epm" />
           </Page>
         }
       />

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./TemplateKW.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
-import Details from "./Details";
+import Table from "./Details";
 import { map } from "lodash";
 
 import { useDisclosure } from "@mantine/hooks";
@@ -45,7 +45,7 @@ export const CreateWaitingPosts = () => {
   const initialSearch = queryParams.get("search") || "";
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
-  const [productLines, setProductLines] = useState([]);
+  const [briefs, setBriefs] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({
@@ -60,19 +60,15 @@ export const CreateWaitingPosts = () => {
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedSKU, setSelectedSKU] = useState();
-  const [selectedCollection, setSelectedCollection] = useState();
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
   const [trigger, setTrigger] = useState(false);
   const [metadata, setMetadata] = useState({});
   const [linkProduct, setLinkProduct] = useState("");
 
-  const [collectionNameInput, setCollectionNameInput] = useState("");
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
   const [loadingUpdateProductLink, setLoadingUpdateProductLink] =
     useState(false);
-
-  const [collections, setCollections] = useState([]);
 
   const fetchBriefs = async (page = 1) => {
     setLoadingFetchBrief(true);
@@ -80,14 +76,13 @@ export const CreateWaitingPosts = () => {
       search,
       page,
       limit: 30,
-      view: "epm",
+      view: "mkt",
       sorting,
       ...query,
     });
     const { data, metadata } = response;
     if (data) {
-      setCollections(data);
-      setProductLines(
+      setBriefs(
         map(data, (x, index) => {
           return {
             ...x,
@@ -105,10 +100,8 @@ export const CreateWaitingPosts = () => {
       );
       setPagination(metadata);
       setMetadata(metadata);
-      setSelectedCollection(data[0]);
     } else {
-      setCollections([]);
-      setProductLines([]);
+      setBriefs([]);
     }
     setLoadingFetchBrief(false);
     setTrigger(false);
@@ -135,12 +128,6 @@ export const CreateWaitingPosts = () => {
       params.set("page", pagination.currentPage);
     navigate(`?${params.toString()}`, { replace: true });
   }, [search, pagination.currentPage, navigate]);
-
-  useEffect(() => {
-    if (selectedCollection) {
-      setCollectionNameInput(selectedCollection.name);
-    }
-  }, [selectedCollection]);
 
   useEffect(() => {
     fetchUsers();
@@ -188,11 +175,10 @@ export const CreateWaitingPosts = () => {
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
       >
-        <Details
+        <Table
           className={styles.details}
           onClose={() => setVisible(false)}
-          productLines={productLines}
-          name={selectedCollection?.name}
+          briefs={briefs}
           query={query}
           setQuery={setQuery}
           setSelectedSKU={setSelectedSKU}

@@ -56,6 +56,7 @@ const BriefsTable = ({
   sampleCampaigns,
   openModalPreview,
   setSelectedCreateCampPayload,
+  metadata,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [selectedCreateCustomCamp, setSelectedCreateCustomCamp] = useState({});

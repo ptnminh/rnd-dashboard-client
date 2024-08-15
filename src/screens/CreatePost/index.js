@@ -46,7 +46,7 @@ const CreatePost = ({
   const [query, setQuery] = useState({
     status: [3],
     postStatus: ["unfulfilled", "partial"],
-    view: "epm",
+    view: "mkt",
   });
   const hasSetChoosePosts = useRef(false);
   const [batch, setBatch] = useState("");
@@ -909,7 +909,7 @@ const CreatePost = ({
                         date: null,
                         batch: "",
                         sku: "",
-                        view: "epm",
+                        view: "mkt",
                         briefType: null,
                         valueName: null,
                         value: null,

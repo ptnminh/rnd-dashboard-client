@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./TemplateKW.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
-import Details from "./Details";
+import Table from "./Details";
 import { map } from "lodash";
 
 import { useDisclosure } from "@mantine/hooks";
@@ -44,7 +44,7 @@ const EPMScreens = () => {
   const initialSearch = queryParams.get("search") || "";
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
-  const [productLines, setProductLines] = useState([]);
+  const [briefs, setBriefs] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({
@@ -58,21 +58,17 @@ const EPMScreens = () => {
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedSKU, setSelectedSKU] = useState();
-  const [selectedCollection, setSelectedCollection] = useState();
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
   const [trigger, setTrigger] = useState(false);
   const [metadata, setMetadata] = useState({});
   const [linkProduct, setLinkProduct] = useState("");
 
-  const [collectionNameInput, setCollectionNameInput] = useState("");
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
   const [loadingUpdateProductLink, setLoadingUpdateProductLink] =
     useState(false);
 
-  const [collections, setCollections] = useState([]);
-
-  const fetchCollections = async (page = 1) => {
+  const fetchBriefs = async (page = 1) => {
     setLoadingFetchBrief(true);
     const response = await rndServices.fetchBriefs({
       search,
@@ -84,8 +80,7 @@ const EPMScreens = () => {
     });
     const { data, metadata } = response;
     if (data) {
-      setCollections(data);
-      setProductLines(
+      setBriefs(
         map(data, (x, index) => {
           return {
             ...x,
@@ -103,10 +98,8 @@ const EPMScreens = () => {
       );
       setPagination(metadata);
       setMetadata(metadata);
-      setSelectedCollection(data[0]);
     } else {
-      setCollections([]);
-      setProductLines([]);
+      setBriefs([]);
     }
     setLoadingFetchBrief(false);
     setTrigger(false);
@@ -122,7 +115,7 @@ const EPMScreens = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   useEffect(() => {
-    fetchCollections(pagination.currentPage);
+    fetchBriefs(pagination.currentPage);
   }, [search, pagination.currentPage, query, trigger, sorting]);
 
   useEffect(() => {
@@ -133,12 +126,6 @@ const EPMScreens = () => {
       params.set("page", pagination.currentPage);
     navigate(`?${params.toString()}`, { replace: true });
   }, [search, pagination.currentPage, navigate]);
-
-  useEffect(() => {
-    if (selectedCollection) {
-      setCollectionNameInput(selectedCollection.name);
-    }
-  }, [selectedCollection]);
 
   useEffect(() => {
     fetchUsers();
@@ -172,7 +159,7 @@ const EPMScreens = () => {
           "Update Link Product thành công",
           "green"
         );
-        await fetchCollections(pagination.currentPage);
+        await fetchBriefs(pagination.currentPage);
       }
     }
     close();
@@ -216,11 +203,10 @@ const EPMScreens = () => {
           </>
         }
       >
-        <Details
+        <Table
           className={styles.details}
           onClose={() => setVisible(false)}
-          productLines={productLines}
-          name={selectedCollection?.name}
+          briefs={briefs}
           query={query}
           setQuery={setQuery}
           setSelectedSKU={setSelectedSKU}
@@ -236,6 +222,7 @@ const EPMScreens = () => {
           setLinkProduct={setLinkProduct}
           setSorting={setSorting}
           sorting={sorting}
+          metadata={metadata}
         />
       </Card>
       <Pagination

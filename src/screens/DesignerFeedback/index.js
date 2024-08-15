@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./DesignerFeedback.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
-import Details from "./Details";
+import Table from "./Details";
 import { findIndex, isEmpty, map, sum } from "lodash";
 import { useDisclosure } from "@mantine/hooks";
 import { Modal, Pagination, Grid, Image, Button, Rating } from "@mantine/core";
@@ -27,7 +27,7 @@ const DesignerFeedbackScreens = () => {
   const [search, setSearch] = useState(initialSearch);
   const [feedback, setFeedback] = useState("");
   const [visible, setVisible] = useState(true);
-  const [productLines, setProductLines] = useState([]);
+  const [briefs, setBriefs] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
   const [users, setUsers] = useState([]);
   const [pagination, setPagination] = useState({
@@ -55,15 +55,11 @@ const DesignerFeedbackScreens = () => {
   const [metadata, setMetadata] = useState({});
   const [linkDesign, setLinkDesign] = useState("");
 
-  const [collectionNameInput, setCollectionNameInput] = useState("");
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
-  const [loadingUpdateDesignLink, setLoadingUpdateDesignLink] = useState(false);
-
-  const [collections, setCollections] = useState([]);
 
   const [orderedData, setOrderedData] = useState([]);
 
-  const fetchCollections = async (page = 1) => {
+  const fetchBriefs = async (page = 1) => {
     setLoadingFetchBrief(true);
     const response = await rndServices.fetchBriefs({
       search,
@@ -74,8 +70,7 @@ const DesignerFeedbackScreens = () => {
     });
     const { data, metadata } = response;
     if (data) {
-      setCollections(data);
-      setProductLines(
+      setBriefs(
         map(data, (x, index) => {
           return {
             ...x,
@@ -93,10 +88,8 @@ const DesignerFeedbackScreens = () => {
       );
       setPagination(metadata);
       setMetadata(metadata);
-      setSelectedCollection(data[0]);
     } else {
-      setCollections([]);
-      setProductLines([]);
+      setBriefs([]);
     }
     setLoadingFetchBrief(false);
     setTrigger(false);
@@ -112,7 +105,7 @@ const DesignerFeedbackScreens = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   useEffect(() => {
-    fetchCollections(pagination.currentPage);
+    fetchBriefs(pagination.currentPage);
   }, [search, pagination.currentPage, query, trigger, sorting]);
 
   useEffect(() => {
@@ -125,23 +118,17 @@ const DesignerFeedbackScreens = () => {
   }, [search, pagination.currentPage, navigate]);
 
   useEffect(() => {
-    if (selectedCollection) {
-      setCollectionNameInput(selectedCollection.name);
-    }
-  }, [selectedCollection]);
-
-  useEffect(() => {
     fetchUsers();
   }, []);
 
   const handleChangeNextSlide = (uid) => {
-    const findCurrentIndex = findIndex(productLines, { uid });
+    const findCurrentIndex = findIndex(briefs, { uid });
     let productLine;
-    if (findCurrentIndex === productLines.length - 1) {
-      productLine = productLines[0];
+    if (findCurrentIndex === briefs.length - 1) {
+      productLine = briefs[0];
       setSelectedSKU(productLine);
     } else {
-      productLine = productLines[findCurrentIndex + 1];
+      productLine = briefs[findCurrentIndex + 1];
       setSelectedSKU(productLine);
     }
     setFeedback(
@@ -153,13 +140,13 @@ const DesignerFeedbackScreens = () => {
   };
 
   const handleChangePreviousSlide = (uid) => {
-    const findCurrentIndex = findIndex(productLines, { uid });
+    const findCurrentIndex = findIndex(briefs, { uid });
     let productLine;
     if (findCurrentIndex === 0) {
-      productLine = productLines[productLines.length - 1];
+      productLine = briefs[briefs.length - 1];
       setSelectedSKU(productLine);
     } else {
-      productLine = productLines[findCurrentIndex - 1];
+      productLine = briefs[findCurrentIndex - 1];
       setSelectedSKU(productLine);
     }
     setFeedback(
@@ -195,7 +182,7 @@ const DesignerFeedbackScreens = () => {
       });
       if (updateBriefResponse) {
         showNotification("Thành công", "Cập nhật thành công", "green");
-        await fetchCollections(pagination.currentPage);
+        await fetchBriefs(pagination.currentPage);
       }
     }
   };
@@ -208,11 +195,10 @@ const DesignerFeedbackScreens = () => {
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
       >
-        <Details
+        <Table
           className={styles.details}
           onClose={() => setVisible(false)}
-          productLines={productLines}
-          name={selectedCollection?.name}
+          briefs={briefs}
           query={query}
           setQuery={setQuery}
           setSelectedSKU={setSelectedSKU}

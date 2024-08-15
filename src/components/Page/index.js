@@ -26,7 +26,7 @@ const findNavigationItem = (navigation, pathname) => {
 
   return result;
 };
-const Page = ({ wide, children, title }) => {
+const Page = ({ wide, children }) => {
   const [visible, setVisible] = useState(false);
   const { getAccessTokenSilently, isAuthenticated } = useAuth0();
   const navigate = useNavigate();
@@ -46,14 +46,21 @@ const Page = ({ wide, children, title }) => {
   const fetchData = async () => {
     if (isAuthenticated) {
       try {
-        let auth0Token = readLocalStorageValue({ key: "token" });
+        let auth0Token = readLocalStorageValue({
+          key: LOCAL_STORAGE_KEY.ACCESS_TOKEN,
+        });
+        let userPermissions = readLocalStorageValue({
+          key: LOCAL_STORAGE_KEY.PERMISSIONS,
+        });
         if (!auth0Token) {
           auth0Token = await getAccessTokenSilently();
           setToken(auth0Token);
         }
-        const { data } = await authServices.verifyToken(auth0Token);
-        const userPermissions = data?.permissions || [];
-        setPermissions(userPermissions || []);
+        if (!userPermissions) {
+          const { data } = await authServices.verifyToken(auth0Token);
+          setPermissions(data?.permissions || []);
+        }
+
         const matchNavigation = findNavigationItem(NAVIGATION, pathname);
         if (matchNavigation) {
           const { permissions } = matchNavigation;
