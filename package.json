@@ -4,6 +4,7 @@
   "private": true,
   "homepage": "https://amz-dashboard.vercel.app",
   "dependencies": {
+    "@auth0/auth0-react": "^2.2.4",
     "@emotion/css": "^11.11.2",
     "@mantine/core": "^7.10.2",
     "@mantine/hooks": "^7.10.2",

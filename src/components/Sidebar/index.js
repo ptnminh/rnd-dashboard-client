@@ -7,104 +7,38 @@ import Dropdown from "./Dropdown";
 import { Logo } from "./logo";
 import { ActionIcon, Avatar, Group, Tooltip } from "@mantine/core";
 import { IconLogout } from "@tabler/icons-react";
+import { useAuth0 } from "@auth0/auth0-react";
+import { useLocalStorage } from "@mantine/hooks";
+import { NAVIGATION } from "../../Routes";
+import { map } from "lodash";
 
-const navigation = [
-  {
-    title: "RnD - Tạo Brief",
-    slug: "rnd",
-    icon: "diamond",
-    arrowDown: true,
-    pathname: "/rnd/brief",
-    dropdown: [
-      {
-        title: "List - Product Line",
-        url: "/rnd/product-line",
-      },
-    ],
-  },
-  {
-    title: "Design - Task",
-    icon: "diamond",
-    arrowDown: true,
-    slug: "/designer",
-    pathname: "/designer",
-    dropdown: [
-      {
-        title: "Design - Feedback",
-        url: "/designer/feedback",
-      },
-      {
-        title: "Video - Submit",
-        url: "/designer/video",
-      },
-    ],
-  },
-  {
-    title: "Listing - Task",
-    arrowDown: true,
-    icon: "diamond",
-    url: "/epm",
-  },
-  {
-    title: "MKT - Task",
-    icon: "diamond",
-    arrowDown: true,
-    slug: "/mkt",
-    pathname: "/mkt",
-    dropdown: [
-      {
-        title: "1. Post",
-        arrowDown: true,
-        dropdown: [
-          {
-            title: "1.1 Dashboard",
-            pathname: "/mkt/post/dashboard",
-          },
-          {
-            title: "1.2 Lên Post",
-            pathname: "/mkt/post/create",
-          },
-        ],
-      },
-      {
-        title: "2. Camps",
-        arrowDown: true,
-        dropdown: [
-          {
-            title: "2.1 Tạo",
-            pathname: "/mkt/camp/dashboard",
-          },
-          {
-            title: "2.2 Đã tạo",
-            pathname: "/mkt/camp/created",
-          },
-        ],
-      },
-      {
-        title: "3. Materials",
-        arrowDown: true,
-        dropdown: [
-          {
-            title: "3.1 Accounts",
-            pathname: "/mkt/account",
-          },
-          {
-            title: "3.2 Camp Phôi",
-            pathname: "/mkt/root-campaign",
-          },
-          {
-            title: "3.3 Caption",
-            pathname: "/mkt/caption",
-          },
-        ],
-      },
-    ],
-  },
-];
-
+const filterNavigation = (navigation, permissions) => {
+  return navigation
+    .filter((item) => item.permissions.every((p) => permissions.includes(p)))
+    .map((item) => {
+      if (item.dropdown) {
+        item.dropdown = filterNavigation(item.dropdown, permissions);
+      }
+      return item;
+    });
+};
 const Sidebar = ({ className, onClose }) => {
   const [visible, setVisible] = useState(false);
+  const { logout, user } = useAuth0();
+  const [token, setToken, removeToken] = useLocalStorage({
+    key: "token",
+    defaultValue: "",
+  });
+  const [userPermissions, setPermissions, removePermissions] = useLocalStorage({
+    key: "permissions",
+    defaultValue: [],
+  });
 
+  const userName =
+    user?.family_name && user?.given_name
+      ? user?.family_name + " " + user?.given_name
+      : user.nickname;
+  const filteredNavigation = filterNavigation(NAVIGATION, userPermissions);
   return (
     <>
       <div
@@ -117,7 +51,7 @@ const Sidebar = ({ className, onClose }) => {
           <Logo />
         </Link>
         <div className={styles.menu}>
-          {navigation.map((x, index) =>
+          {map(filteredNavigation, (x, index) =>
             x.url ? (
               <>
                 <NavLink
@@ -164,17 +98,26 @@ const Sidebar = ({ className, onClose }) => {
             justifyContent: "space-between",
           }}
         >
-          <Tooltip label="Phan Tài Nhật Minh" withArrow>
+          <Tooltip label={`${userName}`} withArrow>
             <Avatar
               color="cyan"
               variant="filled"
               radius="xl"
               size="lg"
-              src="/images/content/avatar-1.jpg"
+              src={user?.picture}
             />
           </Tooltip>
           <Tooltip label="Đăng xuất" withArrow>
-            <ActionIcon variant="filled" size="xl" color="#EFEFEF">
+            <ActionIcon
+              variant="filled"
+              size="xl"
+              color="#EFEFEF"
+              onClick={() => {
+                removeToken();
+                removePermissions();
+                logout();
+              }}
+            >
               <IconLogout color="#1A1D1F" />
             </ActionIcon>
           </Tooltip>
