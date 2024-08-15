@@ -259,11 +259,20 @@ const CreatePost = ({
       transformedPayloads
     );
     if (createPostResponse?.success === false) {
-      showNotification(
-        "Thất bại",
-        createPostResponse?.message || "Tạo post thất bại",
-        "red"
-      );
+      if (createPostResponse?.code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        showNotification(
+          "Thất bại",
+          createPostResponse?.message || "Tạo post thất bại",
+          "red"
+        );
+      }
+
       const errors = createPostResponse?.errorList || [];
       setPostErrors(errors);
     } else {

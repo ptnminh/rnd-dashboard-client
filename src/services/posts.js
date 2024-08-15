@@ -69,11 +69,20 @@ export const postService = {
       const response = await axios.put(`${hostAPI}/posts/${id}`, data);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification(
-          "Thất bại",
-          result?.message || "Cập nhật thất bại",
-          "red"
-        );
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification(
+            "Thất bại",
+            result?.message || "Cập nhật thất bại",
+            "red"
+          );
+        }
+
         return false;
       }
       return result;

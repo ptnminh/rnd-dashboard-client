@@ -3,7 +3,7 @@ import cn from "classnames";
 import styles from "./Dropdown.module.sass";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import Icon from "../../Icon";
-import { isEmpty, map } from "lodash";
+import { isEmpty, isEqual, map } from "lodash";
 
 const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
   const [visible, setVisible] = useState(false);
@@ -45,7 +45,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
             <div key={index}>
               <NavLink
                 className={({ isActive }) =>
-                  isActive && isEmpty(x.dropdown)
+                  isActive && isEmpty(x.dropdown) && !x.turnOffActive
                     ? `${styles.link} ${styles.active}`
                     : styles.link
                 }
@@ -60,7 +60,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
                 {x.title}
                 <Icon name="arrow-next" size="24" />
               </NavLink>
-              {x.dropdown === chooseDropdown &&
+              {isEqual(x.dropdown, chooseDropdown) &&
                 map(chooseDropdown, (y, index) => (
                   <Dropdown
                     className={cn(

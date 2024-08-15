@@ -11,21 +11,37 @@ const PATH_NAMES = {
     title: "Design - Task",
     url: "/designer",
   },
+  DESIGN_SETTING: {
+    title: "Design - Setting",
+    url: "/designer/setting",
+  },
   DESIGN_FEEDBACK: {
     title: "Design - Feedback",
     url: "/designer/feedback",
   },
-  DESIGN_VIDEO: {
-    title: "Video - Submit",
-    url: "/designer/video",
+  VIDEO: {
+    title: "Video - Task",
+    url: "/video",
+  },
+  VIDEO_SETTING: {
+    title: "Video - Setting",
+    url: "/video/setting",
   },
   EPM: {
     title: "Listing - Task",
     url: "/epm",
   },
+  EPM_SETTING: {
+    title: "Listing - Setting",
+    url: "/epm/setting",
+  },
   MKT: {
     title: "MKT - Task",
     url: "/mkt",
+  },
+  MKT_SETTING: {
+    title: "4. Setting",
+    url: "/mkt/setting",
   },
   MKT_POST: {
     title: "1. Post",
@@ -67,6 +83,10 @@ const PATH_NAMES = {
     title: "3.3 Caption",
     url: "/mkt/caption",
   },
+  SETTINGS: {
+    title: "Settings",
+    url: "/settings",
+  },
 };
 
 export const NAVIGATION = [
@@ -99,9 +119,24 @@ export const NAVIGATION = [
         permissions: ["read:design_feedback"],
       },
       {
-        title: PATH_NAMES.DESIGN_VIDEO.title,
-        url: PATH_NAMES.DESIGN_VIDEO.url,
-        permissions: ["read:video"],
+        title: PATH_NAMES.DESIGN_SETTING.title,
+        url: PATH_NAMES.DESIGN_SETTING.url,
+        permissions: ["read:design_setting"],
+      },
+    ],
+  },
+  {
+    title: PATH_NAMES.VIDEO.title,
+    arrowDown: true,
+    permissions: ["read:video"],
+    icon: "diamond",
+    slug: PATH_NAMES.VIDEO.url,
+    pathname: PATH_NAMES.VIDEO.url,
+    dropdown: [
+      {
+        title: PATH_NAMES.VIDEO_SETTING.title,
+        url: PATH_NAMES.VIDEO_SETTING.url,
+        permissions: ["read:video_setting"],
       },
     ],
   },
@@ -110,14 +145,21 @@ export const NAVIGATION = [
     arrowDown: true,
     permissions: ["read:epm"],
     icon: "diamond",
-    url: PATH_NAMES.EPM.url,
+    slug: PATH_NAMES.EPM.url,
+    pathname: PATH_NAMES.EPM.url,
+    dropdown: [
+      {
+        title: PATH_NAMES.EPM_SETTING.title,
+        url: PATH_NAMES.EPM_SETTING.url,
+        permissions: ["read:epm_setting"],
+      },
+    ],
   },
   {
     title: PATH_NAMES.MKT.title,
     icon: "diamond",
     arrowDown: true,
     permissions: ["read:mkt"],
-    slug: PATH_NAMES.MKT.url,
     pathname: PATH_NAMES.MKT.url,
     dropdown: [
       {
@@ -172,6 +214,12 @@ export const NAVIGATION = [
             permissions: ["read:mkt_caption"],
           },
         ],
+      },
+      {
+        title: PATH_NAMES.MKT_SETTING.title,
+        url: PATH_NAMES.MKT_SETTING.url,
+        permissions: ["read:mkt_setting"],
+        turnOffActive: true,
       },
     ],
   },

@@ -34,7 +34,15 @@ export const accountServices = {
       const response = await axios.put(`${hostAPI}/accounts/${id}`, payload);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification("Lỗi", "Cập nhật thất bại", "red");
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Lỗi", "Cập nhật thất bại", "red");
+        }
         return false;
       }
       return result;

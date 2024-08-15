@@ -9,11 +9,19 @@ export const campaignServices = {
       const response = await axios.post(`${hostAPI}/campaigns/batch`, data);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification(
-          "Thất bại",
-          result?.message || "Tạo Campaign thất bại",
-          "red"
-        );
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification(
+            "Thất bại",
+            result?.message || "Tạo Campaign thất bại",
+            "red"
+          );
+        }
 
         return result;
       }
@@ -61,52 +69,18 @@ export const campaignServices = {
       return false;
     }
   },
-  getCampaignHistories: async ({ search, page }) => {
-    try {
-      const response = await axios.post(`${hostAPI}/api/campaigns/histories`, {
-        search,
-        page,
-      });
-      const { data: result } = response;
-      return result;
-    } catch (error) {
-      console.log("Error at getCampaignHistories:", error);
-      return false;
-    }
-  },
-  duplicateCampaigns: async ({ campaignNames, stores }) => {
-    try {
-      const response = await axios.post(`${hostAPI}/api/campaigns/duplicate`, {
-        campaignNames,
-        stores,
-      });
-      const { data: result } = response;
-      return result;
-    } catch (error) {
-      console.log("Error at duplicateCampaigns:", error);
-      return false;
-    }
-  },
-  getAvailableStores: async (skus) => {
-    try {
-      const response = await axios.post(
-        `${hostAPI}/api/keywords/ready-keywords`,
-        {
-          skus,
-        }
-      );
-      const { data: result } = response;
-      return result.data;
-    } catch (error) {
-      console.log("Error at getAvailableStores:", error);
-      return false;
-    }
-  },
   createCampaign: async (data) => {
     try {
       const response = await axios.post(`${hostAPI}/sample-campaigns`, data);
       const { data: result } = response;
       if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        }
         return false;
       }
       return result;
@@ -144,6 +118,13 @@ export const campaignServices = {
       const response = await axios.delete(`${hostAPI}/sample-campaigns/${id}`);
       const { data: result } = response;
       if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        }
         return false;
       }
       return result;

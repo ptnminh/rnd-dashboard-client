@@ -8,6 +8,13 @@ export const captionServices = {
     try {
       const { data: result } = await axios.post(`${hostAPI}/captions`, payload);
       if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        }
         return false;
       }
       return result;
@@ -46,6 +53,13 @@ export const captionServices = {
     try {
       const { data: result } = await axios.delete(`${hostAPI}/captions/${id}`);
       if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        }
         return false;
       }
       return result;

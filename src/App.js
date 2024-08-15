@@ -1,14 +1,8 @@
 import "react-loading-skeleton/dist/skeleton.css";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useNavigate,
-} from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import "./styles/app.sass";
 import Page from "./components/Page";
 import NewCampaigns from "./screens/NewProduct";
-import TemplateKW from "./screens/TemplateKW";
 import DesignerScreens from "./screens/Designer";
 import EPMScreens from "./screens/EPM";
 import { ProductLine } from "./screens/ProductLine";
@@ -23,7 +17,7 @@ import CreatedCampsScreen from "./screens/CreatedCamps";
 import VideoScreens from "./screens/Video";
 import Auth0LoginScreen from "./screens/Auth0Login";
 import Page404 from "./screens/NotFound";
-import ForbiddenPage from "./components/ForbidenPage";
+import ForbiddenPage from "./components/ForbiddenPage";
 
 function App() {
   return (
@@ -53,22 +47,6 @@ function App() {
         }
       />
       <Route
-        path="/rnd/collection"
-        element={
-          <Page title="Campaigns">
-            <TemplateKW />
-          </Page>
-        }
-      />
-      <Route
-        path="/rnd/layout"
-        element={
-          <Page title="Campaigns">
-            <TemplateKW />
-          </Page>
-        }
-      />
-      <Route
         path="/designer"
         element={
           <Page title="Campaigns">
@@ -85,7 +63,7 @@ function App() {
         }
       />
       <Route
-        path="/designer/video"
+        path="/video"
         element={
           <Page title="Designer Feedback">
             <VideoScreens />
@@ -182,6 +160,14 @@ function App() {
       />
       <Route
         path="/mkt/camp/created"
+        element={
+          <Page title="MKT">
+            <CreatedCampsScreen />
+          </Page>
+        }
+      />
+      <Route
+        path="/mkt/setting"
         element={
           <Page title="MKT">
             <CreatedCampsScreen />

@@ -185,11 +185,20 @@ export const rndServices = {
       const response = await axios.post(`${hostAPI}/briefs/create-batch`, data);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification(
-          "Thất bại",
-          result?.message || "Tạo brief thất bại",
-          "red"
-        );
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification(
+            "Thất bại",
+            result?.message || "Tạo brief thất bại",
+            "red"
+          );
+        }
+
         return false;
       }
       showNotification("Thành công", "Tạo brief thành công", "green");
@@ -295,7 +304,15 @@ export const rndServices = {
       const response = await axios.put(`${hostAPI}/briefs/${uid}`, data);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
         return false;
       }
       return true;
@@ -310,7 +327,15 @@ export const rndServices = {
       const response = await axios.put(`${hostAPI}/briefs/delete/${uid}`);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification("Thất bại", "Xóa brief thất bại", "red");
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Xóa brief thất bại", "red");
+        }
         return false;
       }
       return true;
