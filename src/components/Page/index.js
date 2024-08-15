@@ -6,7 +6,7 @@ import { useAuth0, withAuthenticationRequired } from "@auth0/auth0-react";
 import { readLocalStorageValue, useLocalStorage } from "@mantine/hooks";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NAVIGATION } from "../../Routes";
-import { forEach, intersection } from "lodash";
+import { forEach, intersection, isEmpty } from "lodash";
 import { LOCAL_STORAGE_KEY } from "../../constant";
 import { authServices } from "../../services/auth";
 
@@ -56,8 +56,9 @@ const Page = ({ wide, children }) => {
           auth0Token = await getAccessTokenSilently();
           setToken(auth0Token);
         }
-        if (!userPermissions) {
+        if (isEmpty(userPermissions)) {
           const { data } = await authServices.verifyToken(auth0Token);
+          userPermissions = data?.permissions || [];
           setPermissions(data?.permissions || []);
         }
 

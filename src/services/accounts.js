@@ -47,6 +47,14 @@ export const accountServices = {
       }
       return result;
     } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      }
       console.log("Error at updateAccount:", error);
       return false;
     }

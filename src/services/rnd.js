@@ -2,6 +2,9 @@ import axios from "axios";
 import { hostAPI } from "../constant";
 import { showNotification } from "../utils/index";
 import { filter, isEmpty, keys, map } from "lodash";
+axios.defaults.headers.common["Authorization"] = `Bearer ${JSON.parse(
+  localStorage.getItem("token")
+)}`;
 export const rndServices = {
   searchProducts: async (SKU) => {
     try {
@@ -204,8 +207,18 @@ export const rndServices = {
       showNotification("Thành công", "Tạo brief thành công", "green");
       return true;
     } catch (error) {
-      console.log("Error at createBriefs:", error);
-      showNotification("Thất bại", "Tạo brief thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at createBriefs:", error);
+        showNotification("Thất bại", "Tạo brief thất bại", "red");
+      }
+
       return false;
     }
   },
@@ -317,8 +330,17 @@ export const rndServices = {
       }
       return true;
     } catch (error) {
-      console.log("Error at updateBrief:", error);
-      showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
       return false;
     }
   },
@@ -340,8 +362,17 @@ export const rndServices = {
       }
       return true;
     } catch (error) {
-      console.log("Error at deleteBrief:", error);
-      showNotification("Thất bại", "Xóa brief thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at deleteBrief:", error);
+        showNotification("Thất bại", "Xóa brief thất bại", "red");
+      }
       return false;
     }
   },

@@ -19,8 +19,17 @@ export const captionServices = {
       }
       return result;
     } catch (error) {
-      console.log("Error at fetchQuotes:", error);
-      showNotification("Thất bại", "Tạo caption thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at fetchQuotes:", error);
+        showNotification("Thất bại", "Tạo caption thất bại", "red");
+      }
       return false;
     }
   },
@@ -64,6 +73,14 @@ export const captionServices = {
       }
       return result;
     } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      }
       console.log("Error at removeCaption:", error);
       return false;
     }
