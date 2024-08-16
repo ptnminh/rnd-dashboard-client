@@ -48,7 +48,9 @@ const RUN_FLOWS = {
 
 const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
   const [runflowValue, setRunFlowValue] = useState(RUN_FLOWS.sameCamps);
-  const [totalBudget, setTotalBudget] = useState(null);
+  const [totalBudget, setTotalBudget] = useState(
+    toNumber(selectedPayload?.budget)
+  );
   const [selectedImages, setSelectedImages] = useState([]);
   const [visiblePreview, setVisiblePreview] = useState(false);
   const [loadingCreateCampaign, setLoadingCreateCampaign] = useState(false);

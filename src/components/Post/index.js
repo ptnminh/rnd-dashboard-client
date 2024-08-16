@@ -419,7 +419,7 @@ const Ads = ({
                           maxRows={4}
                         />
                       )}
-                      {postId && (
+                      {postId && type !== "video" && (
                         <Group
                           style={{
                             width: "100%",
@@ -475,7 +475,7 @@ const Ads = ({
                           </div>
                         </Group>
                       )}
-                      {postId && (
+                      {postId && type !== "video" && (
                         <Group
                           style={{
                             width: "100%",
