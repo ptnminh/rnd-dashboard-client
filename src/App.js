@@ -19,6 +19,7 @@ import Auth0LoginScreen from "./screens/Auth0Login";
 import Page404 from "./screens/NotFound";
 import ForbiddenPage from "./components/ForbiddenPage";
 import Setting from "./screens/Setting";
+import UserScreen from "./screens/Users";
 
 function App() {
   return (
@@ -196,6 +197,14 @@ function App() {
         element={
           <Page title="MKT">
             <Setting name="epm" />
+          </Page>
+        }
+      />
+      <Route
+        path="/users"
+        element={
+          <Page title="MKT">
+            <UserScreen />
           </Page>
         }
       />

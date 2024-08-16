@@ -111,6 +111,7 @@ export const STORE_PREFIX_BRAND = {
   },
 };
 export const hostAPI = process.env.REACT_APP_BACKEND_URL;
+
 export const MAPPED_STRATEGY = {
   DOWN_ONLY: "LEGACY_FOR_SALES",
   UP_AND_DOWN: "AUTO_FOR_SALES",

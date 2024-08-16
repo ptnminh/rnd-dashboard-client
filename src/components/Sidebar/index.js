@@ -87,7 +87,7 @@ const Sidebar = ({ className, onClose }) => {
         style={{
           position: "fixed",
           left: 0,
-          bottom: "30px",
+          bottom: "10px",
           cursor: "pointer",
           width: "290px",
           padding: "24px",

@@ -87,6 +87,10 @@ const PATH_NAMES = {
     title: "Settings",
     url: "/settings",
   },
+  USERS: {
+    title: "Users",
+    url: "/users",
+  },
 };
 
 export const NAVIGATION = [
@@ -222,5 +226,12 @@ export const NAVIGATION = [
         turnOffActive: true,
       },
     ],
+  },
+  {
+    title: PATH_NAMES.USERS.title,
+    url: PATH_NAMES.USERS.url,
+    icon: "diamond",
+    arrowDown: true,
+    permissions: ["read:users"],
   },
 ];
