@@ -1,14 +1,11 @@
 import { filter, isEmpty, keys } from "lodash";
-import { hostAPI, LOCAL_STORAGE_KEY } from "../constant";
-import axios from "axios";
+import apiClient from "./axiosClient";
 import { showNotification } from "../utils/index";
-axios.defaults.headers.common["Authorization"] = `Bearer ${JSON.parse(
-  localStorage.getItem(LOCAL_STORAGE_KEY.ACCESS_TOKEN)
-)}`;
+
 export const accountServices = {
   fetchAllAccounts: async ({ query, page, limit }) => {
     try {
-      let url = `${hostAPI}/accounts?page=${page}&pageSize=${limit}`;
+      let url = `/accounts?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
@@ -19,7 +16,7 @@ export const accountServices = {
         )}`;
         url = `${url}&${queryString}`;
       }
-      const response = await axios.get(url);
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -33,7 +30,7 @@ export const accountServices = {
   updateAccount: async (data) => {
     try {
       const { id, ...payload } = data;
-      const response = await axios.put(`${hostAPI}/accounts/${id}`, payload);
+      const response = await apiClient.put(`/accounts/${id}`, payload);
       const { data: result } = response;
       if (result?.success === false) {
         if (result?.code === 403) {

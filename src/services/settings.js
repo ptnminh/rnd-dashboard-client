@@ -1,14 +1,11 @@
 import { filter, isEmpty, keys } from "lodash";
-import { hostAPI, LOCAL_STORAGE_KEY } from "../constant";
-import axios from "axios";
 import { showNotification } from "../utils/index";
-axios.defaults.headers.common["Authorization"] = `Bearer ${JSON.parse(
-  localStorage.getItem(LOCAL_STORAGE_KEY.ACCESS_TOKEN)
-)}`;
+import apiClient from "./axiosClient";
+
 export const settingServices = {
   fetchSettings: async ({ limit = 10, page = 1, query = {}, view }) => {
     try {
-      let url = `${hostAPI}/settings`;
+      let url = `/settings`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
@@ -19,7 +16,7 @@ export const settingServices = {
         )}`;
         url = `${url}?${queryString}`;
       }
-      const response = await axios.get(url, {
+      const response = await apiClient.get(url, {
         params: {
           ...(page && { page }),
           ...(limit && { limit }),
@@ -38,8 +35,8 @@ export const settingServices = {
   },
   fetchSetting: async ({ identifier }) => {
     try {
-      let url = `${hostAPI}/settings/${identifier}`;
-      const response = await axios.get(url);
+      let url = `/settings/${identifier}`;
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -52,8 +49,8 @@ export const settingServices = {
   },
   updateSetting: async ({ uid, data }) => {
     try {
-      let url = `${hostAPI}/settings/${uid}`;
-      const response = await axios.put(url, data);
+      let url = `/settings/${uid}`;
+      const response = await apiClient.put(url, data);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -66,8 +63,8 @@ export const settingServices = {
   },
   createSetting: async (data) => {
     try {
-      let url = `${hostAPI}/settings`;
-      const response = await axios.post(url, data);
+      let url = `/settings`;
+      const response = await apiClient.post(url, data);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Tạo setting thất bại", "red");

@@ -1,14 +1,11 @@
-import axios from "axios";
-import { hostAPI, LOCAL_STORAGE_KEY } from "../constant";
 import { showNotification } from "../utils/index";
 import { filter, isEmpty, keys } from "lodash";
-axios.defaults.headers.common["Authorization"] = `Bearer ${JSON.parse(
-  localStorage.getItem(LOCAL_STORAGE_KEY.ACCESS_TOKEN)
-)}`;
+import apiClient from "./axiosClient";
+
 export const captionServices = {
   createCaption: async (payload) => {
     try {
-      const { data: result } = await axios.post(`${hostAPI}/captions`, payload);
+      const { data: result } = await apiClient.post(`/captions`, payload);
       if (result?.success === false) {
         if (result?.code === 403) {
           showNotification(
@@ -37,7 +34,7 @@ export const captionServices = {
   },
   fetchCaptions: async ({ page, limit, query }) => {
     try {
-      let url = `${hostAPI}/captions?page=${page}&pageSize=${limit}`;
+      let url = `/captions?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
@@ -49,7 +46,7 @@ export const captionServices = {
         )}`;
         url = `${url}&${queryString}`;
       }
-      const response = await axios.get(url);
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -62,7 +59,7 @@ export const captionServices = {
   },
   removeCaption: async (id) => {
     try {
-      const { data: result } = await axios.delete(`${hostAPI}/captions/${id}`);
+      const { data: result } = await apiClient.delete(`/captions/${id}`);
       if (result?.success === false) {
         if (result?.code === 403) {
           showNotification(

@@ -1,14 +1,11 @@
-import axios from "axios";
-import { hostAPI, LOCAL_STORAGE_KEY } from "../constant";
 import { filter, isEmpty, keys, omit, pick, reduce } from "lodash";
 import { showNotification } from "../utils/index";
-axios.defaults.headers.common["Authorization"] = `Bearer ${JSON.parse(
-  localStorage.getItem(LOCAL_STORAGE_KEY.ACCESS_TOKEN)
-)}`;
+import apiClient from "./axiosClient";
+
 export const campaignServices = {
   createCamps: async (data) => {
     try {
-      const response = await axios.post(`${hostAPI}/campaigns/batch`, data);
+      const response = await apiClient.post(`/campaigns/batch`, data);
       const { data: result } = response;
       if (result?.success === false) {
         if (result?.code === 403) {
@@ -35,7 +32,7 @@ export const campaignServices = {
   },
   fetchCampaigns: async ({ page, limit, query, sorting }) => {
     try {
-      let url = `${hostAPI}/campaigns?page=${page}&pageSize=${limit}`;
+      let url = `/campaigns?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       const sort = reduce(
@@ -60,7 +57,7 @@ export const campaignServices = {
         const sortString = `sort=${encodeURIComponent(JSON.stringify(sort))}`;
         url = `${url}&${sortString}`;
       }
-      const response = await axios.get(url);
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -73,7 +70,7 @@ export const campaignServices = {
   },
   createCampaign: async (data) => {
     try {
-      const response = await axios.post(`${hostAPI}/sample-campaigns`, data);
+      const response = await apiClient.post(`/sample-campaigns`, data);
       const { data: result } = response;
       if (result?.success === false) {
         if (result?.code === 403) {
@@ -93,7 +90,7 @@ export const campaignServices = {
   },
   fetchSampleCampaigns: async ({ query, page, limit }) => {
     try {
-      let url = `${hostAPI}/sample-campaigns?page=${page}&pageSize=${limit}`;
+      let url = `/sample-campaigns?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
@@ -104,7 +101,7 @@ export const campaignServices = {
         )}`;
         url = `${url}&${queryString}`;
       }
-      const response = await axios.get(url);
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -117,7 +114,7 @@ export const campaignServices = {
   },
   deleteSampleCampaign: async (id) => {
     try {
-      const response = await axios.delete(`${hostAPI}/sample-campaigns/${id}`);
+      const response = await apiClient.delete(`/sample-campaigns/${id}`);
       const { data: result } = response;
       if (result?.success === false) {
         if (result?.code === 403) {

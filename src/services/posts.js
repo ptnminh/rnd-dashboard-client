@@ -1,14 +1,11 @@
 import { filter, isEmpty, keys } from "lodash";
-import { hostAPI, LOCAL_STORAGE_KEY } from "../constant";
-import axios from "axios";
 import { showNotification } from "../utils/index";
-axios.defaults.headers.common["Authorization"] = `Bearer ${JSON.parse(
-  localStorage.getItem(LOCAL_STORAGE_KEY.ACCESS_TOKEN)
-)}`;
+import apiClient from "./axiosClient";
+
 export const postService = {
   fetchFanpages: async ({ limit = 10, page = 1, query = {}, sorting = {} }) => {
     try {
-      let url = `${hostAPI}/pages?page=${page}&pageSize=${limit}`;
+      let url = `/pages?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
@@ -19,7 +16,7 @@ export const postService = {
         )}`;
         url = `${url}&${queryString}`;
       }
-      const response = await axios.get(url);
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -32,7 +29,7 @@ export const postService = {
   },
   createPost: async (data) => {
     try {
-      const response = await axios.post(`${hostAPI}/posts/batch`, {
+      const response = await apiClient.post(`/posts/batch`, {
         payloads: data,
       });
       const { data: result } = response;
@@ -44,7 +41,7 @@ export const postService = {
   },
   fetchPosts: async ({ limit = 10, page = 1, query = {}, sorting = {} }) => {
     try {
-      let url = `${hostAPI}/posts?page=${page}&pageSize=${limit}`;
+      let url = `/posts?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
@@ -55,7 +52,7 @@ export const postService = {
         )}`;
         url = `${url}&${queryString}`;
       }
-      const response = await axios.get(url);
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -68,7 +65,7 @@ export const postService = {
   },
   updatePost: async (id, data) => {
     try {
-      const response = await axios.put(`${hostAPI}/posts/${id}`, data);
+      const response = await apiClient.put(`/posts/${id}`, data);
       const { data: result } = response;
       if (result?.success === false) {
         if (result?.code === 403) {
