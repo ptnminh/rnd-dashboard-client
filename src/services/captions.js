@@ -1,8 +1,10 @@
 import axios from "axios";
-import { hostAPI } from "../constant";
+import { hostAPI, LOCAL_STORAGE_KEY } from "../constant";
 import { showNotification } from "../utils/index";
 import { filter, isEmpty, keys } from "lodash";
-
+axios.defaults.headers.common["Authorization"] = `Bearer ${JSON.parse(
+  localStorage.getItem(LOCAL_STORAGE_KEY.ACCESS_TOKEN)
+)}`;
 export const captionServices = {
   createCaption: async (payload) => {
     try {

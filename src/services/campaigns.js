@@ -1,8 +1,10 @@
 import axios from "axios";
-import { hostAPI } from "../constant";
-import { filter, isEmpty, keys, map, omit, pick, reduce } from "lodash";
+import { hostAPI, LOCAL_STORAGE_KEY } from "../constant";
+import { filter, isEmpty, keys, omit, pick, reduce } from "lodash";
 import { showNotification } from "../utils/index";
-
+axios.defaults.headers.common["Authorization"] = `Bearer ${JSON.parse(
+  localStorage.getItem(LOCAL_STORAGE_KEY.ACCESS_TOKEN)
+)}`;
 export const campaignServices = {
   createCamps: async (data) => {
     try {

@@ -1,9 +1,9 @@
 import axios from "axios";
-import { hostAPI } from "../constant";
+import { hostAPI, LOCAL_STORAGE_KEY } from "../constant";
 import { showNotification } from "../utils/index";
 import { filter, isEmpty, keys, map } from "lodash";
 axios.defaults.headers.common["Authorization"] = `Bearer ${JSON.parse(
-  localStorage.getItem("token")
+  localStorage.getItem(LOCAL_STORAGE_KEY.ACCESS_TOKEN)
 )}`;
 export const rndServices = {
   searchProducts: async (SKU) => {

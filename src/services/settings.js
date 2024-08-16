@@ -1,8 +1,10 @@
 import { filter, isEmpty, keys } from "lodash";
-import { hostAPI } from "../constant";
+import { hostAPI, LOCAL_STORAGE_KEY } from "../constant";
 import axios from "axios";
 import { showNotification } from "../utils/index";
-
+axios.defaults.headers.common["Authorization"] = `Bearer ${JSON.parse(
+  localStorage.getItem(LOCAL_STORAGE_KEY.ACCESS_TOKEN)
+)}`;
 export const settingServices = {
   fetchSettings: async ({ limit = 10, page = 1, query = {}, view }) => {
     try {
