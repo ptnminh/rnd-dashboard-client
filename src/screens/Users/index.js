@@ -10,10 +10,12 @@ import {
   Menu,
   Modal,
   Pagination,
+  PasswordInput,
   rem,
   Select,
   TagsInput,
   Text,
+  TextInput,
 } from "@mantine/core";
 import {
   IconDots,
@@ -21,6 +23,7 @@ import {
   IconUserCheck,
   IconSquareRoundedCheck,
   IconTrash,
+  IconPlus,
 } from "@tabler/icons-react";
 import classes from "./User.module.css";
 import { useDisclosure } from "@mantine/hooks";
@@ -164,14 +167,158 @@ const AssignNewRole = () => {
   );
 };
 
-const ACTIONS = {
-  ASSIGN_NEW_ROLE: "ASSIGN_NEW_ROLE",
-  ASSIGN_PERMISSIONS: "ASSIGN_PERMISSIONS",
-  VIEW_DETAILS: "VIEW_DETAILS",
-  DELETE_ACCOUNT: "DELETE_ACCOUNT",
+const CreateUser = () => {
+  return (
+    <Grid>
+      <Grid.Col span={12}>
+        <TextInput
+          placeholder="email@example.com"
+          required
+          label="Email"
+          styles={{
+            label: {
+              marginBottom: "10px",
+              fontWeight: 500,
+              fontSize: "0.875rem",
+              lineHeight: "1.57143",
+              letterSpacing: "0em",
+              color: "rgb(25, 25, 25)",
+            },
+          }}
+        />
+      </Grid.Col>
+      <Grid.Col span={12}>
+        <PasswordInput
+          required
+          label="Password"
+          styles={{
+            label: {
+              marginBottom: "10px",
+              fontWeight: 500,
+              fontSize: "0.875rem",
+              lineHeight: "1.57143",
+              letterSpacing: "0em",
+              color: "rgb(25, 25, 25)",
+            },
+          }}
+        />
+      </Grid.Col>
+      <Grid.Col span={12}>
+        <PasswordInput
+          required
+          label="Confirm Password"
+          styles={{
+            label: {
+              marginBottom: "10px",
+              fontWeight: 500,
+              fontSize: "0.875rem",
+              lineHeight: "1.57143",
+              letterSpacing: "0em",
+              color: "rgb(25, 25, 25)",
+            },
+          }}
+        />
+      </Grid.Col>
+      <Grid.Col span={12}>
+        <Select
+          data={["Admin", "Manager", "Lead", "User"]}
+          withScrollArea={true}
+          maxDropdownHeight={300}
+          label="Select Role"
+          styles={{
+            label: {
+              marginBottom: "10px",
+              fontWeight: 500,
+              fontSize: "0.875rem",
+              lineHeight: "1.57143",
+              letterSpacing: "0em",
+              color: "rgb(25, 25, 25)",
+            },
+          }}
+        />
+      </Grid.Col>
+      <Grid.Col span={12}>
+        <Flex align="center" justify="space-between">
+          <Text
+            style={{
+              fontWeight: 500,
+              fontSize: "0.875rem",
+              lineHeight: "1.57143",
+              letterSpacing: "0em",
+              color: "rgb(25, 25, 25)",
+            }}
+          >
+            Permissions
+          </Text>
+          <Group>
+            <Text
+              style={{
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              }}
+            >
+              Select:
+            </Text>
+            <Group>
+              <Button
+                size="xs"
+                color="gray"
+                variant="outline"
+                style={{
+                  border: 0,
+                  color: "rgb(52, 73, 186)",
+                }}
+              >
+                All
+              </Button>
+              <Text>|</Text>
+              <Button
+                size="xs"
+                color="gray"
+                variant="outline"
+                style={{
+                  border: 0,
+                  color: "rgb(52, 73, 186)",
+                }}
+              >
+                None
+              </Button>
+            </Group>
+          </Group>
+        </Flex>
+        <TagsInput
+          data={mockPermissions}
+          withScrollArea={true}
+          maxDropdownHeight={300}
+        />
+      </Grid.Col>
+      <Grid.Col
+        span={12}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+        }}
+      >
+        <Button color="rgb(63, 89, 228)" w="95%">
+          Create
+        </Button>
+      </Grid.Col>
+    </Grid>
+  );
 };
 
-const MarketingSetting = () => {
+const ACTIONS = {
+  ASSIGN_NEW_ROLE: "Assign New Role",
+  ASSIGN_PERMISSIONS: "Add Permissions",
+  VIEW_DETAILS: "VIEW_DETAILS",
+  DELETE_ACCOUNT: "Delete Account",
+  CREATE_USER: "Create User",
+};
+
+const UserScreen = () => {
   const [loadingFetchUsers, setLoadingFetchUsers] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
   const [users, setUsers] = useState([]);
@@ -421,7 +568,20 @@ const MarketingSetting = () => {
               backgroundColor: "#EFF0F1",
               flexWrap: "wrap",
             }}
-          ></Flex>
+          >
+            <Button
+              color="rgb(52, 73, 186)"
+              leftSection={
+                <IconPlus style={{ width: rem(14), height: rem(14) }} />
+              }
+              onClick={() => {
+                setAction(ACTIONS.CREATE_USER);
+                open();
+              }}
+            >
+              Create User
+            </Button>
+          </Flex>
         </div>
       );
     },
@@ -468,19 +628,11 @@ const MarketingSetting = () => {
           blur: 3,
         }}
         radius="md"
-        title={
-          action === ACTIONS.ASSIGN_PERMISSIONS
-            ? "Assign Permissions"
-            : action === ACTIONS.ASSIGN_NEW_ROLE
-            ? "Assign New Role"
-            : "Delete Account"
-        }
+        title={action}
       >
-        {action === ACTIONS.ASSIGN_PERMISSIONS ? (
-          <AssignPermissions />
-        ) : action === ACTIONS.ASSIGN_NEW_ROLE ? (
-          <AssignNewRole />
-        ) : (
+        {action === ACTIONS.ASSIGN_PERMISSIONS && <AssignPermissions />}
+        {action === ACTIONS.ASSIGN_NEW_ROLE && <AssignNewRole />}
+        {action === ACTIONS.DELETE_ACCOUNT && (
           <Grid>
             <Grid.Col span={12}>
               <Text
@@ -502,9 +654,10 @@ const MarketingSetting = () => {
             </Grid.Col>
           </Grid>
         )}
+        {action === ACTIONS.CREATE_USER && <CreateUser />}
       </Modal>
     </Card>
   );
 };
 
-export default MarketingSetting;
+export default UserScreen;
