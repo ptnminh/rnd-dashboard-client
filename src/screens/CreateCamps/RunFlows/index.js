@@ -95,9 +95,8 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
           rootCampId: selectedPayload?.rootCampaign?.campaignId,
           campInfo: {
             dailyBudget: totalBudget,
-            name: `${selectedPayload.team} - ${selectedPayload.sku} - ${
-              selectedPayload.batch
-            } - Test${selectedPayload.exCampIds.length + 1}`,
+            name: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch
+              } - Test${selectedPayload.exCampIds.length + 1}`,
           },
           adsInfo: map(selectedAds, (x) => ({
             adsLinkId: x.uid,
@@ -111,15 +110,13 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
         isEmpty(selectedAds) || !totalBudget
           ? []
           : [
-              {
-                rootCampName: `${selectedPayload.team} - ${
-                  selectedPayload.sku
-                } - ${selectedPayload.batch} - Test${
-                  selectedPayload.exCampIds.length + 1
+            {
+              rootCampName: `${selectedPayload.team} - ${selectedPayload.sku
+                } - ${selectedPayload.batch} - Test${selectedPayload.exCampIds.length + 1
                 }`,
-                budget: totalBudget,
-              },
-            ];
+              budget: totalBudget,
+            },
+          ];
       setPreviews(transformedPreviews);
     } else {
       const mergedSelectedAdIds = compact(
@@ -133,9 +130,8 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
         briefId: selectedPayload?.briefId,
         rootCampId: selectedPayload?.rootCampaign?.campaignId,
         campInfo: {
-          name: `${selectedPayload.team} - ${selectedPayload.sku} - ${
-            selectedPayload.batch
-          } - Test${selectedPayload.exCampIds.length + index + 1}`,
+          name: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch
+            } - Test${selectedPayload.exCampIds.length + index + 1}`,
           dailyBudget: budgetPerCamp,
         },
         adsInfo: [
@@ -150,13 +146,11 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
         isEmpty(selectedAds) || !totalBudget
           ? []
           : map(selectedAds, (x, index) => ({
-              rootCampName: `${selectedPayload.team} - ${
-                selectedPayload.sku
-              } - ${selectedPayload.batch} - Test${
-                selectedPayload.exCampIds.length + index + 1
+            rootCampName: `${selectedPayload.team} - ${selectedPayload.sku
+              } - ${selectedPayload.batch} - Test${selectedPayload.exCampIds.length + index + 1
               }`,
-              budget: budgetPerCamp,
-            }));
+            budget: budgetPerCamp,
+          }));
       setPreviews(transformedPreviews);
       setPayloads(transformedPayloads);
     }
@@ -366,7 +360,7 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
                                 href={`https://facebook.com/${item?.postId}`}
                                 size="sx"
                                 aria-label="Open in a new tab"
-                                onClick={() => {}}
+                                onClick={() => { }}
                                 target="_blank"
                               >
                                 <IconExternalLink />
@@ -473,9 +467,22 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
                       }}
                     />
                     <Group>
-                      <video width="80px" height="80px" controls autoPlay muted>
-                        <source src={item.value} type="video/mp4" />
-                      </video>
+                      <Tooltip label="Click để xem chi tiết">
+                        <Image
+                          src={
+                            item?.thumbLink ||
+                            "/images/content/not_found_2.jpg"
+                          }
+                          alt="Post-Camp"
+                          width="80px"
+                          height="80px"
+                          radius="md"
+                          onClick={() => {
+                            // open new window
+                            window.open(item?.value, "_blank")
+                          }}
+                        />
+                      </Tooltip>
                       <Flex direction="column" gap={8}>
                         <TextInput
                           size="sm"
@@ -498,7 +505,7 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
                               href={`https://facebook.com/${item?.postId}`}
                               size="sx"
                               aria-label="Open in a new tab"
-                              onClick={() => {}}
+                              onClick={() => { }}
                               target="_blank"
                             >
                               <IconExternalLink />
@@ -725,7 +732,7 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
               const mergedSelectedAdIds = compact(
                 concat(selectedImages, selectedVideos)
               );
-              if (isEmpty(mergedSelectedAdIds)) {
+              if (isEmpty(mergedSelectedAdIds) && !visiblePreview) {
                 showNotification(
                   "Thất bại",
                   "Vui lòng chọn ít nhất 1 hình hoặc 1 video",
@@ -740,7 +747,7 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
               setVisiblePreview(!visiblePreview);
             }}
           >
-            {visiblePreview ? "Ẩn Preview" : "Preview"}
+            {visiblePreview ? "Hide" : "Rename Camp"}
           </Button>
         </Flex>
       </Grid.Col>

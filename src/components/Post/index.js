@@ -17,6 +17,7 @@ import {
   Textarea,
   TextInput,
   ThemeIcon,
+  Tooltip,
 } from "@mantine/core";
 import { filter, find, findIndex, includes, isEmpty, map } from "lodash";
 import {
@@ -39,6 +40,7 @@ const Ads = ({
   sku,
   type,
   postId,
+  thumbLink,
   addCta,
   captions,
   setQueryCaption,
@@ -104,8 +106,8 @@ const Ads = ({
           padding: "10px",
           ...(includes(choosePosts, uid) &&
             !postId && {
-              backgroundColor: "#ffecd2",
-            }),
+            backgroundColor: "#ffecd2",
+          }),
         }}
       >
         <Checkbox.Indicator
@@ -213,25 +215,23 @@ const Ads = ({
                     {type === "image" || !type ? "Hình" : "Video"} Ads
                   </div>
                   {type === "video" ? (
-                    <video
-                      width="100%"
-                      height="200px"
-                      controls
-                      id="video"
-                      style={{
-                        display: "block",
-                      }}
-                      autoPlay
-                      muted
-                    >
-                      <source
+                    <Tooltip label="Click để xem chi tiết">
+                      <Image
                         src={
-                          find(postPayloads, { uid })?.videoLink ||
+                          find(postPayloads, { uid })?.thumbLink ||
                           "/images/content/not_found_2.jpg"
                         }
-                        type="video/mp4"
+                        alt="Post-Camp"
+                        height="100%"
+                        fit="contain"
+                        radius="md"
+                        onClick={() => {
+                          // open new window
+                          window.open(find(postPayloads, { uid })?.videoLink, "_blank")
+                        }}
                       />
-                    </video>
+                    </Tooltip>
+
                   ) : (
                     <Image
                       src={
@@ -360,7 +360,7 @@ const Ads = ({
                             href={`https://pawfecthouse.com/${sku}`}
                             size="lg"
                             aria-label="Open in a new tab"
-                            onClick={() => {}}
+                            onClick={() => { }}
                             target="_blank"
                           >
                             <IconExternalLink />
@@ -456,7 +456,7 @@ const Ads = ({
                               href={`https://facebook.com/${postId}`}
                               size="lg"
                               aria-label="Open in a new tab"
-                              onClick={() => {}}
+                              onClick={() => { }}
                               target="_blank"
                             >
                               <IconExternalLink />

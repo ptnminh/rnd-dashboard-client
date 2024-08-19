@@ -9,6 +9,7 @@ import {
   Image,
   Menu,
   Modal,
+  MultiSelect,
   Pagination,
   PasswordInput,
   rem,
@@ -24,6 +25,7 @@ import {
   IconSquareRoundedCheck,
   IconTrash,
   IconPlus,
+  IconMail
 } from "@tabler/icons-react";
 import classes from "./User.module.css";
 import { useDisclosure } from "@mantine/hooks";
@@ -33,6 +35,10 @@ import Card from "../../components/Card";
 import { mockUsers } from "../../mocks/viewers";
 import moment from "moment-timezone";
 import { mockPermissions } from "../../mocks/permissions";
+import { Controller, useForm } from "react-hook-form";
+import { BD_TEAMS } from "../../constant";
+import { userServices } from "../../services/users";
+import { showNotification } from "../../utils/index";
 
 const AssignPermissions = () => {
   return (
@@ -167,90 +173,155 @@ const AssignNewRole = () => {
   );
 };
 
-const CreateUser = () => {
+const CreateUser = ({
+  closeModal
+}) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    control,
+    getValues,
+  } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+      role: [],
+      permissions: []
+    }
+  });
+  const onSubmit = async (data) => {
+    const payload = {
+      ...data,
+      connection: "Username-Password-Authentication",
+    }
+    const createUserResponse = await userServices.createUser(payload);
+    if (createUserResponse) {
+      showNotification("Thành công", "Tạo người dùng thành công", "green");
+      closeModal()
+    }
+  }
   return (
-    <Grid>
-      <Grid.Col span={12}>
-        <TextInput
-          placeholder="email@example.com"
-          required
-          label="Email"
-          styles={{
-            label: {
-              marginBottom: "10px",
-              fontWeight: 500,
-              fontSize: "0.875rem",
-              lineHeight: "1.57143",
-              letterSpacing: "0em",
-              color: "rgb(25, 25, 25)",
-            },
-          }}
-        />
-      </Grid.Col>
-      <Grid.Col span={12}>
-        <PasswordInput
-          required
-          label="Password"
-          styles={{
-            label: {
-              marginBottom: "10px",
-              fontWeight: 500,
-              fontSize: "0.875rem",
-              lineHeight: "1.57143",
-              letterSpacing: "0em",
-              color: "rgb(25, 25, 25)",
-            },
-          }}
-        />
-      </Grid.Col>
-      <Grid.Col span={12}>
-        <PasswordInput
-          required
-          label="Confirm Password"
-          styles={{
-            label: {
-              marginBottom: "10px",
-              fontWeight: 500,
-              fontSize: "0.875rem",
-              lineHeight: "1.57143",
-              letterSpacing: "0em",
-              color: "rgb(25, 25, 25)",
-            },
-          }}
-        />
-      </Grid.Col>
-      <Grid.Col span={12}>
-        <Select
-          data={["Admin", "Manager", "Lead", "User"]}
-          withScrollArea={true}
-          maxDropdownHeight={300}
-          label="Select Role"
-          styles={{
-            label: {
-              marginBottom: "10px",
-              fontWeight: 500,
-              fontSize: "0.875rem",
-              lineHeight: "1.57143",
-              letterSpacing: "0em",
-              color: "rgb(25, 25, 25)",
-            },
-          }}
-        />
-      </Grid.Col>
-      <Grid.Col span={12}>
-        <Flex align="center" justify="space-between">
-          <Text
-            style={{
-              fontWeight: 500,
-              fontSize: "0.875rem",
-              lineHeight: "1.57143",
-              letterSpacing: "0em",
-              color: "rgb(25, 25, 25)",
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Grid>
+        <Grid.Col span={12}>
+          <TextInput
+            placeholder="email@example.com"
+            required
+            name="email"
+            label="Email"
+            styles={{
+              label: {
+                marginBottom: "10px",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              },
             }}
-          >
-            Permissions
-          </Text>
-          <Group>
+            {
+            ...register("email", {
+              required: "Trường này là bắt buộc",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                message: "Email không hợp lệ",
+              },
+            })
+            }
+            error={errors.email ? errors.email.message : null}
+          />
+        </Grid.Col>
+        <Grid.Col span={12}>
+          <PasswordInput
+            required
+            name="password"
+            label="Password"
+            styles={{
+              label: {
+                marginBottom: "10px",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              },
+            }}
+            {
+            ...register("password", {
+              required: "Trường này là bắt buộc",
+              minLength: {
+                value: 6,
+                message: "Mật khẩu phải có ít nhất 6 ký tự",
+              },
+              // require First letter to be uppercase
+              pattern: {
+                value: /^(?=.*[A-Z])/,
+                message: "Mật khẩu phải có ít nhất 1 ký tự viết hoa",
+              },
+            })
+            }
+            error={errors.password ? errors.password.message : null}
+          />
+        </Grid.Col>
+        <Grid.Col span={12}>
+          <PasswordInput
+            required
+            name="confirmPassword"
+            label="Confirm Password"
+            styles={{
+              label: {
+                marginBottom: "10px",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              },
+            }}
+            {
+            ...register("confirmPassword", {
+              required: "Trường này là bắt buộc",
+              validate: (value) =>
+                value === getValues("password") || "Mật khẩu không khớp",
+            })
+            }
+            error={errors.confirmPassword ? errors.confirmPassword.message : null}
+          />
+        </Grid.Col>
+        <Grid.Col span={12}>
+          <Controller
+            name="role"
+            control={control}
+            rules={{ required: "Trường này là bắt buộc" }}
+            render={({ field }) => (
+              <MultiSelect
+                {...field}
+                withAsterisk
+                data={["Admin", "Manager", "Lead", "User"]}
+                withScrollArea={true}
+                maxDropdownHeight={300}
+                label="Select Role"
+                styles={{
+                  label: {
+                    marginBottom: "10px",
+                    fontWeight: 500,
+                    fontSize: "0.875rem",
+                    lineHeight: "1.57143",
+                    letterSpacing: "0em",
+                    color: "rgb(25, 25, 25)",
+                  },
+                }}
+                error={errors.role ? errors.role.message : null}
+                clearable
+              />
+            )}
+          />
+        </Grid.Col>
+        <Grid.Col span={12}>
+          <Flex align="center" justify="space-between">
             <Text
               style={{
                 fontWeight: 500,
@@ -260,53 +331,113 @@ const CreateUser = () => {
                 color: "rgb(25, 25, 25)",
               }}
             >
-              Select:
+              Permissions
             </Text>
             <Group>
-              <Button
-                size="xs"
-                color="gray"
-                variant="outline"
+              <Text
                 style={{
-                  border: 0,
-                  color: "rgb(52, 73, 186)",
+                  fontWeight: 500,
+                  fontSize: "0.875rem",
+                  lineHeight: "1.57143",
+                  letterSpacing: "0em",
+                  color: "rgb(25, 25, 25)",
                 }}
               >
-                All
-              </Button>
-              <Text>|</Text>
-              <Button
-                size="xs"
-                color="gray"
-                variant="outline"
-                style={{
-                  border: 0,
-                  color: "rgb(52, 73, 186)",
-                }}
-              >
-                None
-              </Button>
+                Select:
+              </Text>
+              <Group>
+                <Button
+                  size="xs"
+                  color="gray"
+                  variant="outline"
+                  style={{
+                    border: 0,
+                    color: "rgb(52, 73, 186)",
+                  }}
+                  onClick={() => {
+                    setValue("permissions", mockPermissions.map((permission) => permission));
+                  }}
+                >
+                  All
+                </Button>
+                <Text>|</Text>
+                <Button
+                  size="xs"
+                  color="gray"
+                  variant="outline"
+                  style={{
+                    border: 0,
+                    color: "rgb(52, 73, 186)",
+                  }}
+                  onClick={() => {
+                    setValue("permissions", []);
+                  }}
+                >
+                  None
+                </Button>
+              </Group>
             </Group>
-          </Group>
-        </Flex>
-        <TagsInput
-          data={mockPermissions}
-          withScrollArea={true}
-          maxDropdownHeight={300}
-        />
-      </Grid.Col>
-      <Grid.Col
-        span={12}
-        style={{
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
-        <Button color="rgb(63, 89, 228)" w="95%">
-          Create
-        </Button>
-      </Grid.Col>
-    </Grid>
+          </Flex>
+          <Controller
+            name="permissions"
+            control={control}
+            rules={{ required: "Trường này là bắt buộc" }}
+            render={({ field }) => (
+              <TagsInput
+                withAsterisk
+                {...field}
+                data={mockPermissions}
+                withScrollArea={true}
+                maxDropdownHeight={100}
+                name="permissions"
+                error={errors.permissions ? errors.permissions.message : null}
+                clearable
+              />
+            )}
+          />
+
+        </Grid.Col>
+        <Grid.Col span={12}>
+          <Controller
+            name="team"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                data={BD_TEAMS}
+                withScrollArea={true}
+                maxDropdownHeight={300}
+                label="Select Team"
+                styles={{
+                  label: {
+                    marginBottom: "10px",
+                    fontWeight: 500,
+                    fontSize: "0.875rem",
+                    lineHeight: "1.57143",
+                    letterSpacing: "0em",
+                    color: "rgb(25, 25, 25)",
+                  },
+                }}
+                error={errors.team ? errors.team.message : null}
+                clearable
+              />
+            )}
+          />
+        </Grid.Col>
+        <Grid.Col
+          span={12}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Button color="rgb(63, 89, 228)" w="95%" type="submit">
+            Create
+          </Button>
+        </Grid.Col>
+      </Grid>
+    </form>
+
   );
 };
 
@@ -316,12 +447,14 @@ const ACTIONS = {
   VIEW_DETAILS: "VIEW_DETAILS",
   DELETE_ACCOUNT: "Delete Account",
   CREATE_USER: "Create User",
+  RESEND_EMAIL_VERIFICATION: "Resend Email Verification",
 };
 
 const UserScreen = () => {
   const [loadingFetchUsers, setLoadingFetchUsers] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
   const [users, setUsers] = useState([]);
+  const [triggerFetchUsers, setTriggerFetchUsers] = useState(false);
   const [action, setAction] = useState(null);
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -338,6 +471,7 @@ const UserScreen = () => {
       //   const { data } = response;
       setUsers(mockUsers);
     }
+    setTriggerFetchUsers(false);
     setLoadingFetchUsers(false);
   };
   const handlePageChange = (page) => {
@@ -462,7 +596,7 @@ const UserScreen = () => {
                   color="#ffffff"
                   size="sx"
                   disabled={row.original.key === "budget"}
-                  onClick={() => {}}
+                  onClick={() => { }}
                 >
                   <IconDots color="rgb(25, 25, 25)" />
                 </Button>
@@ -475,6 +609,19 @@ const UserScreen = () => {
                   }
                 >
                   View
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={
+                    <IconMail
+                      style={{ width: rem(14), height: rem(14) }}
+                    />
+                  }
+                  onClick={() => {
+                    setAction(ACTIONS.RESEND_EMAIL_VERIFICATION);
+                    open();
+                  }}
+                >
+                  Resend Email
                 </Menu.Item>
                 <Menu.Item
                   leftSection={
@@ -600,7 +747,7 @@ const UserScreen = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [triggerFetchUsers, pagination.currentPage]);
 
   return (
     <Card
@@ -654,7 +801,31 @@ const UserScreen = () => {
             </Grid.Col>
           </Grid>
         )}
-        {action === ACTIONS.CREATE_USER && <CreateUser />}
+        {
+          action === ACTIONS.RESEND_EMAIL_VERIFICATION && (
+            <Grid>
+              <Grid.Col span={12}>
+                <Text
+                  style={{
+                    fontWeight: 500,
+                    fontSize: "0.875rem",
+                    lineHeight: "1.57143",
+                    letterSpacing: "0em",
+                    color: "rgb(25, 25, 25)",
+                  }}
+                >
+                  Are you sure you want to resend email verification?
+                </Text>
+              </Grid.Col>
+              <Grid.Col span={12}>
+                <Button color="rgb(63, 89, 228)" w="100%">
+                  Resend Email Verification
+                </Button>
+              </Grid.Col>
+            </Grid>
+          )
+        }
+        {action === ACTIONS.CREATE_USER && <CreateUser closeModal={close} />}
       </Modal>
     </Card>
   );

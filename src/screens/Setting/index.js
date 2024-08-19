@@ -6,6 +6,7 @@ import {
   Group,
   List,
   Modal,
+  Select,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -19,8 +20,10 @@ import {
   keys,
   map,
   omit,
+  toLower,
+  toString,
 } from "lodash";
-import { IconX } from "@tabler/icons-react";
+import { IconX, IconClock, IconCurrencyDollar } from "@tabler/icons-react";
 import classes from "./Setting.module.css";
 import { toPascalCase } from "../../utils";
 import { settingServices } from "../../services/settings";
@@ -192,34 +195,72 @@ const MarketingSetting = ({ name }) => {
                       >
                         {toPascalCase(item.key)}
                       </Text>
-                      <TextInput
-                        value={item.value}
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          const clonedSettings = cloneDeep(settings);
-                          const newValue = map(
-                            clonedSettings[row.index].value,
-                            (x) => {
-                              if (item.key === x.key) {
-                                return {
-                                  key: x.key,
-                                  value,
-                                };
-                              }
-                              return x;
+                      {
+                        toLower(key) !== "time" ? (
+                          <TextInput
+                            value={item.value}
+                            rightSection={
+                              toLower(key) === "budget" ? <IconCurrencyDollar /> : null
                             }
-                          );
-                          clonedSettings[row.index].value = newValue;
-                          clonedSettings[row.index].attribute[key][item.key] =
-                            value;
-                          console.log("clonedSettings", clonedSettings);
-                          setSettings(clonedSettings);
-                          setUpdatePayload({
-                            uid: clonedSettings[row.index].uid,
-                            data: clonedSettings[row.index],
-                          });
-                        }}
-                      />
+                            onChange={(event) => {
+                              const value = event.target.value;
+                              const clonedSettings = cloneDeep(settings);
+                              const newValue = map(
+                                clonedSettings[row.index].value,
+                                (x) => {
+                                  if (item.key === x.key) {
+                                    return {
+                                      key: x.key,
+                                      value,
+                                    };
+                                  }
+                                  return x;
+                                }
+                              );
+                              clonedSettings[row.index].value = newValue;
+                              clonedSettings[row.index].attribute[key][item.key] =
+                                value;
+                              setSettings(clonedSettings);
+                              setUpdatePayload({
+                                uid: clonedSettings[row.index].uid,
+                                data: clonedSettings[row.index],
+                              });
+                            }}
+                          />) : (
+                          <Select
+                            data={[...Array(11).keys()].map(i => toString(i * 0.5))}
+                            defaultValue={toString(item.value)}
+                            allowDeselect={false}
+                            rightSection={
+                              <IconClock />
+                            }
+                            value={toString(item.value)}
+                            onChange={(value) => {
+                              const clonedSettings = cloneDeep(settings);
+                              const newValue = map(
+                                clonedSettings[row.index].value,
+                                (x) => {
+                                  if (item.key === x.key) {
+                                    return {
+                                      key: x.key,
+                                      value,
+                                    };
+                                  }
+                                  return x;
+                                }
+                              );
+                              clonedSettings[row.index].value = newValue;
+                              clonedSettings[row.index].attribute[key][item.key] =
+                                value;
+                              setSettings(clonedSettings);
+                              setUpdatePayload({
+                                uid: clonedSettings[row.index].uid,
+                                data: clonedSettings[row.index],
+                              });
+                            }}
+                          />
+                        )
+                      }
                     </Group>
                   </List.Item>
                 );
@@ -305,7 +346,7 @@ const MarketingSetting = ({ name }) => {
     state: {
       showProgressBars: loadingFetchSetting,
     },
-    renderTopToolbar: ({ table }) => {
+    renderTopToolbar: () => {
       return (
         <div
           style={{

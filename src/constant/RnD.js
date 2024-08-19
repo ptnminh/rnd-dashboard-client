@@ -1,6 +1,7 @@
 export const MEMBERS = ["Thảo Thảo", "Nhật Minh"];
 export const DESIGNER_MEMBERS = ["Phương Duy"];
 export const GROUP_WORKS = ["BD1", "BD2", "BD3"];
+export const BD_TEAMS = ["BD1", "BD2", "BD3", "POD-BIZ"];
 export const BRIEF_TYPES = [
   "Scale - Product Line",
   "Scale - Clipart",
