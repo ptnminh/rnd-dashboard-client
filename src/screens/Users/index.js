@@ -178,6 +178,7 @@ const CreateUser = ({
   closeModal,
   roles
 }) => {
+  const [loadingCreateUser, setLoadingCreateUser] = useState(false);
   const {
     register,
     handleSubmit,
@@ -201,6 +202,7 @@ const CreateUser = ({
   });
   const [availablePermissions, setAvailablePermissions] = useState([]);
   const onSubmit = async (data) => {
+    setLoadingCreateUser(true);
     const role = find(roles, { name: data.role });
     const payload = {
       ...data,
@@ -216,6 +218,7 @@ const CreateUser = ({
       showNotification("Thành công", "Tạo người dùng thành công", "green");
       closeModal()
     }
+    setLoadingCreateUser(false);
   }
   // Update permissions when the role changes
   useEffect(() => {
@@ -500,7 +503,7 @@ const CreateUser = ({
             justifyContent: "center",
           }}
         >
-          <Button color="rgb(63, 89, 228)" w="95%" type="submit">
+          <Button color="rgb(63, 89, 228)" w="95%" type="submit" loading={loadingCreateUser}>
             Create
           </Button>
         </Grid.Col>
