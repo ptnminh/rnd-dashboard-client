@@ -35,10 +35,11 @@ import Card from "../../components/Card";
 import { mockUsers } from "../../mocks/viewers";
 import moment from "moment-timezone";
 import { mockPermissions } from "../../mocks/permissions";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { BD_TEAMS } from "../../constant";
 import { userServices } from "../../services/users";
 import { showNotification } from "../../utils/index";
+import { compact, filter, find, includes, map, uniq } from "lodash";
 
 const AssignPermissions = () => {
   return (
@@ -174,7 +175,8 @@ const AssignNewRole = () => {
 };
 
 const CreateUser = ({
-  closeModal
+  closeModal,
+  roles
 }) => {
   const {
     register,
@@ -188,24 +190,91 @@ const CreateUser = ({
       email: "",
       password: "",
       confirmPassword: "",
-      role: [],
+      role: "",
       permissions: []
     }
   });
+  // Watch for changes to the role
+  const selectedRole = useWatch({
+    control,
+    name: "role", // Track changes to the role field
+  });
+  const [availablePermissions, setAvailablePermissions] = useState([]);
   const onSubmit = async (data) => {
+    const role = find(roles, { name: data.role });
     const payload = {
       ...data,
       connection: "Username-Password-Authentication",
+      roleId: role?.uid,
+      permissions: filter(role?.permissions, (permission) => {
+        return includes(data.permissions, permission?.name)
+      })
     }
+    console.log(payload);
     const createUserResponse = await userServices.createUser(payload);
     if (createUserResponse) {
       showNotification("Thành công", "Tạo người dùng thành công", "green");
       closeModal()
     }
   }
+  // Update permissions when the role changes
+  useEffect(() => {
+    if (selectedRole) {
+      const rolePermissions = find(roles, { name: selectedRole })?.permissions || [];
+      setAvailablePermissions(rolePermissions); // Set available permissions for the selected role
+      setValue("permissions", []); // Reset permissions when role changes
+    }
+  }, [selectedRole]);
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Grid>
+        <Grid.Col span={12} style={{
+          display: "flex",
+          gap: "20px"
+        }}>
+          <TextInput
+            required
+            withAsterisk
+            name="name"
+            label="Name"
+            placeholder="John Doe"
+            styles={{
+              label: {
+                marginBottom: "10px",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              },
+            }}
+            {
+            ...register("name", {
+              required: "Trường này là bắt buộc",
+            })
+            }
+            error={errors.name ? errors.name.message : null}
+          />
+          <TextInput
+            name="shortName"
+            label="Short Name"
+            placeholder="Member RnD để tạo Brief"
+            styles={{
+              label: {
+                marginBottom: "10px",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              },
+            }}
+            {
+            ...register("shortName")
+            }
+            error={errors.shortName ? errors.shortName.message : null}
+          />
+        </Grid.Col>
         <Grid.Col span={12}>
           <TextInput
             placeholder="email@example.com"
@@ -297,10 +366,10 @@ const CreateUser = ({
             control={control}
             rules={{ required: "Trường này là bắt buộc" }}
             render={({ field }) => (
-              <MultiSelect
+              <Select
                 {...field}
                 withAsterisk
-                data={["Admin", "Manager", "Lead", "User"]}
+                data={compact(uniq(map(roles, (role) => role?.name))) || []}
                 withScrollArea={true}
                 maxDropdownHeight={300}
                 label="Select Role"
@@ -355,7 +424,7 @@ const CreateUser = ({
                     color: "rgb(52, 73, 186)",
                   }}
                   onClick={() => {
-                    setValue("permissions", mockPermissions.map((permission) => permission));
+                    setValue("permissions", map(availablePermissions, (permission) => permission?.name));
                   }}
                 >
                   All
@@ -386,7 +455,7 @@ const CreateUser = ({
               <TagsInput
                 withAsterisk
                 {...field}
-                data={mockPermissions}
+                data={map(availablePermissions, "name")}
                 withScrollArea={true}
                 maxDropdownHeight={100}
                 name="permissions"
@@ -453,6 +522,7 @@ const ACTIONS = {
 const UserScreen = () => {
   const [loadingFetchUsers, setLoadingFetchUsers] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
+  const [roles, setRoles] = useState([]);
   const [users, setUsers] = useState([]);
   const [triggerFetchUsers, setTriggerFetchUsers] = useState(false);
   const [action, setAction] = useState(null);
@@ -474,6 +544,12 @@ const UserScreen = () => {
     setTriggerFetchUsers(false);
     setLoadingFetchUsers(false);
   };
+  const fetchRoles = async () => {
+    const { data } = await userServices.fetchRoles();
+    if (data) {
+      setRoles(data);
+    }
+  }
   const handlePageChange = (page) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
   };
@@ -748,7 +824,9 @@ const UserScreen = () => {
   useEffect(() => {
     fetchUsers();
   }, [triggerFetchUsers, pagination.currentPage]);
-
+  useEffect(() => {
+    fetchRoles();
+  }, []);
   return (
     <Card
       className={cn(styles.card, styles.clipArtCard)}
@@ -825,7 +903,7 @@ const UserScreen = () => {
             </Grid>
           )
         }
-        {action === ACTIONS.CREATE_USER && <CreateUser closeModal={close} />}
+        {action === ACTIONS.CREATE_USER && <CreateUser closeModal={close} roles={roles} />}
       </Modal>
     </Card>
   );
