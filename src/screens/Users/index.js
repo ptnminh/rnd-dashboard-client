@@ -327,8 +327,8 @@ const CreateUser = ({
               },
               // require First letter to be uppercase
               pattern: {
-                value: /^(?=.*[A-Z])/,
-                message: "Mật khẩu phải có ít nhất 1 ký tự viết hoa",
+                value: /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/,
+                message: "Mật khẩu phải có ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt",
               },
             })
             }
