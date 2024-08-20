@@ -20,6 +20,7 @@ import Page404 from "./screens/NotFound";
 import ForbiddenPage from "./components/ForbiddenPage";
 import Setting from "./screens/Setting";
 import UserScreen from "./screens/Users";
+import EmailVerify from "./components/VerifyEmail";
 
 function App() {
   return (
@@ -212,6 +213,7 @@ function App() {
       <Route path="/sign-in" element={<Auth0LoginScreen />} />
       <Route path="*" element={<Page404 />} />
       <Route path="/forbidden" element={<ForbiddenPage />} />
+      <Route path="/verify-email" element={<EmailVerify />} />
     </Routes>
   );
 }

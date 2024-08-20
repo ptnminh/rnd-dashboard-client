@@ -10,12 +10,12 @@ import { IconLogout } from "@tabler/icons-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useLocalStorage } from "@mantine/hooks";
 import { NAVIGATION } from "../../Routes";
-import { every, map } from "lodash";
+import { map, some } from "lodash";
 import { LOCAL_STORAGE_KEY } from "../../constant";
 
 const filterNavigation = (navigation, permissions) => {
   return navigation
-    .filter((item) => every(item?.permissions, (p) => permissions.includes(p)))
+    .filter((item) => some(item?.permissions, (p) => permissions.includes(p)))
     .map((item) => {
       if (item.dropdown) {
         item.dropdown = filterNavigation(item.dropdown, permissions);

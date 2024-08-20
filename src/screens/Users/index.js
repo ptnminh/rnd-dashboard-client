@@ -2,7 +2,6 @@ import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import {
   Button,
-  Divider,
   Flex,
   Grid,
   Group,
@@ -14,7 +13,6 @@ import {
   PasswordInput,
   rem,
   Select,
-  TagsInput,
   Text,
   TextInput,
 } from "@mantine/core";
@@ -26,6 +24,7 @@ import {
   IconPlus,
   IconSearch,
   IconFilterOff,
+  IconMailFilled,
 } from "@tabler/icons-react";
 import classes from "./User.module.css";
 import { readLocalStorageValue, useDisclosure } from "@mantine/hooks";
@@ -87,66 +86,53 @@ const AssignPermissions = ({ closeModal, user }) => {
               color: "rgb(25, 25, 25)",
             }}
           >
-            Permissions
+            Select:
           </Text>
           <Group>
-            <Text
+            <Button
+              size="xs"
+              color="gray"
+              variant="outline"
               style={{
-                fontWeight: 500,
-                fontSize: "0.875rem",
-                lineHeight: "1.57143",
-                letterSpacing: "0em",
-                color: "rgb(25, 25, 25)",
+                border: 0,
+                color: "rgb(52, 73, 186)",
+              }}
+              onClick={() => {
+                setSelectedPermissions(currentUserPermissions);
               }}
             >
-              Select:
-            </Text>
-            <Group>
-              <Button
-                size="xs"
-                color="gray"
-                variant="outline"
-                style={{
-                  border: 0,
-                  color: "rgb(52, 73, 186)",
-                }}
-                onClick={() => {
-                  setSelectedPermissions(currentUserPermissions);
-                }}
-              >
-                All
-              </Button>
-              <Text>|</Text>
-              <Button
-                size="xs"
-                color="gray"
-                variant="outline"
-                style={{
-                  border: 0,
-                  color: "rgb(52, 73, 186)",
-                }}
-                onClick={() => {
-                  setSelectedPermissions([]);
-                }}
-              >
-                None
-              </Button>
-              <Text>|</Text>
-              <Button
-                size="xs"
-                color="gray"
-                variant="outline"
-                style={{
-                  border: 0,
-                  color: "rgb(52, 73, 186)",
-                }}
-                onClick={() => {
-                  setSelectedPermissions(user?.permissions || []);
-                }}
-              >
-                Roll Back
-              </Button>
-            </Group>
+              All
+            </Button>
+            <Text>|</Text>
+            <Button
+              size="xs"
+              color="gray"
+              variant="outline"
+              style={{
+                border: 0,
+                color: "rgb(52, 73, 186)",
+              }}
+              onClick={() => {
+                setSelectedPermissions([]);
+              }}
+            >
+              None
+            </Button>
+            <Text>|</Text>
+            <Button
+              size="xs"
+              color="gray"
+              variant="outline"
+              style={{
+                border: 0,
+                color: "rgb(52, 73, 186)",
+              }}
+              onClick={() => {
+                setSelectedPermissions(user?.permissions || []);
+              }}
+            >
+              Roll Back
+            </Button>
           </Group>
         </Flex>
       </Grid.Col>
@@ -171,6 +157,11 @@ const AssignPermissions = ({ closeModal, user }) => {
           }}
           searchable
           clearable
+          scrollAreaProps={{
+            h: "200px",
+            scrollbars: "y",
+            scrollbarSize: "sm",
+          }}
         />
       </Grid.Col>
       <Grid.Col span={12}>
@@ -935,10 +926,9 @@ const UpdatePassword = ({ closeModal, user }) => {
     const payload = {
       ...data,
     };
-    const updatePasswordResponse = await userServices.update({
+    const updatePasswordResponse = await userServices.updatePassword({
       uid: user?.uid,
       data: {
-        ...user,
         ...omit(payload, "confirmPassword"),
       },
     });
@@ -1043,6 +1033,7 @@ const ACTIONS = {
 const UserScreen = () => {
   const [loadingFetchUsers, setLoadingFetchUsers] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
+  const [loadingSendEmail, setLoadingSendEmail] = useState(false);
   const [roles, setRoles] = useState([]);
   const [queryUser, setQueryUser] = useState({});
   const [users, setUsers] = useState([]);
@@ -1077,7 +1068,17 @@ const UserScreen = () => {
   const handlePageChange = (page) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
   };
-
+  const handleResendEmailVerify = async () => {
+    setLoadingSendEmail(true);
+    const response = await userServices.resendEmailVerification(
+      selectedUser?.uid
+    );
+    if (response) {
+      showNotification("Thành công", "Gửi email thành công", "green");
+      close();
+    }
+    setLoadingSendEmail(false);
+  };
   const columns = useMemo(
     () => [
       {
@@ -1227,30 +1228,21 @@ const UserScreen = () => {
                 >
                   Change Password
                 </Menu.Item>
-                {/* <Menu.Item
+                <Menu.Item
                   leftSection={
-                    <IconMail style={{ width: rem(14), height: rem(14) }} />
-                  }
-                  onClick={() => {
-                    setAction(ACTIONS.RESEND_EMAIL_VERIFICATION);
-                    open();
-                  }}
-                >
-                  Resend Email
-                </Menu.Item> */}
-                {/* <Menu.Item
-                  leftSection={
-                    <IconUserCheck
+                    <IconMailFilled
                       style={{ width: rem(14), height: rem(14) }}
                     />
                   }
                   onClick={() => {
-                    setAction(ACTIONS.ASSIGN_NEW_ROLE);
+                    setAction(ACTIONS.RESEND_EMAIL_VERIFICATION);
+                    setSelectedUser(row.original);
                     open();
                   }}
                 >
-                  Assign New Role
-                </Menu.Item> */}
+                  Resend Email
+                </Menu.Item>
+
                 <Menu.Item
                   leftSection={
                     <IconSquareRoundedCheck
@@ -1545,7 +1537,11 @@ const UserScreen = () => {
               </Text>
             </Grid.Col>
             <Grid.Col span={12}>
-              <Button color="rgb(63, 89, 228)" w="100%">
+              <Button
+                color="rgb(63, 89, 228)"
+                w="100%"
+                onClick={handleResendEmailVerify}
+              >
                 Resend Email Verification
               </Button>
             </Grid.Col>

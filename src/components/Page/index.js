@@ -6,7 +6,7 @@ import { useAuth0, withAuthenticationRequired } from "@auth0/auth0-react";
 import { readLocalStorageValue, useLocalStorage } from "@mantine/hooks";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NAVIGATION } from "../../Routes";
-import { forEach, intersection, isEmpty, map } from "lodash";
+import { find, forEach, includes, intersection, isEmpty, map } from "lodash";
 import { LOCAL_STORAGE_KEY } from "../../constant";
 import { authServices } from "../../services/auth";
 
@@ -28,7 +28,7 @@ const findNavigationItem = (navigation, pathname) => {
 };
 const Page = ({ wide, children }) => {
   const [visible, setVisible] = useState(false);
-  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
+  const { getAccessTokenSilently, isAuthenticated, user } = useAuth0();
   const navigate = useNavigate();
   const [isForbidden, setIsForbidden] = useState(true);
 
@@ -61,13 +61,32 @@ const Page = ({ wide, children }) => {
           setPermissions(data?.permissions || []);
           userPermissions = data?.permissions || [];
         }
-
         const matchNavigation = findNavigationItem(NAVIGATION, pathname);
         if (matchNavigation) {
           const { permissions } = matchNavigation;
-          if (!intersection(map(userPermissions, "name"), permissions).length) {
-            setIsForbidden(true);
-            navigate("/forbidden");
+          if (
+            !intersection(map(userPermissions, "name"), permissions).length !==
+            0
+          ) {
+            if (isEmpty(userPermissions)) {
+              setIsForbidden(true);
+              navigate("/forbidden");
+            } else {
+              const foundFirstRoute = find(
+                NAVIGATION,
+                (item) =>
+                  !isEmpty(
+                    intersection(map(userPermissions, "name"), item.permissions)
+                  )
+              ); // find first route that user has permission
+              if (foundFirstRoute) {
+                setIsForbidden(false);
+                navigate(foundFirstRoute.pathname || foundFirstRoute.url);
+              } else {
+                setIsForbidden(true);
+                navigate("/forbidden");
+              }
+            }
           } else {
             setIsForbidden(false);
           }
@@ -78,8 +97,12 @@ const Page = ({ wide, children }) => {
     }
   };
   useEffect(() => {
-    fetchData();
-  }, [isAuthenticated, getAccessTokenSilently]);
+    if (user?.email_verified === true) {
+      fetchData();
+    } else {
+      navigate("/verify-email");
+    }
+  }, [isAuthenticated]);
   return !isForbidden ? (
     <div className={styles.page}>
       <Sidebar

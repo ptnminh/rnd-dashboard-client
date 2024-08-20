@@ -99,13 +99,23 @@ export const NAVIGATION = [
     slug: "rnd",
     icon: "diamond",
     arrowDown: true,
-    permissions: ["read:briefs"],
+    permissions: [
+      "read:briefs",
+      "create:brief",
+      "update:brief",
+      "delete:brief",
+    ],
     pathname: PATH_NAMES.RND_BRIEFS.url,
     dropdown: [
       {
         title: PATH_NAMES.RND_PRODUCT_LINE.title,
         url: PATH_NAMES.RND_PRODUCT_LINE.url,
-        permissions: ["read:product_lines"],
+        permissions: [
+          "read:product_lines",
+          "create:product_line",
+          "update:product_line",
+          "delete:product_line",
+        ],
       },
     ],
   },
@@ -113,26 +123,30 @@ export const NAVIGATION = [
     title: PATH_NAMES.DESIGN.title,
     icon: "diamond",
     arrowDown: true,
-    permissions: ["read:design"],
+    permissions: ["read:design", "update:design", "delete:design"],
     slug: "/designer",
     pathname: PATH_NAMES.DESIGN.url,
     dropdown: [
       {
         title: PATH_NAMES.DESIGN_FEEDBACK.title,
         url: PATH_NAMES.DESIGN_FEEDBACK.url,
-        permissions: ["read:design_feedback"],
+        permissions: [
+          "read:design_feedback",
+          "update:design_feedback",
+          "delete:design_feedback",
+        ],
       },
       {
         title: PATH_NAMES.DESIGN_SETTING.title,
         url: PATH_NAMES.DESIGN_SETTING.url,
-        permissions: ["read:design_setting"],
+        permissions: ["read:design_setting", "update:design_setting"],
       },
     ],
   },
   {
     title: PATH_NAMES.VIDEO.title,
     arrowDown: true,
-    permissions: ["read:video"],
+    permissions: ["read:video", "update:video", "delete:video"],
     icon: "diamond",
     slug: PATH_NAMES.VIDEO.url,
     pathname: PATH_NAMES.VIDEO.url,
@@ -140,14 +154,14 @@ export const NAVIGATION = [
       {
         title: PATH_NAMES.VIDEO_SETTING.title,
         url: PATH_NAMES.VIDEO_SETTING.url,
-        permissions: ["read:video_setting"],
+        permissions: ["read:video_setting", "update:video_setting"],
       },
     ],
   },
   {
     title: PATH_NAMES.EPM.title,
     arrowDown: true,
-    permissions: ["read:epm"],
+    permissions: ["read:epm", "update:epm", "delete:epm"],
     icon: "diamond",
     slug: PATH_NAMES.EPM.url,
     pathname: PATH_NAMES.EPM.url,
@@ -155,7 +169,7 @@ export const NAVIGATION = [
       {
         title: PATH_NAMES.EPM_SETTING.title,
         url: PATH_NAMES.EPM_SETTING.url,
-        permissions: ["read:epm_setting"],
+        permissions: ["read:epm_setting", "update:epm_setting"],
       },
     ],
   },
@@ -163,7 +177,7 @@ export const NAVIGATION = [
     title: PATH_NAMES.MKT.title,
     icon: "diamond",
     arrowDown: true,
-    permissions: ["read:mkt"],
+    permissions: ["read:mkt", "update:mkt"],
     pathname: PATH_NAMES.MKT.url,
     dropdown: [
       {
@@ -205,24 +219,27 @@ export const NAVIGATION = [
           {
             title: PATH_NAMES.MKT_ACCOUNT.title,
             pathname: PATH_NAMES.MKT_ACCOUNT.url,
-            permissions: ["read:mkt_account"],
+            permissions: ["read:mkt_account", "update:mkt_account"],
           },
           {
             title: PATH_NAMES.MKT_ROOT_CAMPAIGN.title,
             pathname: PATH_NAMES.MKT_ROOT_CAMPAIGN.url,
-            permissions: ["read:mkt_sample_campaign"],
+            permissions: [
+              "read:mkt_sample_campaign",
+              "update:mkt_sample_campaign",
+            ],
           },
           {
             title: PATH_NAMES.MKT_CAPTION.title,
             pathname: PATH_NAMES.MKT_CAPTION.url,
-            permissions: ["read:mkt_caption"],
+            permissions: ["read:mkt_caption", "update:mkt_caption"],
           },
         ],
       },
       {
         title: PATH_NAMES.MKT_SETTING.title,
         url: PATH_NAMES.MKT_SETTING.url,
-        permissions: ["read:mkt_setting"],
+        permissions: ["read:mkt_setting", "update:mkt_setting"],
         turnOffActive: true,
       },
     ],
@@ -232,6 +249,6 @@ export const NAVIGATION = [
     url: PATH_NAMES.USERS.url,
     icon: "diamond",
     arrowDown: true,
-    permissions: ["read:users"],
+    permissions: ["read:users", "update:user", "create:user"],
   },
 ];

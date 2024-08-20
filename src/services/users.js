@@ -82,4 +82,57 @@ export const userServices = {
       return false;
     }
   },
+  resendEmailVerification: async (uid) => {
+    try {
+      const response = await apiClient.post(
+        `/users/auth0/send-verification-email/${uid}`
+      );
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification(
+          "Thất bại",
+          result?.message || "Gửi lại email xác thực thất bại",
+          "red"
+        );
+        return false;
+      }
+      return result;
+    } catch (error) {
+      const message = error?.response?.data?.message;
+      showNotification(
+        "Thất bại",
+        message || "Gửi lại email xác thực thất bại",
+        "red"
+      );
+      console.error("Failed to resend email verification:", error);
+      return false;
+    }
+  },
+  updatePassword: async ({ uid, data }) => {
+    try {
+      const response = await apiClient.put(
+        `/users/auth0/update-password/${uid}`,
+        data
+      );
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification(
+          "Thất bại",
+          result?.message || "Cập nhật mật khẩu thất bại",
+          "red"
+        );
+        return false;
+      }
+      return result;
+    } catch (error) {
+      const message = error?.response?.data?.message;
+      showNotification(
+        "Thất bại",
+        message || "Cập nhật mật khẩu thất bại",
+        "red"
+      );
+      console.error("Failed to update password:", error);
+      return false;
+    }
+  },
 };
