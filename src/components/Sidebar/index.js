@@ -11,6 +11,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { useLocalStorage } from "@mantine/hooks";
 import { NAVIGATION } from "../../Routes";
 import { every, map } from "lodash";
+import { LOCAL_STORAGE_KEY } from "../../constant";
 
 const filterNavigation = (navigation, permissions) => {
   return navigation
@@ -26,14 +27,14 @@ const Sidebar = ({ className, onClose }) => {
   const [visible, setVisible] = useState(false);
   const { logout, user } = useAuth0();
   const [token, setToken, removeToken] = useLocalStorage({
-    key: "token",
+    key: LOCAL_STORAGE_KEY.ACCESS_TOKEN,
     defaultValue: "",
   });
-  const [userPermissions, setPermissions, removePermissions] = useLocalStorage({
-    key: "permissions",
+  const [permissions, setPermissions, removePermissions] = useLocalStorage({
+    key: LOCAL_STORAGE_KEY.PERMISSIONS,
     defaultValue: [],
   });
-
+  const userPermissions = map(permissions, "name");
   const userName =
     user?.family_name && user?.given_name
       ? user?.family_name + " " + user?.given_name

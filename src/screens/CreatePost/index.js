@@ -552,7 +552,7 @@ const CreatePost = ({
                   />
                   <Select
                     placeholder="RND"
-                    data={map(filter(users, { role: "rnd" }), "name") || []}
+                    data={map(filter(users, { position: "rnd" }), "name") || []}
                     styles={{
                       input: {
                         width: "100px",
@@ -839,7 +839,7 @@ const CreatePost = ({
                   />
                   <Select
                     placeholder="RND"
-                    data={map(filter(users, { role: "rnd" }), "name") || []}
+                    data={map(filter(users, { position: "rnd" }), "name") || []}
                     styles={{
                       input: {
                         width: "150px",

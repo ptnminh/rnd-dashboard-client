@@ -116,9 +116,12 @@ const CampaignInfo = ({
               value={rndMember}
               setValue={setRndMember}
               options={
-                !isEmpty(filter(users, { role: "rnd", team: workGroup }))
-                  ? map(filter(users, { role: "rnd", team: workGroup }), "name")
-                  : map(filter(users, { role: "rnd" }), "name")
+                !isEmpty(filter(users, { position: "rnd", team: workGroup }))
+                  ? map(
+                      filter(users, { position: "rnd", team: workGroup }),
+                      "name"
+                    )
+                  : map(filter(users, { position: "rnd" }), "name")
               }
               classOutSideClick={styles.memberDropdown}
             />{" "}
@@ -129,12 +132,14 @@ const CampaignInfo = ({
               value={designerMember}
               setValue={setDesignerMember}
               options={
-                !isEmpty(filter(users, { role: "designer", team: workGroup }))
+                !isEmpty(
+                  filter(users, { position: "designer", team: workGroup })
+                )
                   ? map(
-                      filter(users, { role: "designer", team: workGroup }),
+                      filter(users, { position: "designer", team: workGroup }),
                       "name"
                     )
-                  : map(filter(users, { role: "designer" }), "name")
+                  : map(filter(users, { position: "designer" }), "name")
               }
               classOutSideClick={styles.memberDropdown}
             />{" "}
@@ -144,7 +149,7 @@ const CampaignInfo = ({
               classDropdownHead={styles.dropdownHead}
               value={epmMember}
               setValue={setEpmMember}
-              options={map(filter(users, { role: "epm" }), "name") || []}
+              options={map(filter(users, { position: "epm" }), "name") || []}
               classOutSideClick={styles.memberDropdown}
             />{" "}
           </div>

@@ -587,12 +587,12 @@ const NewCampaigns = () => {
   };
 
   useEffect(() => {
-    const rnds = filter(users, { role: "rnd", team: workGroup });
+    const rnds = filter(users, { position: "rnd", team: workGroup });
     const designers = !isEmpty(
-      filter(users, { role: "designer", team: workGroup })
+      filter(users, { position: "designer", team: workGroup })
     )
-      ? filter(users, { role: "designer", team: workGroup })
-      : filter(users, { role: "designer" });
+      ? filter(users, { position: "designer", team: workGroup })
+      : filter(users, { position: "designer" });
     if (!includes(map(rnds, "name"), rndMember)) {
       setRndMember("");
     }
@@ -784,7 +784,7 @@ const NewCampaigns = () => {
   };
 
   useEffect(() => {
-    const batch = find(users, { name: rndMember, role: "rnd" })?.nextBatch;
+    const batch = find(users, { name: rndMember, position: "rnd" })?.nextBatch;
     setBatch(batch || "");
   }, [rndMember]);
   useEffect(() => {

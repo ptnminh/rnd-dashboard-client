@@ -609,7 +609,7 @@ const KeywordTable = ({
             />
             <Select
               placeholder="RND"
-              data={map(filter(users, { role: "rnd" }), "name") || []}
+              data={map(filter(users, { position: "rnd" }), "name") || []}
               styles={{
                 input: {
                   width: "150px",
@@ -634,7 +634,7 @@ const KeywordTable = ({
             />
             <Select
               placeholder="Designer"
-              data={map(filter(users, { role: "designer" }), "name") || []}
+              data={map(filter(users, { position: "designer" }), "name") || []}
               styles={{
                 input: {
                   width: "120px",

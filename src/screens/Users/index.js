@@ -20,54 +20,63 @@ import {
 } from "@mantine/core";
 import {
   IconDots,
-  IconEye,
-  IconUserCheck,
+  IconBrandSamsungpass,
   IconSquareRoundedCheck,
   IconTrash,
   IconPlus,
-  IconMail
+  IconSearch,
+  IconFilterOff,
 } from "@tabler/icons-react";
 import classes from "./User.module.css";
-import { useDisclosure } from "@mantine/hooks";
+import { readLocalStorageValue, useDisclosure } from "@mantine/hooks";
 import cn from "classnames";
 import styles from "./User.module.sass";
 import Card from "../../components/Card";
-import { mockUsers } from "../../mocks/viewers";
 import moment from "moment-timezone";
-import { mockPermissions } from "../../mocks/permissions";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { BD_TEAMS } from "../../constant";
+import { Controller, useForm } from "react-hook-form";
+import { BD_TEAMS, LOCAL_STORAGE_KEY, MEMBER_POSITIONS } from "../../constant";
 import { userServices } from "../../services/users";
 import { showNotification } from "../../utils/index";
-import { compact, filter, find, includes, map, uniq } from "lodash";
+import {
+  compact,
+  find,
+  keys,
+  map,
+  omit,
+  toLower,
+  toUpper,
+  uniq,
+  values,
+} from "lodash";
+import { toPascalCase } from "../../utils";
 
-const AssignPermissions = () => {
+const AssignPermissions = ({ closeModal, user }) => {
+  const currentUserPermissions = readLocalStorageValue({
+    key: LOCAL_STORAGE_KEY.PERMISSIONS,
+  });
+  const [loadingAssignPermissions, setLoadingAssignPermissions] =
+    useState(false);
+  const [selectedPermissions, setSelectedPermissions] = useState(
+    user?.permissions || []
+  );
+  const updateUserPermission = async () => {
+    setLoadingAssignPermissions(true);
+    const response = await userServices.update({
+      uid: user?.uid,
+      data: {
+        ...user,
+        permissions: selectedPermissions,
+      },
+    });
+    if (response) {
+      showNotification("Thành công", "Cập nhật thành công", "green");
+      closeModal();
+    }
+    setLoadingAssignPermissions(false);
+  };
   return (
     <Grid>
       <Grid.Col span={12}>
-        <Flex align="center" justify="space-between">
-          <Text
-            style={{
-              fontWeight: 500,
-              fontSize: "0.875rem",
-              lineHeight: "1.57143",
-              letterSpacing: "0em",
-              color: "rgb(25, 25, 25)",
-            }}
-          >
-            Selected Permissions
-          </Text>
-        </Flex>
-        <Grid.Col span={12}>
-          <TagsInput
-            data={mockPermissions}
-            withScrollArea={true}
-            maxDropdownHeight={300}
-            value={["create:brief", "create:mkt_camp"]}
-          />
-        </Grid.Col>
-
-        <Divider style={{ margin: "10px 0" }} />
         <Flex align="center" justify="space-between">
           <Text
             style={{
@@ -101,6 +110,9 @@ const AssignPermissions = () => {
                   border: 0,
                   color: "rgb(52, 73, 186)",
                 }}
+                onClick={() => {
+                  setSelectedPermissions(currentUserPermissions);
+                }}
               >
                 All
               </Button>
@@ -113,22 +125,61 @@ const AssignPermissions = () => {
                   border: 0,
                   color: "rgb(52, 73, 186)",
                 }}
+                onClick={() => {
+                  setSelectedPermissions([]);
+                }}
               >
                 None
+              </Button>
+              <Text>|</Text>
+              <Button
+                size="xs"
+                color="gray"
+                variant="outline"
+                style={{
+                  border: 0,
+                  color: "rgb(52, 73, 186)",
+                }}
+                onClick={() => {
+                  setSelectedPermissions(user?.permissions || []);
+                }}
+              >
+                Roll Back
               </Button>
             </Group>
           </Group>
         </Flex>
       </Grid.Col>
       <Grid.Col span={12}>
-        <TagsInput
-          data={mockPermissions}
+        <MultiSelect
+          data={map(currentUserPermissions, (x) => {
+            return {
+              value: x.name,
+              label: x.description,
+            };
+          })}
+          withAsterisk
           withScrollArea={true}
           maxDropdownHeight={300}
+          value={map(selectedPermissions, "name")}
+          onChange={(selectedNames) => {
+            setSelectedPermissions(
+              currentUserPermissions?.filter((perm) =>
+                selectedNames.includes(perm.name)
+              )
+            );
+          }}
+          searchable
+          clearable
         />
       </Grid.Col>
       <Grid.Col span={12}>
-        <Button color="rgb(63, 89, 228)" w="100%">
+        <Button
+          color="rgb(63, 89, 228)"
+          w="100%"
+          loading={loadingAssignPermissions}
+          onClick={updateUserPermission}
+        >
           Add Permissions
         </Button>
       </Grid.Col>
@@ -174,11 +225,11 @@ const AssignNewRole = () => {
   );
 };
 
-const CreateUser = ({
-  closeModal,
-  roles
-}) => {
+const CreateUser = ({ closeModal, roles }) => {
   const [loadingCreateUser, setLoadingCreateUser] = useState(false);
+  const permissions = readLocalStorageValue({
+    key: LOCAL_STORAGE_KEY.PERMISSIONS,
+  });
   const {
     register,
     handleSubmit,
@@ -192,15 +243,13 @@ const CreateUser = ({
       password: "",
       confirmPassword: "",
       role: "",
-      permissions: []
-    }
+      permissions: [],
+      position: "",
+      name: "",
+      team: "",
+    },
   });
-  // Watch for changes to the role
-  const selectedRole = useWatch({
-    control,
-    name: "role", // Track changes to the role field
-  });
-  const [availablePermissions, setAvailablePermissions] = useState([]);
+
   const onSubmit = async (data) => {
     setLoadingCreateUser(true);
     const role = find(roles, { name: data.role });
@@ -208,33 +257,25 @@ const CreateUser = ({
       ...data,
       connection: "Username-Password-Authentication",
       roleId: role?.uid,
-      permissions: filter(role?.permissions, (permission) => {
-        return includes(data.permissions, permission?.name)
-      })
-    }
-    console.log(payload);
+      ...(data?.position && { position: toLower(data.position) }),
+    };
     const createUserResponse = await userServices.createUser(payload);
     if (createUserResponse) {
       showNotification("Thành công", "Tạo người dùng thành công", "green");
-      closeModal()
+      closeModal();
     }
     setLoadingCreateUser(false);
-  }
-  // Update permissions when the role changes
-  useEffect(() => {
-    if (selectedRole) {
-      const rolePermissions = find(roles, { name: selectedRole })?.permissions || [];
-      setAvailablePermissions(rolePermissions); // Set available permissions for the selected role
-      setValue("permissions", []); // Reset permissions when role changes
-    }
-  }, [selectedRole]);
+  };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Grid>
-        <Grid.Col span={12} style={{
-          display: "flex",
-          gap: "20px"
-        }}>
+        <Grid.Col
+          span={12}
+          style={{
+            display: "flex",
+            gap: "20px",
+          }}
+        >
           <TextInput
             required
             withAsterisk
@@ -251,11 +292,9 @@ const CreateUser = ({
                 color: "rgb(25, 25, 25)",
               },
             }}
-            {
-            ...register("name", {
+            {...register("name", {
               required: "Trường này là bắt buộc",
-            })
-            }
+            })}
             error={errors.name ? errors.name.message : null}
           />
           <TextInput
@@ -272,9 +311,7 @@ const CreateUser = ({
                 color: "rgb(25, 25, 25)",
               },
             }}
-            {
-            ...register("shortName")
-            }
+            {...register("shortName")}
             error={errors.shortName ? errors.shortName.message : null}
           />
         </Grid.Col>
@@ -294,15 +331,13 @@ const CreateUser = ({
                 color: "rgb(25, 25, 25)",
               },
             }}
-            {
-            ...register("email", {
+            {...register("email", {
               required: "Trường này là bắt buộc",
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
                 message: "Email không hợp lệ",
               },
-            })
-            }
+            })}
             error={errors.email ? errors.email.message : null}
           />
         </Grid.Col>
@@ -321,8 +356,7 @@ const CreateUser = ({
                 color: "rgb(25, 25, 25)",
               },
             }}
-            {
-            ...register("password", {
+            {...register("password", {
               required: "Trường này là bắt buộc",
               minLength: {
                 value: 6,
@@ -330,11 +364,12 @@ const CreateUser = ({
               },
               // require First letter to be uppercase
               pattern: {
-                value: /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/,
-                message: "Mật khẩu phải có ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt",
+                value:
+                  /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/,
+                message:
+                  "Mật khẩu phải có ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt",
               },
-            })
-            }
+            })}
             error={errors.password ? errors.password.message : null}
           />
         </Grid.Col>
@@ -353,17 +388,23 @@ const CreateUser = ({
                 color: "rgb(25, 25, 25)",
               },
             }}
-            {
-            ...register("confirmPassword", {
+            {...register("confirmPassword", {
               required: "Trường này là bắt buộc",
               validate: (value) =>
                 value === getValues("password") || "Mật khẩu không khớp",
-            })
+            })}
+            error={
+              errors.confirmPassword ? errors.confirmPassword.message : null
             }
-            error={errors.confirmPassword ? errors.confirmPassword.message : null}
           />
         </Grid.Col>
-        <Grid.Col span={12}>
+        <Grid.Col
+          span={12}
+          style={{
+            display: "flex",
+            gap: "20px",
+          }}
+        >
           <Controller
             name="role"
             control={control}
@@ -391,7 +432,37 @@ const CreateUser = ({
               />
             )}
           />
+          <Controller
+            name="position"
+            control={control}
+            rules={{ required: "Trường này là bắt buộc" }}
+            render={({ field }) => (
+              <Select
+                {...field}
+                withAsterisk
+                data={map(values(MEMBER_POSITIONS), (value) =>
+                  toPascalCase(value)
+                )}
+                withScrollArea={true}
+                maxDropdownHeight={300}
+                label="Select Position"
+                styles={{
+                  label: {
+                    marginBottom: "10px",
+                    fontWeight: 500,
+                    fontSize: "0.875rem",
+                    lineHeight: "1.57143",
+                    letterSpacing: "0em",
+                    color: "rgb(25, 25, 25)",
+                  },
+                }}
+                error={errors.position ? errors.position.message : null}
+                clearable
+              />
+            )}
+          />
         </Grid.Col>
+
         <Grid.Col span={12}>
           <Flex align="center" justify="space-between">
             <Text
@@ -427,7 +498,7 @@ const CreateUser = ({
                     color: "rgb(52, 73, 186)",
                   }}
                   onClick={() => {
-                    setValue("permissions", map(availablePermissions, (permission) => permission?.name));
+                    setValue("permissions", permissions);
                   }}
                 >
                   All
@@ -455,19 +526,28 @@ const CreateUser = ({
             control={control}
             rules={{ required: "Trường này là bắt buộc" }}
             render={({ field }) => (
-              <TagsInput
-                withAsterisk
+              <MultiSelect
                 {...field}
-                data={map(availablePermissions, "name")}
-                withScrollArea={true}
-                maxDropdownHeight={100}
-                name="permissions"
+                data={map(permissions, (perm) => ({
+                  value: perm.name, // Using 'name' as the value for submission
+                  label: perm.description, // Display 'description' in the dropdown
+                }))}
+                withAsterisk
                 error={errors.permissions ? errors.permissions.message : null}
                 clearable
+                searchable
+                onChange={(selectedNames) => {
+                  // Map selected descriptions back to full objects
+                  const selectedPermissions = permissions.filter((perm) =>
+                    selectedNames.includes(perm.name)
+                  );
+                  field.onChange(selectedPermissions); // Set the selected permissions as full objects
+                }}
+                value={field.value.map((perm) => perm.name)} // Convert selected objects back to 'name' for display
+                maxDropdownHeight={200}
               />
             )}
           />
-
         </Grid.Col>
         <Grid.Col span={12}>
           <Controller
@@ -503,13 +583,449 @@ const CreateUser = ({
             justifyContent: "center",
           }}
         >
-          <Button color="rgb(63, 89, 228)" w="95%" type="submit" loading={loadingCreateUser}>
+          <Button
+            color="rgb(63, 89, 228)"
+            w="100%"
+            type="submit"
+            loading={loadingCreateUser}
+          >
             Create
           </Button>
         </Grid.Col>
       </Grid>
     </form>
+  );
+};
 
+const UpdateUser = ({ closeModal, user, roles }) => {
+  const [loadingUpdateUser, setLoadingUpdateUser] = useState(false);
+  const permissions = readLocalStorageValue({
+    key: LOCAL_STORAGE_KEY.PERMISSIONS,
+  });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    control,
+  } = useForm({
+    defaultValues: {
+      email: user?.email,
+      password: user?.password,
+      confirmPassword: user?.password,
+      role: user?.role,
+      permissions: user?.permissions,
+      position: toUpper(user?.position),
+      name: user?.name,
+      team: user?.team,
+      shortName: user?.shortName,
+    },
+  });
+
+  const onSubmit = async (data) => {
+    setLoadingUpdateUser(true);
+    const role = find(roles, { name: data.role });
+    const payload = {
+      ...data,
+      connection: "Username-Password-Authentication",
+      roleId: role?.uid,
+      ...(data?.position && { position: toLower(data.position) }),
+    };
+    const createUserResponse = await userServices.update({
+      uid: user?.uid,
+      data: {
+        ...user,
+        ...omit(payload, "confirmPassword"),
+      },
+    });
+    if (createUserResponse) {
+      showNotification("Thành công", "Tạo người dùng thành công", "green");
+      closeModal();
+    }
+    setLoadingUpdateUser(false);
+  };
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Grid>
+        <Grid.Col
+          span={12}
+          style={{
+            display: "flex",
+            gap: "20px",
+          }}
+        >
+          <TextInput
+            required
+            withAsterisk
+            name="name"
+            label="Name"
+            placeholder="John Doe"
+            styles={{
+              label: {
+                marginBottom: "10px",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              },
+            }}
+            {...register("name", { required: "Trường này là bắt buộc" })}
+            error={errors.name ? errors.name.message : null}
+          />
+          <TextInput
+            name="shortName"
+            label="Short Name"
+            placeholder="Member RnD để tạo Brief"
+            styles={{
+              label: {
+                marginBottom: "10px",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              },
+            }}
+            {...register("shortName")}
+            error={errors.shortName ? errors.shortName.message : null}
+          />
+        </Grid.Col>
+        <Grid.Col span={12}>
+          <TextInput
+            placeholder="email@example.com"
+            required
+            name="email"
+            label="Email"
+            readOnly
+            styles={{
+              label: {
+                marginBottom: "10px",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              },
+            }}
+            {...register("email", {
+              required: "Trường này là bắt buộc",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
+                message: "Email không hợp lệ",
+              },
+            })}
+            error={errors.email ? errors.email.message : null}
+          />
+        </Grid.Col>
+        <Grid.Col
+          span={12}
+          style={{
+            display: "flex",
+            gap: "20px",
+          }}
+        >
+          <Controller
+            name="role"
+            control={control}
+            rules={{ required: "Trường này là bắt buộc" }}
+            render={({ field }) => (
+              <Select
+                {...field}
+                withAsterisk
+                data={compact(uniq(map(roles, (role) => role?.name))) || []}
+                withScrollArea={true}
+                maxDropdownHeight={300}
+                label="Select Role"
+                styles={{
+                  label: {
+                    marginBottom: "10px",
+                    fontWeight: 500,
+                    fontSize: "0.875rem",
+                    lineHeight: "1.57143",
+                    letterSpacing: "0em",
+                    color: "rgb(25, 25, 25)",
+                  },
+                }}
+                error={errors.role ? errors.role.message : null}
+                clearable
+              />
+            )}
+          />
+          <Controller
+            name="position"
+            control={control}
+            rules={{ required: "Trường này là bắt buộc" }}
+            render={({ field }) => (
+              <Select
+                {...field}
+                withAsterisk
+                data={map(values(MEMBER_POSITIONS), (value) => toUpper(value))}
+                value={field.value}
+                withScrollArea={true}
+                maxDropdownHeight={300}
+                label="Select Position"
+                styles={{
+                  label: {
+                    marginBottom: "10px",
+                    fontWeight: 500,
+                    fontSize: "0.875rem",
+                    lineHeight: "1.57143",
+                    letterSpacing: "0em",
+                    color: "rgb(25, 25, 25)",
+                  },
+                }}
+                error={errors.position ? errors.position.message : null}
+                clearable
+              />
+            )}
+          />
+        </Grid.Col>
+
+        <Grid.Col span={12}>
+          <Flex align="center" justify="space-between">
+            <Text
+              style={{
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              }}
+            >
+              Permissions
+            </Text>
+            <Group>
+              <Text
+                style={{
+                  fontWeight: 500,
+                  fontSize: "0.875rem",
+                  lineHeight: "1.57143",
+                  letterSpacing: "0em",
+                  color: "rgb(25, 25, 25)",
+                }}
+              >
+                Select:
+              </Text>
+              <Group>
+                <Button
+                  size="xs"
+                  color="gray"
+                  variant="outline"
+                  style={{
+                    border: 0,
+                    color: "rgb(52, 73, 186)",
+                  }}
+                  onClick={() => {
+                    setValue("permissions", permissions);
+                  }}
+                >
+                  All
+                </Button>
+                <Text>|</Text>
+                <Button
+                  size="xs"
+                  color="gray"
+                  variant="outline"
+                  style={{
+                    border: 0,
+                    color: "rgb(52, 73, 186)",
+                  }}
+                  onClick={() => {
+                    setValue("permissions", []);
+                  }}
+                >
+                  None
+                </Button>
+              </Group>
+            </Group>
+          </Flex>
+          <Controller
+            name="permissions"
+            control={control}
+            rules={{ required: "Trường này là bắt buộc" }}
+            render={({ field }) => (
+              <MultiSelect
+                {...field}
+                data={map(permissions, (perm) => ({
+                  value: perm.name, // Using 'name' as the value for submission
+                  label: perm.description, // Display 'description' in the dropdown
+                }))}
+                withAsterisk
+                error={errors.permissions ? errors.permissions.message : null}
+                clearable
+                searchable
+                onChange={(selectedNames) => {
+                  // Map selected descriptions back to full objects
+                  const selectedPermissions = permissions.filter((perm) =>
+                    selectedNames.includes(perm.name)
+                  );
+                  field.onChange(selectedPermissions); // Set the selected permissions as full objects
+                }}
+                value={field.value.map((perm) => perm.name)} // Convert selected objects back to 'name' for display
+                maxDropdownHeight={200}
+              />
+            )}
+          />
+        </Grid.Col>
+        <Grid.Col span={12}>
+          <Controller
+            name="team"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                data={BD_TEAMS}
+                withScrollArea={true}
+                value={field.value}
+                maxDropdownHeight={300}
+                label="Select Team"
+                styles={{
+                  label: {
+                    marginBottom: "10px",
+                    fontWeight: 500,
+                    fontSize: "0.875rem",
+                    lineHeight: "1.57143",
+                    letterSpacing: "0em",
+                    color: "rgb(25, 25, 25)",
+                  },
+                }}
+                error={errors.team ? errors.team.message : null}
+                clearable
+              />
+            )}
+          />
+        </Grid.Col>
+        <Grid.Col
+          span={12}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Button
+            color="rgb(63, 89, 228)"
+            w="100%"
+            type="submit"
+            loading={loadingUpdateUser}
+          >
+            Update
+          </Button>
+        </Grid.Col>
+      </Grid>
+    </form>
+  );
+};
+
+const UpdatePassword = ({ closeModal, user }) => {
+  const [loadingUpdatePassword, setLoadingUpdatePassword] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    getValues,
+  } = useForm({
+    defaultValues: {
+      password: "",
+      confirmPassword: "",
+    },
+  });
+  const onSubmit = async (data) => {
+    setLoadingUpdatePassword(true);
+    const payload = {
+      ...data,
+    };
+    const updatePasswordResponse = await userServices.update({
+      uid: user?.uid,
+      data: {
+        ...user,
+        ...omit(payload, "confirmPassword"),
+      },
+    });
+    if (updatePasswordResponse) {
+      showNotification("Thành công", "Cập nhật mật khẩu thành công", "green");
+      closeModal();
+    }
+    setLoadingUpdatePassword(false);
+  };
+  return (
+    <form onSubmit={handleSubmit(onSubmit)}>
+      <Grid>
+        <Grid.Col span={12}>
+          <PasswordInput
+            required
+            name="password"
+            label="Password"
+            styles={{
+              label: {
+                marginBottom: "10px",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              },
+            }}
+            {...register("password", {
+              required: "Trường này là bắt buộc",
+              minLength: {
+                value: 6,
+                message: "Mật khẩu phải có ít nhất 6 ký tự",
+              },
+              // require First letter to be uppercase
+              pattern: {
+                value:
+                  /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/,
+                message:
+                  "Mật khẩu phải có ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt",
+              },
+            })}
+            error={errors.password ? errors.password.message : null}
+          />
+        </Grid.Col>
+        <Grid.Col span={12}>
+          <PasswordInput
+            required
+            name="confirmPassword"
+            label="Confirm Password"
+            styles={{
+              label: {
+                marginBottom: "10px",
+                fontWeight: 500,
+                fontSize: "0.875rem",
+                lineHeight: "1.57143",
+                letterSpacing: "0em",
+                color: "rgb(25, 25, 25)",
+              },
+            }}
+            {...register("confirmPassword", {
+              required: "Trường này là bắt buộc",
+              validate: (value) =>
+                value === getValues("password") || "Mật khẩu không khớp",
+            })}
+            error={
+              errors.confirmPassword ? errors.confirmPassword.message : null
+            }
+          />
+        </Grid.Col>
+        <Grid.Col
+          span={12}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Button
+            color="rgb(63, 89, 228)"
+            w="100%"
+            type="submit"
+            loading={loadingUpdatePassword}
+          >
+            Update
+          </Button>
+        </Grid.Col>
+      </Grid>
+    </form>
   );
 };
 
@@ -520,13 +1036,17 @@ const ACTIONS = {
   DELETE_ACCOUNT: "Delete Account",
   CREATE_USER: "Create User",
   RESEND_EMAIL_VERIFICATION: "Resend Email Verification",
+  UPDATE_PASSWORD: "Update Password",
+  UPDATE_USER: "Update User",
 };
 
 const UserScreen = () => {
   const [loadingFetchUsers, setLoadingFetchUsers] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
   const [roles, setRoles] = useState([]);
+  const [queryUser, setQueryUser] = useState({});
   const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [triggerFetchUsers, setTriggerFetchUsers] = useState(false);
   const [action, setAction] = useState(null);
   const [pagination, setPagination] = useState({
@@ -535,14 +1055,15 @@ const UserScreen = () => {
   });
   const fetchUsers = async (page = 1) => {
     setLoadingFetchUsers(true);
-    // const response = await userServices.fetchUsers({
-    //   page,
-    //   limit: 30,
-    // });
-    const response = true;
+    const response = await userServices.fetchUsers({
+      page,
+      limit: 20,
+      query: queryUser,
+    });
     if (response) {
-      //   const { data } = response;
-      setUsers(mockUsers);
+      const { data, metadata } = response;
+      setPagination(metadata);
+      setUsers(map(data, (x, index) => ({ ...x, id: index + 1 })));
     }
     setTriggerFetchUsers(false);
     setLoadingFetchUsers(false);
@@ -552,7 +1073,7 @@ const UserScreen = () => {
     if (data) {
       setRoles(data);
     }
-  }
+  };
   const handlePageChange = (page) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
   };
@@ -561,7 +1082,6 @@ const UserScreen = () => {
     () => [
       {
         accessorKey: "id",
-        accessorFn: (row) => 1,
         mantineTableHeadCellProps: {
           align: "right",
         },
@@ -579,18 +1099,22 @@ const UserScreen = () => {
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => {
-          const { given_name, family_name, email, picture, nickname } =
-            row.original;
+          const { name, email, imageSrc } = row.original;
           return (
             <Flex
               style={{
                 gap: "10px",
                 height: "60px",
               }}
+              onClick={() => {
+                setSelectedUser(row.original);
+                setAction(ACTIONS.UPDATE_USER);
+                open();
+              }}
             >
               <Image
-                src={picture}
-                alt={nickname}
+                src={imageSrc}
+                alt={name}
                 width={40}
                 height="80%"
                 radius="xl"
@@ -610,9 +1134,7 @@ const UserScreen = () => {
                     cursor: "pointer",
                   }}
                 >
-                  {!given_name && !family_name
-                    ? nickname
-                    : `${given_name} ${family_name}`}
+                  {name}
                 </Text>
                 <Text
                   style={{
@@ -627,9 +1149,9 @@ const UserScreen = () => {
         },
       },
       {
-        accessorKey: "logins_count",
-        header: "Logins",
-        accessorFn: (row) => row?.logins_count,
+        accessorKey: "team",
+        header: "Team",
+        accessorFn: (row) => row?.team,
         size: 50,
         enableEditing: false,
         enableSorting: false,
@@ -638,7 +1160,16 @@ const UserScreen = () => {
       {
         accessorKey: "role",
         header: "Role",
-        accessorFn: (row) => row?.role?.name || "Admin",
+        accessorFn: (row) => row?.role,
+        size: 50,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+      },
+      {
+        accessorKey: "position",
+        accessorFn: (row) => toUpper(row?.position),
+        header: "Position",
         size: 50,
         enableEditing: false,
         enableSorting: false,
@@ -646,7 +1177,7 @@ const UserScreen = () => {
       },
       {
         accessorKey: "createdAt",
-        header: "Ngày tham gia",
+        header: "Created At",
         accessorFn: (row) => moment(row?.created_at).format("DD/MM/YYYY"),
         size: 50,
         enableEditing: false,
@@ -675,7 +1206,7 @@ const UserScreen = () => {
                   color="#ffffff"
                   size="sx"
                   disabled={row.original.key === "budget"}
-                  onClick={() => { }}
+                  onClick={() => {}}
                 >
                   <IconDots color="rgb(25, 25, 25)" />
                 </Button>
@@ -684,16 +1215,21 @@ const UserScreen = () => {
                 <Menu.Label>Application</Menu.Label>
                 <Menu.Item
                   leftSection={
-                    <IconEye style={{ width: rem(14), height: rem(14) }} />
-                  }
-                >
-                  View
-                </Menu.Item>
-                <Menu.Item
-                  leftSection={
-                    <IconMail
+                    <IconBrandSamsungpass
                       style={{ width: rem(14), height: rem(14) }}
                     />
+                  }
+                  onClick={() => {
+                    setAction(ACTIONS.UPDATE_PASSWORD);
+                    setSelectedUser(row.original);
+                    open();
+                  }}
+                >
+                  Change Password
+                </Menu.Item>
+                {/* <Menu.Item
+                  leftSection={
+                    <IconMail style={{ width: rem(14), height: rem(14) }} />
                   }
                   onClick={() => {
                     setAction(ACTIONS.RESEND_EMAIL_VERIFICATION);
@@ -701,8 +1237,8 @@ const UserScreen = () => {
                   }}
                 >
                   Resend Email
-                </Menu.Item>
-                <Menu.Item
+                </Menu.Item> */}
+                {/* <Menu.Item
                   leftSection={
                     <IconUserCheck
                       style={{ width: rem(14), height: rem(14) }}
@@ -714,7 +1250,7 @@ const UserScreen = () => {
                   }}
                 >
                   Assign New Role
-                </Menu.Item>
+                </Menu.Item> */}
                 <Menu.Item
                   leftSection={
                     <IconSquareRoundedCheck
@@ -723,6 +1259,7 @@ const UserScreen = () => {
                   }
                   onClick={() => {
                     setAction(ACTIONS.ASSIGN_PERMISSIONS);
+                    setSelectedUser(row.original);
                     open();
                   }}
                 >
@@ -751,6 +1288,7 @@ const UserScreen = () => {
     [users]
   );
 
+  const [keyword, setKeyword] = useState("");
   const table = useMantineReactTable({
     columns,
     data: users,
@@ -807,6 +1345,113 @@ const UserScreen = () => {
             >
               Create User
             </Button>
+            <TextInput
+              placeholder="Keyword"
+              size="sm"
+              width="200px"
+              leftSection={
+                <span
+                  onClick={() => {
+                    setQueryUser({ ...queryUser, keyword });
+                  }}
+                  style={{
+                    cursor: "pointer",
+                  }}
+                >
+                  <IconSearch size={16} />
+                </span>
+              }
+              styles={{
+                input: {
+                  width: "150px",
+                },
+              }}
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  setQueryUser({ ...queryUser, keyword });
+                }
+              }}
+            />
+
+            <Select
+              placeholder="Team"
+              data={["BD1", "BD2", "BD3", "POD-Biz"]}
+              styles={{
+                input: {
+                  width: "100px",
+                },
+              }}
+              value={queryUser?.team}
+              onChange={(value) => setQueryUser({ ...queryUser, team: value })}
+              clearable
+              onClear={() => {
+                setQueryUser({
+                  ...queryUser,
+                  team: null,
+                });
+              }}
+            />
+            <Select
+              placeholder="Position"
+              data={keys(MEMBER_POSITIONS) || []}
+              styles={{
+                input: {
+                  width: "150px",
+                },
+              }}
+              value={queryUser?.position}
+              onChange={(value) =>
+                setQueryUser({
+                  ...queryUser,
+                  position: value,
+                })
+              }
+              clearable
+              onClear={() => {
+                setQueryUser({
+                  ...queryUser,
+                  position: null,
+                });
+              }}
+            />
+            <Select
+              placeholder="Role"
+              data={uniq(map(roles, "name")) || []}
+              styles={{
+                input: {
+                  width: "150px",
+                },
+              }}
+              value={queryUser?.role}
+              onChange={(value) =>
+                setQueryUser({
+                  ...queryUser,
+                  role: value,
+                })
+              }
+              clearable
+              onClear={() => {
+                setQueryUser({
+                  ...queryUser,
+                  role: null,
+                });
+              }}
+            />
+            <Button
+              onClick={() => {
+                setQueryUser({
+                  keyword: "",
+                  team: null,
+                  position: null,
+                  role: null,
+                });
+                setKeyword("");
+              }}
+            >
+              <IconFilterOff />
+            </Button>
           </Flex>
         </div>
       );
@@ -825,8 +1470,8 @@ const UserScreen = () => {
   });
 
   useEffect(() => {
-    fetchUsers();
-  }, [triggerFetchUsers, pagination.currentPage]);
+    fetchUsers(pagination.currentPage);
+  }, [triggerFetchUsers, pagination.currentPage, queryUser]);
   useEffect(() => {
     fetchRoles();
   }, []);
@@ -858,7 +1503,9 @@ const UserScreen = () => {
         radius="md"
         title={action}
       >
-        {action === ACTIONS.ASSIGN_PERMISSIONS && <AssignPermissions />}
+        {action === ACTIONS.ASSIGN_PERMISSIONS && (
+          <AssignPermissions closeModal={close} user={selectedUser} />
+        )}
         {action === ACTIONS.ASSIGN_NEW_ROLE && <AssignNewRole />}
         {action === ACTIONS.DELETE_ACCOUNT && (
           <Grid>
@@ -882,31 +1529,37 @@ const UserScreen = () => {
             </Grid.Col>
           </Grid>
         )}
-        {
-          action === ACTIONS.RESEND_EMAIL_VERIFICATION && (
-            <Grid>
-              <Grid.Col span={12}>
-                <Text
-                  style={{
-                    fontWeight: 500,
-                    fontSize: "0.875rem",
-                    lineHeight: "1.57143",
-                    letterSpacing: "0em",
-                    color: "rgb(25, 25, 25)",
-                  }}
-                >
-                  Are you sure you want to resend email verification?
-                </Text>
-              </Grid.Col>
-              <Grid.Col span={12}>
-                <Button color="rgb(63, 89, 228)" w="100%">
-                  Resend Email Verification
-                </Button>
-              </Grid.Col>
-            </Grid>
-          )
-        }
-        {action === ACTIONS.CREATE_USER && <CreateUser closeModal={close} roles={roles} />}
+        {action === ACTIONS.RESEND_EMAIL_VERIFICATION && (
+          <Grid>
+            <Grid.Col span={12}>
+              <Text
+                style={{
+                  fontWeight: 500,
+                  fontSize: "0.875rem",
+                  lineHeight: "1.57143",
+                  letterSpacing: "0em",
+                  color: "rgb(25, 25, 25)",
+                }}
+              >
+                Are you sure you want to resend email verification?
+              </Text>
+            </Grid.Col>
+            <Grid.Col span={12}>
+              <Button color="rgb(63, 89, 228)" w="100%">
+                Resend Email Verification
+              </Button>
+            </Grid.Col>
+          </Grid>
+        )}
+        {action === ACTIONS.CREATE_USER && (
+          <CreateUser closeModal={close} roles={roles} />
+        )}
+        {action === ACTIONS.UPDATE_PASSWORD && (
+          <UpdatePassword closeModal={close} user={selectedUser} />
+        )}
+        {action === ACTIONS.UPDATE_USER && (
+          <UpdateUser closeModal={close} user={selectedUser} roles={roles} />
+        )}
       </Modal>
     </Card>
   );

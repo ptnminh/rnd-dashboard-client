@@ -6,7 +6,7 @@ import { useAuth0, withAuthenticationRequired } from "@auth0/auth0-react";
 import { readLocalStorageValue, useLocalStorage } from "@mantine/hooks";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NAVIGATION } from "../../Routes";
-import { forEach, intersection, isEmpty } from "lodash";
+import { forEach, intersection, isEmpty, map } from "lodash";
 import { LOCAL_STORAGE_KEY } from "../../constant";
 import { authServices } from "../../services/auth";
 
@@ -58,14 +58,14 @@ const Page = ({ wide, children }) => {
         }
         if (isEmpty(userPermissions)) {
           const { data } = await authServices.verifyToken(auth0Token);
-          userPermissions = data?.permissions || [];
           setPermissions(data?.permissions || []);
+          userPermissions = data?.permissions || [];
         }
 
         const matchNavigation = findNavigationItem(NAVIGATION, pathname);
         if (matchNavigation) {
           const { permissions } = matchNavigation;
-          if (!intersection(userPermissions, permissions).length) {
+          if (!intersection(map(userPermissions, "name"), permissions).length) {
             setIsForbidden(true);
             navigate("/forbidden");
           } else {

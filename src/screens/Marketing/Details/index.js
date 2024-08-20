@@ -564,7 +564,7 @@ const BriefsTable = ({
             />
             <Select
               placeholder="RND"
-              data={map(filter(users, { role: "rnd" }), "name") || []}
+              data={map(filter(users, { position: "rnd" }), "name") || []}
               styles={{
                 input: {
                   width: "100px",
@@ -589,7 +589,7 @@ const BriefsTable = ({
             />
             <Select
               placeholder="Designer"
-              data={map(filter(users, { role: "designer" }), "name") || []}
+              data={map(filter(users, { position: "designer" }), "name") || []}
               styles={{
                 input: {
                   width: "100px",
