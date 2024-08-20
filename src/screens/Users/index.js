@@ -588,7 +588,7 @@ const CreateUser = ({ closeModal, roles }) => {
   );
 };
 
-const UpdateUser = ({ closeModal, user, roles }) => {
+const UpdateUser = ({ closeModal, user, roles, setTriggerFetchUsers }) => {
   const [loadingUpdateUser, setLoadingUpdateUser] = useState(false);
   const permissions = readLocalStorageValue({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
@@ -631,6 +631,7 @@ const UpdateUser = ({ closeModal, user, roles }) => {
     });
     if (createUserResponse) {
       showNotification("Thành công", "Tạo người dùng thành công", "green");
+      setTriggerFetchUsers(true);
       closeModal();
     }
     setLoadingUpdateUser(false);
@@ -1055,6 +1056,9 @@ const UserScreen = () => {
       const { data, metadata } = response;
       setPagination(metadata);
       setUsers(map(data, (x, index) => ({ ...x, id: index + 1 })));
+    } else {
+      setUsers([]);
+      setPagination({ currentPage: 1, totalPages: 1 });
     }
     setTriggerFetchUsers(false);
     setLoadingFetchUsers(false);
@@ -1554,7 +1558,12 @@ const UserScreen = () => {
           <UpdatePassword closeModal={close} user={selectedUser} />
         )}
         {action === ACTIONS.UPDATE_USER && (
-          <UpdateUser closeModal={close} user={selectedUser} roles={roles} />
+          <UpdateUser
+            closeModal={close}
+            user={selectedUser}
+            roles={roles}
+            setTriggerFetchUsers={setTriggerFetchUsers}
+          />
         )}
       </Modal>
     </Card>
