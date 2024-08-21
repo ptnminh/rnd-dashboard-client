@@ -148,7 +148,7 @@ export const CreateWaitingPosts = () => {
       return;
     }
     if (linkProduct) {
-      const updateResponse = await rndServices.updateBrief({
+      const updateResponse = await rndServices.updateBriefMKT({
         uid,
         data: {
           linkProduct,

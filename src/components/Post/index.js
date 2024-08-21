@@ -106,8 +106,8 @@ const Ads = ({
           padding: "10px",
           ...(includes(choosePosts, uid) &&
             !postId && {
-            backgroundColor: "#ffecd2",
-          }),
+              backgroundColor: "#ffecd2",
+            }),
         }}
       >
         <Checkbox.Indicator
@@ -202,7 +202,7 @@ const Ads = ({
                 }}
               >
                 <Grid.Col
-                  span={type === "image" || !type ? 1 : 3}
+                  span={1}
                   style={{
                     height: "80%",
                   }}
@@ -227,11 +227,13 @@ const Ads = ({
                         radius="md"
                         onClick={() => {
                           // open new window
-                          window.open(find(postPayloads, { uid })?.videoLink, "_blank")
+                          window.open(
+                            find(postPayloads, { uid })?.videoLink,
+                            "_blank"
+                          );
                         }}
                       />
                     </Tooltip>
-
                   ) : (
                     <Image
                       src={
@@ -245,7 +247,7 @@ const Ads = ({
                     />
                   )}
                 </Grid.Col>
-                <Grid.Col span={type === "image" || !type ? 11 : 9}>
+                <Grid.Col span={11}>
                   <Flex gap={20} wrap={true}>
                     <Textarea
                       label="Nội dung"
@@ -360,7 +362,7 @@ const Ads = ({
                             href={`https://pawfecthouse.com/${sku}`}
                             size="lg"
                             aria-label="Open in a new tab"
-                            onClick={() => { }}
+                            onClick={() => {}}
                             target="_blank"
                           >
                             <IconExternalLink />
@@ -456,7 +458,7 @@ const Ads = ({
                               href={`https://facebook.com/${postId}`}
                               size="lg"
                               aria-label="Open in a new tab"
-                              onClick={() => { }}
+                              onClick={() => {}}
                               target="_blank"
                             >
                               <IconExternalLink />

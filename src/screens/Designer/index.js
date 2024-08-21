@@ -154,7 +154,7 @@ const DesignerScreens = () => {
       return;
     }
     if (linkDesign) {
-      const updateResponse = await rndServices.updateBrief({
+      const updateResponse = await rndServices.updateBriefDesign({
         uid,
         data: {
           linkDesign,

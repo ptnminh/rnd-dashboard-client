@@ -258,21 +258,7 @@ const CreatePost = ({
     const createPostResponse = await postService.createPost(
       transformedPayloads
     );
-    if (createPostResponse?.success === false) {
-      if (createPostResponse?.code === 403) {
-        showNotification(
-          "Thất bại",
-          "Bạn không có quyền thực hiện hành động này",
-          "red"
-        );
-      } else {
-        showNotification(
-          "Thất bại",
-          createPostResponse?.message || "Tạo post thất bại",
-          "red"
-        );
-      }
-
+    if (createPostResponse?.success === false || !createPostResponse) {
       const errors = createPostResponse?.errorList || [];
       setPostErrors(errors);
     } else {

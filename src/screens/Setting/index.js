@@ -97,6 +97,7 @@ const MarketingSetting = ({ name }) => {
     await settingServices.updateSetting({
       uid,
       data,
+      view: name,
     });
   };
   const createSettingHandler = async () => {
@@ -195,72 +196,73 @@ const MarketingSetting = ({ name }) => {
                       >
                         {toPascalCase(item.key)}
                       </Text>
-                      {
-                        toLower(key) !== "time" ? (
-                          <TextInput
-                            value={item.value}
-                            rightSection={
-                              toLower(key) === "budget" ? <IconCurrencyDollar /> : null
-                            }
-                            onChange={(event) => {
-                              const value = event.target.value;
-                              const clonedSettings = cloneDeep(settings);
-                              const newValue = map(
-                                clonedSettings[row.index].value,
-                                (x) => {
-                                  if (item.key === x.key) {
-                                    return {
-                                      key: x.key,
-                                      value,
-                                    };
-                                  }
-                                  return x;
+                      {toLower(key) !== "time" ? (
+                        <TextInput
+                          value={item.value}
+                          rightSection={
+                            toLower(key) === "budget" ? (
+                              <IconCurrencyDollar />
+                            ) : null
+                          }
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            const clonedSettings = cloneDeep(settings);
+                            const newValue = map(
+                              clonedSettings[row.index].value,
+                              (x) => {
+                                if (item.key === x.key) {
+                                  return {
+                                    key: x.key,
+                                    value,
+                                  };
                                 }
-                              );
-                              clonedSettings[row.index].value = newValue;
-                              clonedSettings[row.index].attribute[key][item.key] =
-                                value;
-                              setSettings(clonedSettings);
-                              setUpdatePayload({
-                                uid: clonedSettings[row.index].uid,
-                                data: clonedSettings[row.index],
-                              });
-                            }}
-                          />) : (
-                          <Select
-                            data={[...Array(11).keys()].map(i => toString(i * 0.5))}
-                            defaultValue={toString(item.value)}
-                            allowDeselect={false}
-                            rightSection={
-                              <IconClock />
-                            }
-                            value={toString(item.value)}
-                            onChange={(value) => {
-                              const clonedSettings = cloneDeep(settings);
-                              const newValue = map(
-                                clonedSettings[row.index].value,
-                                (x) => {
-                                  if (item.key === x.key) {
-                                    return {
-                                      key: x.key,
-                                      value,
-                                    };
-                                  }
-                                  return x;
+                                return x;
+                              }
+                            );
+                            clonedSettings[row.index].value = newValue;
+                            clonedSettings[row.index].attribute[key][item.key] =
+                              value;
+                            setSettings(clonedSettings);
+                            setUpdatePayload({
+                              uid: clonedSettings[row.index].uid,
+                              data: clonedSettings[row.index],
+                            });
+                          }}
+                        />
+                      ) : (
+                        <Select
+                          data={[...Array(11).keys()].map((i) =>
+                            toString(i * 0.5)
+                          )}
+                          defaultValue={toString(item.value)}
+                          allowDeselect={false}
+                          rightSection={<IconClock />}
+                          value={toString(item.value)}
+                          onChange={(value) => {
+                            const clonedSettings = cloneDeep(settings);
+                            const newValue = map(
+                              clonedSettings[row.index].value,
+                              (x) => {
+                                if (item.key === x.key) {
+                                  return {
+                                    key: x.key,
+                                    value,
+                                  };
                                 }
-                              );
-                              clonedSettings[row.index].value = newValue;
-                              clonedSettings[row.index].attribute[key][item.key] =
-                                value;
-                              setSettings(clonedSettings);
-                              setUpdatePayload({
-                                uid: clonedSettings[row.index].uid,
-                                data: clonedSettings[row.index],
-                              });
-                            }}
-                          />
-                        )
-                      }
+                                return x;
+                              }
+                            );
+                            clonedSettings[row.index].value = newValue;
+                            clonedSettings[row.index].attribute[key][item.key] =
+                              value;
+                            setSettings(clonedSettings);
+                            setUpdatePayload({
+                              uid: clonedSettings[row.index].uid,
+                              data: clonedSettings[row.index],
+                            });
+                          }}
+                        />
+                      )}
                     </Group>
                   </List.Item>
                 );
@@ -359,7 +361,7 @@ const MarketingSetting = ({ name }) => {
             position: "sticky",
             top: 0,
             right: 0,
-            zIndex: 100,
+            zindex: 10,
           }}
         >
           <Flex

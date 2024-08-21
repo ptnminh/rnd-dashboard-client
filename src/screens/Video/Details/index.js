@@ -58,7 +58,7 @@ const KeywordTable = ({
     );
   }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefVideo({
       uid,
       data: {
         status: status === 1 ? 2 : 1,
@@ -67,7 +67,7 @@ const KeywordTable = ({
     setTrigger(true);
   };
   const handleUpdatePriority = async ({ uid, priority }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefVideo({
       uid,
       data: {
         priority: priority === 1 ? 2 : 1,
@@ -76,7 +76,7 @@ const KeywordTable = ({
     setTrigger(true);
   };
   const handleUpdateLinkVideos = async ({ uid, linkVideos }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefVideo({
       uid,
       data: {
         linkVideos,
@@ -382,7 +382,7 @@ const KeywordTable = ({
             position: "sticky",
             top: 0,
             right: 0,
-            zIndex: 100,
+            zindex: 10,
           }}
         >
           <Flex

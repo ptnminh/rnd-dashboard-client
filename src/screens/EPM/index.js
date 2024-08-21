@@ -146,7 +146,7 @@ const EPMScreens = () => {
       return;
     }
     if (linkProduct) {
-      const updateResponse = await rndServices.updateBrief({
+      const updateResponse = await rndServices.updateBriefListing({
         uid,
         data: {
           linkProduct,

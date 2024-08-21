@@ -17,7 +17,7 @@ import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
 import { IconX, IconHeart } from "@tabler/icons-react";
-import { CHOOSE_BRIEF_TYPES } from "../../../constant";
+import { CHOOSE_BRIEF_TYPES, LOCAL_STORAGE_KEY } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -26,6 +26,7 @@ import {
 } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
+import { readLocalStorageValue } from "@mantine/hooks";
 
 const Table = ({
   briefs,
@@ -48,13 +49,19 @@ const Table = ({
   setTypoRating,
   setLayoutRating,
 }) => {
+  const permissions = map(
+    readLocalStorageValue({
+      key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    }),
+    "name"
+  );
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(briefs || []);
   useEffect(() => {
     setData(briefs);
   }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefDesignFeedback({
       uid,
       data: {
         status: status === 1 ? 2 : 1,
@@ -63,7 +70,7 @@ const Table = ({
     setTrigger(true);
   };
   const handleUpdatePriority = async ({ uid, priority }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefDesignFeedback({
       uid,
       data: {
         priority: priority === 1 ? 2 : 1,
@@ -638,16 +645,19 @@ const Table = ({
     },
     mantineTableBodyCellProps: ({ row, table, cell }) => ({
       className: classes["body-cells"],
-      onDoubleClick: (event) => {
-        console.log(`cell----`, cell);
-        console.info(row.original);
+      onDoubleClick: () => {
         if (cell && cell.column.id === "linkDesign") {
           setEditingCell(true);
           table.setEditingCell(cell);
         }
       },
-      onClick: (event) => {
-        if (cell && cell.column.id === "status") {
+      onClick: () => {
+        if (
+          cell &&
+          cell.column.id === "status" &&
+          (includes(permissions, "update:design_feedback") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdateStatus({
             uid: row.original.uid,
             status: row.original.status,
@@ -656,11 +666,21 @@ const Table = ({
           });
           return;
         }
-        if (cell && cell.column.id === "remove") {
+        if (
+          cell &&
+          cell.column.id === "remove" &&
+          (includes(permissions, "delete:design_feedback") ||
+            includes(permissions, "delete:brief"))
+        ) {
           openDeleteConfirmModal(row);
           return;
         }
-        if (cell && cell.column.id === "priority") {
+        if (
+          cell &&
+          cell.column.id === "priority" &&
+          (includes(permissions, "update:design_feedback") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdatePriority({
             uid: row.original.uid,
             priority: row.original.priority,
@@ -671,7 +691,7 @@ const Table = ({
         }
       },
       // when leaving the cell, we want to reset the editing cell
-      onBlur: (event) => {
+      onBlur: () => {
         if (isEmpty(updateBrief.linkDesigns)) {
           setEditingCell(false);
         }
@@ -703,7 +723,7 @@ const Table = ({
             return;
           }
           rndServices
-            .updateBrief({
+            .updateBriefDesignFeedback({
               uid,
               data: updateBrief[uid],
             })

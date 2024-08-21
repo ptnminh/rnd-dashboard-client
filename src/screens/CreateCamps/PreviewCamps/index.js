@@ -81,8 +81,9 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
               rootCampId: selectedPayload?.rootCampaign?.campaignId,
               campInfo: {
                 dailyBudget: selectedPayload?.budget,
-                name: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch
-                  } - Test${selectedPayload.exCampIds.length + 1}`,
+                name: `${selectedPayload.team} - ${selectedPayload.sku} - ${
+                  selectedPayload.batch
+                } - Test${selectedPayload.exCampIds.length + 1}`,
               },
               adsInfo: map(ads, (ad) => {
                 return {
@@ -95,9 +96,11 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
           ]);
           const transformedPreviews = [
             {
-              rootCampName: `${selectedPayload.team} - ${selectedPayload.sku
-                } - ${selectedPayload.batch} - Test${selectedPayload.exCampIds.length + 1
-                }`,
+              rootCampName: `${selectedPayload.team} - ${
+                selectedPayload.sku
+              } - ${selectedPayload.batch} - Test${
+                selectedPayload.exCampIds.length + 1
+              }`,
               budget: selectedPayload?.budget,
               ads: ads,
             },
@@ -116,8 +119,9 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
               rootCampId: selectedPayload?.rootCampaign?.campaignId,
               campInfo: {
                 dailyBudget: budgetPerCamp,
-                name: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch
-                  } - Test${selectedPayload.exCampIds.length + index + 1}`,
+                name: `${selectedPayload.team} - ${selectedPayload.sku} - ${
+                  selectedPayload.batch
+                } - Test${selectedPayload.exCampIds.length + index + 1}`,
               },
               adsInfo: map(ads, (ad) => {
                 return {
@@ -131,9 +135,11 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
           const transformedPreviews = map(keyTypes, (type, index) => {
             const ads = groupedAds[type];
             return {
-              rootCampName: `${selectedPayload.team} - ${selectedPayload.sku
-                } - ${selectedPayload.batch} - Test${selectedPayload.exCampIds.length + index + 1
-                }`,
+              rootCampName: `${selectedPayload.team} - ${
+                selectedPayload.sku
+              } - ${selectedPayload.batch} - Test${
+                selectedPayload.exCampIds.length + index + 1
+              }`,
               budget: budgetPerCamp,
               ads,
             };
@@ -150,8 +156,9 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
               rootCampId: selectedPayload?.rootCampaign?.campaignId,
               campInfo: {
                 dailyBudget: budgetPerCamp,
-                name: `${selectedPayload.team} - ${selectedPayload.sku} - ${selectedPayload.batch
-                  } - Test${selectedPayload.exCampIds.length + index + 1}`,
+                name: `${selectedPayload.team} - ${selectedPayload.sku} - ${
+                  selectedPayload.batch
+                } - Test${selectedPayload.exCampIds.length + index + 1}`,
               },
               adsInfo: [
                 {
@@ -164,9 +171,11 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
           });
           const transformedPreviews = map(ads, (ad, index) => {
             return {
-              rootCampName: `${selectedPayload.team} - ${selectedPayload.sku
-                } - ${selectedPayload.batch} - Test${selectedPayload.exCampIds.length + index + 1
-                }`,
+              rootCampName: `${selectedPayload.team} - ${
+                selectedPayload.sku
+              } - ${selectedPayload.batch} - Test${
+                selectedPayload.exCampIds.length + index + 1
+              }`,
               budget: budgetPerCamp,
               ads: [ad],
             };
@@ -186,7 +195,7 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
     const createCampResponse = await campaignServices.createCamps({
       payloads,
     });
-    if (createCampResponse?.success === false) {
+    if (createCampResponse?.success === false || !createCampResponse) {
       const postNames = map(selectedPayload?.ads, (x) => x.postName);
       const errorList = compact(
         map(createCampResponse?.errorList, (x) => {
@@ -363,12 +372,10 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
                               radius="md"
                               onClick={() => {
                                 // open new window
-                                window.open(ad?.value, "_blank")
+                                window.open(ad?.value, "_blank");
                               }}
                             />
                           </Tooltip>
-
-
                         ) : (
                           <Image
                             src={ad?.value || "/images/content/not_found_2.jpg"}
@@ -399,7 +406,7 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
                                 href={`https://facebook.com/${ad?.postId}`}
                                 size="sx"
                                 aria-label="Open in a new tab"
-                                onClick={() => { }}
+                                onClick={() => {}}
                                 target="_blank"
                               >
                                 <IconExternalLink />

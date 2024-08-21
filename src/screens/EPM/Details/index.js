@@ -12,7 +12,7 @@ import {
 import { modals } from "@mantine/modals";
 import Checkbox from "../../../components/Checkbox";
 
-import { filter, find, includes, isEmpty, keys, map, sumBy } from "lodash";
+import { filter, find, includes, isEmpty, keys, map } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
@@ -22,7 +22,7 @@ import {
   IconDeviceFloppy,
   IconBan,
 } from "@tabler/icons-react";
-import { BRIEF_TYPES, CHOOSE_BRIEF_TYPES } from "../../../constant";
+import { CHOOSE_BRIEF_TYPES, LOCAL_STORAGE_KEY } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -30,6 +30,7 @@ import {
 } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
+import { readLocalStorageValue } from "@mantine/hooks";
 
 const BriefsTable = ({
   briefs,
@@ -50,12 +51,18 @@ const BriefsTable = ({
   metadata,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
+  const permissions = map(
+    readLocalStorageValue({
+      key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    }),
+    "name"
+  );
   const [data, setData] = useState(briefs || []);
   useEffect(() => {
     setData(briefs);
   }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefListing({
       uid,
       data: {
         status: status === 2 ? 3 : 2,
@@ -64,7 +71,7 @@ const BriefsTable = ({
     setTrigger(true);
   };
   const handleUpdatePriority = async ({ uid, priority }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefListing({
       uid,
       data: {
         priority: priority === 1 ? 2 : 1,
@@ -787,16 +794,19 @@ const BriefsTable = ({
     },
     mantineTableBodyCellProps: ({ row, table, cell }) => ({
       className: classes["body-cells"],
-      onDoubleClick: (event) => {
-        console.log(`cell----`, cell);
-        console.info(row.original);
+      onDoubleClick: () => {
         if (cell && cell.column.id === "linkProduct") {
           setEditingCell(true);
           table.setEditingCell(cell);
         }
       },
-      onClick: (event) => {
-        if (cell && cell.column.id === "status") {
+      onClick: () => {
+        if (
+          cell &&
+          cell.column.id === "status" &&
+          (includes(permissions, "update:epm") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdateStatus({
             uid: row.original.uid,
             status: row.original.status,
@@ -805,11 +815,21 @@ const BriefsTable = ({
           });
           return;
         }
-        if (cell && cell.column.id === "remove") {
+        if (
+          cell &&
+          cell.column.id === "remove" &&
+          (includes(permissions, "delete:epm") ||
+            includes(permissions, "delete:brief"))
+        ) {
           openDeleteConfirmModal(row);
           return;
         }
-        if (cell && cell.column.id === "priority") {
+        if (
+          cell &&
+          cell.column.id === "priority" &&
+          (includes(permissions, "update:epm") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdatePriority({
             uid: row.original.uid,
             priority: row.original.priority,
@@ -840,7 +860,7 @@ const BriefsTable = ({
             /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
 
           if (!urlPattern.test(updateBrief[uid].linkProduct)) {
-            showNotification("Thất bại", "Link Design không hợp lệ", "red");
+            showNotification("Thất bại", "Link Listing không hợp lệ", "red");
             setUpdateBrief({
               ...updateBrief,
               [uid]: {
@@ -852,14 +872,23 @@ const BriefsTable = ({
             return;
           }
           rndServices
-            .updateBrief({
+            .updateBriefListing({
               uid,
               data: updateBrief[uid],
             })
             .then((response) => {
-              console.log(response);
+              if (!response) {
+                setUpdateBrief({
+                  ...updateBrief,
+                  [uid]: {
+                    ...updateBrief[uid],
+                    linkProduct: "",
+                  },
+                });
+              } else {
+                setData(newData);
+              }
             });
-          setData(newData);
           table.setEditingCell(null);
         } else {
           table.setEditingCell(null);

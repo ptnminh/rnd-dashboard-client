@@ -61,35 +61,37 @@ const Page = ({ wide, children }) => {
           setPermissions(data?.permissions || []);
           userPermissions = data?.permissions || [];
         }
+        if (isEmpty(userPermissions)) {
+          setIsForbidden(true);
+          navigate("/forbidden");
+        }
         const matchNavigation = findNavigationItem(NAVIGATION, pathname);
         if (matchNavigation) {
           const { permissions } = matchNavigation;
           if (
-            !intersection(map(userPermissions, "name"), permissions).length !==
-            0
+            !isEmpty(intersection(map(userPermissions, "name"), permissions))
           ) {
-            if (isEmpty(userPermissions)) {
+            setIsForbidden(false);
+            navigate(matchNavigation.pathname || matchNavigation.url);
+          } else {
+            const foundFirstRoute = find(
+              NAVIGATION,
+              (item) =>
+                !isEmpty(
+                  intersection(map(userPermissions, "name"), item.permissions)
+                )
+            ); // find first route that user has permission
+            if (foundFirstRoute) {
+              setIsForbidden(false);
+              navigate(foundFirstRoute.pathname || foundFirstRoute.url);
+            } else {
               setIsForbidden(true);
               navigate("/forbidden");
-            } else {
-              const foundFirstRoute = find(
-                NAVIGATION,
-                (item) =>
-                  !isEmpty(
-                    intersection(map(userPermissions, "name"), item.permissions)
-                  )
-              ); // find first route that user has permission
-              if (foundFirstRoute) {
-                setIsForbidden(false);
-                navigate(foundFirstRoute.pathname || foundFirstRoute.url);
-              } else {
-                setIsForbidden(true);
-                navigate("/forbidden");
-              }
             }
-          } else {
-            setIsForbidden(false);
           }
+        } else {
+          setIsForbidden(true);
+          navigate("/forbidden");
         }
       } catch (error) {
         console.error("Error fetching data:", error);

@@ -34,7 +34,6 @@ export const rndServices = {
       const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
-        // showNotification("Thất bại", "Không tìm thấy collection", "red");
         return false;
       }
       return result;
@@ -148,7 +147,8 @@ export const rndServices = {
       if (limit) {
         query = `${query}&search=${search}`;
       }
-      const url = query ? `/users?${query}` : `/users`;
+      let url = query ? `/users/all?${query}` : `/users/all`;
+      url = `${url}&includeFields=currentUser`;
       const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
@@ -310,6 +310,169 @@ export const rndServices = {
   updateBrief: async ({ uid, data }) => {
     try {
       const response = await apiClient.put(`/briefs/${uid}`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
+      return false;
+    }
+  },
+  updateBriefDesign: async ({ uid, data }) => {
+    try {
+      const response = await apiClient.put(`/briefs/${uid}/design`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
+      return false;
+    }
+  },
+  updateBriefDesignFeedback: async ({ uid, data }) => {
+    try {
+      const response = await apiClient.put(
+        `/briefs/${uid}/design-feedback`,
+        data
+      );
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
+      return false;
+    }
+  },
+  updateBriefListing: async ({ uid, data }) => {
+    try {
+      const response = await apiClient.put(`/briefs/${uid}/epm`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
+      return false;
+    }
+  },
+  updateBriefMKT: async ({ uid, data }) => {
+    try {
+      const response = await apiClient.put(`/briefs/${uid}/mkt`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
+      return false;
+    }
+  },
+  updateBriefVideo: async ({ uid, data }) => {
+    try {
+      const response = await apiClient.put(`/briefs/${uid}/video`, data);
       const { data: result } = response;
       if (result?.success === false) {
         if (result?.code === 403) {

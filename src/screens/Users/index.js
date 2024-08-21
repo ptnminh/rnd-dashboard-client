@@ -38,18 +38,20 @@ import { userServices } from "../../services/users";
 import { showNotification } from "../../utils/index";
 import {
   compact,
+  filter,
   find,
   keys,
   map,
   omit,
   toLower,
+  toNumber,
   toUpper,
   uniq,
   values,
 } from "lodash";
 import { toPascalCase } from "../../utils";
 
-const AssignPermissions = ({ closeModal, user }) => {
+const AssignPermissions = ({ closeModal, user, setTriggerFetchUsers }) => {
   const currentUserPermissions = readLocalStorageValue({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
   });
@@ -70,6 +72,7 @@ const AssignPermissions = ({ closeModal, user }) => {
     if (response) {
       showNotification("Thành công", "Cập nhật thành công", "green");
       closeModal();
+      setTriggerFetchUsers(true);
     }
     setLoadingAssignPermissions(false);
   };
@@ -216,7 +219,12 @@ const AssignNewRole = () => {
   );
 };
 
-const CreateUser = ({ closeModal, roles }) => {
+const CreateUser = ({
+  closeModal,
+  roles,
+  setTriggerFetchUsers,
+  currentUser,
+}) => {
   const [loadingCreateUser, setLoadingCreateUser] = useState(false);
   const permissions = readLocalStorageValue({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
@@ -256,6 +264,7 @@ const CreateUser = ({ closeModal, roles }) => {
       closeModal();
     }
     setLoadingCreateUser(false);
+    setTriggerFetchUsers(true);
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -349,16 +358,12 @@ const CreateUser = ({ closeModal, roles }) => {
             }}
             {...register("password", {
               required: "Trường này là bắt buộc",
-              minLength: {
-                value: 6,
-                message: "Mật khẩu phải có ít nhất 6 ký tự",
-              },
               // require First letter to be uppercase
               pattern: {
                 value:
                   /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/,
                 message:
-                  "Mật khẩu phải có ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt",
+                  "Mật khẩu phải có ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt và ít nhất 8 ký tự",
               },
             })}
             error={errors.password ? errors.password.message : null}
@@ -404,7 +409,23 @@ const CreateUser = ({ closeModal, roles }) => {
               <Select
                 {...field}
                 withAsterisk
-                data={compact(uniq(map(roles, (role) => role?.name))) || []}
+                data={
+                  currentUser?.role
+                    ? compact(
+                        uniq(
+                          map(
+                            filter(
+                              roles,
+                              (x) =>
+                                toNumber(x.level) <
+                                toNumber(currentUser?.roleInfo?.level)
+                            ),
+                            (role) => role?.name
+                          )
+                        )
+                      )
+                    : compact(uniq(map(roles, (role) => role?.name)))
+                }
                 withScrollArea={true}
                 maxDropdownHeight={300}
                 label="Select Role"
@@ -431,9 +452,17 @@ const CreateUser = ({ closeModal, roles }) => {
               <Select
                 {...field}
                 withAsterisk
-                data={map(values(MEMBER_POSITIONS), (value) =>
-                  toPascalCase(value)
-                )}
+                data={
+                  toLower(currentUser?.role) === "admin" || !currentUser?.role
+                    ? map(values(MEMBER_POSITIONS), (value) =>
+                        toPascalCase(value)
+                      )
+                    : [
+                        toPascalCase(
+                          MEMBER_POSITIONS[toUpper(currentUser?.position)]
+                        ),
+                      ]
+                }
                 withScrollArea={true}
                 maxDropdownHeight={300}
                 label="Select Position"
@@ -835,7 +864,6 @@ const UpdateUser = ({ closeModal, user, roles, setTriggerFetchUsers }) => {
           <Controller
             name="permissions"
             control={control}
-            rules={{ required: "Trường này là bắt buộc" }}
             render={({ field }) => (
               <MultiSelect
                 {...field}
@@ -959,16 +987,12 @@ const UpdatePassword = ({ closeModal, user }) => {
             }}
             {...register("password", {
               required: "Trường này là bắt buộc",
-              minLength: {
-                value: 6,
-                message: "Mật khẩu phải có ít nhất 6 ký tự",
-              },
               // require First letter to be uppercase
               pattern: {
                 value:
                   /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/,
                 message:
-                  "Mật khẩu phải có ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt",
+                  "Mật khẩu phải có ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt và ít nhất 8 ký tự",
               },
             })}
             error={errors.password ? errors.password.message : null}
@@ -1037,6 +1061,7 @@ const UserScreen = () => {
   const [loadingSendEmail, setLoadingSendEmail] = useState(false);
   const [roles, setRoles] = useState([]);
   const [queryUser, setQueryUser] = useState({});
+  const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [triggerFetchUsers, setTriggerFetchUsers] = useState(false);
@@ -1064,9 +1089,10 @@ const UserScreen = () => {
     setLoadingFetchUsers(false);
   };
   const fetchRoles = async () => {
-    const { data } = await userServices.fetchRoles();
+    const { data, metadata } = await userServices.fetchRoles();
     if (data) {
       setRoles(data);
+      setCurrentUser(metadata?.currentUser);
     }
   };
   const handlePageChange = (page) => {
@@ -1183,7 +1209,8 @@ const UserScreen = () => {
       {
         accessorKey: "createdAt",
         header: "Created At",
-        accessorFn: (row) => moment(row?.created_at).format("DD/MM/YYYY"),
+        accessorFn: (row) =>
+          moment(row?.created_at).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY"),
         size: 50,
         enableEditing: false,
         enableSorting: false,
@@ -1317,7 +1344,7 @@ const UserScreen = () => {
             position: "sticky",
             top: 0,
             right: 0,
-            zIndex: 100,
+            zindex: 10,
           }}
         >
           <Flex
@@ -1401,7 +1428,7 @@ const UserScreen = () => {
               onChange={(value) =>
                 setQueryUser({
                   ...queryUser,
-                  position: value,
+                  position: toLower(value),
                 })
               }
               clearable
@@ -1438,7 +1465,7 @@ const UserScreen = () => {
             <Button
               onClick={() => {
                 setQueryUser({
-                  keyword: "",
+                  keyword: null,
                   team: null,
                   position: null,
                   role: null,
@@ -1500,7 +1527,11 @@ const UserScreen = () => {
         title={action}
       >
         {action === ACTIONS.ASSIGN_PERMISSIONS && (
-          <AssignPermissions closeModal={close} user={selectedUser} />
+          <AssignPermissions
+            closeModal={close}
+            user={selectedUser}
+            setTriggerFetchUsers={setTriggerFetchUsers}
+          />
         )}
         {action === ACTIONS.ASSIGN_NEW_ROLE && <AssignNewRole />}
         {action === ACTIONS.DELETE_ACCOUNT && (
@@ -1545,6 +1576,7 @@ const UserScreen = () => {
                 color="rgb(63, 89, 228)"
                 w="100%"
                 onClick={handleResendEmailVerify}
+                loading={loadingSendEmail}
               >
                 Resend Email Verification
               </Button>
@@ -1552,7 +1584,12 @@ const UserScreen = () => {
           </Grid>
         )}
         {action === ACTIONS.CREATE_USER && (
-          <CreateUser closeModal={close} roles={roles} />
+          <CreateUser
+            closeModal={close}
+            roles={roles}
+            setTriggerFetchUsers={setTriggerFetchUsers}
+            currentUser={currentUser}
+          />
         )}
         {action === ACTIONS.UPDATE_PASSWORD && (
           <UpdatePassword closeModal={close} user={selectedUser} />

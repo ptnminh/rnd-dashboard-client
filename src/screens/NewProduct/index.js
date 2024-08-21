@@ -588,16 +588,12 @@ const NewCampaigns = () => {
 
   useEffect(() => {
     const rnds = filter(users, { position: "rnd", team: workGroup });
-    const designers = !isEmpty(
-      filter(users, { position: "designer", team: workGroup })
-    )
-      ? filter(users, { position: "designer", team: workGroup })
-      : filter(users, { position: "designer" });
+    const designers = filter(users, { position: "designer", team: workGroup });
     if (!includes(map(rnds, "name"), rndMember)) {
-      setRndMember("");
+      setRndMember(null);
     }
     if (!includes(map(designers, "name"), designerMember)) {
-      setDesignerMember("");
+      setDesignerMember(null);
     }
   }, [workGroup]);
   const fetchQuotes = async (page) => {

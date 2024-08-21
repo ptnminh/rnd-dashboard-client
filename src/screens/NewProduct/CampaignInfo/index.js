@@ -3,7 +3,7 @@ import cn from "classnames";
 import styles from "./CampaignInfo.module.sass";
 import Card from "../../../components/Card";
 import Dropdown from "../../../components/Dropdown";
-import { debounce, filter, isEmpty, map, uniq } from "lodash";
+import { debounce, filter, isEmpty, map, uniq, values } from "lodash";
 import {
   Grid,
   Image,
@@ -15,6 +15,7 @@ import {
 } from "@mantine/core";
 import { IconCircleCheck, IconRotateClockwise } from "@tabler/icons-react";
 import {
+  BD_TEAMS,
   BRIEF_TYPES,
   BRIEF_VALUES,
   CHOOSE_BRIEF_TYPES,
@@ -62,7 +63,6 @@ const CampaignInfo = ({
     }, 300),
     []
   );
-
   return (
     <>
       <Card
@@ -71,14 +71,6 @@ const CampaignInfo = ({
         classTitle="title-red"
         classCardHead={styles.classCardHead}
         classSpanTitle={styles.classSpanTitle}
-        head={
-          <Button
-            onClick={handleSyncUser}
-            leftSection={<IconRotateClockwise />}
-          >
-            Sync User
-          </Button>
-        }
       >
         <div className={styles.description}>
           <div className={styles.campType}>
@@ -88,7 +80,7 @@ const CampaignInfo = ({
               classDropdownHead={styles.dropdownHead}
               value={workGroup}
               setValue={setWorkGroup}
-              options={teams || []}
+              options={BD_TEAMS}
               classOutSideClick={styles.memberDropdown}
             />{" "}
             <Dropdown
@@ -121,7 +113,7 @@ const CampaignInfo = ({
                       filter(users, { position: "rnd", team: workGroup }),
                       "name"
                     )
-                  : map(filter(users, { position: "rnd" }), "name")
+                  : []
               }
               classOutSideClick={styles.memberDropdown}
             />{" "}
@@ -139,7 +131,7 @@ const CampaignInfo = ({
                       filter(users, { position: "designer", team: workGroup }),
                       "name"
                     )
-                  : map(filter(users, { position: "designer" }), "name")
+                  : []
               }
               classOutSideClick={styles.memberDropdown}
             />{" "}

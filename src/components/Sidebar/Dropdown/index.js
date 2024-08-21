@@ -44,11 +44,11 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
           <>
             <div key={index}>
               <NavLink
-                className={({ isActive }) =>
-                  isActive && isEmpty(x.dropdown) && !x.turnOffActive
+                className={({ isActive }) => {
+                  return isActive && isEmpty(x.dropdown) && !x.turnOffActive
                     ? `${styles.link} ${styles.active}`
-                    : styles.link
-                }
+                    : styles.link;
+                }}
                 to={x.url}
                 key={index}
                 onClick={() => {
@@ -84,7 +84,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
       className={cn(
         styles.dropdown,
         className,
-        { [styles.active]: visible },
+        { [styles.active]: visible && item.pathname === pathname },
         {
           [styles.active]: pathname.includes(item.slug || item.pathname),
         },

@@ -176,7 +176,7 @@ const DesignerFeedbackScreens = () => {
       ...(!isEmpty(rating) && { rating }),
     };
     if (!isEmpty(payload)) {
-      const updateBriefResponse = await rndServices.updateBrief({
+      const updateBriefResponse = await rndServices.updateBriefDesignFeedback({
         uid: selectedSKU?.uid,
         data: payload,
       });

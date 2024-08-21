@@ -32,12 +32,12 @@ import {
 } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
-import { CREATE_CAMP_FLOWS } from "../../../constant";
+import { CREATE_CAMP_FLOWS, LOCAL_STORAGE_KEY } from "../../../constant";
 import moment from "moment-timezone";
 import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
-import { useDisclosure } from "@mantine/hooks";
+import { readLocalStorageValue, useDisclosure } from "@mantine/hooks";
 import RunFlows from "../RunFlows";
 
 const BriefsTable = ({
@@ -58,6 +58,12 @@ const BriefsTable = ({
   setSelectedCreateCampPayload,
   metadata,
 }) => {
+  const permissions = map(
+    readLocalStorageValue({
+      key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    }),
+    "name"
+  );
   const [validationErrors, setValidationErrors] = useState({});
   const [selectedCreateCustomCamp, setSelectedCreateCustomCamp] = useState({});
   const [data, setData] = useState(briefs || []);
@@ -66,7 +72,7 @@ const BriefsTable = ({
   }, [briefs]);
 
   const handleUpdatePriority = async ({ uid, priority }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefMKT({
       uid,
       data: {
         priority: priority === 1 ? 2 : 1,
@@ -743,7 +749,12 @@ const BriefsTable = ({
     mantineTableBodyCellProps: ({ row, cell }) => ({
       className: classes["body-cells"],
       onClick: () => {
-        if (cell && cell.column.id === "priority") {
+        if (
+          cell &&
+          cell.column.id === "priority" &&
+          (includes(permissions, "update:mkt") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdatePriority({
             uid: row.original.uid,
             priority: row.original.priority,

@@ -5,7 +5,7 @@ import apiClient from "./axiosClient";
 export const settingServices = {
   fetchSettings: async ({ limit = 10, page = 1, query = {}, view }) => {
     try {
-      let url = `/settings`;
+      let url = `/settings/${view}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
@@ -29,6 +29,14 @@ export const settingServices = {
       }
       return result;
     } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      }
       console.log("Error at fetchSettings:", error);
       return false;
     }
@@ -43,13 +51,21 @@ export const settingServices = {
       }
       return result;
     } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      }
       console.log("Error at fetchSetting:", error);
       return false;
     }
   },
-  updateSetting: async ({ uid, data }) => {
+  updateSetting: async ({ uid, data, view }) => {
     try {
-      let url = `/settings/${uid}`;
+      let url = `/settings/${uid}/${view}`;
       const response = await apiClient.put(url, data);
       const { data: result } = response;
       if (result?.success === false) {
@@ -57,6 +73,14 @@ export const settingServices = {
       }
       return result;
     } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      }
       console.log("Error at fetchSetting:", error);
       return false;
     }
@@ -73,6 +97,14 @@ export const settingServices = {
       showNotification("Thành công", "Tạo setting thành công", "green");
       return result;
     } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      }
       console.log("Error at fetchSetting:", error);
       return false;
     }
