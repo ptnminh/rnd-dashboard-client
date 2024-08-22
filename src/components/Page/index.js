@@ -37,7 +37,7 @@ const Page = ({ wide, children }) => {
   let [userPermissions, setPermissions] = useLocalStorage({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
     defaultValue: [],
-    expiryInMinutes: 5,
+    expiryInMinutes: 43200,
   });
 
   let [auth0Token, setToken] = useLocalStorage({
