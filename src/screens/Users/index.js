@@ -27,7 +27,8 @@ import {
   IconMailFilled,
 } from "@tabler/icons-react";
 import classes from "./User.module.css";
-import { readLocalStorageValue, useDisclosure } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
 import cn from "classnames";
 import styles from "./User.module.sass";
 import Card from "../../components/Card";
@@ -52,8 +53,9 @@ import {
 import { toPascalCase } from "../../utils";
 
 const AssignPermissions = ({ closeModal, user, setTriggerFetchUsers }) => {
-  const currentUserPermissions = readLocalStorageValue({
+  const [currentUserPermissions] = useLocalStorage({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    defaultValue: [],
   });
   const [loadingAssignPermissions, setLoadingAssignPermissions] =
     useState(false);
@@ -226,8 +228,9 @@ const CreateUser = ({
   currentUser,
 }) => {
   const [loadingCreateUser, setLoadingCreateUser] = useState(false);
-  const permissions = readLocalStorageValue({
+  const [permissions] = useLocalStorage({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    defaultValue: [],
   });
   const {
     register,
@@ -619,8 +622,9 @@ const CreateUser = ({
 
 const UpdateUser = ({ closeModal, user, roles, setTriggerFetchUsers }) => {
   const [loadingUpdateUser, setLoadingUpdateUser] = useState(false);
-  const permissions = readLocalStorageValue({
+  const [permissions] = useLocalStorage({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    defaultValue: [],
   });
   const {
     register,
@@ -1210,7 +1214,7 @@ const UserScreen = () => {
         accessorKey: "createdAt",
         header: "Created At",
         accessorFn: (row) =>
-          moment(row?.created_at).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY"),
+          moment(row?.createdAt).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY"),
         size: 50,
         enableEditing: false,
         enableSorting: false,

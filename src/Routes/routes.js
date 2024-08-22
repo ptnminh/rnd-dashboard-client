@@ -99,13 +99,13 @@ export const NAVIGATION = [
     slug: "rnd",
     icon: "diamond",
     arrowDown: true,
-    permissions: ["read:briefs"],
+    permissions: ["read:brief"],
     pathname: PATH_NAMES.RND_BRIEFS.url,
     dropdown: [
       {
         title: PATH_NAMES.RND_PRODUCT_LINE.title,
         url: PATH_NAMES.RND_PRODUCT_LINE.url,
-        permissions: ["read:product_lines"],
+        permissions: ["read:product_line"],
       },
     ],
   },
@@ -232,6 +232,6 @@ export const NAVIGATION = [
     url: PATH_NAMES.USERS.url,
     icon: "diamond",
     arrowDown: true,
-    permissions: ["read:users"],
+    permissions: ["read:user"],
   },
 ];

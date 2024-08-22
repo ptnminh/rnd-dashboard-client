@@ -37,8 +37,9 @@ import moment from "moment-timezone";
 import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
-import { readLocalStorageValue, useDisclosure } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import RunFlows from "../RunFlows";
+import { useLocalStorage } from "../../../hooks/useLocalStorage";
 
 const BriefsTable = ({
   briefs,
@@ -58,12 +59,10 @@ const BriefsTable = ({
   setSelectedCreateCampPayload,
   metadata,
 }) => {
-  const permissions = map(
-    readLocalStorageValue({
-      key: LOCAL_STORAGE_KEY.PERMISSIONS,
-    }),
-    "name"
-  );
+  const [permissions] = useLocalStorage({
+    key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    defaultValue: [],
+  });
   const [validationErrors, setValidationErrors] = useState({});
   const [selectedCreateCustomCamp, setSelectedCreateCustomCamp] = useState({});
   const [data, setData] = useState(briefs || []);
@@ -627,7 +626,7 @@ const BriefsTable = ({
     onCreatingRowCancel: () => setValidationErrors({}),
     onEditingRowCancel: () => setValidationErrors({}),
     enableDensityToggle: false,
-    renderTopToolbar: ({ table }) => {
+    renderTopToolbar: () => {
       return (
         <div
           style={{

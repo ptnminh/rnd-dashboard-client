@@ -2,8 +2,8 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { ActionIcon, Tooltip } from "@mantine/core";
 import React from "react";
 import { IconLogout } from "@tabler/icons-react";
-import { useLocalStorage } from "@mantine/hooks";
 import { LOCAL_STORAGE_KEY } from "../../constant/localStorage";
+import { useLocalStorage } from "../../hooks";
 
 const ForbiddenPage = () => {
   const { logout } = useAuth0();

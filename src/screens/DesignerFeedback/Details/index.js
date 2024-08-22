@@ -26,7 +26,7 @@ import {
 } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
-import { readLocalStorageValue } from "@mantine/hooks";
+import { useLocalStorage } from "../../../hooks";
 
 const Table = ({
   briefs,
@@ -49,12 +49,10 @@ const Table = ({
   setTypoRating,
   setLayoutRating,
 }) => {
-  const permissions = map(
-    readLocalStorageValue({
-      key: LOCAL_STORAGE_KEY.PERMISSIONS,
-    }),
-    "name"
-  );
+  const [permissions] = useLocalStorage({
+    key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    defaultValue: [],
+  });
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(briefs || []);
   useEffect(() => {

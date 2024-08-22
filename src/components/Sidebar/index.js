@@ -21,13 +21,14 @@ import {
 } from "@mantine/core";
 import { IconLogout, IconBrandSamsungpass } from "@tabler/icons-react";
 import { useAuth0 } from "@auth0/auth0-react";
-import { useDisclosure, useLocalStorage } from "@mantine/hooks";
+import { useDisclosure } from "@mantine/hooks";
 import { NAVIGATION } from "../../Routes";
 import { filter, isEmpty, map, omit, some } from "lodash";
 import { LOCAL_STORAGE_KEY } from "../../constant";
 import { userServices } from "../../services/users";
 import { useForm } from "react-hook-form";
 import { showNotification } from "../../utils/index";
+import { useLocalStorage } from "../../hooks";
 
 const filterNavigation = (navigation, permissions) => {
   return navigation
@@ -163,10 +164,6 @@ const Sidebar = ({ className, onClose }) => {
     defaultValue: [],
   });
   const userPermissions = map(permissions, "name");
-  const userName =
-    user?.family_name && user?.given_name
-      ? user?.family_name + " " + user?.given_name
-      : user.nickname;
   const filteredNavigation = filterNavigation(NAVIGATION, userPermissions)?.map(
     (item) => {
       if (item.dropdown) {

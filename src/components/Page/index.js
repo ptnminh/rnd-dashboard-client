@@ -3,12 +3,12 @@ import cn from "classnames";
 import styles from "./Page.module.sass";
 import Sidebar from "../Sidebar";
 import { useAuth0, withAuthenticationRequired } from "@auth0/auth0-react";
-import { readLocalStorageValue, useLocalStorage } from "@mantine/hooks";
 import { useLocation, useNavigate } from "react-router-dom";
 import { NAVIGATION } from "../../Routes";
-import { find, forEach, includes, intersection, isEmpty, map } from "lodash";
+import { find, forEach, intersection, isEmpty, map } from "lodash";
 import { LOCAL_STORAGE_KEY } from "../../constant";
 import { authServices } from "../../services/auth";
+import { useLocalStorage } from "../../hooks";
 
 const findNavigationItem = (navigation, pathname) => {
   let result = null;
@@ -34,24 +34,20 @@ const Page = ({ wide, children }) => {
 
   const { pathname } = useLocation();
 
-  const [permissions, setPermissions] = useLocalStorage({
+  let [userPermissions, setPermissions] = useLocalStorage({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
     defaultValue: [],
+    expiryInMinutes: 5,
   });
 
-  const [token, setToken] = useLocalStorage({
+  let [auth0Token, setToken] = useLocalStorage({
     key: LOCAL_STORAGE_KEY.ACCESS_TOKEN,
     defaultValue: "",
+    expiryInMinutes: 720, // expired in 0.5 day
   });
   const fetchData = async () => {
     if (isAuthenticated) {
       try {
-        let auth0Token = readLocalStorageValue({
-          key: LOCAL_STORAGE_KEY.ACCESS_TOKEN,
-        });
-        let userPermissions = readLocalStorageValue({
-          key: LOCAL_STORAGE_KEY.PERMISSIONS,
-        });
         if (!auth0Token) {
           auth0Token = await getAccessTokenSilently();
           setToken(auth0Token);
