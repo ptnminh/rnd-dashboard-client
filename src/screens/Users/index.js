@@ -663,7 +663,7 @@ const UpdateUser = ({ closeModal, user, roles, setTriggerFetchUsers }) => {
       },
     });
     if (createUserResponse) {
-      showNotification("Thành công", "Tạo người dùng thành công", "green");
+      showNotification("Thành công", "Cập nhật người dùng thành công", "green");
       setTriggerFetchUsers(true);
       closeModal();
     }
