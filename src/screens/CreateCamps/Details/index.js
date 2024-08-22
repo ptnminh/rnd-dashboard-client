@@ -59,10 +59,11 @@ const BriefsTable = ({
   setSelectedCreateCampPayload,
   metadata,
 }) => {
-  const [permissions] = useLocalStorage({
+  let [permissions] = useLocalStorage({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
     defaultValue: [],
   });
+  permissions = map(permissions, "name");
   const [validationErrors, setValidationErrors] = useState({});
   const [selectedCreateCustomCamp, setSelectedCreateCustomCamp] = useState({});
   const [data, setData] = useState(briefs || []);

@@ -49,10 +49,11 @@ const Table = ({
   setTypoRating,
   setLayoutRating,
 }) => {
-  const [permissions] = useLocalStorage({
+  let [permissions] = useLocalStorage({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
     defaultValue: [],
   });
+  permissions = map(permissions, "name");
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(briefs || []);
   useEffect(() => {

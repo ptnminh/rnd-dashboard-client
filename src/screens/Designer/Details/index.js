@@ -51,10 +51,11 @@ const KeywordTable = ({
   metadata,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
-  const [permissions] = useLocalStorage({
+  let [permissions] = useLocalStorage({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
     defaultValue: [],
   });
+  permissions = map(permissions, "name");
   const [data, setData] = useState(briefs || []);
   useEffect(() => {
     setData(briefs);

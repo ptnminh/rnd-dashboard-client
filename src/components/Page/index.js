@@ -52,11 +52,9 @@ const Page = ({ wide, children }) => {
           auth0Token = await getAccessTokenSilently();
           setToken(auth0Token);
         }
-        if (isEmpty(userPermissions)) {
-          const { data } = await authServices.verifyToken(auth0Token);
-          setPermissions(data?.permissions || []);
-          userPermissions = data?.permissions || [];
-        }
+        const { data } = await authServices.verifyToken(auth0Token);
+        setPermissions(data?.permissions || []);
+        userPermissions = data?.permissions || [];
         if (isEmpty(userPermissions)) {
           setIsForbidden(true);
           navigate("/forbidden");
