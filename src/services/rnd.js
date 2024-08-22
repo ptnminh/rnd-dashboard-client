@@ -138,6 +138,11 @@ export const rndServices = {
   getUsers: async ({ page, limit, search }) => {
     try {
       let query = "";
+      const queryString = `filter=${encodeURIComponent(
+        JSON.stringify({
+          emailVerified: true,
+        })
+      )}`;
       if (search) {
         query = `&pageSize=${limit}`;
       }
@@ -148,7 +153,7 @@ export const rndServices = {
         query = `${query}&search=${search}`;
       }
       let url = query ? `/users/all?${query}` : `/users/all`;
-      url = `${url}&includeFields=currentUser`;
+      url = `${url}&${queryString}`;
       const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
