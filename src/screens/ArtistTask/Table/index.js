@@ -618,7 +618,7 @@ const BriefsTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [2, 3],
+                  status: [1, 2],
                   statusValue: null,
                 });
               }}

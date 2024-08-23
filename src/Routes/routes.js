@@ -119,11 +119,11 @@ export const NAVIGATION = [
         url: PATH_NAMES.RND_PRODUCT_LINE.url,
         permissions: ["read:collection", "read:layout"],
       },
-      // {
-      //   title: PATH_NAMES.RND_BRIEFS_ARTIST.title,
-      //   url: PATH_NAMES.RND_BRIEFS_ARTIST.url,
-      //   permissions: ["read:artist"],
-      // },
+      {
+        title: PATH_NAMES.RND_BRIEFS_ARTIST.title,
+        url: PATH_NAMES.RND_BRIEFS_ARTIST.url,
+        permissions: ["read:artist"],
+      },
     ],
   },
   {
@@ -146,21 +146,21 @@ export const NAVIGATION = [
       },
     ],
   },
-  // {
-  //   title: PATH_NAMES.ARTIST.title,
-  //   arrowDown: true,
-  //   permissions: ["read:artist"],
-  //   icon: "diamond",
-  //   slug: PATH_NAMES.ARTIST.url,
-  //   pathname: PATH_NAMES.ARTIST.url,
-  //   dropdown: [
-  //     {
-  //       title: PATH_NAMES.ARTIST_SETTING.title,
-  //       url: PATH_NAMES.ARTIST_SETTING.url,
-  //       permissions: ["read:artist_setting"],
-  //     },
-  //   ],
-  // },
+  {
+    title: PATH_NAMES.ARTIST.title,
+    arrowDown: true,
+    permissions: ["read:artist"],
+    icon: "diamond",
+    slug: PATH_NAMES.ARTIST.url,
+    pathname: PATH_NAMES.ARTIST.url,
+    dropdown: [
+      {
+        title: PATH_NAMES.ARTIST_SETTING.title,
+        url: PATH_NAMES.ARTIST_SETTING.url,
+        permissions: ["read:artist_setting"],
+      },
+    ],
+  },
   // {
   //   title: PATH_NAMES.VIDEO.title,
   //   arrowDown: true,
