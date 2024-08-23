@@ -921,9 +921,27 @@ const UpdateUser = ({ closeModal, user, roles, setTriggerFetchUsers }) => {
                 clearable
                 searchable
                 onChange={(selectedNames) => {
+                  // add more permissions if has relationship
+                  const additionalPermissions = uniq(
+                    flatMap(
+                      map(selectedNames, (name) => {
+                        const childPermissions = compact(
+                          map(PERMISSIONS_RELATIONSHIP, (perm) => {
+                            const { parentPermissions, childPermissions } =
+                              perm;
+                            if (parentPermissions.includes(name)) {
+                              return childPermissions;
+                            }
+                            return null;
+                          })
+                        );
+                        return [name, ...flatMap(childPermissions)];
+                      })
+                    )
+                  );
                   // Map selected descriptions back to full objects
                   const selectedPermissions = permissions.filter((perm) =>
-                    selectedNames.includes(perm.name)
+                    additionalPermissions.includes(perm.name)
                   );
                   field.onChange(selectedPermissions); // Set the selected permissions as full objects
                 }}
