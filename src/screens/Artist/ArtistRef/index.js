@@ -31,7 +31,7 @@ const ArtistRef = ({
     const fileName = generateRandomString(10);
     const updateFileResponse = await uploadServices.upload(file, fileName);
     if (updateFileResponse) {
-      setArtistDesignRefLink(updateFileResponse.data.url);
+      setArtistDesignRefLink(updateFileResponse.data.shortUrl);
     } else {
       showNotification("Thất bại", "Upload ảnh thất bại", "red");
     }
@@ -47,7 +47,7 @@ const ArtistRef = ({
         const fileName = generateRandomString(10);
         const updateFileResponse = await uploadServices.upload(blob, fileName);
         if (updateFileResponse) {
-          setArtistDesignRefLink(updateFileResponse.data.url);
+          setArtistDesignRefLink(updateFileResponse.data.shortUrl);
         } else {
           showNotification("Thất bại", "Upload ảnh thất bại", "red");
         }
