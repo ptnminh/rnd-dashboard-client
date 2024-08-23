@@ -178,3 +178,193 @@ export const viewers = [
     ],
   },
 ];
+
+export const mockUsers = [
+  {
+    given_name: "Thien Nhat",
+    email_verified: true,
+    identities: [
+      {
+        connection: "google-oauth2",
+        user_id: "109067234978332037367",
+        provider: "google-oauth2",
+        isSocial: true,
+        access_token:
+          "ya29.a0AcM612w9BkAOs3fpz3Dnpk3btyd0VGQxaJzuxhrCYjzebrHojdX0xYyygy23ZWCvZd1BeM3bx0lUO0FURz_-veqWYMo8_aPLheILnZTpkyrQ_K0cx2eRH8SuQGBn4o3nyWgoUs_AdiXkiMmjpFXf62Nh5nc-3zPUSe1KaCgYKAVgSARISFQHGX2MiflcdTtntdXPFWXk6wqkUaw0171",
+        expires_in: 3599,
+      },
+    ],
+    email: "readonlyuid@gmail.com",
+    name: "Thien Nhat Vuong",
+    nickname: "readonlyuid",
+    updated_at: "2024-08-16T06:43:54.221Z",
+    created_at: "2024-08-14T02:49:01.009Z",
+    user_id: "google-oauth2|109067234978332037367",
+    picture:
+      "https://lh3.googleusercontent.com/a/ACg8ocLaUdRpN7VM8ti2r7C9P6cu26Cr4oOzvcRMvoqLI1hmS3m3OA=s96-c",
+    family_name: "Vuong",
+    last_login: "2024-08-16T06:43:54.220Z",
+    last_ip: "171.224.240.147",
+    logins_count: 22,
+  },
+  {
+    name: "user1@gmail.com",
+    identities: [
+      {
+        isSocial: false,
+        connection: "Username-Password-Authentication",
+        user_id: "66bdd7bb8d9f3569c0a2c5c8",
+        provider: "auth0",
+      },
+    ],
+    user_id: "auth0|66bdd7bb8d9f3569c0a2c5c8",
+    picture:
+      "https://s.gravatar.com/avatar/59029276955677351421b3ff6bf5ee4c?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fus.png",
+    created_at: "2024-08-15T10:26:03.876Z",
+    updated_at: "2024-08-16T04:54:09.856Z",
+    last_password_reset: "2024-08-16T03:12:06.118Z",
+    email: "user1@gmail.com",
+    nickname: "user1",
+    email_verified: false,
+    last_login: "2024-08-16T04:54:09.855Z",
+    last_ip: "171.224.240.147",
+    logins_count: 8,
+  },
+  {
+    user_id: "auth0|66bec337e102e8fb5bbccfda",
+    nickname: "user_full_permissions",
+    identities: [
+      {
+        isSocial: false,
+        connection: "Username-Password-Authentication",
+        user_id: "66bec337e102e8fb5bbccfda",
+        provider: "auth0",
+      },
+    ],
+    picture:
+      "https://s.gravatar.com/avatar/e1528f1d5ee9f264a4146fadbb802b5c?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fus.png",
+    email_verified: false,
+    created_at: "2024-08-16T03:10:47.578Z",
+    updated_at: "2024-08-16T04:44:51.274Z",
+    email: "user_full_permissions@gmail.com",
+    name: "user_full_permissions@gmail.com",
+    last_login: "2024-08-16T04:44:51.274Z",
+    last_ip: "171.224.240.147",
+    logins_count: 8,
+  },
+  {
+    user_id: "auth0|66bd660cfa1afba3fd00ed42",
+    updated_at: "2024-08-15T10:25:36.599Z",
+    name: "test@gmail.com",
+    identities: [
+      {
+        connection: "Username-Password-Authentication",
+        user_id: "66bd660cfa1afba3fd00ed42",
+        provider: "auth0",
+        isSocial: false,
+      },
+    ],
+    nickname: "test",
+    created_at: "2024-08-15T02:21:00.675Z",
+    email: "test@gmail.com",
+    picture:
+      "https://s.gravatar.com/avatar/1aedb8d9dc4751e229a335e371db8058?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fte.png",
+    email_verified: false,
+    last_login: "2024-08-15T10:25:36.599Z",
+    last_ip: "171.224.240.147",
+    logins_count: 6,
+  },
+  {
+    nickname: "brominh",
+    created_at: "2024-08-15T02:32:22.295Z",
+    user_id: "auth0|66bd68b6771b52b2cab10020",
+    updated_at: "2024-08-15T09:56:04.318Z",
+    identities: [
+      {
+        connection: "Username-Password-Authentication",
+        user_id: "66bd68b6771b52b2cab10020",
+        provider: "auth0",
+        isSocial: false,
+      },
+    ],
+    email: "brominh@yopmail.com",
+    name: "brominh@yopmail.com",
+    picture:
+      "https://s.gravatar.com/avatar/0f4a7d2f5db394c82636f5af6ae2876a?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fbr.png",
+    email_verified: false,
+    last_login: "2024-08-15T09:56:04.317Z",
+    last_ip: "171.224.240.147",
+    logins_count: 8,
+  },
+  {
+    picture:
+      "https://s.gravatar.com/avatar/30ed4c487e5f9b60d8cbd124939a984c?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fnh.png",
+    identities: [
+      {
+        isSocial: false,
+        connection: "Username-Password-Authentication",
+        user_id: "66bc6059771b52b2caaff8b2",
+        provider: "auth0",
+      },
+    ],
+    user_id: "auth0|66bc6059771b52b2caaff8b2",
+    email: "nhatminh@gmail.com",
+    created_at: "2024-08-14T07:44:25.993Z",
+    name: "nhatminh@gmail.com",
+    nickname: "nhatminh",
+    email_verified: false,
+    updated_at: "2024-08-14T07:44:25.993Z",
+    last_login: "2024-08-14T07:44:25.990Z",
+    last_ip: "171.224.240.147",
+    logins_count: 1,
+  },
+  {
+    user_id: "google-oauth2|111667112071635940258",
+    email: "writeonlyuid@gmail.com",
+    picture:
+      "https://lh3.googleusercontent.com/a/ACg8ocLx-nQgL-5XrPT0HPdq3puYUMsX1sywfL3brr-smnad1G0bmA=s96-c",
+    given_name: "Only",
+    created_at: "2024-08-14T07:23:22.772Z",
+    nickname: "writeonlyuid",
+    family_name: "Read",
+    email_verified: true,
+    updated_at: "2024-08-14T07:23:22.772Z",
+    identities: [
+      {
+        access_token:
+          "ya29.a0AcM612x351EHgdSFaO0y1DNlAoPogGsQdI8R481lFx3_pLQPaKQWUJKv_idlg-WzXjKhjtsUXx9X5T2eyK-TCceFuJfMvqCSLc7OYMIYogA3XIVEUhGI243bJH4sMzA4Lb9Q78Wgh9FB4k7_5fIX9W2xIKRarLxBHwJeaCgYKAWASARESFQHGX2MiB-r0NChX9SVYFJ-dZOlVGQ0171",
+        expires_in: 3599,
+        connection: "google-oauth2",
+        user_id: "111667112071635940258",
+        provider: "google-oauth2",
+        isSocial: true,
+      },
+    ],
+    name: "Only Read",
+    last_login: "2024-08-14T07:23:22.765Z",
+    last_ip: "171.224.240.147",
+    logins_count: 1,
+  },
+  {
+    user_id: "auth0|66bc59f4b8c04b58844e86b0",
+    identities: [
+      {
+        isSocial: false,
+        connection: "Username-Password-Authentication",
+        user_id: "66bc59f4b8c04b58844e86b0",
+        provider: "auth0",
+      },
+    ],
+    created_at: "2024-08-14T07:17:08.970Z",
+    picture:
+      "https://s.gravatar.com/avatar/be58a579f507d6b3ee40cecfc12f046b?s=480&r=pg&d=https%3A%2F%2Fcdn.auth0.com%2Favatars%2Fwr.png",
+    name: "writeonlyuid@gmail.com",
+    nickname: "writeonlyuid",
+    email: "writeonlyuid@gmail.com",
+    updated_at: "2024-08-14T07:19:06.205Z",
+    email_verified: false,
+    last_login: "2024-08-14T07:19:06.205Z",
+    last_ip: "171.224.240.147",
+    logins_count: 2,
+  },
+];

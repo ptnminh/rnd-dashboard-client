@@ -16,28 +16,20 @@ import { filter, find, includes, isEmpty, keys, map } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
-import {
-  IconCheck,
-  IconX,
-  IconDeviceFloppy,
-  IconBan,
-  IconHeart,
-  IconMoon,
-} from "@tabler/icons-react";
-import { BRIEF_TYPES, CHOOSE_BRIEF_TYPES } from "../../../constant";
+import { IconX, IconHeart } from "@tabler/icons-react";
+import { CHOOSE_BRIEF_TYPES, LOCAL_STORAGE_KEY } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
   getStringAsEditorState,
-  reorderArrayById,
 } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
+import { useLocalStorage } from "../../../hooks";
 
-const KeywordTable = ({
-  productLines,
-  name,
+const Table = ({
+  briefs,
   query,
   setQuery,
   setSelectedSKU,
@@ -46,7 +38,6 @@ const KeywordTable = ({
   setEditingCell,
   setUpdateBrief,
   updateBrief,
-  editingCell,
   loadingFetchBrief,
   setTrigger,
   setLinkDesign,
@@ -58,15 +49,18 @@ const KeywordTable = ({
   setTypoRating,
   setLayoutRating,
 }) => {
+  let [permissions] = useLocalStorage({
+    key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    defaultValue: [],
+  });
+  permissions = map(permissions, "name");
   const [validationErrors, setValidationErrors] = useState({});
-  const [data, setData] = useState(productLines || []);
-  const [templateName, setTemplateName] = useState(name);
+  const [data, setData] = useState(briefs || []);
   useEffect(() => {
-    setData(productLines);
-    setTemplateName(name);
-  }, [productLines, templateName]);
+    setData(briefs);
+  }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefDesignFeedback({
       uid,
       data: {
         status: status === 1 ? 2 : 1,
@@ -75,7 +69,7 @@ const KeywordTable = ({
     setTrigger(true);
   };
   const handleUpdatePriority = async ({ uid, priority }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefDesignFeedback({
       uid,
       data: {
         priority: priority === 1 ? 2 : 1,
@@ -567,7 +561,7 @@ const KeywordTable = ({
             />
             <Select
               placeholder="RND"
-              data={map(filter(users, { role: "rnd" }), "name") || []}
+              data={map(filter(users, { position: "rnd" }), "name") || []}
               styles={{
                 input: {
                   width: "150px",
@@ -592,7 +586,7 @@ const KeywordTable = ({
             />
             <Select
               placeholder="Designer"
-              data={map(filter(users, { role: "designer" }), "name") || []}
+              data={map(filter(users, { position: "designer" }), "name") || []}
               styles={{
                 input: {
                   width: "120px",
@@ -650,16 +644,19 @@ const KeywordTable = ({
     },
     mantineTableBodyCellProps: ({ row, table, cell }) => ({
       className: classes["body-cells"],
-      onDoubleClick: (event) => {
-        console.log(`cell----`, cell);
-        console.info(row.original);
+      onDoubleClick: () => {
         if (cell && cell.column.id === "linkDesign") {
           setEditingCell(true);
           table.setEditingCell(cell);
         }
       },
-      onClick: (event) => {
-        if (cell && cell.column.id === "status") {
+      onClick: () => {
+        if (
+          cell &&
+          cell.column.id === "status" &&
+          (includes(permissions, "update:design_feedback") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdateStatus({
             uid: row.original.uid,
             status: row.original.status,
@@ -668,11 +665,21 @@ const KeywordTable = ({
           });
           return;
         }
-        if (cell && cell.column.id === "remove") {
+        if (
+          cell &&
+          cell.column.id === "remove" &&
+          (includes(permissions, "delete:design_feedback") ||
+            includes(permissions, "delete:brief"))
+        ) {
           openDeleteConfirmModal(row);
           return;
         }
-        if (cell && cell.column.id === "priority") {
+        if (
+          cell &&
+          cell.column.id === "priority" &&
+          (includes(permissions, "update:design_feedback") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdatePriority({
             uid: row.original.uid,
             priority: row.original.priority,
@@ -683,7 +690,7 @@ const KeywordTable = ({
         }
       },
       // when leaving the cell, we want to reset the editing cell
-      onBlur: (event) => {
+      onBlur: () => {
         if (isEmpty(updateBrief.linkDesigns)) {
           setEditingCell(false);
         }
@@ -715,7 +722,7 @@ const KeywordTable = ({
             return;
           }
           rndServices
-            .updateBrief({
+            .updateBriefDesignFeedback({
               uid,
               data: updateBrief[uid],
             })
@@ -738,4 +745,4 @@ const KeywordTable = ({
   return <MantineReactTable table={table} />;
 };
 
-export default KeywordTable;
+export default Table;

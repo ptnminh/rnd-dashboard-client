@@ -1,5 +1,4 @@
-import axios from "axios";
-import { hostAPI } from "../constant";
+import apiClient from "./axiosClient";
 
 export const uploadServices = {
   upload: async (file, fileName = null) => {
@@ -9,7 +8,7 @@ export const uploadServices = {
       if (fileName) {
         formData.append("fileName", fileName);
       }
-      const response = await axios.post(`${hostAPI}/uploads`, formData);
+      const response = await apiClient.post(`/uploads`, formData);
       const { data: result } = response;
       if (result?.success === false) {
         return false;

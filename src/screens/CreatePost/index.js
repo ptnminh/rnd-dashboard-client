@@ -46,7 +46,7 @@ const CreatePost = ({
   const [query, setQuery] = useState({
     status: [3],
     postStatus: ["unfulfilled", "partial"],
-    view: "epm",
+    view: "mkt",
   });
   const hasSetChoosePosts = useRef(false);
   const [batch, setBatch] = useState("");
@@ -258,12 +258,7 @@ const CreatePost = ({
     const createPostResponse = await postService.createPost(
       transformedPayloads
     );
-    if (createPostResponse?.success === false) {
-      showNotification(
-        "Thất bại",
-        createPostResponse?.message || "Tạo post thất bại",
-        "red"
-      );
+    if (createPostResponse?.success === false || !createPostResponse) {
       const errors = createPostResponse?.errorList || [];
       setPostErrors(errors);
     } else {
@@ -543,7 +538,7 @@ const CreatePost = ({
                   />
                   <Select
                     placeholder="RND"
-                    data={map(filter(users, { role: "rnd" }), "name") || []}
+                    data={map(filter(users, { position: "rnd" }), "name") || []}
                     styles={{
                       input: {
                         width: "100px",
@@ -830,7 +825,7 @@ const CreatePost = ({
                   />
                   <Select
                     placeholder="RND"
-                    data={map(filter(users, { role: "rnd" }), "name") || []}
+                    data={map(filter(users, { position: "rnd" }), "name") || []}
                     styles={{
                       input: {
                         width: "150px",
@@ -900,7 +895,7 @@ const CreatePost = ({
                         date: null,
                         batch: "",
                         sku: "",
-                        view: "epm",
+                        view: "mkt",
                         briefType: null,
                         valueName: null,
                         value: null,

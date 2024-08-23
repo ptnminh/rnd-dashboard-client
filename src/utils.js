@@ -96,6 +96,6 @@ export function toCamelCase(str) {
 }
 export function toPascalCase(str) {
   return str
-    .replace(/[-_\s]+(.)?/g, (_, c) => (c ? c.toUpperCase() : ""))
-    .replace(/^[a-z]/, (match) => match.toUpperCase());
+    ?.replace(/[-_\s]+(.)?/g, (_, c) => (c ? c?.toUpperCase() : ""))
+    ?.replace(/^[a-z]/, (match) => match?.toUpperCase());
 }

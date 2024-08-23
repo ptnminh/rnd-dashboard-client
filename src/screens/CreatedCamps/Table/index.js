@@ -1,21 +1,8 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import {
-  Badge,
-  Button,
-  Flex,
-  Image,
-  rem,
-  Select,
-  Text,
-  TextInput,
-} from "@mantine/core";
+import { Badge, Button, Flex, Image, Select, TextInput } from "@mantine/core";
 import { ceil, keys } from "lodash";
-import {
-  IconSearch,
-  IconFilterOff,
-  IconCurrencyDollar,
-} from "@tabler/icons-react";
+import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
 import moment from "moment-timezone";
@@ -35,7 +22,6 @@ const CampaignsTable = ({
   sorting,
   setSorting,
   accounts,
-  setCampsPayload,
   campsPayload,
   sampleCampaigns,
 }) => {

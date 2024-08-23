@@ -1,11 +1,11 @@
-import axios from "axios";
-import { hostAPI } from "../constant";
 import { showNotification } from "../utils/index";
 import { filter, isEmpty, keys, map } from "lodash";
+import apiClient from "./axiosClient";
+
 export const rndServices = {
   searchProducts: async (SKU) => {
     try {
-      const response = await axios.get(`${hostAPI}/skus/search/${SKU}`);
+      const response = await apiClient.get(`/skus/search/${SKU}`);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Không tìm thấy SKU", "red");
@@ -30,13 +30,10 @@ export const rndServices = {
       if (limit) {
         query = `${query}&pageSize=${limit}`;
       }
-      const url = query
-        ? `${hostAPI}/collections?${query}`
-        : `${hostAPI}/collections`;
-      const response = await axios.get(url);
+      const url = query ? `/collections?${query}` : `/collections`;
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
-        // showNotification("Thất bại", "Không tìm thấy collection", "red");
         return false;
       }
       return result;
@@ -48,7 +45,7 @@ export const rndServices = {
   },
   deleteCollection: async (uid) => {
     try {
-      const response = await axios.delete(`${hostAPI}/collections/${uid}`);
+      const response = await apiClient.delete(`/collections/${uid}`);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Xóa collection thất bại", "red");
@@ -70,9 +67,9 @@ export const rndServices = {
       if (limit) {
         query = `${query}&pageSize=${limit}`;
       }
-      let url = query ? `${hostAPI}/skus?${query}` : `${hostAPI}/skus`;
+      let url = query ? `/skus?${query}` : `/skus`;
       if (isTakeAll) {
-        url = `${hostAPI}/skus?pageSize=-1`;
+        url = `/skus?pageSize=-1`;
       }
       if (search || productName) {
         const queryString = `filter=${encodeURIComponent(
@@ -81,9 +78,9 @@ export const rndServices = {
             ...(productName && { keyword: productName }),
           })
         )}`;
-        url = `${hostAPI}/skus?${query}&${queryString}`;
+        url = `/skus?${query}&${queryString}`;
       }
-      const response = await axios.get(url, {
+      const response = await apiClient.get(url, {
         params: {
           fields: "sku",
         },
@@ -108,7 +105,7 @@ export const rndServices = {
     fields = "uid,sku,productLine",
   }) => {
     try {
-      let url = `${hostAPI}/skus?page=${page}&pageSize=${limit}`;
+      let url = `/skus?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
@@ -123,7 +120,7 @@ export const rndServices = {
       if (includeFields) {
         url = `${url}&includeFields=${includeFields}`;
       }
-      const response = await axios.get(url, {
+      const response = await apiClient.get(url, {
         params: {
           fields,
         },
@@ -141,6 +138,11 @@ export const rndServices = {
   getUsers: async ({ page, limit, search }) => {
     try {
       let query = "";
+      const queryString = `filter=${encodeURIComponent(
+        JSON.stringify({
+          emailVerified: true,
+        })
+      )}`;
       if (search) {
         query = `&pageSize=${limit}`;
       }
@@ -150,8 +152,9 @@ export const rndServices = {
       if (limit) {
         query = `${query}&search=${search}`;
       }
-      const url = query ? `${hostAPI}/users?${query}` : `${hostAPI}/users`;
-      const response = await axios.get(url);
+      let url = query ? `/users/all?${query}` : `/users/all`;
+      url = `${url}&${queryString}`;
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Không tìm thấy user", "red");
@@ -166,7 +169,7 @@ export const rndServices = {
   },
   syncUser: async () => {
     try {
-      const response = await axios.post(`${hostAPI}/users/sync-from-sheet`);
+      const response = await apiClient.post(`/users/sync-from-sheet`);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Sync user thất bại", "red");
@@ -182,21 +185,40 @@ export const rndServices = {
   },
   createBriefs: async (data) => {
     try {
-      const response = await axios.post(`${hostAPI}/briefs/create-batch`, data);
+      const response = await apiClient.post(`/briefs/create-batch`, data);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification(
-          "Thất bại",
-          result?.message || "Tạo brief thất bại",
-          "red"
-        );
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification(
+            "Thất bại",
+            result?.message || "Tạo brief thất bại",
+            "red"
+          );
+        }
+
         return false;
       }
       showNotification("Thành công", "Tạo brief thành công", "green");
       return true;
     } catch (error) {
-      console.log("Error at createBriefs:", error);
-      showNotification("Thất bại", "Tạo brief thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at createBriefs:", error);
+        showNotification("Thất bại", "Tạo brief thất bại", "red");
+      }
+
       return false;
     }
   },
@@ -251,7 +273,7 @@ export const rndServices = {
                 : "asc",
           }
         : {};
-      let url = `${hostAPI}/briefs?page=${page}&pageSize=${limit}&view=${view}`;
+      let url = `/briefs?page=${page}&pageSize=${limit}&view=${view}`;
       if (Object.keys(filter).length !== 0) {
         const queryString = `filter=${encodeURIComponent(
           JSON.stringify(filter)
@@ -276,7 +298,7 @@ export const rndServices = {
         url = `${url}&${queryString}`;
       }
 
-      const response = await axios.get(url);
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         // showNotification("Thất bại", "Không tìm thấy brief", "red");
@@ -292,37 +314,234 @@ export const rndServices = {
 
   updateBrief: async ({ uid, data }) => {
     try {
-      const response = await axios.put(`${hostAPI}/briefs/${uid}`, data);
+      const response = await apiClient.put(`/briefs/${uid}`, data);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
         return false;
       }
       return true;
     } catch (error) {
-      console.log("Error at updateBrief:", error);
-      showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
+      return false;
+    }
+  },
+  updateBriefDesign: async ({ uid, data }) => {
+    try {
+      const response = await apiClient.put(`/briefs/${uid}/design`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
+      return false;
+    }
+  },
+  updateBriefDesignFeedback: async ({ uid, data }) => {
+    try {
+      const response = await apiClient.put(
+        `/briefs/${uid}/design-feedback`,
+        data
+      );
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
+      return false;
+    }
+  },
+  updateBriefListing: async ({ uid, data }) => {
+    try {
+      const response = await apiClient.put(`/briefs/${uid}/epm`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
+      return false;
+    }
+  },
+  updateBriefMKT: async ({ uid, data }) => {
+    try {
+      const response = await apiClient.put(`/briefs/${uid}/mkt`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
+      return false;
+    }
+  },
+  updateBriefVideo: async ({ uid, data }) => {
+    try {
+      const response = await apiClient.put(`/briefs/${uid}/video`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+        }
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateBrief:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
       return false;
     }
   },
   deleteBrief: async (uid) => {
     try {
-      const response = await axios.put(`${hostAPI}/briefs/delete/${uid}`);
+      const response = await apiClient.put(`/briefs/delete/${uid}`);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification("Thất bại", "Xóa brief thất bại", "red");
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Thất bại", "Xóa brief thất bại", "red");
+        }
         return false;
       }
       return true;
     } catch (error) {
-      console.log("Error at deleteBrief:", error);
-      showNotification("Thất bại", "Xóa brief thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at deleteBrief:", error);
+        showNotification("Thất bại", "Xóa brief thất bại", "red");
+      }
       return false;
     }
   },
   fetchFilters: async () => {
     try {
-      const response = await axios.get(`${hostAPI}/libraries/clipart-filters`);
+      const response = await apiClient.get(`/libraries/clipart-filters`);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Không tìm thấy filters", "red");
@@ -337,7 +556,7 @@ export const rndServices = {
   },
   fetchClipArts: async ({ page, limit, query, type = "clipart", keyword }) => {
     try {
-      let url = `${hostAPI}/libraries?page=${page}&pageSize=${limit}&type=${type}`;
+      let url = `/libraries?page=${page}&pageSize=${limit}&type=${type}`;
       const queryKeys = keys(query);
       const transformedQuery = map(queryKeys, (key) => {
         return {
@@ -360,7 +579,7 @@ export const rndServices = {
         )}`;
         url = `${url}&${queryString}`;
       }
-      const response = await axios.get(url);
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         // showNotification("Thất bại", "Không tìm thấy clipart", "red");
@@ -375,7 +594,7 @@ export const rndServices = {
   },
   fetchQuotes: async ({ page, limit, query }) => {
     try {
-      let url = `${hostAPI}/quotes?page=${page}&pageSize=${limit}`;
+      let url = `/quotes?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
@@ -387,7 +606,7 @@ export const rndServices = {
         )}`;
         url = `${url}&${queryString}`;
       }
-      const response = await axios.get(url);
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -400,7 +619,7 @@ export const rndServices = {
   },
   syncQuotes: async () => {
     try {
-      const response = await axios.post(`${hostAPI}/quotes/sync-from-sheet`);
+      const response = await apiClient.post(`/quotes/sync-from-sheet`);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Sync thất bại", "red");
@@ -414,8 +633,8 @@ export const rndServices = {
   },
   syncProductBases: async () => {
     try {
-      const response = await axios.post(
-        `${hostAPI}/libraries/sync-latest-product-lines`
+      const response = await apiClient.post(
+        `/libraries/sync-latest-product-lines`
       );
       const { data: result } = response;
       if (result?.success === false) {
@@ -430,9 +649,7 @@ export const rndServices = {
   },
   syncCliparts: async () => {
     try {
-      const response = await axios.post(
-        `${hostAPI}/libraries/sync-latest-cliparts`
-      );
+      const response = await apiClient.post(`/libraries/sync-latest-cliparts`);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Sync thất bại", "red");
@@ -446,7 +663,7 @@ export const rndServices = {
   },
   fetchQuotesFilter: async () => {
     try {
-      const response = await axios.get(`${hostAPI}/quotes/filters`);
+      const response = await apiClient.get(`/quotes/filters`);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -459,7 +676,7 @@ export const rndServices = {
   },
   fetchProductLines: async ({ page, limit, query, fields }) => {
     try {
-      let url = `${hostAPI}/product-lines?page=${page}&pageSize=${limit}`;
+      let url = `/product-lines?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
@@ -474,7 +691,7 @@ export const rndServices = {
       if (fields) {
         url = `${url}&fields=${fields}`;
       }
-      const response = await axios.get(url);
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -487,7 +704,7 @@ export const rndServices = {
   },
   createCollection: async (data) => {
     try {
-      const response = await axios.post(`${hostAPI}/collections`, data);
+      const response = await apiClient.post(`/collections`, data);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Tạo collection thất bại", "red");
@@ -503,7 +720,7 @@ export const rndServices = {
   },
   updateCollection: async (data) => {
     try {
-      const response = await axios.post(`${hostAPI}/collections`, data);
+      const response = await apiClient.post(`/collections`, data);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Cập nhật collection thất bại", "red");
@@ -527,8 +744,8 @@ export const rndServices = {
         query = `${query}&page=${page}`;
       }
 
-      const url = query ? `${hostAPI}/layouts?${query}` : `${hostAPI}/layouts`;
-      const response = await axios.get(url);
+      const url = query ? `/layouts?${query}` : `/layouts`;
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         // showNotification("Thất bại", "Không tìm thấy layout", "red");
@@ -543,7 +760,7 @@ export const rndServices = {
   },
   createLayout: async (data) => {
     try {
-      const response = await axios.post(`${hostAPI}/layouts`, data);
+      const response = await apiClient.post(`/layouts`, data);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Tạo layout thất bại", "red");
@@ -559,7 +776,7 @@ export const rndServices = {
   },
   updateLayout: async (data) => {
     try {
-      const response = await axios.post(`${hostAPI}/layouts`, data);
+      const response = await apiClient.post(`/layouts`, data);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Cập nhật layout thất bại", "red");
@@ -575,7 +792,7 @@ export const rndServices = {
   },
   deleteLayout: async (uid) => {
     try {
-      const response = await axios.delete(`${hostAPI}/layouts/${uid}`);
+      const response = await apiClient.delete(`/layouts/${uid}`);
       const { data: result } = response;
       if (result?.success === false) {
         showNotification("Thất bại", "Xóa layout thất bại", "red");

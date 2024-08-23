@@ -195,7 +195,7 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
     const createCampResponse = await campaignServices.createCamps({
       payloads,
     });
-    if (createCampResponse?.success === false) {
+    if (createCampResponse?.success === false || !createCampResponse) {
       const postNames = map(selectedPayload?.ads, (x) => x.postName);
       const errorList = compact(
         map(createCampResponse?.errorList, (x) => {
@@ -360,18 +360,22 @@ const PreviewCamps = ({ selectedPayload, closeModal, setTrigger }) => {
                     {map(preview?.ads, (ad) => (
                       <Group>
                         {ad?.type === "video" ? (
-                          <video
-                            width="80px"
-                            height="80px"
-                            controls
-                            style={{
-                              display: "block",
-                            }}
-                            autoPlay
-                            muted
-                          >
-                            <source src={ad?.value} type="video/mp4" />
-                          </video>
+                          <Tooltip label="Click để xem chi tiết">
+                            <Image
+                              src={
+                                ad?.thumbLink ||
+                                "/images/content/not_found_2.jpg"
+                              }
+                              alt="Post-Camp"
+                              width="80px"
+                              height="80px"
+                              radius="md"
+                              onClick={() => {
+                                // open new window
+                                window.open(ad?.value, "_blank");
+                              }}
+                            />
+                          </Tooltip>
                         ) : (
                           <Image
                             src={ad?.value || "/images/content/not_found_2.jpg"}

@@ -16,8 +16,7 @@ import { filter, find, includes, isEmpty, keys, map } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
-import { IconCheck, IconX, IconBan } from "@tabler/icons-react";
-import { CHOOSE_BRIEF_TYPES } from "../../../constant";
+import { CHOOSE_BRIEF_TYPES, LOCAL_STORAGE_KEY } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -27,10 +26,10 @@ import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 import { useDisclosure } from "@mantine/hooks";
 import CreatePost from "../../CreatePost";
+import { useLocalStorage } from "../../../hooks";
 
 const BriefsTable = ({
-  productLines,
-  name,
+  briefs,
   query,
   setQuery,
   setSelectedSKU,
@@ -39,23 +38,24 @@ const BriefsTable = ({
   setEditingCell,
   setUpdateBrief,
   updateBrief,
-  editingCell,
   loadingFetchBrief,
-  setLoadingFetchBrief,
   setTrigger,
   setLinkProduct,
   sorting,
   setSorting,
 }) => {
+  let [permissions] = useLocalStorage({
+    key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    defaultValue: [],
+  });
+  permissions = map(permissions, "name");
   const [validationErrors, setValidationErrors] = useState({});
-  const [data, setData] = useState(productLines || []);
-  const [templateName, setTemplateName] = useState(name);
+  const [data, setData] = useState(briefs || []);
   useEffect(() => {
-    setData(productLines);
-    setTemplateName(name);
-  }, [productLines, templateName]);
+    setData(briefs);
+  }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefMKT({
       uid,
       data: {
         status: status === 2 ? 3 : 2,
@@ -64,7 +64,7 @@ const BriefsTable = ({
     setTrigger(true);
   };
   const handleUpdatePriority = async ({ uid, priority }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefMKT({
       uid,
       data: {
         priority: priority === 1 ? 2 : 1,
@@ -569,7 +569,7 @@ const BriefsTable = ({
             />
             <Select
               placeholder="RND"
-              data={map(filter(users, { role: "rnd" }), "name") || []}
+              data={map(filter(users, { position: "rnd" }), "name") || []}
               styles={{
                 input: {
                   width: "100px",
@@ -594,7 +594,7 @@ const BriefsTable = ({
             />
             <Select
               placeholder="Designer"
-              data={map(filter(users, { role: "designer" }), "name") || []}
+              data={map(filter(users, { position: "designer" }), "name") || []}
               styles={{
                 input: {
                   width: "100px",
@@ -682,16 +682,19 @@ const BriefsTable = ({
     },
     mantineTableBodyCellProps: ({ row, table, cell }) => ({
       className: classes["body-cells"],
-      onDoubleClick: (event) => {
-        console.log(`cell----`, cell);
-        console.info(row.original);
+      onDoubleClick: () => {
         if (cell && cell.column.id === "linkProduct") {
           setEditingCell(true);
           table.setEditingCell(cell);
         }
       },
-      onClick: (event) => {
-        if (cell && cell.column.id === "status") {
+      onClick: () => {
+        if (
+          cell &&
+          cell.column.id === "status" &&
+          (includes(permissions, "update:mkt") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdateStatus({
             uid: row.original.uid,
             status: row.original.status,
@@ -700,11 +703,21 @@ const BriefsTable = ({
           });
           return;
         }
-        if (cell && cell.column.id === "remove") {
+        if (
+          cell &&
+          cell.column.id === "remove" &&
+          (includes(permissions, "delete:mkt") ||
+            includes(permissions, "delete:brief"))
+        ) {
           openDeleteConfirmModal(row);
           return;
         }
-        if (cell && cell.column.id === "priority") {
+        if (
+          cell &&
+          cell.column.id === "priority" &&
+          (includes(permissions, "update:mkt") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdatePriority({
             uid: row.original.uid,
             priority: row.original.priority,
@@ -747,7 +760,7 @@ const BriefsTable = ({
             return;
           }
           rndServices
-            .updateBrief({
+            .updateBriefMKT({
               uid,
               data: updateBrief[uid],
             })

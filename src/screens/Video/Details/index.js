@@ -40,6 +40,7 @@ const KeywordTable = ({
   setLinkDesign,
   sorting,
   setSorting,
+  metadata,
 }) => {
   const [payloads, setPayloads] = useState([]);
   const [validationErrors, setValidationErrors] = useState({});
@@ -57,7 +58,7 @@ const KeywordTable = ({
     );
   }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefVideo({
       uid,
       data: {
         status: status === 1 ? 2 : 1,
@@ -66,7 +67,7 @@ const KeywordTable = ({
     setTrigger(true);
   };
   const handleUpdatePriority = async ({ uid, priority }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefVideo({
       uid,
       data: {
         priority: priority === 1 ? 2 : 1,
@@ -75,7 +76,7 @@ const KeywordTable = ({
     setTrigger(true);
   };
   const handleUpdateLinkVideos = async ({ uid, linkVideos }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefVideo({
       uid,
       data: {
         linkVideos,
@@ -381,7 +382,7 @@ const KeywordTable = ({
             position: "sticky",
             top: 0,
             right: 0,
-            zIndex: 100,
+            zindex: 10,
           }}
         >
           <Flex
@@ -549,7 +550,7 @@ const KeywordTable = ({
             />
             <Select
               placeholder="RND"
-              data={map(filter(users, { role: "rnd" }), "name") || []}
+              data={map(filter(users, { position: "rnd" }), "name") || []}
               styles={{
                 input: {
                   width: "150px",
@@ -574,7 +575,7 @@ const KeywordTable = ({
             />
             <Select
               placeholder="Designer"
-              data={map(filter(users, { role: "designer" }), "name") || []}
+              data={map(filter(users, { position: "designer" }), "name") || []}
               styles={{
                 input: {
                   width: "120px",
@@ -636,7 +637,7 @@ const KeywordTable = ({
                 fontSize: "16px",
               }}
             >
-              Undone: {filter(data, { status: 1 }).length}
+              Undone: {metadata?.totalUndoneBriefsWithFilter}
             </div>
             <div
               style={{
@@ -644,7 +645,7 @@ const KeywordTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: {filter(data, { status: 1 }).length}h
+              Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
             </div>
           </Flex>
           {editingCell && !isEmpty(updateBrief.linkDesigns) && (

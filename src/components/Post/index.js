@@ -17,6 +17,7 @@ import {
   Textarea,
   TextInput,
   ThemeIcon,
+  Tooltip,
 } from "@mantine/core";
 import { filter, find, findIndex, includes, isEmpty, map } from "lodash";
 import {
@@ -39,6 +40,7 @@ const Ads = ({
   sku,
   type,
   postId,
+  thumbLink,
   addCta,
   captions,
   setQueryCaption,
@@ -200,7 +202,7 @@ const Ads = ({
                 }}
               >
                 <Grid.Col
-                  span={type === "image" || !type ? 1 : 3}
+                  span={1}
                   style={{
                     height: "80%",
                   }}
@@ -213,25 +215,25 @@ const Ads = ({
                     {type === "image" || !type ? "Hình" : "Video"} Ads
                   </div>
                   {type === "video" ? (
-                    <video
-                      width="100%"
-                      height="200px"
-                      controls
-                      id="video"
-                      style={{
-                        display: "block",
-                      }}
-                      autoPlay
-                      muted
-                    >
-                      <source
+                    <Tooltip label="Click để xem chi tiết">
+                      <Image
                         src={
-                          find(postPayloads, { uid })?.videoLink ||
+                          find(postPayloads, { uid })?.thumbLink ||
                           "/images/content/not_found_2.jpg"
                         }
-                        type="video/mp4"
+                        alt="Post-Camp"
+                        height="100%"
+                        fit="contain"
+                        radius="md"
+                        onClick={() => {
+                          // open new window
+                          window.open(
+                            find(postPayloads, { uid })?.videoLink,
+                            "_blank"
+                          );
+                        }}
                       />
-                    </video>
+                    </Tooltip>
                   ) : (
                     <Image
                       src={
@@ -245,7 +247,7 @@ const Ads = ({
                     />
                   )}
                 </Grid.Col>
-                <Grid.Col span={type === "image" || !type ? 11 : 9}>
+                <Grid.Col span={11}>
                   <Flex gap={20} wrap={true}>
                     <Textarea
                       label="Nội dung"
@@ -419,7 +421,7 @@ const Ads = ({
                           maxRows={4}
                         />
                       )}
-                      {postId && (
+                      {postId && type !== "video" && (
                         <Group
                           style={{
                             width: "100%",
@@ -475,7 +477,7 @@ const Ads = ({
                           </div>
                         </Group>
                       )}
-                      {postId && (
+                      {postId && type !== "video" && (
                         <Group
                           style={{
                             width: "100%",

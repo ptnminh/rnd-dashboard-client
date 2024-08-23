@@ -228,6 +228,7 @@ const VideoScreens = () => {
           setLinkDesign={setLinkDesign}
           setSorting={setSorting}
           sorting={sorting}
+          metadata={metadata}
         />
       </Card>
       <Pagination

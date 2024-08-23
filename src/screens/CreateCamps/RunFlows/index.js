@@ -48,7 +48,9 @@ const RUN_FLOWS = {
 
 const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
   const [runflowValue, setRunFlowValue] = useState(RUN_FLOWS.sameCamps);
-  const [totalBudget, setTotalBudget] = useState(null);
+  const [totalBudget, setTotalBudget] = useState(
+    toNumber(selectedPayload?.budget)
+  );
   const [selectedImages, setSelectedImages] = useState([]);
   const [visiblePreview, setVisiblePreview] = useState(false);
   const [loadingCreateCampaign, setLoadingCreateCampaign] = useState(false);
@@ -184,7 +186,7 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
     const createCampResponse = await campaignServices.createCamps({
       payloads,
     });
-    if (createCampResponse?.success === false) {
+    if (createCampResponse?.success === false || !createCampResponse) {
       const postNames = map(selectedPayload?.ads, (x) => x.postName);
       const errorList = compact(
         map(createCampResponse?.errorList, (x) => {
@@ -471,9 +473,21 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
                       }}
                     />
                     <Group>
-                      <video width="80px" height="80px" controls autoPlay muted>
-                        <source src={item.value} type="video/mp4" />
-                      </video>
+                      <Tooltip label="Click để xem chi tiết">
+                        <Image
+                          src={
+                            item?.thumbLink || "/images/content/not_found_2.jpg"
+                          }
+                          alt="Post-Camp"
+                          width="80px"
+                          height="80px"
+                          radius="md"
+                          onClick={() => {
+                            // open new window
+                            window.open(item?.value, "_blank");
+                          }}
+                        />
+                      </Tooltip>
                       <Flex direction="column" gap={8}>
                         <TextInput
                           size="sm"
@@ -723,7 +737,7 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
               const mergedSelectedAdIds = compact(
                 concat(selectedImages, selectedVideos)
               );
-              if (isEmpty(mergedSelectedAdIds)) {
+              if (isEmpty(mergedSelectedAdIds) && !visiblePreview) {
                 showNotification(
                   "Thất bại",
                   "Vui lòng chọn ít nhất 1 hình hoặc 1 video",
@@ -738,7 +752,7 @@ const RunFlows = ({ selectedPayload, closeModal, setTrigger }) => {
               setVisiblePreview(!visiblePreview);
             }}
           >
-            {visiblePreview ? "Ẩn Preview" : "Preview"}
+            {visiblePreview ? "Hide" : "Rename Camp"}
           </Button>
         </Flex>
       </Grid.Col>

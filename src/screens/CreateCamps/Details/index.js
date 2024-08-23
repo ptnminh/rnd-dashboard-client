@@ -32,13 +32,14 @@ import {
 } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
-import { CREATE_CAMP_FLOWS } from "../../../constant";
+import { CREATE_CAMP_FLOWS, LOCAL_STORAGE_KEY } from "../../../constant";
 import moment from "moment-timezone";
 import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 import { useDisclosure } from "@mantine/hooks";
 import RunFlows from "../RunFlows";
+import { useLocalStorage } from "../../../hooks/useLocalStorage";
 
 const BriefsTable = ({
   briefs,
@@ -56,7 +57,13 @@ const BriefsTable = ({
   sampleCampaigns,
   openModalPreview,
   setSelectedCreateCampPayload,
+  metadata,
 }) => {
+  let [permissions] = useLocalStorage({
+    key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    defaultValue: [],
+  });
+  permissions = map(permissions, "name");
   const [validationErrors, setValidationErrors] = useState({});
   const [selectedCreateCustomCamp, setSelectedCreateCustomCamp] = useState({});
   const [data, setData] = useState(briefs || []);
@@ -65,7 +72,7 @@ const BriefsTable = ({
   }, [briefs]);
 
   const handleUpdatePriority = async ({ uid, priority }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefMKT({
       uid,
       data: {
         priority: priority === 1 ? 2 : 1,
@@ -620,7 +627,7 @@ const BriefsTable = ({
     onCreatingRowCancel: () => setValidationErrors({}),
     onEditingRowCancel: () => setValidationErrors({}),
     enableDensityToggle: false,
-    renderTopToolbar: ({ table }) => {
+    renderTopToolbar: () => {
       return (
         <div
           style={{
@@ -742,7 +749,12 @@ const BriefsTable = ({
     mantineTableBodyCellProps: ({ row, cell }) => ({
       className: classes["body-cells"],
       onClick: () => {
-        if (cell && cell.column.id === "priority") {
+        if (
+          cell &&
+          cell.column.id === "priority" &&
+          (includes(permissions, "update:mkt") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdatePriority({
             uid: row.original.uid,
             priority: row.original.priority,

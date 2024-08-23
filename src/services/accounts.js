@@ -1,12 +1,11 @@
 import { filter, isEmpty, keys } from "lodash";
-import { hostAPI } from "../constant";
-import axios from "axios";
+import apiClient from "./axiosClient";
 import { showNotification } from "../utils/index";
 
 export const accountServices = {
   fetchAllAccounts: async ({ query, page, limit }) => {
     try {
-      let url = `${hostAPI}/accounts?page=${page}&pageSize=${limit}`;
+      let url = `/accounts?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       if (!isEmpty(transformedQuery)) {
@@ -17,7 +16,7 @@ export const accountServices = {
         )}`;
         url = `${url}&${queryString}`;
       }
-      const response = await axios.get(url);
+      const response = await apiClient.get(url);
       const { data: result } = response;
       if (result?.success === false) {
         return false;
@@ -31,14 +30,30 @@ export const accountServices = {
   updateAccount: async (data) => {
     try {
       const { id, ...payload } = data;
-      const response = await axios.put(`${hostAPI}/accounts/${id}`, payload);
+      const response = await apiClient.put(`/accounts/${id}`, payload);
       const { data: result } = response;
       if (result?.success === false) {
-        showNotification("Lỗi", "Cập nhật thất bại", "red");
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification("Lỗi", "Cập nhật thất bại", "red");
+        }
         return false;
       }
       return result;
     } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      }
       console.log("Error at updateAccount:", error);
       return false;
     }

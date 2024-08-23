@@ -12,7 +12,7 @@ import {
 import { modals } from "@mantine/modals";
 import Checkbox from "../../../components/Checkbox";
 
-import { filter, find, includes, isEmpty, keys, map, sumBy } from "lodash";
+import { filter, find, includes, isEmpty, keys, map } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
@@ -22,7 +22,7 @@ import {
   IconDeviceFloppy,
   IconBan,
 } from "@tabler/icons-react";
-import { BRIEF_TYPES, CHOOSE_BRIEF_TYPES } from "../../../constant";
+import { CHOOSE_BRIEF_TYPES, LOCAL_STORAGE_KEY } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -30,10 +30,10 @@ import {
 } from "../../../utils";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
+import { useLocalStorage } from "../../../hooks";
 
 const BriefsTable = ({
-  productLines,
-  name,
+  briefs,
   query,
   setQuery,
   setSelectedSKU,
@@ -44,21 +44,24 @@ const BriefsTable = ({
   updateBrief,
   editingCell,
   loadingFetchBrief,
-  setLoadingFetchBrief,
   setTrigger,
   setLinkProduct,
   sorting,
   setSorting,
+  metadata,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
-  const [data, setData] = useState(productLines || []);
-  const [templateName, setTemplateName] = useState(name);
+  let [permissions] = useLocalStorage({
+    key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    defaultValue: [],
+  });
+  permissions = map(permissions, "name");
+  const [data, setData] = useState(briefs || []);
   useEffect(() => {
-    setData(productLines);
-    setTemplateName(name);
-  }, [productLines, templateName]);
+    setData(briefs);
+  }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefListing({
       uid,
       data: {
         status: status === 2 ? 3 : 2,
@@ -67,7 +70,7 @@ const BriefsTable = ({
     setTrigger(true);
   };
   const handleUpdatePriority = async ({ uid, priority }) => {
-    await rndServices.updateBrief({
+    await rndServices.updateBriefListing({
       uid,
       data: {
         priority: priority === 1 ? 2 : 1,
@@ -442,7 +445,7 @@ const BriefsTable = ({
     onCreatingRowCancel: () => setValidationErrors({}),
     onEditingRowCancel: () => setValidationErrors({}),
     enableDensityToggle: false,
-    renderTopToolbar: ({ table }) => {
+    renderTopToolbar: () => {
       return (
         <div
           style={{
@@ -545,7 +548,7 @@ const BriefsTable = ({
                   date: null,
                 });
               }}
-              onShortcutClick={(shortcut, event) => {
+              onShortcutClick={(shortcut) => {
                 setQuery({
                   ...query,
                   dateValue: shortcut.value,
@@ -619,7 +622,7 @@ const BriefsTable = ({
             />
             <Select
               placeholder="RND"
-              data={map(filter(users, { role: "rnd" }), "name") || []}
+              data={map(filter(users, { position: "rnd" }), "name") || []}
               styles={{
                 input: {
                   width: "100px",
@@ -644,7 +647,7 @@ const BriefsTable = ({
             />
             <Select
               placeholder="Designer"
-              data={map(filter(users, { role: "designer" }), "name") || []}
+              data={map(filter(users, { position: "designer" }), "name") || []}
               styles={{
                 input: {
                   width: "100px",
@@ -669,7 +672,7 @@ const BriefsTable = ({
             />
             <Select
               placeholder="EPM"
-              data={map(filter(users, { role: "epm" }), "name") || []}
+              data={map(filter(users, { position: "epm" }), "name") || []}
               styles={{
                 input: {
                   width: "100px",
@@ -759,7 +762,7 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Undone: {filter(data, { status: 2 }).length}
+              Undone: {metadata?.totalUndoneBriefsWithFilter}
             </div>
             <div
               style={{
@@ -767,7 +770,7 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: {filter(data, { status: 2 }).length}h
+              Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
             </div>
           </Flex>
           {editingCell && !isEmpty(updateBrief.linkDesigns) && (
@@ -790,16 +793,19 @@ const BriefsTable = ({
     },
     mantineTableBodyCellProps: ({ row, table, cell }) => ({
       className: classes["body-cells"],
-      onDoubleClick: (event) => {
-        console.log(`cell----`, cell);
-        console.info(row.original);
+      onDoubleClick: () => {
         if (cell && cell.column.id === "linkProduct") {
           setEditingCell(true);
           table.setEditingCell(cell);
         }
       },
-      onClick: (event) => {
-        if (cell && cell.column.id === "status") {
+      onClick: () => {
+        if (
+          cell &&
+          cell.column.id === "status" &&
+          (includes(permissions, "update:epm") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdateStatus({
             uid: row.original.uid,
             status: row.original.status,
@@ -808,11 +814,21 @@ const BriefsTable = ({
           });
           return;
         }
-        if (cell && cell.column.id === "remove") {
+        if (
+          cell &&
+          cell.column.id === "remove" &&
+          (includes(permissions, "delete:epm") ||
+            includes(permissions, "delete:brief"))
+        ) {
           openDeleteConfirmModal(row);
           return;
         }
-        if (cell && cell.column.id === "priority") {
+        if (
+          cell &&
+          cell.column.id === "priority" &&
+          (includes(permissions, "update:epm") ||
+            includes(permissions, "update:brief"))
+        ) {
           handleUpdatePriority({
             uid: row.original.uid,
             priority: row.original.priority,
@@ -823,7 +839,7 @@ const BriefsTable = ({
         }
       },
       // when leaving the cell, we want to reset the editing cell
-      onBlur: (event) => {
+      onBlur: () => {
         if (isEmpty(updateBrief.linkDesigns)) {
           setEditingCell(false);
         }
@@ -843,7 +859,7 @@ const BriefsTable = ({
             /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
 
           if (!urlPattern.test(updateBrief[uid].linkProduct)) {
-            showNotification("Thất bại", "Link Design không hợp lệ", "red");
+            showNotification("Thất bại", "Link Listing không hợp lệ", "red");
             setUpdateBrief({
               ...updateBrief,
               [uid]: {
@@ -855,14 +871,23 @@ const BriefsTable = ({
             return;
           }
           rndServices
-            .updateBrief({
+            .updateBriefListing({
               uid,
               data: updateBrief[uid],
             })
             .then((response) => {
-              console.log(response);
+              if (!response) {
+                setUpdateBrief({
+                  ...updateBrief,
+                  [uid]: {
+                    ...updateBrief[uid],
+                    linkProduct: "",
+                  },
+                });
+              } else {
+                setData(newData);
+              }
             });
-          setData(newData);
           table.setEditingCell(null);
         } else {
           table.setEditingCell(null);
