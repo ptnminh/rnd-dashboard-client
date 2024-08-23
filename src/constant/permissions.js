@@ -39,6 +39,10 @@ export const PERMISSIONS_RELATIONSHIP = [
     childPermissions: ["read:design"],
   },
   {
+    parentPermissions: ["update:design_setting"],
+    childPermissions: ["read:design_setting", "read:design"],
+  },
+  {
     parentPermissions: ["update:design_feedback"],
     childPermissions: ["read:design_feedback"],
   },
@@ -52,7 +56,7 @@ export const PERMISSIONS_RELATIONSHIP = [
   },
   {
     parentPermissions: ["update:video_setting"],
-    childPermissions: ["read:video_setting"],
+    childPermissions: ["read:video_setting", "read:video"],
   },
   {
     parentPermissions: ["update:epm"],
@@ -60,7 +64,7 @@ export const PERMISSIONS_RELATIONSHIP = [
   },
   {
     parentPermissions: ["update:epm_setting"],
-    childPermissions: ["read:epm_setting"],
+    childPermissions: ["read:epm_setting", "read:epm"],
   },
   {
     parentPermissions: ["create:mkt_post", "update:mkt_post"],
@@ -97,5 +101,17 @@ export const PERMISSIONS_RELATIONSHIP = [
   {
     parentPermissions: ["update:mkt_setting"],
     childPermissions: ["read:mkt_setting", "read:mkt"],
+  },
+  {
+    parentPermissions: ["update:artist", "create:artist"],
+    childPermissions: ["read:artist", "read:brief"],
+  },
+  {
+    parentPermissions: ["update:artist_setting"],
+    childPermissions: ["read:artist", "read:artist_setting"],
+  },
+  {
+    parentPermissions: ["update:user", "create:user"],
+    childPermissions: ["read:user"],
   },
 ];
