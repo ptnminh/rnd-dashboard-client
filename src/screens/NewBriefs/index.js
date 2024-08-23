@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./NewCampaigns.module.sass";
-import CampaignInfo from "./CampaignInfo";
+import RndInfo from "./RndInfo";
 import cn from "classnames";
 import Card from "../../components/Card";
 import { BRIEF_TYPES, KEEP_CLIPARTS, LAYOUT_TYPES } from "../../constant";
@@ -40,7 +40,6 @@ import {
   map,
   merge,
   orderBy,
-  random,
   sortBy,
   toLower,
   uniq,
@@ -996,7 +995,7 @@ const NewCampaigns = () => {
         />
         <div className={styles.row}>
           <div className={styles.col}>
-            <CampaignInfo
+            <RndInfo
               className={styles.card}
               workGroup={workGroup}
               setWorkGroup={setWorkGroup}

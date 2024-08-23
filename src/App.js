@@ -2,7 +2,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { Routes, Route } from "react-router-dom";
 import "./styles/app.sass";
 import Page from "./components/Page";
-import NewCampaigns from "./screens/NewProduct";
+import NewBriefs from "./screens/NewBriefs";
 import DesignerScreens from "./screens/Designer";
 import EPMScreens from "./screens/EPM";
 import { ProductLine } from "./screens/ProductLine";
@@ -21,6 +21,8 @@ import ForbiddenPage from "./components/ForbiddenPage";
 import Setting from "./screens/Setting";
 import UserScreen from "./screens/Users";
 import EmailVerify from "./components/VerifyEmail";
+import ArtistScreen from "./screens/Artist";
+import ArtistTask from "./screens/ArtistTask";
 
 function App() {
   return (
@@ -29,7 +31,7 @@ function App() {
         path="/"
         element={
           <Page title="Board">
-            <NewCampaigns />
+            <NewBriefs />
           </Page>
         }
       />
@@ -37,7 +39,7 @@ function App() {
         path="/rnd/brief"
         element={
           <Page title="Board">
-            <NewCampaigns />
+            <NewBriefs />
           </Page>
         }
       />
@@ -54,6 +56,22 @@ function App() {
         element={
           <Page title="Campaigns">
             <DesignerScreens />
+          </Page>
+        }
+      />
+      <Route
+        path="/artist"
+        element={
+          <Page title="Artist">
+            <ArtistTask />
+          </Page>
+        }
+      />
+      <Route
+        path="/rnd/artist"
+        element={
+          <Page title="Artist">
+            <ArtistScreen />
           </Page>
         }
       />
@@ -174,6 +192,14 @@ function App() {
         element={
           <Page title="MKT">
             <Setting name="mkt" />
+          </Page>
+        }
+      />
+      <Route
+        path="/artist/setting"
+        element={
+          <Page title="MKT">
+            <Setting name="art" />
           </Page>
         }
       />

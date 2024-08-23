@@ -4,7 +4,6 @@ import cn from "classnames";
 import Card from "../../components/Card";
 import Table from "./Details";
 import { map } from "lodash";
-
 import { useDisclosure } from "@mantine/hooks";
 import { IconCircleCheck } from "@tabler/icons-react";
 import {

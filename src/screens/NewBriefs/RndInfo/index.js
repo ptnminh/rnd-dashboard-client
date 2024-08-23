@@ -1,19 +1,11 @@
 import React, { useCallback, useEffect } from "react";
 import cn from "classnames";
-import styles from "./CampaignInfo.module.sass";
+import styles from "./RndInfo.module.sass";
 import Card from "../../../components/Card";
 import Dropdown from "../../../components/Dropdown";
-import { debounce, filter, isEmpty, map, uniq, values } from "lodash";
-import {
-  Grid,
-  Image,
-  List,
-  ThemeIcon,
-  rem,
-  Skeleton,
-  Button,
-} from "@mantine/core";
-import { IconCircleCheck, IconRotateClockwise } from "@tabler/icons-react";
+import { debounce, filter, isEmpty, map, uniq } from "lodash";
+import { Grid, Image, List, ThemeIcon, rem, Skeleton } from "@mantine/core";
+import { IconCircleCheck } from "@tabler/icons-react";
 import {
   BD_TEAMS,
   BRIEF_TYPES,
@@ -24,7 +16,7 @@ import {
 import { Autocomplete } from "@mantine/core";
 import Icon from "../../../components/Icon";
 
-const CampaignInfo = ({
+const RndInfo = ({
   className,
   workGroup,
   setWorkGroup,
@@ -47,10 +39,8 @@ const CampaignInfo = ({
   rndSize,
   setRndSize,
   users,
-  teams,
   epmMember,
   setEpmMember,
-  handleSyncUser,
   fetchAllProducts,
 }) => {
   useEffect(() => {
@@ -324,4 +314,4 @@ const CampaignInfo = ({
   );
 };
 
-export default CampaignInfo;
+export default RndInfo;

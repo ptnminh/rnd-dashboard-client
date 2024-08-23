@@ -34,13 +34,19 @@ import styles from "./User.module.sass";
 import Card from "../../components/Card";
 import moment from "moment-timezone";
 import { Controller, useForm } from "react-hook-form";
-import { BD_TEAMS, LOCAL_STORAGE_KEY, MEMBER_POSITIONS } from "../../constant";
+import {
+  BD_TEAMS,
+  LOCAL_STORAGE_KEY,
+  MEMBER_POSITIONS,
+  PERMISSIONS_RELATIONSHIP,
+} from "../../constant";
 import { userServices } from "../../services/users";
 import { showNotification } from "../../utils/index";
 import {
   compact,
   filter,
   find,
+  flatMap,
   keys,
   map,
   omit,
@@ -154,9 +160,26 @@ const AssignPermissions = ({ closeModal, user, setTriggerFetchUsers }) => {
           maxDropdownHeight={300}
           value={map(selectedPermissions, "name")}
           onChange={(selectedNames) => {
+            // add more permissions if has relationship
+            const additionalPermissions = uniq(
+              flatMap(
+                map(selectedNames, (name) => {
+                  const childPermissions = compact(
+                    map(PERMISSIONS_RELATIONSHIP, (perm) => {
+                      const { parentPermissions, childPermissions } = perm;
+                      if (parentPermissions.includes(name)) {
+                        return childPermissions;
+                      }
+                      return null;
+                    })
+                  );
+                  return [name, ...flatMap(childPermissions)];
+                })
+              )
+            );
             setSelectedPermissions(
               currentUserPermissions?.filter((perm) =>
-                selectedNames.includes(perm.name)
+                additionalPermissions.includes(perm.name)
               )
             );
           }}
@@ -560,9 +583,27 @@ const CreateUser = ({
                 clearable
                 searchable
                 onChange={(selectedNames) => {
+                  // add more permissions if has relationship
+                  const additionalPermissions = uniq(
+                    flatMap(
+                      map(selectedNames, (name) => {
+                        const childPermissions = compact(
+                          map(PERMISSIONS_RELATIONSHIP, (perm) => {
+                            const { parentPermissions, childPermissions } =
+                              perm;
+                            if (parentPermissions.includes(name)) {
+                              return childPermissions;
+                            }
+                            return null;
+                          })
+                        );
+                        return [name, ...flatMap(childPermissions)];
+                      })
+                    )
+                  );
                   // Map selected descriptions back to full objects
                   const selectedPermissions = permissions.filter((perm) =>
-                    selectedNames.includes(perm.name)
+                    additionalPermissions.includes(perm.name)
                   );
                   field.onChange(selectedPermissions); // Set the selected permissions as full objects
                 }}

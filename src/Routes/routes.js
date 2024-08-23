@@ -3,6 +3,10 @@ const PATH_NAMES = {
     title: "RnD - Tạo Brief",
     url: "/",
   },
+  RND_BRIEFS_ARTIST: {
+    title: "Vẽ Clipart",
+    url: "/rnd/artist",
+  },
   RND_PRODUCT_LINE: {
     title: "List - Product Line",
     url: "/rnd/product-line",
@@ -38,6 +42,14 @@ const PATH_NAMES = {
   MKT: {
     title: "MKT - Task",
     url: "/mkt",
+  },
+  ARTIST: {
+    title: "Artist - Task",
+    url: "/artist",
+  },
+  ARTIST_SETTING: {
+    title: "Artist - Setting",
+    url: "/artist/setting",
   },
   MKT_SETTING: {
     title: "4. Setting",
@@ -105,7 +117,12 @@ export const NAVIGATION = [
       {
         title: PATH_NAMES.RND_PRODUCT_LINE.title,
         url: PATH_NAMES.RND_PRODUCT_LINE.url,
-        permissions: ["read:product_line"],
+        permissions: ["read:collection", "read:layout"],
+      },
+      {
+        title: PATH_NAMES.RND_BRIEFS_ARTIST.title,
+        url: PATH_NAMES.RND_BRIEFS_ARTIST.url,
+        permissions: ["read:artist"],
       },
     ],
   },
@@ -130,20 +147,35 @@ export const NAVIGATION = [
     ],
   },
   {
-    title: PATH_NAMES.VIDEO.title,
+    title: PATH_NAMES.ARTIST.title,
     arrowDown: true,
-    permissions: ["read:video"],
+    permissions: ["read:artist"],
     icon: "diamond",
-    slug: PATH_NAMES.VIDEO.url,
-    pathname: PATH_NAMES.VIDEO.url,
+    slug: PATH_NAMES.ARTIST.url,
+    pathname: PATH_NAMES.ARTIST.url,
     dropdown: [
       {
-        title: PATH_NAMES.VIDEO_SETTING.title,
-        url: PATH_NAMES.VIDEO_SETTING.url,
-        permissions: ["read:video_setting"],
+        title: PATH_NAMES.ARTIST_SETTING.title,
+        url: PATH_NAMES.ARTIST_SETTING.url,
+        permissions: ["read:artist_setting"],
       },
     ],
   },
+  // {
+  //   title: PATH_NAMES.VIDEO.title,
+  //   arrowDown: true,
+  //   permissions: ["read:video"],
+  //   icon: "diamond",
+  //   slug: PATH_NAMES.VIDEO.url,
+  //   pathname: PATH_NAMES.VIDEO.url,
+  //   dropdown: [
+  //     {
+  //       title: PATH_NAMES.VIDEO_SETTING.title,
+  //       url: PATH_NAMES.VIDEO_SETTING.url,
+  //       permissions: ["read:video_setting"],
+  //     },
+  //   ],
+  // },
   {
     title: PATH_NAMES.EPM.title,
     arrowDown: true,

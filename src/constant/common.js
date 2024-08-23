@@ -11,6 +11,7 @@ export const MEMBER_POSITIONS = {
   EPM: "epm",
   VIDEO: "video",
   RND: "rnd",
+  ARTIST: "artist",
   OTHER: "other",
 };
 
