@@ -73,7 +73,7 @@ export const productlineService = {
     }) => {
         try {
             const response = await apiClient.put(
-                `/new-product-line-briefs/${uid}`,
+                `/new-product-line-briefs/${uid}/new-product-line`,
                 data
             );
             const { data: result } = response;

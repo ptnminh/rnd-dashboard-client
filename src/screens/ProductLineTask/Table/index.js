@@ -221,11 +221,11 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
+              value={foundBrief?.productLink || ""}
               onChange={(e) => {
                 const payload = {
                   ...foundBrief,
-                  clipartLinkRef: e.target.value,
+                  productLink: e.target.value,
                 };
                 setPayloads((prev) => {
                   return map(prev, (x) => {
@@ -238,17 +238,21 @@ const BriefsTable = ({
               }}
               onBlur={(e) => {
                 const value = e.target.value;
+                let data = {}
                 if (value === "") {
-                  return;
+                  data = {
+                    ...foundBrief,
+                    productLink: "",
+                  };
+                } else {
+                  if (!urlPattern.test(value)) {
+                    showNotification("Thất bại", "Link không hợp lệ", "red");
+                    return;
+                  }
+                  data = {
+                    productLink: value,
+                  };
                 }
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
                 handleUpdateBrief({ uid, data });
               }}
               onPaste={(e) => {
@@ -258,8 +262,7 @@ const BriefsTable = ({
                   return;
                 }
                 const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
+                  productLink: value,
                 };
                 handleUpdateBrief({ uid, data });
               }}
@@ -280,11 +283,11 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
+              value={foundBrief?.templateLink || ""}
               onChange={(e) => {
                 const payload = {
                   ...foundBrief,
-                  clipartLinkRef: e.target.value,
+                  templateLink: e.target.value,
                 };
                 setPayloads((prev) => {
                   return map(prev, (x) => {
@@ -297,17 +300,21 @@ const BriefsTable = ({
               }}
               onBlur={(e) => {
                 const value = e.target.value;
+                let data = {}
                 if (value === "") {
-                  return;
+                  data = {
+                    ...foundBrief,
+                    templateLink: "",
+                  };
+                } else {
+                  if (!urlPattern.test(value)) {
+                    showNotification("Thất bại", "Link không hợp lệ", "red");
+                    return;
+                  }
+                  data = {
+                    templateLink: value,
+                  };
                 }
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
                 handleUpdateBrief({ uid, data });
               }}
               onPaste={(e) => {
@@ -317,8 +324,7 @@ const BriefsTable = ({
                   return;
                 }
                 const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
+                  templateLink: value,
                 };
                 handleUpdateBrief({ uid, data });
               }}
@@ -343,13 +349,13 @@ const BriefsTable = ({
                 color="green"
                 size="sx"
                 loading={loadingUpdateBriefUID === uid}
-                disabled={foundBrief?.status === 2}
+                disabled={foundBrief?.status === 2 || foundBrief?.templateLink === "" || foundBrief?.productLink === ""}
                 onClick={() => {
                   if (
                     !foundBrief?.size?.artist &&
                     !foundBrief?.artist?.name &&
                     !foundBrief?.name &&
-                    !foundBrief?.clipartLinkRef
+                    !foundBrief?.productLink
                   ) {
                     showNotification(
                       "Thất bại",
@@ -359,10 +365,9 @@ const BriefsTable = ({
                     return;
                   }
                   const data = {
-                    ...foundBrief,
                     status: 2,
                   };
-                  handleUpdateBrief({ uid, data });
+                  handleUpdateBrief({ uid, data, isTrigger: true });
                 }}
               >
                 Done
@@ -373,7 +378,7 @@ const BriefsTable = ({
       },
       {
         id: "time",
-        accessorFn: (row) => row?.clipartInfo?.time,
+        accessorFn: (row) => row?.newProductLineInfo?.time,
         header: "TIME",
         mantineTableHeadCellProps: { className: classes["head-cells"] },
         enableEditing: false,
