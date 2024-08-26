@@ -21,7 +21,7 @@ import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
 } from "../../../utils";
-import { artistServices, productlineService } from "../../../services";
+import { productlineService } from "../../../services";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
 import { showNotification } from "../../../utils/index";
 
@@ -545,7 +545,8 @@ const BriefsTable = ({
                   rndTeam: null,
                   rndId: null,
                   epm: null,
-                  status: [4],
+                  status: [3, 4],
+                  isPhotography: true,
                   sizeValue: null,
                   rndName: null,
                   statusValue: null,

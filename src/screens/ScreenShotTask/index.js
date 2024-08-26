@@ -28,7 +28,8 @@ const ScreenshotTask = () => {
     totalPages: 1,
   });
   const [query, setQuery] = useState({
-    status: [4],
+    status: [3, 4],
+    isPhotography: true,
     statusValue: "Undone",
     photographyStatus: -1
   });
