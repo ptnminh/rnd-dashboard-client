@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import styles from "./Artist.module.sass";
+import styles from "./Task.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Table from "./Table";
@@ -13,7 +13,7 @@ import ArtistRef from "../Artist/ArtistRef";
 import Editor from "../../components/Editor";
 import { CONVERT_NUMBER_TO_STATUS, getStringAsEditorState } from "../../utils";
 
-const ArtistTask = () => {
+const MockupTask = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -34,15 +34,8 @@ const ArtistTask = () => {
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedBrief, setSelectedBrief] = useState();
-  const [updateBrief, setUpdateBrief] = useState({});
-  const [editingCell, setEditingCell] = useState(false);
   const [metadata, setMetadata] = useState({});
-  const [selectedCreateCampPayload, setSelectedCreateCampPayload] = useState(
-    {}
-  );
   const [trigger, setTrigger] = useState(false);
-  const [querySampleCampaigns, setQuerySampleCampaigns] = useState({});
-  const [linkProduct, setLinkProduct] = useState("");
   const [
     openedModalPreview,
     { open: openModalPreview, close: closeModalPreview },
@@ -70,11 +63,6 @@ const ArtistTask = () => {
             date: moment(x.createdAt)
               .tz("Asia/Ho_Chi_Minh")
               .format("DD/MM/YYYY"),
-            time: Math.floor(
-              moment()
-                .tz("Asia/Ho_Chi_Minh")
-                .diff(moment(x.createdAt), "hours", true)
-            ),
           };
         })
       );
@@ -116,34 +104,24 @@ const ArtistTask = () => {
     <>
       <Card
         className={styles.card}
-        title="Artist Task"
+        title="Mockup - Task"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
       >
         <Table
           className={styles.Table}
-          onClose={() => setVisible(false)}
           briefs={briefs}
           query={query}
           setQuery={setQuery}
           setSelectedBrief={setSelectedBrief}
           openModal={open}
           users={users}
-          setUpdateBrief={setUpdateBrief}
-          updateBrief={updateBrief}
-          setEditingCell={setEditingCell}
-          editingCell={editingCell}
           loadingFetchBrief={loadingFetchBrief}
           setLoadingFetchBrief={setLoadingFetchBrief}
           setTrigger={setTrigger}
-          setLinkProduct={setLinkProduct}
           setSorting={setSorting}
           sorting={sorting}
-          querySampleCampaigns={querySampleCampaigns}
-          setQuerySampleCampaigns={setQuerySampleCampaigns}
           openModalPreview={openModalPreview}
-          setSelectedCreateCampPayload={setSelectedCreateCampPayload}
-          selectedCreateCampPayload={selectedCreateCampPayload}
           metadata={metadata}
         />
       </Card>
@@ -229,4 +207,4 @@ const ArtistTask = () => {
   );
 };
 
-export default ArtistTask;
+export default MockupTask;

@@ -1,0 +1,127 @@
+@import ../../../styles/helpers
+
+.description
+    // display: flex
+    // flex-wrap: wrap
+    // align-items: center
+    // justify-content: space-between
+    & > .field
+        &:not(:last-child)
+            margin-bottom: 32px
+            +d
+                margin-bottom: 24px
+    .dropdown
+        margin-bottom: 24px
+    .dropdownHead
+        padding: 0 80px 0 12px
+
+.editor
+    width: 100%
+    &:not(:last-child)
+        margin-bottom: 32px
+        +d
+            margin-bottom: 24px
+
+.group
+    display: flex
+    flex-wrap: wrap
+    align-items: flex-end
+    flex-direction: column
+    align-items: flex-start
+    margin: 0 -6px -12px
+    +m
+        display: block
+        margin: 0
+    .field
+        flex: 0 0 calc(50% - 12px)
+        width: calc(50% - 12px)
+        margin: 0 6px 12px
+        +m
+            width: 100%
+            margin: 12px 0 0
+    .textarea
+        flex: 0 0 100%
+        width: 100%
+        margin: 0 6px 0px
+        +m
+            margin-top: 12px
+
+.actions
+    display: flex
+    justify-content: flex-end
+    margin-top: 16px
+    gap: 10px
+    +d
+        margin-top: 24px
+.createButton
+    &:hover
+        background-color: #ffffff
+
+.defaultValue
+    margin-top: 32px
+    padding: 0
+
+.list
+    display: flex
+    flex-wrap: wrap
+    width: 100%
+    margin: -4px -16px 32px 0
+    +d
+        margin-bottom: 24px
+.checkbox
+    flex: 0 0 calc(33.33% - 16px)
+    width: 100%
+    margin: 16px 16px 0 0
+    +m
+        flex: 0 0 calc(50% - 16px)
+        width: calc(50% - 16px)
+
+.checkboxChannel
+    flex: 0 0 calc(33.33% - 16px)
+    width: 100%
+    margin: 0 16px 0 0
+    +m
+        flex: 0 0 calc(50% - 16px)
+        width: calc(50% - 16px)
+
+.maximumCamp
+    width: 100%
+    margin-top: 16px
+
+.clearButton
+    width: 100px
+.createButton
+    width: 100px
+
+
+
+.classCardHead
+    margin-bottom: 16px
+
+.storeDropdown
+    width: 200px
+
+.multiSelect 
+    width: 300px
+    
+.loader
+    margin-right: 16px
+
+.classSpanTitle
+    background-color: #FAC399
+    padding: 4px
+    border-radius: 5px
+
+.campType
+    display: flex
+    flex-wrap: wrap
+    gap: 10px
+
+.groupDropdown
+    flex: 0 0 40%
+.memberDropdown
+    flex: 1 1 25%
+.classSpanBriefTitle
+    background-color: #91DE9E
+    padding: 4px
+    border-radius: 5px

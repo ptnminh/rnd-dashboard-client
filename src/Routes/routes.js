@@ -7,6 +7,26 @@ const PATH_NAMES = {
     title: "Vẽ Clipart",
     url: "/rnd/artist",
   },
+  RND_BRIEF_PRODUCT_LINE: {
+    title: "New PL",
+    url: "/rnd/brief-pl",
+  },
+  PRODUCT_LINE_TASK: {
+    title: "New PL - Mockup",
+    url: "/pl",
+  },
+  PRODUCT_LINE_READY_TO_LAUNCH: {
+    title: "Ready to Launch",
+    url: "/pl/ready-to-launch",
+  },
+  PRODUCT_LINE_MOCKUP: {
+    title: "Mockup - Task",
+    url: "/pl/mockup",
+  },
+  PRODUCT_LINE_SCREENSHOT: {
+    title: "Chụp - Task",
+    url: "/pl/screenshot",
+  },
   RND_PRODUCT_LINE: {
     title: "List - Product Line",
     url: "/rnd/product-line",
@@ -119,11 +139,16 @@ export const NAVIGATION = [
         url: PATH_NAMES.RND_PRODUCT_LINE.url,
         permissions: ["read:collection", "read:layout"],
       },
-      // {
-      //   title: PATH_NAMES.RND_BRIEFS_ARTIST.title,
-      //   url: PATH_NAMES.RND_BRIEFS_ARTIST.url,
-      //   permissions: ["read:artist"],
-      // },
+      {
+        title: PATH_NAMES.RND_BRIEFS_ARTIST.title,
+        url: PATH_NAMES.RND_BRIEFS_ARTIST.url,
+        permissions: ["read:artist"],
+      },
+      {
+        title: PATH_NAMES.RND_BRIEF_PRODUCT_LINE.title,
+        url: PATH_NAMES.RND_BRIEF_PRODUCT_LINE.url,
+        permissions: ["read:product_line"],
+      }
     ],
   },
   {
@@ -146,21 +171,46 @@ export const NAVIGATION = [
       },
     ],
   },
-  // {
-  //   title: PATH_NAMES.ARTIST.title,
-  //   arrowDown: true,
-  //   permissions: ["read:artist"],
-  //   icon: "diamond",
-  //   slug: PATH_NAMES.ARTIST.url,
-  //   pathname: PATH_NAMES.ARTIST.url,
-  //   dropdown: [
-  //     {
-  //       title: PATH_NAMES.ARTIST_SETTING.title,
-  //       url: PATH_NAMES.ARTIST_SETTING.url,
-  //       permissions: ["read:artist_setting"],
-  //     },
-  //   ],
-  // },
+  {
+    title: PATH_NAMES.ARTIST.title,
+    arrowDown: true,
+    permissions: ["read:artist"],
+    icon: "diamond",
+    slug: PATH_NAMES.ARTIST.url,
+    pathname: PATH_NAMES.ARTIST.url,
+    dropdown: [
+      {
+        title: PATH_NAMES.ARTIST_SETTING.title,
+        url: PATH_NAMES.ARTIST_SETTING.url,
+        permissions: ["read:artist_setting"],
+      },
+    ],
+  },
+  {
+    title: PATH_NAMES.PRODUCT_LINE_TASK.title,
+    arrowDown: true,
+    permissions: ["read:product_line"],
+    icon: "diamond",
+    slug: PATH_NAMES.PRODUCT_LINE_TASK.url,
+    pathname: PATH_NAMES.PRODUCT_LINE_TASK.url,
+    dropdown: [
+      {
+        title: PATH_NAMES.PRODUCT_LINE_READY_TO_LAUNCH.title,
+        url: PATH_NAMES.PRODUCT_LINE_READY_TO_LAUNCH.url,
+        permissions: ["read:product_line"],
+      },
+      {
+        title: PATH_NAMES.PRODUCT_LINE_MOCKUP.title,
+        url: PATH_NAMES.PRODUCT_LINE_MOCKUP.url,
+        permissions: ["read:product_line"],
+      },
+      {
+        title: PATH_NAMES.PRODUCT_LINE_SCREENSHOT.title,
+        url: PATH_NAMES.PRODUCT_LINE_SCREENSHOT.url,
+        permissions: ["read:product_line"],
+      }
+    ],
+  },
   // {
   //   title: PATH_NAMES.VIDEO.title,
   //   arrowDown: true,
