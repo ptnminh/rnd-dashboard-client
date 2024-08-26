@@ -185,6 +185,7 @@ const BriefsTable = ({
         accessorKey: "priority",
         header: "PRIORITY",
         enableSorting: false,
+        enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         size: 100,
         Cell: ({ row }) => {
@@ -195,9 +196,6 @@ const BriefsTable = ({
               style={{
                 display: "flex",
                 justifyContent: "center",
-              }}
-              onClick={() => {
-                showNotification("Thất bại", "Chưa hỗ trợ", "yello");
               }}
             >
               <Checkbox value={foundBrief?.priority === 2} />
@@ -293,7 +291,7 @@ const BriefsTable = ({
                   });
                 })
                 const data = {
-                  mockupId: foundMockup?.uid,
+                  mockupId: foundMockup?.uid || "",
                 };
                 handleUpdateBrief({ uid, data });
               }}

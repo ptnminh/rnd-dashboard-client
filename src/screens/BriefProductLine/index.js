@@ -9,7 +9,7 @@ import { Modal, Grid, Flex, Button, TextInput } from "@mantine/core";
 import { showNotification } from "../../utils/index";
 
 import { filter, find, includes, map, orderBy, uniq } from "lodash";
-import { artistServices, productlineService, rndServices } from "../../services";
+import { productlineService, rndServices } from "../../services";
 import { CONVERT_STATUS_TO_NUMBER, getEditorStateAsString } from "../../utils";
 import ArtistRef from "./ImageRef";
 

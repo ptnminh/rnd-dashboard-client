@@ -5,10 +5,10 @@ import Card from "../../components/Card";
 import Table from "./Table";
 import { map } from "lodash";
 import { useDisclosure } from "@mantine/hooks";
-import { Flex, Grid, Modal, Pagination } from "@mantine/core";
+import { Flex, Grid, Modal, Pagination, TextInput } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
-import { artistServices, rndServices } from "../../services";
+import { productlineService, rndServices } from "../../services";
 import ArtistRef from "../Artist/ArtistRef";
 import Editor from "../../components/Editor";
 import { CONVERT_NUMBER_TO_STATUS, getStringAsEditorState } from "../../utils";
@@ -28,8 +28,9 @@ const ScreenshotTask = () => {
     totalPages: 1,
   });
   const [query, setQuery] = useState({
-    status: [1],
+    status: [4],
     statusValue: "Undone",
+    photographyStatus: -1
   });
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
@@ -45,11 +46,11 @@ const ScreenshotTask = () => {
 
   const fetchBriefs = async (page = 1) => {
     setLoadingFetchBrief(true);
-    const response = await artistServices.fetchArtistTask({
+    const response = await productlineService.fetchTask({
       search,
       page,
       limit: 30,
-      view: "art",
+      view: "new-product-line",
       sorting,
       query,
     });
@@ -195,6 +196,22 @@ const ScreenshotTask = () => {
             />
           </Grid.Col>
           <Grid.Col span={9}>
+            <TextInput
+              label="Tên sản phẩm"
+              placeholder="Nhập tên sản phẩm"
+              value={selectedBrief?.name}
+              style={{ marginBottom: "12px" }}
+              styles={{
+                label: {
+                  marginBottom: "12px",
+                  fontWeight: 600,
+                  lineHeight: 1.7,
+                  fontSize: "14px",
+                }
+              }}
+              readOnly
+              required
+            />
             <Editor
               state={getStringAsEditorState(selectedBrief?.note?.artist)}
               classEditorWrapper={styles.editor}

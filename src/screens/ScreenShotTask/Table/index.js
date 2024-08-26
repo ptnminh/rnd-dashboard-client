@@ -21,7 +21,7 @@ import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
 } from "../../../utils";
-import { artistServices } from "../../../services";
+import { artistServices, productlineService } from "../../../services";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
 import { showNotification } from "../../../utils/index";
 
@@ -55,13 +55,17 @@ const BriefsTable = ({
   }, [briefs]);
 
   const handleUpdateBrief = async ({ uid, data, isTrigger = false }) => {
-    setLoadingUpdateBriefUID(uid);
-    await artistServices.update({
+    if (isTrigger) {
+      setLoadingUpdateBriefUID(uid);
+    }
+    await productlineService.updateScreenshot({
       uid,
       data,
     });
-    if (isTrigger) setTrigger(true);
-    setLoadingUpdateBriefUID("");
+    if (isTrigger) {
+      setTrigger(true);
+      setLoadingUpdateBriefUID("");
+    }
   };
   const columns = useMemo(
     () => [
@@ -192,13 +196,6 @@ const BriefsTable = ({
                 display: "flex",
                 justifyContent: "center",
               }}
-              onClick={() => {
-                const data = {
-                  ...foundBrief,
-                  priority: foundBrief?.priority === 2 ? 1 : 2,
-                };
-                handleUpdateBrief({ uid, data, isTrigger: true });
-              }}
             >
               <Checkbox value={foundBrief?.priority === 2} />
             </div>
@@ -206,7 +203,7 @@ const BriefsTable = ({
         },
       },
       {
-        id: "linkTemplate",
+        id: "docLink",
         header: "Brief cho Chụp (lấy link Brief cho Mockup)",
         enableEditing: false,
         enableSorting: false,
@@ -218,54 +215,17 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
-              onChange={(e) => {
-                const payload = {
-                  ...foundBrief,
-                  clipartLinkRef: e.target.value,
-                };
-                setPayloads((prev) => {
-                  return map(prev, (x) => {
-                    if (x.uid === uid) {
-                      return payload;
-                    }
-                    return x;
-                  });
-                });
-              }}
-              onBlur={(e) => {
-                const value = e.target.value;
-                if (value === "") {
-                  return;
-                }
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
-              }}
-              onPaste={(e) => {
-                const value = e.clipboardData.getData("Text");
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
+              value={foundBrief?.docLink || ""}
+              readOnly
+              onClick={() => {
+                window.open(foundBrief?.docLink, "_blank");
               }}
             />
           );
         },
       },
       {
-        id: "linkScreenshot",
+        id: "photographyLink",
         header: "Hình chụp",
         enableEditing: false,
         enableSorting: false,
@@ -277,11 +237,11 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
+              value={foundBrief?.photographyLink || ""}
               onChange={(e) => {
                 const payload = {
                   ...foundBrief,
-                  clipartLinkRef: e.target.value,
+                  photographyLink: e.target.value,
                 };
                 setPayloads((prev) => {
                   return map(prev, (x) => {
@@ -294,17 +254,21 @@ const BriefsTable = ({
               }}
               onBlur={(e) => {
                 const value = e.target.value;
+                let data = {}
+
                 if (value === "") {
-                  return;
+                  data = {
+                    photographyLink: "",
+                  };
+                } else {
+                  if (!urlPattern.test(value)) {
+                    showNotification("Thất bại", "Link không hợp lệ", "red");
+                    return;
+                  }
+                  data = {
+                    photographyLink: value,
+                  };
                 }
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
                 handleUpdateBrief({ uid, data });
               }}
               onPaste={(e) => {
@@ -314,8 +278,7 @@ const BriefsTable = ({
                   return;
                 }
                 const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
+                  photographyLink: value,
                 };
                 handleUpdateBrief({ uid, data });
               }}
@@ -340,13 +303,10 @@ const BriefsTable = ({
                 color="green"
                 size="sx"
                 loading={loadingUpdateBriefUID === uid}
-                disabled={foundBrief?.status === 2}
+                disabled={foundBrief?.mockupPhotographyInfo?.status === 1 || foundBrief?.photographyLink === ""}
                 onClick={() => {
                   if (
-                    !foundBrief?.size?.artist &&
-                    !foundBrief?.artist?.name &&
-                    !foundBrief?.name &&
-                    !foundBrief?.clipartLinkRef
+                    foundBrief?.photographyLink === ""
                   ) {
                     showNotification(
                       "Thất bại",
@@ -356,10 +316,9 @@ const BriefsTable = ({
                     return;
                   }
                   const data = {
-                    ...foundBrief,
-                    status: 2,
+                    status: 1,
                   };
-                  handleUpdateBrief({ uid, data });
+                  handleUpdateBrief({ uid, data, isTrigger: true });
                 }}
               >
                 DONE
@@ -370,7 +329,7 @@ const BriefsTable = ({
       },
       {
         id: "time",
-        accessorFn: (row) => row?.clipartInfo?.time,
+        accessorFn: (row) => row?.newProductLineInfo?.time,
         header: "TIME",
         mantineTableHeadCellProps: { className: classes["head-cells"] },
         enableEditing: false,
@@ -471,6 +430,8 @@ const BriefsTable = ({
                   ...query,
                   dateValue: null,
                   date: null,
+                  startDate: null,
+                  endDate: null,
                 });
               }}
               onShortcutClick={(shortcut) => {
@@ -562,7 +523,7 @@ const BriefsTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  status: value === "Done" ? [2] : [1],
+                  photographyStatus: value === "Done" ? 1 : -1,
                   statusValue: value,
                 })
               }
@@ -570,7 +531,7 @@ const BriefsTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [1, 2],
+                  photographyStatus: null,
                   statusValue: null,
                 });
               }}
@@ -584,11 +545,14 @@ const BriefsTable = ({
                   rndTeam: null,
                   rndId: null,
                   epm: null,
-                  status: [1, 2],
+                  status: [4],
                   sizeValue: null,
                   rndName: null,
                   statusValue: null,
                   dateValue: null,
+                  startDate: null,
+                  endDate: null,
+                  photographyStatus: null,
                 });
                 setClipartName("");
               }}

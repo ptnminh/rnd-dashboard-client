@@ -569,7 +569,7 @@ const BriefsTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  status: value === "Done" ? [2] : [1],
+                  status: value === "Done" ? [2, 3, 4] : [1],
                   statusValue: value,
                 })
               }
@@ -577,7 +577,7 @@ const BriefsTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [1, 2],
+                  status: [1, 2, 3, 4],
                   statusValue: null,
                 });
               }}
@@ -591,7 +591,7 @@ const BriefsTable = ({
                   rndTeam: null,
                   rndId: null,
                   epm: null,
-                  status: [1, 2],
+                  status: [1, 2, 3, 4],
                   sizeValue: null,
                   rndName: null,
                   statusValue: null,
