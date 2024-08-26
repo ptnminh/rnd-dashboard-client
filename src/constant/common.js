@@ -12,6 +12,7 @@ export const MEMBER_POSITIONS = {
   VIDEO: "video",
   RND: "rnd",
   ARTIST: "artist",
+  MOCKUP: "mockup",
   OTHER: "other",
 };
 

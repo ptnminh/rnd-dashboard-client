@@ -150,5 +150,47 @@ export const productlineService = {
             }
             return false;
         }
+    },
+    updateMockup: async ({
+        uid,
+        data,
+    }) => {
+        try {
+            const response = await apiClient.put(
+                `/new-product-line-briefs/${uid}/mockup`,
+                data
+            );
+            const { data: result } = response;
+            if (result?.success === false) {
+                if (result?.code === 403) {
+                    showNotification(
+                        "Thất bại",
+                        "Bạn không có quyền thực hiện hành động này",
+                        "red"
+                    );
+                } else {
+                    showNotification(
+                        "Thất bại",
+                        result?.message || "Cập nhật Brief thất bại",
+                        "red"
+                    );
+                }
+                return false;
+            }
+            return result;
+        } catch (error) {
+            const code = error?.response?.data?.code;
+            if (code === 403) {
+                showNotification(
+                    "Thất bại",
+                    "Bạn không có quyền thực hiện hành động này",
+                    "red"
+                );
+            } else {
+                console.log("Error at fetchQuotes:", error);
+                showNotification("Thất bại", "Cập nhật Brief thất bại", "red");
+            }
+            return false;
+        }
     }
 }

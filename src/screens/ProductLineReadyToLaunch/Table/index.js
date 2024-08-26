@@ -182,34 +182,6 @@ const BriefsTable = ({
         },
       },
       {
-        accessorKey: "priority",
-        header: "PRIORITY",
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        size: 100,
-        Cell: ({ row }) => {
-          const uid = row.original.uid;
-          const foundBrief = find(payloads, { uid });
-          return (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-              onClick={() => {
-                const data = {
-                  ...foundBrief,
-                  priority: foundBrief?.priority === 2 ? 1 : 2,
-                };
-                handleUpdateBrief({ uid, data, isTrigger: true });
-              }}
-            >
-              <Checkbox value={foundBrief?.priority === 2} />
-            </div>
-          );
-        },
-      },
-      {
         id: "linkProduct",
         header: "Link Product (Library)",
         enableEditing: false,

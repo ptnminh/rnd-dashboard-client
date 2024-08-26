@@ -15,13 +15,13 @@ import { filter, find, map } from "lodash";
 import { IconSearch, IconFilterOff, IconLink } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
-import { LOCAL_STORAGE_KEY } from "../../../constant";
+import { LOCAL_STORAGE_KEY, MEMBER_POSITIONS } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
 } from "../../../utils";
-import { artistServices } from "../../../services";
+import { productlineService } from "../../../services";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
 import { showNotification } from "../../../utils/index";
 
@@ -55,13 +55,17 @@ const BriefsTable = ({
   }, [briefs]);
 
   const handleUpdateBrief = async ({ uid, data, isTrigger = false }) => {
-    setLoadingUpdateBriefUID(uid);
-    await artistServices.update({
+    if (isTrigger) {
+      setLoadingUpdateBriefUID(uid);
+    }
+    await productlineService.updateMockup({
       uid,
       data,
     });
-    if (isTrigger) setTrigger(true);
-    setLoadingUpdateBriefUID("");
+    if (isTrigger) {
+      setLoadingUpdateBriefUID("");
+      setTrigger(true);
+    }
   };
   const columns = useMemo(
     () => [
@@ -92,7 +96,7 @@ const BriefsTable = ({
       },
       {
         accessorKey: "productName",
-        accessorFn: (row) => row?.rnd?.name,
+        accessorFn: (row) => row?.name,
         header: "Tên Product",
         size: 120,
         enableEditing: false,
@@ -193,11 +197,7 @@ const BriefsTable = ({
                 justifyContent: "center",
               }}
               onClick={() => {
-                const data = {
-                  ...foundBrief,
-                  priority: foundBrief?.priority === 2 ? 1 : 2,
-                };
-                handleUpdateBrief({ uid, data, isTrigger: true });
+                showNotification("Thất bại", "Chưa hỗ trợ", "yello");
               }}
             >
               <Checkbox value={foundBrief?.priority === 2} />
@@ -217,47 +217,15 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
-              onChange={(e) => {
-                const payload = {
-                  ...foundBrief,
-                  clipartLinkRef: e.target.value,
-                };
-                setPayloads((prev) => {
-                  return map(prev, (x) => {
-                    if (x.uid === uid) {
-                      return payload;
-                    }
-                    return x;
-                  });
-                });
+              styles={{
+                input: {
+                  cursor: "pointer",
+                }
               }}
-              onBlur={(e) => {
-                const value = e.target.value;
-                if (value === "") {
-                  return;
-                }
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
-              }}
-              onPaste={(e) => {
-                const value = e.clipboardData.getData("Text");
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
+              value={foundBrief?.templateLink || ""}
+              readOnly
+              onClick={() => {
+                window.open(foundBrief?.templateLink, "_blank");
               }}
             />
           );
@@ -275,47 +243,15 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
-              onChange={(e) => {
-                const payload = {
-                  ...foundBrief,
-                  clipartLinkRef: e.target.value,
-                };
-                setPayloads((prev) => {
-                  return map(prev, (x) => {
-                    if (x.uid === uid) {
-                      return payload;
-                    }
-                    return x;
-                  });
-                });
+              styles={{
+                input: {
+                  cursor: "pointer",
+                }
               }}
-              onBlur={(e) => {
-                const value = e.target.value;
-                if (value === "") {
-                  return;
-                }
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
-              }}
-              onPaste={(e) => {
-                const value = e.clipboardData.getData("Text");
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
+              value={foundBrief?.readyToLaunchInfo?.docLink || ""}
+              readOnly
+              onClick={() => {
+                window.open(foundBrief?.readyToLaunchInfo?.docLink, "_blank");
               }}
             />
           );
@@ -333,23 +269,23 @@ const BriefsTable = ({
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
           const artistNames = map(
-            filter(users, { position: "artist" }),
+            filter(users, { position: MEMBER_POSITIONS.MOCKUP }),
             "name"
           );
           return (
             <Select
               data={artistNames || []}
-              value={foundBrief?.artist?.name || null}
+              value={foundBrief?.mockup?.name || null}
               onChange={(name) => {
-                const foundArtist = find(users, { name });
+                const foundMockup = find(users, { name });
                 setPayloads((prev) => {
                   return map(prev, (x) => {
                     if (x.uid === uid) {
                       return {
                         ...x,
-                        artist: {
+                        mockup: {
                           name,
-                          uid: foundArtist?.uid,
+                          uid: foundMockup?.uid,
                         },
                       };
                     }
@@ -357,8 +293,7 @@ const BriefsTable = ({
                   });
                 })
                 const data = {
-                  ...foundBrief,
-                  artistId: foundArtist?.uid,
+                  mockupId: foundMockup?.uid,
                 };
                 handleUpdateBrief({ uid, data });
               }}
@@ -384,19 +319,18 @@ const BriefsTable = ({
               }}
               onClick={() => {
                 const data = {
-                  ...foundBrief,
-                  priority: foundBrief?.priority === 2 ? 1 : 2,
+                  isPhotography: foundBrief?.isPhotography === true ? false : true,
                 };
                 handleUpdateBrief({ uid, data, isTrigger: true });
               }}
             >
-              <Checkbox value={foundBrief?.priority === 2} />
+              <Checkbox value={foundBrief?.isPhotography === true} />
             </div>
           );
         },
       },
       {
-        id: "linkTemplate",
+        id: "photographyLink",
         header: "Hình chụp",
         enableEditing: false,
         enableSorting: false,
@@ -407,54 +341,22 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
-              onChange={(e) => {
-                const payload = {
-                  ...foundBrief,
-                  clipartLinkRef: e.target.value,
-                };
-                setPayloads((prev) => {
-                  return map(prev, (x) => {
-                    if (x.uid === uid) {
-                      return payload;
-                    }
-                    return x;
-                  });
-                });
+              styles={{
+                input: {
+                  cursor: "pointer",
+                }
               }}
-              onBlur={(e) => {
-                const value = e.target.value;
-                if (value === "") {
-                  return;
-                }
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
-              }}
-              onPaste={(e) => {
-                const value = e.clipboardData.getData("Text");
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
+              value={foundBrief?.photographyLink || ""}
+              readOnly
+              onClick={() => {
+                window.open(foundBrief?.photographyLink, "_blank");
               }}
             />
           );
         },
       },
       {
-        id: "linkTemplate",
+        id: "mockupLink",
         header: "Link Mockup (Library)",
         enableEditing: false,
         enableSorting: false,
@@ -466,11 +368,11 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
+              value={foundBrief?.mockupLink || ""}
               onChange={(e) => {
                 const payload = {
                   ...foundBrief,
-                  clipartLinkRef: e.target.value,
+                  mockupLink: e.target.value,
                 };
                 setPayloads((prev) => {
                   return map(prev, (x) => {
@@ -483,17 +385,20 @@ const BriefsTable = ({
               }}
               onBlur={(e) => {
                 const value = e.target.value;
+                let data = {}
                 if (value === "") {
-                  return;
+                  data = {
+                    mockupLink: "",
+                  };
+                } else {
+                  if (!urlPattern.test(value)) {
+                    showNotification("Thất bại", "Link không hợp lệ", "red");
+                    return;
+                  }
+                  data = {
+                    mockupLink: value,
+                  };
                 }
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
                 handleUpdateBrief({ uid, data });
               }}
               onPaste={(e) => {
@@ -503,8 +408,7 @@ const BriefsTable = ({
                   return;
                 }
                 const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
+                  mockupLink: value,
                 };
                 handleUpdateBrief({ uid, data });
               }}
@@ -529,13 +433,13 @@ const BriefsTable = ({
                 color="green"
                 size="sx"
                 loading={loadingUpdateBriefUID === uid}
-                disabled={foundBrief?.status === 2}
+                disabled={foundBrief?.status === 4 || foundBrief?.mockupLink === "" || (
+                  foundBrief?.isPhotography === true && foundBrief?.photographyLink === ""
+                )}
                 onClick={() => {
                   if (
-                    !foundBrief?.size?.artist &&
-                    !foundBrief?.artist?.name &&
-                    !foundBrief?.name &&
-                    !foundBrief?.clipartLinkRef
+                    foundBrief?.mockupLink === "" ||
+                    (foundBrief?.isPhotography === true && foundBrief?.photographyLink === "")
                   ) {
                     showNotification(
                       "Thất bại",
@@ -545,10 +449,9 @@ const BriefsTable = ({
                     return;
                   }
                   const data = {
-                    ...foundBrief,
-                    status: 2,
+                    status: 4,
                   };
-                  handleUpdateBrief({ uid, data });
+                  handleUpdateBrief({ uid, data, isTrigger: true });
                 }}
               >
                 DONE
@@ -559,7 +462,7 @@ const BriefsTable = ({
       },
       {
         id: "time",
-        accessorFn: (row) => row?.clipartInfo?.time,
+        accessorFn: (row) => row?.newProductLineInfo?.time,
         header: "TIME",
         mantineTableHeadCellProps: { className: classes["head-cells"] },
         enableEditing: false,
@@ -660,6 +563,8 @@ const BriefsTable = ({
                   ...query,
                   dateValue: null,
                   date: null,
+                  startDate: null,
+                  endDate: null,
                 });
               }}
               onShortcutClick={(shortcut) => {
@@ -740,6 +645,31 @@ const BriefsTable = ({
               }}
             />
             <Select
+              placeholder="Mockup"
+              data={map(filter(users, { position: MEMBER_POSITIONS.MOCKUP }), "name") || []}
+              styles={{
+                input: {
+                  width: "100px",
+                },
+              }}
+              value={query?.mockupName}
+              onChange={(value) =>
+                setQuery({
+                  ...query,
+                  mockupName: find(users, { name: value })?.name,
+                  mockupId: find(users, { name: value })?.uid,
+                })
+              }
+              clearable
+              onClear={() => {
+                setQuery({
+                  ...query,
+                  mockupName: null,
+                  mockupId: null,
+                });
+              }}
+            />
+            <Select
               placeholder="Status"
               data={["Done", "Undone"]}
               styles={{
@@ -751,7 +681,7 @@ const BriefsTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  status: value === "Done" ? [2] : [1],
+                  status: value === "Done" ? [4] : [3],
                   statusValue: value,
                 })
               }
@@ -759,7 +689,7 @@ const BriefsTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [1, 2],
+                  status: [3, 4],
                   statusValue: null,
                 });
               }}
@@ -773,11 +703,15 @@ const BriefsTable = ({
                   rndTeam: null,
                   rndId: null,
                   epm: null,
-                  status: [1, 2],
+                  status: [3, 4],
                   sizeValue: null,
                   rndName: null,
                   statusValue: null,
                   dateValue: null,
+                  startDate: null,
+                  endDate: null,
+                  mockupName: null,
+                  mockupId: null,
                 });
                 setClipartName("");
               }}
