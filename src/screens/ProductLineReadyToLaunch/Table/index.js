@@ -21,7 +21,7 @@ import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
 } from "../../../utils";
-import { artistServices } from "../../../services";
+import { productlineService } from "../../../services";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
 import { showNotification } from "../../../utils/index";
 
@@ -55,13 +55,17 @@ const BriefsTable = ({
   }, [briefs]);
 
   const handleUpdateBrief = async ({ uid, data, isTrigger = false }) => {
-    setLoadingUpdateBriefUID(uid);
-    await artistServices.update({
+    if (isTrigger) {
+      setLoadingUpdateBriefUID(uid);
+    }
+    await productlineService.updateReadyToLaunch({
       uid,
       data,
     });
-    if (isTrigger) setTrigger(true);
-    setLoadingUpdateBriefUID("");
+    if (isTrigger) {
+      setTrigger(true);
+      setLoadingUpdateBriefUID("");
+    }
   };
   const columns = useMemo(
     () => [
@@ -92,7 +96,7 @@ const BriefsTable = ({
       },
       {
         accessorKey: "productName",
-        accessorFn: (row) => row?.rnd?.name,
+        accessorFn: (row) => row?.name,
         header: "Tên Product",
         size: 120,
         enableEditing: false,
@@ -217,47 +221,16 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
-              onChange={(e) => {
-                const payload = {
-                  ...foundBrief,
-                  clipartLinkRef: e.target.value,
-                };
-                setPayloads((prev) => {
-                  return map(prev, (x) => {
-                    if (x.uid === uid) {
-                      return payload;
-                    }
-                    return x;
-                  });
-                });
+              value={foundBrief?.productLink || ""}
+              style={{
+                cursor: "pointer"
               }}
-              onBlur={(e) => {
-                const value = e.target.value;
-                if (value === "") {
+              readOnly
+              onClick={() => {
+                if (!foundBrief?.productLink) {
                   return;
                 }
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
-              }}
-              onPaste={(e) => {
-                const value = e.clipboardData.getData("Text");
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
+                window.open(foundBrief?.productLink, "_blank");
               }}
             />
           );
@@ -275,47 +248,16 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
-              onChange={(e) => {
-                const payload = {
-                  ...foundBrief,
-                  clipartLinkRef: e.target.value,
-                };
-                setPayloads((prev) => {
-                  return map(prev, (x) => {
-                    if (x.uid === uid) {
-                      return payload;
-                    }
-                    return x;
-                  });
-                });
+              value={foundBrief?.templateLink || ""}
+              style={{
+                cursor: "pointer"
               }}
-              onBlur={(e) => {
-                const value = e.target.value;
-                if (value === "") {
+              readOnly
+              onClick={() => {
+                if (!foundBrief?.templateLink) {
                   return;
                 }
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
-              }}
-              onPaste={(e) => {
-                const value = e.clipboardData.getData("Text");
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
-                handleUpdateBrief({ uid, data });
+                window.open(foundBrief?.templateLink, "_blank");
               }}
             />
           );
@@ -334,11 +276,14 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
+              value={foundBrief?.readyToLaunchInfo?.docLink || ""}
               onChange={(e) => {
                 const payload = {
                   ...foundBrief,
-                  clipartLinkRef: e.target.value,
+                  readyToLaunchInfo: {
+                    ...foundBrief?.readyToLaunchInfo,
+                    docLink: e.target.value,
+                  }
                 };
                 setPayloads((prev) => {
                   return map(prev, (x) => {
@@ -351,17 +296,20 @@ const BriefsTable = ({
               }}
               onBlur={(e) => {
                 const value = e.target.value;
+                let data = {}
                 if (value === "") {
-                  return;
+                  data = {
+                    docLink: "",
+                  };
+                } else {
+                  if (!urlPattern.test(value)) {
+                    showNotification("Thất bại", "Link không hợp lệ", "red");
+                    return
+                  }
+                  data = {
+                    docLink: value,
+                  };
                 }
-                if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link không hợp lệ", "red");
-                  return;
-                }
-                const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
-                };
                 handleUpdateBrief({ uid, data });
               }}
               onPaste={(e) => {
@@ -371,8 +319,7 @@ const BriefsTable = ({
                   return;
                 }
                 const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
+                  docLink: value,
                 };
                 handleUpdateBrief({ uid, data });
               }}
@@ -397,13 +344,10 @@ const BriefsTable = ({
                 color="green"
                 size="sx"
                 loading={loadingUpdateBriefUID === uid}
-                disabled={foundBrief?.status === 2}
+                disabled={foundBrief?.status === 3 || foundBrief?.readyToLaunchInfo?.docLink === ""}
                 onClick={() => {
                   if (
-                    !foundBrief?.size?.artist &&
-                    !foundBrief?.artist?.name &&
-                    !foundBrief?.name &&
-                    !foundBrief?.clipartLinkRef
+                    foundBrief?.readyToLaunchInfo?.docLink === ""
                   ) {
                     showNotification(
                       "Thất bại",
@@ -413,10 +357,9 @@ const BriefsTable = ({
                     return;
                   }
                   const data = {
-                    ...foundBrief,
-                    status: 2,
+                    status: 3,
                   };
-                  handleUpdateBrief({ uid, data });
+                  handleUpdateBrief({ uid, data, isTrigger: true });
                 }}
               >
                 Làm MOCKUP
@@ -427,7 +370,7 @@ const BriefsTable = ({
       },
       {
         id: "time",
-        accessorFn: (row) => row?.clipartInfo?.time,
+        accessorFn: (row) => row?.newProductLineInfo?.time,
         header: "TIME",
         mantineTableHeadCellProps: { className: classes["head-cells"] },
         enableEditing: false,
@@ -528,6 +471,8 @@ const BriefsTable = ({
                   ...query,
                   dateValue: null,
                   date: null,
+                  startDate: null,
+                  endDate: null,
                 });
               }}
               onShortcutClick={(shortcut) => {
@@ -619,7 +564,7 @@ const BriefsTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  status: value === "Done" ? [2] : [1],
+                  status: value === "Done" ? [3] : [2],
                   statusValue: value,
                 })
               }
@@ -627,7 +572,7 @@ const BriefsTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [1, 2],
+                  status: [2, 3],
                   statusValue: null,
                 });
               }}
@@ -641,11 +586,13 @@ const BriefsTable = ({
                   rndTeam: null,
                   rndId: null,
                   epm: null,
-                  status: [1, 2],
+                  status: [2, 3],
                   sizeValue: null,
                   rndName: null,
                   statusValue: null,
                   dateValue: null,
+                  startDate: null,
+                  endDate: null,
                 });
                 setClipartName("");
               }}

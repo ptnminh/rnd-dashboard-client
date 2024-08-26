@@ -352,10 +352,7 @@ const BriefsTable = ({
                 disabled={foundBrief?.status === 2 || foundBrief?.templateLink === "" || foundBrief?.productLink === ""}
                 onClick={() => {
                   if (
-                    !foundBrief?.size?.artist &&
-                    !foundBrief?.artist?.name &&
-                    !foundBrief?.name &&
-                    !foundBrief?.productLink
+                    foundBrief?.productLink === "" || foundBrief?.templateLink === ""
                   ) {
                     showNotification(
                       "Thất bại",
