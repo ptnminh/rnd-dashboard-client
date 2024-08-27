@@ -292,6 +292,13 @@ const RndInfo = ({
                       <List.Item>PL: {SKU.productLine}</List.Item>
                     )}
                   </List>
+                  <hr />
+                  {!SKU?.productLineFromLibrary && (
+                    <i>
+                      Lưu ý: Không tìm thấy PL trên Library{" "}
+                      {SKU.productLine ? `của ${SKU.productLine}` : ""}
+                    </i>
+                  )}
                 </Grid.Col>
               </Grid>
             )}

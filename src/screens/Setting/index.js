@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
+import { useLocation } from "react-router-dom";
 import {
   Button,
   Flex,
@@ -397,10 +398,10 @@ const MarketingSetting = ({ name }) => {
       },
     }),
   });
-
+  const location = useLocation();
   useEffect(() => {
     fetchSettings();
-  }, []);
+  }, [location.pathname]);
 
   return (
     <Card
