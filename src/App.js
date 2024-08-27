@@ -284,7 +284,7 @@ function App() {
         }
       />
       <Route
-        path="/pl/mockup/setting"
+        path="/pl/setting/mockup"
         element={
           <Page title="MKT">
             <Setting name="mockup" />

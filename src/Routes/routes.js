@@ -33,7 +33,7 @@ const PATH_NAMES = {
   },
   MOCKUP_SETTING: {
     title: "Mockup - Setting",
-    url: "/pl/mockup/setting",
+    url: "/pl/setting/mockup",
   },
   RND_PRODUCT_LINE: {
     title: "List - Product Line",
