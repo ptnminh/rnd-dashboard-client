@@ -10,7 +10,6 @@ import {
   Select,
   TextInput,
 } from "@mantine/core";
-import Checkbox from "../../../components/Checkbox";
 import { filter, find, map } from "lodash";
 import { IconSearch, IconFilterOff, IconLink } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
@@ -21,7 +20,7 @@ import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
 } from "../../../utils";
-import { artistServices } from "../../../services";
+import { productlineService } from "../../../services";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
 import { showNotification } from "../../../utils/index";
 
@@ -58,7 +57,7 @@ const BriefsTable = ({
     if (isTrigger) {
       setLoadingUpdateBriefUID(uid);
     }
-    await artistServices.update({
+    await productlineService.updateReadyToLaunch({
       uid,
       data,
     });
@@ -89,6 +88,15 @@ const BriefsTable = ({
         accessorKey: "rnd",
         accessorFn: (row) => row?.rnd?.name,
         header: "RnD",
+        size: 120,
+        enableEditing: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        enableSorting: false,
+      },
+      {
+        accessorKey: "productName",
+        accessorFn: (row) => row?.name,
+        header: "Tên Product",
         size: 120,
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
@@ -139,34 +147,6 @@ const BriefsTable = ({
         },
       },
       {
-        accessorKey: "priority",
-        header: "PRIORITY",
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        size: 100,
-        Cell: ({ row }) => {
-          const uid = row.original.uid;
-          const foundBrief = find(payloads, { uid });
-          return (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-              onClick={() => {
-                const data = {
-                  ...foundBrief,
-                  priority: foundBrief?.priority === 2 ? 1 : 2,
-                };
-                handleUpdateBrief({ uid, data, isTrigger: true });
-              }}
-            >
-              <Checkbox value={foundBrief?.priority === 2} />
-            </div>
-          );
-        },
-      },
-      {
         accessorKey: "value",
         header: "Value",
         size: 100,
@@ -201,144 +181,65 @@ const BriefsTable = ({
         },
       },
       {
-        accessorKey: "size",
-        header: "SIZE",
-        size: 150,
-        enableEditing: false,
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
-        Cell: ({ row }) => {
-          const uid = row.original.uid;
-          const foundBrief = find(payloads, { uid });
-          return (
-            <Select
-              data={["Small", "Medium", "Big"]}
-              value={CONVERT_NUMBER_TO_STATUS[foundBrief?.size?.artist] || null}
-              onChange={(value) => {
-                setPayloads((prev) => {
-                  return map(prev, (x) => {
-                    if (x.uid === uid) {
-                      return {
-                        ...x,
-                        size: {
-                          ...x.size,
-                          artist: CONVERT_STATUS_TO_NUMBER[value],
-                        },
-                      };
-                    }
-                    return x;
-                  });
-                });
-                const data = {
-                  ...foundBrief,
-                  size: {
-                    ...foundBrief?.size,
-                    ...(value && {
-                      artist: CONVERT_STATUS_TO_NUMBER[value],
-                    }),
-                  },
-                };
-                handleUpdateBrief({ uid, data });
-              }}
-            />
-          );
-        },
-      },
-      {
-        id: "artistName",
-        header: "Artist",
+        id: "linkProduct",
+        header: "Link Product (Library)",
         enableEditing: false,
         enableSorting: false,
         size: 150,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
-        Cell: ({ row }) => {
-          const uid = row.original.uid;
-          const foundBrief = find(payloads, { uid });
-          const artistNames = map(
-            filter(users, { position: "artist" }),
-            "name"
-          );
-          return (
-            <Select
-              data={artistNames || []}
-              value={foundBrief?.artist?.name || null}
-              onChange={(name) => {
-                const foundArtist = find(users, { name });
-                setPayloads((prev) => {
-                  return map(prev, (x) => {
-                    if (x.uid === uid) {
-                      return {
-                        ...x,
-                        artist: {
-                          name,
-                          uid: foundArtist?.uid,
-                        },
-                      };
-                    }
-                    return x;
-                  });
-                });
-                const data = {
-                  ...foundBrief,
-                  artistId: foundArtist?.uid,
-                };
-                handleUpdateBrief({ uid, data });
-              }}
-            />
-          );
-        },
-      },
-      {
-        id: "clipartName",
-        header: "Tên Clipart",
-        enableEditing: false,
-        enableSorting: false,
-        size: 150,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.name || ""}
-              onChange={(e) => {
-                const payload = {
-                  ...foundBrief,
-                  name: e.target.value,
-                };
-                setPayloads((prev) => {
-                  return map(prev, (x) => {
-                    if (x.uid === uid) {
-                      return payload;
-                    }
-                    return x;
-                  });
-                });
+              value={foundBrief?.productLink || ""}
+              style={{
+                cursor: "pointer",
               }}
-              onBlur={(e) => {
-                const value = e.target.value;
-                if (value === "") {
+              readOnly
+              onClick={() => {
+                if (!foundBrief?.productLink) {
                   return;
                 }
-                const data = {
-                  ...foundBrief,
-                  name: value,
-                };
-                handleUpdateBrief({ uid, data });
+                window.open(foundBrief?.productLink, "_blank");
               }}
             />
           );
         },
       },
       {
-        id: "linkClipart",
-        header: "Link Clipart (Library)",
+        id: "linkTemplate",
+        header: "Link Template (Library)",
         enableEditing: false,
         enableSorting: false,
-        size: 200,
+        size: 170,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        Cell: ({ row }) => {
+          const uid = row.original.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <TextInput
+              value={foundBrief?.templateLink || ""}
+              style={{
+                cursor: "pointer",
+              }}
+              readOnly
+              onClick={() => {
+                if (!foundBrief?.templateLink) {
+                  return;
+                }
+                window.open(foundBrief?.templateLink, "_blank");
+              }}
+            />
+          );
+        },
+      },
+      {
+        id: "linkDoc",
+        header: "Brief Cho Mockup (Link Doc)",
+        enableEditing: false,
+        enableSorting: false,
+        size: 170,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["edit-header"] },
         Cell: ({ row }) => {
@@ -346,11 +247,14 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={foundBrief?.clipartLinkRef || ""}
+              value={foundBrief?.readyToLaunchInfo?.docLink || ""}
               onChange={(e) => {
                 const payload = {
                   ...foundBrief,
-                  clipartLinkRef: e.target.value,
+                  readyToLaunchInfo: {
+                    ...foundBrief?.readyToLaunchInfo,
+                    docLink: e.target.value,
+                  },
                 };
                 setPayloads((prev) => {
                   return map(prev, (x) => {
@@ -366,8 +270,7 @@ const BriefsTable = ({
                 let data = {};
                 if (value === "") {
                   data = {
-                    ...foundBrief,
-                    clipartLinkRef: "",
+                    docLink: "",
                   };
                 } else {
                   if (!urlPattern.test(value)) {
@@ -375,8 +278,7 @@ const BriefsTable = ({
                     return;
                   }
                   data = {
-                    ...foundBrief,
-                    clipartLinkRef: value,
+                    docLink: value,
                   };
                 }
                 handleUpdateBrief({ uid, data });
@@ -388,8 +290,7 @@ const BriefsTable = ({
                   return;
                 }
                 const data = {
-                  ...foundBrief,
-                  clipartLinkRef: value,
+                  docLink: value,
                 };
                 handleUpdateBrief({ uid, data });
               }}
@@ -399,7 +300,7 @@ const BriefsTable = ({
       },
       {
         accessorKey: "status",
-        header: "Status",
+        header: "ACTION",
         enableSorting: false,
         enableEditing: false,
         size: 150,
@@ -415,19 +316,11 @@ const BriefsTable = ({
                 size="sx"
                 loading={loadingUpdateBriefUID === uid}
                 disabled={
-                  foundBrief?.status === 2 ||
-                  !foundBrief?.size?.artist ||
-                  !foundBrief?.artist?.name ||
-                  foundBrief?.name === "" ||
-                  foundBrief?.clipartLinkRef === ""
+                  foundBrief?.status === 3 ||
+                  foundBrief?.readyToLaunchInfo?.docLink === ""
                 }
                 onClick={() => {
-                  if (
-                    !foundBrief?.size?.artist &&
-                    !foundBrief?.artist?.name &&
-                    foundBrief?.name !== "" &&
-                    foundBrief?.clipartLinkRef !== ""
-                  ) {
+                  if (foundBrief?.readyToLaunchInfo?.docLink === "") {
                     showNotification(
                       "Thất bại",
                       "Vui lòng nhập đủ thông tin",
@@ -436,13 +329,12 @@ const BriefsTable = ({
                     return;
                   }
                   const data = {
-                    ...foundBrief,
-                    status: 2,
+                    status: 3,
                   };
                   handleUpdateBrief({ uid, data, isTrigger: true });
                 }}
               >
-                Done
+                Làm MOCKUP
               </Button>
             </Group>
           );
@@ -450,7 +342,7 @@ const BriefsTable = ({
       },
       {
         id: "time",
-        accessorFn: (row) => row?.clipartInfo?.time,
+        accessorFn: (row) => row?.newProductLineInfo?.time,
         header: "TIME",
         mantineTableHeadCellProps: { className: classes["head-cells"] },
         enableEditing: false,
@@ -503,7 +395,7 @@ const BriefsTable = ({
             }}
           >
             <TextInput
-              placeholder="Tên Clipart"
+              placeholder="Tên Product"
               size="sm"
               width="100px"
               leftSection={
@@ -628,32 +520,7 @@ const BriefsTable = ({
                 setQuery({
                   ...query,
                   rndName: null,
-                  rnd: null,
-                });
-              }}
-            />
-            <Select
-              placeholder="Artist"
-              data={map(filter(users, { position: "artist" }), "name") || []}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={query?.artistName}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  artistName: find(users, { name: value })?.name,
-                  artistId: find(users, { name: value })?.uid,
-                })
-              }
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  artistName: null,
-                  artistId: null,
+                  rndId: null,
                 });
               }}
             />
@@ -669,7 +536,7 @@ const BriefsTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  status: value === "Done" ? [2] : [1],
+                  status: value === "Done" ? [3] : [2],
                   statusValue: value,
                 })
               }
@@ -677,7 +544,7 @@ const BriefsTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [1, 2],
+                  status: [2, 3],
                   statusValue: null,
                 });
               }}
@@ -691,12 +558,9 @@ const BriefsTable = ({
                   rndTeam: null,
                   rndId: null,
                   epm: null,
-                  artistId: null,
-                  status: [1, 2],
+                  status: [2, 3],
                   sizeValue: null,
                   rndName: null,
-                  artistName: null,
-                  epmName: null,
                   statusValue: null,
                   dateValue: null,
                   startDate: null,
@@ -723,7 +587,7 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Undone: {metadata?.totalUndoneArtBriefsWithFilter}
+              Undone: {metadata?.totalUndoneNewProductLineBriefsWithFilter}
             </div>
             <div
               style={{
@@ -731,7 +595,8 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: {metadata?.totalTimeToDoneArtBriefsWithFilter}h
+              Time to done:{" "}
+              {metadata?.totalTimeToDoneNewProductLineBriefsWithFilter}h
             </div>
           </Flex>
         </div>

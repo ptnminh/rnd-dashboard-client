@@ -35,6 +35,8 @@ import { useDisclosure } from "@mantine/hooks";
 import { rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
 import { modals } from "@mantine/modals";
+import { useLocalStorage } from "../../hooks/useLocalStorage";
+import { LOCAL_STORAGE_KEY } from "../../constant";
 
 const Collection = ({
   collections,
@@ -748,6 +750,11 @@ export const ProductLine = () => {
       onConfirm: () => handleDeleteLayoutProductLine(uid),
     });
   };
+  let [permissions] = useLocalStorage({
+    key: LOCAL_STORAGE_KEY.PERMISSIONS,
+    defaultValue: [],
+  });
+  permissions = map(permissions, "name");
   return (
     <>
       <Tabs
@@ -792,59 +799,65 @@ export const ProductLine = () => {
           </Tabs.Tab>
         </Tabs.List>
         <Tabs.Panel value="collection" mt={8}>
-          <Collection
-            collections={collections}
-            setCollections={setCollections}
-            handleSelectCollection={handleSelectCollection}
-            visible={activeTable}
-            setVisible={setActiveTable}
-            selectedFilters={selectedCollections}
-            setSelectedFilters={setSelectedCollections}
-            handleSelectAllCollections={handleSelectAllCollections}
-            handleChangeCollection={handleChangeCollection}
-            selectedCollection={selectedCollection}
-            openModal={open}
-            setIsCreateNewCollection={setIsCreateNewCollection}
-            openModalProductBase={openModalProductBase}
-            setSelectedProductLines={setSelectedProductLines}
-            editCollection={editCollection}
-            setEditCollection={setEditCollection}
-            editCollectionName={editCollectionName}
-            setEditCollectionName={setEditCollectionName}
-            handleSaveNewCollectionName={handleSaveNewCollectionName}
-            openModalConfirmDeleteCollection={openModalConfirmDeleteCollection}
-            openModalConfirmDeleteProductLine={
-              openModalConfirmDeleteProductLine
-            }
-            handleSearchCollections={handleSearchCollections}
-          />
+          {includes(permissions, "read:collection") && (
+            <Collection
+              collections={collections}
+              setCollections={setCollections}
+              handleSelectCollection={handleSelectCollection}
+              visible={activeTable}
+              setVisible={setActiveTable}
+              selectedFilters={selectedCollections}
+              setSelectedFilters={setSelectedCollections}
+              handleSelectAllCollections={handleSelectAllCollections}
+              handleChangeCollection={handleChangeCollection}
+              selectedCollection={selectedCollection}
+              openModal={open}
+              setIsCreateNewCollection={setIsCreateNewCollection}
+              openModalProductBase={openModalProductBase}
+              setSelectedProductLines={setSelectedProductLines}
+              editCollection={editCollection}
+              setEditCollection={setEditCollection}
+              editCollectionName={editCollectionName}
+              setEditCollectionName={setEditCollectionName}
+              handleSaveNewCollectionName={handleSaveNewCollectionName}
+              openModalConfirmDeleteCollection={
+                openModalConfirmDeleteCollection
+              }
+              openModalConfirmDeleteProductLine={
+                openModalConfirmDeleteProductLine
+              }
+              handleSearchCollections={handleSearchCollections}
+            />
+          )}
         </Tabs.Panel>
         <Tabs.Panel value="layout" mt={8}>
-          <Layout
-            layouts={layouts}
-            setLayouts={setLayouts}
-            handleSelectLayout={handleSelectLayout}
-            visible={activeTable}
-            setVisible={setActiveTable}
-            selectedFilters={selectedCollections}
-            setSelectedFilters={setSelectedCollections}
-            selectedLayout={selectedLayout}
-            layoutName={layoutName}
-            setLayoutName={setLayoutName}
-            openModal={openModalLayout}
-            openModalProductBase={openModalProductBase}
-            setSelectedProductLines={setSelectedProductLines}
-            editLayout={editLayout}
-            setEditLayout={setEditLayout}
-            editLayoutName={editLayoutName}
-            setEditLayoutName={setEditLayoutName}
-            handleSaveNewLayoutName={handleSaveNewLayoutName}
-            openModalConfirmDeleteLayout={openModalConfirmDeleteLayout}
-            openModalConfirmDeleteProductLineLayout={
-              openModalConfirmDeleteProductLineLayout
-            }
-            handleSearchLayouts={handleSearchLayouts}
-          />
+          {includes(permissions, "read:layout") && (
+            <Layout
+              layouts={layouts}
+              setLayouts={setLayouts}
+              handleSelectLayout={handleSelectLayout}
+              visible={activeTable}
+              setVisible={setActiveTable}
+              selectedFilters={selectedCollections}
+              setSelectedFilters={setSelectedCollections}
+              selectedLayout={selectedLayout}
+              layoutName={layoutName}
+              setLayoutName={setLayoutName}
+              openModal={openModalLayout}
+              openModalProductBase={openModalProductBase}
+              setSelectedProductLines={setSelectedProductLines}
+              editLayout={editLayout}
+              setEditLayout={setEditLayout}
+              editLayoutName={editLayoutName}
+              setEditLayoutName={setEditLayoutName}
+              handleSaveNewLayoutName={handleSaveNewLayoutName}
+              openModalConfirmDeleteLayout={openModalConfirmDeleteLayout}
+              openModalConfirmDeleteProductLineLayout={
+                openModalConfirmDeleteProductLineLayout
+              }
+              handleSearchLayouts={handleSearchLayouts}
+            />
+          )}
         </Tabs.Panel>
       </Tabs>
 

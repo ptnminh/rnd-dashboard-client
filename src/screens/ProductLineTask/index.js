@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from "react";
-import styles from "./Artist.module.sass";
+import styles from "./Task.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Table from "./Table";
 import { map } from "lodash";
 import { useDisclosure } from "@mantine/hooks";
-import { Flex, Grid, Modal, Pagination } from "@mantine/core";
+import { Flex, Grid, Modal, Pagination, TextInput } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
-import { artistServices, rndServices } from "../../services";
+import { productlineService, rndServices } from "../../services";
 import ArtistRef from "../Artist/ArtistRef";
 import Editor from "../../components/Editor";
 import { CONVERT_NUMBER_TO_STATUS, getStringAsEditorState } from "../../utils";
 
-const ArtistTask = () => {
+const BriefProductLineTask = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -34,15 +34,8 @@ const ArtistTask = () => {
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedBrief, setSelectedBrief] = useState();
-  const [updateBrief, setUpdateBrief] = useState({});
-  const [editingCell, setEditingCell] = useState(false);
   const [metadata, setMetadata] = useState({});
-  const [selectedCreateCampPayload, setSelectedCreateCampPayload] = useState(
-    {}
-  );
   const [trigger, setTrigger] = useState(false);
-  const [querySampleCampaigns, setQuerySampleCampaigns] = useState({});
-  const [linkProduct, setLinkProduct] = useState("");
   const [
     openedModalPreview,
     { open: openModalPreview, close: closeModalPreview },
@@ -52,11 +45,11 @@ const ArtistTask = () => {
 
   const fetchBriefs = async (page = 1) => {
     setLoadingFetchBrief(true);
-    const response = await artistServices.fetchArtistTask({
+    const response = await productlineService.fetchTask({
       search,
       page,
       limit: 30,
-      view: "art",
+      view: "new-product-line",
       sorting,
       query,
     });
@@ -70,11 +63,6 @@ const ArtistTask = () => {
             date: moment(x.createdAt)
               .tz("Asia/Ho_Chi_Minh")
               .format("DD/MM/YYYY"),
-            time: Math.floor(
-              moment()
-                .tz("Asia/Ho_Chi_Minh")
-                .diff(moment(x.createdAt), "hours", true)
-            ),
           };
         })
       );
@@ -116,34 +104,24 @@ const ArtistTask = () => {
     <>
       <Card
         className={styles.card}
-        title="Artist Task"
+        title="New PL - Task"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
       >
         <Table
           className={styles.Table}
-          onClose={() => setVisible(false)}
           briefs={briefs}
           query={query}
           setQuery={setQuery}
           setSelectedBrief={setSelectedBrief}
           openModal={open}
           users={users}
-          setUpdateBrief={setUpdateBrief}
-          updateBrief={updateBrief}
-          setEditingCell={setEditingCell}
-          editingCell={editingCell}
           loadingFetchBrief={loadingFetchBrief}
           setLoadingFetchBrief={setLoadingFetchBrief}
           setTrigger={setTrigger}
-          setLinkProduct={setLinkProduct}
           setSorting={setSorting}
           sorting={sorting}
-          querySampleCampaigns={querySampleCampaigns}
-          setQuerySampleCampaigns={setQuerySampleCampaigns}
           openModalPreview={openModalPreview}
-          setSelectedCreateCampPayload={setSelectedCreateCampPayload}
-          selectedCreateCampPayload={selectedCreateCampPayload}
           metadata={metadata}
         />
       </Card>
@@ -217,8 +195,26 @@ const ArtistTask = () => {
             />
           </Grid.Col>
           <Grid.Col span={9}>
+            <TextInput
+              label="Tên sản phẩm"
+              placeholder="Nhập tên sản phẩm"
+              value={selectedBrief?.name}
+              style={{ marginBottom: "12px" }}
+              styles={{
+                label: {
+                  marginBottom: "12px",
+                  fontWeight: 600,
+                  lineHeight: 1.7,
+                  fontSize: "14px",
+                },
+              }}
+              readOnly
+              required
+            />
             <Editor
-              state={getStringAsEditorState(selectedBrief?.note?.artist)}
+              state={getStringAsEditorState(
+                selectedBrief?.note?.newProductLine
+              )}
               classEditorWrapper={styles.editor}
               readOnly={true}
             />
@@ -229,4 +225,4 @@ const ArtistTask = () => {
   );
 };
 
-export default ArtistTask;
+export default BriefProductLineTask;

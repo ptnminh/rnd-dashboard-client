@@ -22,7 +22,13 @@ import Setting from "./screens/Setting";
 import UserScreen from "./screens/Users";
 import EmailVerify from "./components/VerifyEmail";
 import ArtistScreen from "./screens/Artist";
+import BriefProductLine from "./screens/BriefProductLine";
 import ArtistTask from "./screens/ArtistTask";
+import BriefProductLineTask from "./screens/ProductLineTask";
+import ProductLineReadyToLaunch from "./screens/ProductLineReadyToLaunch";
+import MockupTask from "./screens/MockupTask";
+import ScreenshotTask from "./screens/ScreenShotTask";
+import Mockup from "./screens/Mockup";
 
 function App() {
   return (
@@ -75,6 +81,48 @@ function App() {
           </Page>
         }
       />
+      <Route
+        path="/rnd/brief-pl"
+        element={
+          <Page title="Product Line">
+            <BriefProductLine />
+          </Page>
+        }
+      />
+      <Route
+        path="/pl"
+        element={
+          <Page title="Product Line">
+            <BriefProductLineTask />
+          </Page>
+        }
+      />
+
+      <Route
+        path="/pl/ready-to-launch"
+        element={
+          <Page title="Product Line">
+            <ProductLineReadyToLaunch />
+          </Page>
+        }
+      />
+      <Route
+        path="/pl/mockup"
+        element={
+          <Page title="Product Line">
+            <Mockup />
+          </Page>
+        }
+      />
+      <Route
+        path="/pl/screenshot"
+        element={
+          <Page title="Product Line">
+            <ScreenshotTask />
+          </Page>
+        }
+      />
+
       <Route
         path="/designer/feedback"
         element={

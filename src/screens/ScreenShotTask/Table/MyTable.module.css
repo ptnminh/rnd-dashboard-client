@@ -1,0 +1,100 @@
+/* Example CSS Module */
+.head-cells {
+  font-weight: bold;
+  color: #000000;
+  width: 100%;
+  padding: 0;
+  background-color: #e1eaff;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.head-cells>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.SKU {
+  background-color: #3751d7;
+  color: #ffffff;
+  width: 100%;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.default-header {
+  text-align: center;
+  background-color: #e1eaff;
+}
+
+.edit-header {
+  background-color: #ECE2FE;
+  color: #000000;
+  width: 100%;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.edit-header>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.SKU>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.body-cells {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.linkDesign {
+  background-color: #d9f5d6;
+  width: 100%;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.linkDesign>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.remove {
+  background-color: #fde2e2;
+  width: 100%;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.remove>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Target an internal MRT class already defined */
+.toolbar {
+
+  /* Use :global() to make sure this className does not get hashed */
+  :global(.mrt-toolbar-internal-buttons) {
+    gap: 0.5rem;
+  }
+}
+
+/* Define MRT CSS variables in your CSS */
+.root {
+
+  /* You can account for both light and dark mode with the Mantine mixins */
+  @mixin dark {
+    --mrt-base-background-color: rgb(33, 24, 44);
+  }
+
+  @mixin light {
+    --mrt-base-background-color: rgb(244, 233, 255);
+  }
+
+  /* It's also best to redefine all of the other MRT CSS variables that derive from --mrt-base-background-color */
+  /* ... */
+}

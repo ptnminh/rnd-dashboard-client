@@ -114,4 +114,28 @@ export const PERMISSIONS_RELATIONSHIP = [
     parentPermissions: ["update:user", "create:user"],
     childPermissions: ["read:user"],
   },
+  {
+    parentPermissions: ["update:new_product_line", "create:new_product_line"],
+    childPermissions: ["read:new_product_line", "read:brief"],
+  },
+  {
+    parentPermissions: ["update:photography"],
+    childPermissions: ["read:photography", "read:new_product_line"],
+  },
+  {
+    parentPermissions: ["update:ready_to_launch"],
+    childPermissions: ["read:ready_to_launch", "read:new_product_line"],
+  },
+  {
+    parentPermissions: ["update:mockup"],
+    childPermissions: ["read:mockup", "read:new_product_line"],
+  },
+  {
+    parentPermissions: ["update:optimized_mockup", "create:optimized_mockup"],
+    childPermissions: ["read:optimized_mockup", "read:new_product_line"],
+  },
+  {
+    parentPermissions: ["read:new_product_line"],
+    childPermissions: ["read:brief"],
+  },
 ];

@@ -12,9 +12,19 @@ export const MEMBER_POSITIONS = {
   VIDEO: "video",
   RND: "rnd",
   ARTIST: "artist",
+  MOCKUP: "mockup",
   OTHER: "other",
 };
 
 export const ROLES = {
   MEMBER: "member",
+};
+
+export const NewProductLineBriefStatus = {
+  BRIEF_CREATED: 1,
+  NEW_PRODUCT_LINE_DONE: 2,
+  READY_TO_LAUNCH_DONE: 3,
+  MOCKUP_DONE: 4,
+  OPTIMIZED_MOCKUP_UNDONE: 8,
+  OPTIMIZED_MOCKUP_DONE: 9,
 };
