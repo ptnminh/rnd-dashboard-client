@@ -3,6 +3,7 @@ import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import styles from "./Details.module.sass";
 import {
   Button,
+  ButtonGroup,
   Flex,
   Grid,
   Group,
@@ -22,6 +23,7 @@ import {
   IconEdit,
   IconPlus,
   IconCheck,
+  IconX,
 } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
@@ -529,47 +531,125 @@ const BriefsTable = ({
 
           return (
             <Group justify="center">
-              <Button
-                variant="filled"
-                color="green"
-                size="sx"
-                loading={loadingUpdateBriefUID === uid}
-                disabled={
-                  foundBrief?.status ===
-                    NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE ||
-                  foundBrief?.mockupLink === "" ||
-                  isEmpty(foundBrief?.mockup?.name) ||
-                  isEmpty(foundBrief?.imageRef) ||
-                  isEmpty(foundBrief?.name)
-                }
-                onClick={() => {
-                  if (
+              {!foundBrief?.isDraft && (
+                <Button
+                  variant="filled"
+                  color="green"
+                  size="sx"
+                  loading={loadingUpdateBriefUID === uid}
+                  disabled={
+                    foundBrief?.status ===
+                      NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE ||
                     foundBrief?.mockupLink === "" ||
                     isEmpty(foundBrief?.mockup?.name) ||
                     isEmpty(foundBrief?.imageRef) ||
-                    isEmpty(foundBrief?.name) ||
                     isEmpty(foundBrief?.name)
-                  ) {
-                    showNotification(
-                      "Thất bại",
-                      "Vui lòng nhập đủ thông tin",
-                      "red"
-                    );
-                    return;
                   }
-                  if (foundBrief?.isDraft) {
-                    // create a new brief
-                    handleCreateNewBrief({ data: foundBrief });
-                  } else {
-                    const data = {
-                      status: NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE,
-                    };
-                    handleUpdateBrief({ uid, data, isTrigger: true });
-                  }
-                }}
-              >
-                {foundBrief?.isDraft ? "Create" : "Done"}
-              </Button>
+                  onClick={() => {
+                    if (
+                      foundBrief?.mockupLink === "" ||
+                      isEmpty(foundBrief?.mockup?.name) ||
+                      isEmpty(foundBrief?.imageRef) ||
+                      isEmpty(foundBrief?.name) ||
+                      isEmpty(foundBrief?.name)
+                    ) {
+                      showNotification(
+                        "Thất bại",
+                        "Vui lòng nhập đủ thông tin",
+                        "red"
+                      );
+                      return;
+                    }
+                    if (foundBrief?.isDraft) {
+                      // create a new brief
+                      handleCreateNewBrief({ data: foundBrief });
+                    } else {
+                      const data = {
+                        status: NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE,
+                      };
+                      handleUpdateBrief({ uid, data, isTrigger: true });
+                    }
+                  }}
+                >
+                  Done
+                </Button>
+              )}
+              {foundBrief?.isDraft && (
+                <ButtonGroup
+                  style={{
+                    display: "flex",
+                  }}
+                >
+                  <Button
+                    variant="filled"
+                    color="green"
+                    size="sx"
+                    loading={loadingUpdateBriefUID === uid}
+                    disabled={
+                      foundBrief?.status ===
+                        NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE ||
+                      foundBrief?.mockupLink === "" ||
+                      isEmpty(foundBrief?.mockup?.name) ||
+                      isEmpty(foundBrief?.imageRef) ||
+                      isEmpty(foundBrief?.name)
+                    }
+                    onClick={() => {
+                      if (
+                        foundBrief?.mockupLink === "" ||
+                        isEmpty(foundBrief?.mockup?.name) ||
+                        isEmpty(foundBrief?.imageRef) ||
+                        isEmpty(foundBrief?.name) ||
+                        isEmpty(foundBrief?.name)
+                      ) {
+                        showNotification(
+                          "Thất bại",
+                          "Vui lòng nhập đủ thông tin",
+                          "red"
+                        );
+                        return;
+                      }
+                      if (foundBrief?.isDraft) {
+                        // create a new brief
+                        handleCreateNewBrief({ data: foundBrief });
+                      } else {
+                        const data = {
+                          status:
+                            NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE,
+                        };
+                        handleUpdateBrief({ uid, data, isTrigger: true });
+                      }
+                    }}
+                  >
+                    <IconPlus
+                      style={{
+                        width: rem(20),
+                        height: rem(20),
+                      }}
+                    />
+                  </Button>
+                  <Button
+                    color="red"
+                    variant="filled"
+                    size="sx"
+                    radius="md"
+                    onClick={() => {
+                      setPayloads((prev) => {
+                        return filter(prev, (x) => x.uid !== uid);
+                      });
+                      setData((prev) => {
+                        return filter(prev, (x) => x.uid !== uid);
+                      });
+                    }}
+                  >
+                    <IconX
+                      style={{
+                        width: rem(20),
+                        height: rem(20),
+                      }}
+                    />
+                  </Button>
+                </ButtonGroup>
+              )}
             </Group>
           );
         },
