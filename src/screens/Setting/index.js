@@ -116,6 +116,7 @@ const MarketingSetting = ({ name }) => {
     await settingServices.updateSetting({
       uid: setting.uid,
       data: payload,
+      view: name,
     });
   };
   useEffect(() => {

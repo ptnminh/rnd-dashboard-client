@@ -10,7 +10,6 @@ import {
   Select,
   TextInput,
 } from "@mantine/core";
-import Checkbox from "../../../components/Checkbox";
 import { filter, find, map } from "lodash";
 import { IconSearch, IconFilterOff, IconLink } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
@@ -195,7 +194,7 @@ const BriefsTable = ({
             <TextInput
               value={foundBrief?.productLink || ""}
               style={{
-                cursor: "pointer"
+                cursor: "pointer",
               }}
               readOnly
               onClick={() => {
@@ -222,7 +221,7 @@ const BriefsTable = ({
             <TextInput
               value={foundBrief?.templateLink || ""}
               style={{
-                cursor: "pointer"
+                cursor: "pointer",
               }}
               readOnly
               onClick={() => {
@@ -255,7 +254,7 @@ const BriefsTable = ({
                   readyToLaunchInfo: {
                     ...foundBrief?.readyToLaunchInfo,
                     docLink: e.target.value,
-                  }
+                  },
                 };
                 setPayloads((prev) => {
                   return map(prev, (x) => {
@@ -268,7 +267,7 @@ const BriefsTable = ({
               }}
               onBlur={(e) => {
                 const value = e.target.value;
-                let data = {}
+                let data = {};
                 if (value === "") {
                   data = {
                     docLink: "",
@@ -276,7 +275,7 @@ const BriefsTable = ({
                 } else {
                   if (!urlPattern.test(value)) {
                     showNotification("Thất bại", "Link không hợp lệ", "red");
-                    return
+                    return;
                   }
                   data = {
                     docLink: value,
@@ -316,11 +315,12 @@ const BriefsTable = ({
                 color="green"
                 size="sx"
                 loading={loadingUpdateBriefUID === uid}
-                disabled={foundBrief?.status === 3 || foundBrief?.readyToLaunchInfo?.docLink === ""}
+                disabled={
+                  foundBrief?.status === 3 ||
+                  foundBrief?.readyToLaunchInfo?.docLink === ""
+                }
                 onClick={() => {
-                  if (
-                    foundBrief?.readyToLaunchInfo?.docLink === ""
-                  ) {
+                  if (foundBrief?.readyToLaunchInfo?.docLink === "") {
                     showNotification(
                       "Thất bại",
                       "Vui lòng nhập đủ thông tin",
@@ -520,7 +520,7 @@ const BriefsTable = ({
                 setQuery({
                   ...query,
                   rndName: null,
-                  rnd: null,
+                  rndId: null,
                 });
               }}
             />
@@ -587,7 +587,7 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Undone: {metadata?.totalUndoneBriefsWithFilter}
+              Undone: {metadata?.totalUndoneNewProductLineBriefsWithFilter}
             </div>
             <div
               style={{
@@ -595,7 +595,8 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
+              Time to done:{" "}
+              {metadata?.totalTimeToDoneNewProductLineBriefsWithFilter}h
             </div>
           </Flex>
         </div>

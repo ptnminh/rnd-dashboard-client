@@ -254,7 +254,7 @@ const BriefsTable = ({
               }}
               onBlur={(e) => {
                 const value = e.target.value;
-                let data = {}
+                let data = {};
 
                 if (value === "") {
                   data = {
@@ -303,11 +303,12 @@ const BriefsTable = ({
                 color="green"
                 size="sx"
                 loading={loadingUpdateBriefUID === uid}
-                disabled={foundBrief?.mockupPhotographyInfo?.status === 1 || foundBrief?.photographyLink === ""}
+                disabled={
+                  foundBrief?.mockupPhotographyInfo?.status === 1 ||
+                  foundBrief?.photographyLink === ""
+                }
                 onClick={() => {
-                  if (
-                    foundBrief?.photographyLink === ""
-                  ) {
+                  if (foundBrief?.photographyLink === "") {
                     showNotification(
                       "Thất bại",
                       "Vui lòng nhập đủ thông tin",
@@ -507,7 +508,7 @@ const BriefsTable = ({
                 setQuery({
                   ...query,
                   rndName: null,
-                  rnd: null,
+                  rndId: null,
                 });
               }}
             />
@@ -576,7 +577,7 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Undone: {metadata?.totalUndoneBriefsWithFilter}
+              Undone: {metadata?.totalUndoneNewProductLineBriefsWithFilter}
             </div>
             <div
               style={{
@@ -584,7 +585,8 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
+              Time to done:{" "}
+              {metadata?.totalTimeToDoneNewProductLineBriefsWithFilter}h
             </div>
           </Flex>
         </div>

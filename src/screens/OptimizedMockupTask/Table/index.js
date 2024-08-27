@@ -1,52 +1,88 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
+import styles from "./Details.module.sass";
 import {
-  Badge,
   Button,
   Flex,
+  Grid,
   Group,
   Image,
+  Loader,
+  Modal,
   rem,
   Select,
   TextInput,
+  Tooltip,
 } from "@mantine/core";
 import Checkbox from "../../../components/Checkbox";
-import { filter, find, map } from "lodash";
-import { IconSearch, IconFilterOff, IconLink } from "@tabler/icons-react";
+import { filter, find, isEmpty, map, omit } from "lodash";
+import {
+  IconSearch,
+  IconFilterOff,
+  IconEdit,
+  IconPlus,
+  IconCheck,
+} from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
-import { LOCAL_STORAGE_KEY, MEMBER_POSITIONS } from "../../../constant";
+import { MEMBER_POSITIONS, NewProductLineBriefStatus } from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
+  generateRandomString,
+  getEditorStateAsString,
+  getStringAsEditorState,
 } from "../../../utils";
 import { productlineService } from "../../../services";
-import { useLocalStorage } from "../../../hooks/useLocalStorage";
 import { showNotification } from "../../../utils/index";
+import { useDisclosure } from "@mantine/hooks";
+import Editor from "../../../components/Editor";
+import { uploadServices } from "../../../services/uploads";
+import { useAuth0 } from "@auth0/auth0-react";
+
+const defaultRow = {
+  name: "",
+  imageRef: "",
+  status: NewProductLineBriefStatus.OPTIMIZED_MOCKUP_UNDONE,
+  note: {
+    newProductLine: "",
+  },
+  value: {
+    rnd: 1,
+  },
+  priority: 1,
+  rndId: "",
+  mockupId: "",
+  mockupLink: "",
+  date: moment().tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY"),
+  uid: generateRandomString(10),
+  isDraft: true,
+  newProductLineInfo: {
+    time: "0h",
+  },
+};
 
 const BriefsTable = ({
   briefs,
   query,
   setQuery,
-  openModal,
   loadingFetchBrief,
   setTrigger,
   sorting,
   setSorting,
   metadata,
   users,
-  setSelectedBrief,
 }) => {
+  const [loadingUploadFile, setLoadingUploadFile] = useState("");
+  const { user } = useAuth0();
+  const [opened, { open, close }] = useDisclosure(false);
+  const [productLineNote, setProductLineNote] = useState("");
+  const [selectedBrief, setSelectedBrief] = useState({});
   const [loadingUpdateBriefUID, setLoadingUpdateBriefUID] = useState("");
-  let [permissions] = useLocalStorage({
-    key: LOCAL_STORAGE_KEY.PERMISSIONS,
-    defaultValue: [],
-  });
   const urlPattern =
     /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
   const [payloads, setPayloads] = useState([]);
-  permissions = map(permissions, "name");
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(briefs || []);
   useEffect(() => {
@@ -58,7 +94,7 @@ const BriefsTable = ({
     if (isTrigger) {
       setLoadingUpdateBriefUID(uid);
     }
-    await productlineService.updateMockup({
+    await productlineService.updateOptimizedMockup({
       uid,
       data,
     });
@@ -66,6 +102,19 @@ const BriefsTable = ({
       setLoadingUpdateBriefUID("");
       setTrigger(true);
     }
+  };
+  const handleCreateNewBrief = async ({ data }) => {
+    const payload = omit(
+      {
+        ...data,
+        rndId: user.sub,
+      },
+      ["id", "uid", "isDraft", "newProductLineInfo", "date"]
+    );
+    await productlineService.createOptimizedMockup({
+      payloads: [payload],
+    });
+    setTrigger(true);
   };
   const columns = useMemo(
     () => [
@@ -78,30 +127,54 @@ const BriefsTable = ({
         enableSorting: true,
       },
       {
-        accessorKey: "rndTeam",
-        header: "Team",
-        size: 120,
-        enableEditing: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        enableSorting: true,
-      },
-      {
-        accessorKey: "rnd",
-        accessorFn: (row) => row?.rnd?.name,
-        header: "RnD",
-        size: 120,
-        enableEditing: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        enableSorting: false,
-      },
-      {
         accessorKey: "productName",
-        accessorFn: (row) => row?.name,
         header: "Tên Product",
-        size: 120,
+        size: 170,
         enableEditing: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
         enableSorting: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        Cell: ({ row }) => {
+          const uid = row.original.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <TextInput
+              value={foundBrief?.name || ""}
+              onChange={(e) => {
+                const payload = {
+                  ...foundBrief,
+                  name: e.target.value,
+                };
+                setPayloads((prev) => {
+                  return map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return payload;
+                    }
+                    return x;
+                  });
+                });
+              }}
+              onBlur={(e) => {
+                if (!foundBrief?.isDraft) {
+                  const value = e.target.value;
+                  const data = {
+                    name: value,
+                  };
+                  handleUpdateBrief({ uid, data });
+                }
+              }}
+              onPaste={(e) => {
+                if (!foundBrief?.isDraft) {
+                  const value = e.clipboardData.getData("Text");
+                  const data = {
+                    name: value,
+                  };
+                  handleUpdateBrief({ uid, data });
+                }
+              }}
+            />
+          );
+        },
       },
       {
         accessorKey: "imageRef",
@@ -110,74 +183,140 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Cell: ({ row }) => (
-          <Image
-            radius="md"
-            src={row?.original?.imageRef || "/images/content/not_found_2.jpg"}
-            height={100}
-            fit="contain"
-          />
-        ),
-      },
-      {
-        accessorKey: "modal",
-        header: "Brief",
-        size: 120,
-        enableEditing: false,
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["edit-header"] },
         Cell: ({ row }) => {
-          return (
-            <Button
-              leftSection={
-                <IconLink
-                  style={{
-                    width: rem(16),
-                    height: rem(16),
-                  }}
-                />
+          const { uid, isDraft } = row?.original;
+          const generateTempUID = () => `temp-${Date.now()}`;
+          const uniqueId = uid || generateTempUID();
+          const foundBrief = find(payloads, { uid });
+          const handleImageChange = async (event) => {
+            setLoadingUploadFile(uid);
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+              const fileName = generateRandomString(10);
+              const response = await uploadServices.upload(file, fileName); // Adjust this to your upload API call
+              if (response && response.data) {
+                const newImageUrl = response.data.shortUrl;
+                // Update the imageRef in the relevant row
+                const updatedBriefs = map(payloads, (brief) =>
+                  brief.uid === uid
+                    ? { ...brief, imageRef: newImageUrl }
+                    : brief
+                );
+                setPayloads(updatedBriefs); // Update state
+                if (!isDraft) {
+                  // update the imageRef in the database
+                  const data = {
+                    imageRef: newImageUrl,
+                  };
+                  handleUpdateBrief({ uid, data });
+                }
+                setLoadingUploadFile("");
               }
-              onClick={() => {
-                setSelectedBrief(row.original);
-                openModal();
-              }}
-            >
-              Preview
-            </Button>
+            } catch (error) {
+              setLoadingUploadFile("");
+              console.error("Image upload failed", error);
+            }
+          };
+          return (
+            <>
+              <input
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                id={`upload-image-${uniqueId}`}
+                onChange={handleImageChange}
+              />
+              {isDraft && !foundBrief?.imageRef ? (
+                <Button
+                  radius="xl"
+                  style={{
+                    width: rem(50),
+                    height: rem(50),
+                  }}
+                  loading={loadingUploadFile === uid}
+                  onClick={() => {
+                    document.getElementById(`upload-image-${uniqueId}`).click(); // Trigger file input click
+                  }}
+                  color="#3751D7"
+                >
+                  <IconPlus
+                    style={{
+                      width: rem(20),
+                      height: rem(20),
+                    }}
+                  />
+                </Button>
+              ) : (
+                <Tooltip label="Click to edit">
+                  {loadingUploadFile === uid ? (
+                    <Loader color="blue" size={30} />
+                  ) : (
+                    <Image
+                      style={{
+                        cursor: "pointer",
+                      }}
+                      radius="md"
+                      src={
+                        foundBrief?.imageRef ||
+                        "/images/content/not_found_2.jpg"
+                      }
+                      height={100}
+                      fit="contain"
+                      onClick={() => {
+                        document
+                          .getElementById(`upload-image-${uniqueId}`)
+                          .click(); // Trigger file input click
+                      }}
+                    />
+                  )}
+                </Tooltip>
+              )}
+            </>
           );
         },
       },
       {
         accessorKey: "value",
         header: "Value",
-        size: 100,
+        size: 150,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["edit-header"] },
         Cell: ({ row }) => {
-          let color = null;
-          switch (row?.original?.value?.rnd) {
-            case 1:
-              color = "#cfcfcf";
-              break;
-            case 2:
-              color = "yellow";
-              break;
-            case 3:
-              color = "green";
-              break;
-            case 4:
-              color = "#38761C";
-              break;
-            default:
-              break;
-          }
-          return color ? (
-            <Badge color={color} variant="filled">
-              {CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}
-            </Badge>
-          ) : (
-            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}</span>
+          const uid = row.original.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <Select
+              data={["Small", "Medium", "Big", "Super Big"]}
+              value={CONVERT_NUMBER_TO_STATUS[foundBrief.value?.rnd]}
+              onChange={(value) => {
+                const data = {
+                  value: {
+                    rnd: CONVERT_STATUS_TO_NUMBER[value],
+                  },
+                };
+                setPayloads((prev) => {
+                  return map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        value: {
+                          rnd: CONVERT_STATUS_TO_NUMBER[value],
+                        },
+                      };
+                    }
+                    return x;
+                  });
+                });
+                if (!foundBrief?.isDraft) {
+                  handleUpdateBrief({ uid, data });
+                }
+              }}
+            />
           );
         },
       },
@@ -187,6 +326,7 @@ const BriefsTable = ({
         enableSorting: false,
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["edit-header"] },
         size: 100,
         Cell: ({ row }) => {
           const uid = row.original.uid;
@@ -197,6 +337,14 @@ const BriefsTable = ({
                 display: "flex",
                 justifyContent: "center",
               }}
+              onClick={() => {
+                const data = {
+                  priority: foundBrief?.priority === 2 ? 1 : 2,
+                };
+                if (!foundBrief?.isDraft) {
+                  handleUpdateBrief({ uid, data, isTrigger: true });
+                }
+              }}
             >
               <Checkbox value={foundBrief?.priority === 2} />
             </div>
@@ -204,54 +352,33 @@ const BriefsTable = ({
         },
       },
       {
-        id: "linkTemplate",
-        header: "Link Template (Library)",
-        enableEditing: false,
+        accessorKey: "note",
+        header: "Brief cho Mockup",
         enableSorting: false,
-        size: 170,
+        enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        size: 100,
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
           return (
-            <TextInput
-              styles={{
-                input: {
-                  cursor: "pointer",
-                },
-              }}
-              value={foundBrief?.templateLink || ""}
-              readOnly
+            <Button
               onClick={() => {
-                window.open(foundBrief?.templateLink, "_blank");
+                setSelectedBrief(foundBrief);
+                setProductLineNote(
+                  getStringAsEditorState(foundBrief?.note?.newProductLine)
+                );
+                open();
               }}
-            />
-          );
-        },
-      },
-      {
-        id: "linkDoc",
-        header: "Brief Cho Mockup (Link Doc)",
-        enableEditing: false,
-        enableSorting: false,
-        size: 150,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Cell: ({ row }) => {
-          const uid = row.original.uid;
-          const foundBrief = find(payloads, { uid });
-          return (
-            <TextInput
-              styles={{
-                input: {
-                  cursor: "pointer",
-                },
-              }}
-              value={foundBrief?.readyToLaunchInfo?.docLink || ""}
-              readOnly
-              onClick={() => {
-                window.open(foundBrief?.readyToLaunchInfo?.docLink, "_blank");
-              }}
-            />
+            >
+              <IconEdit
+                style={{
+                  width: rem(20),
+                  height: rem(20),
+                }}
+              />
+            </Button>
           );
         },
       },
@@ -264,7 +391,7 @@ const BriefsTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["edit-header"] },
         Cell: ({ row }) => {
-          const uid = row.original.uid;
+          const uid = row?.original?.uid;
           const foundBrief = find(payloads, { uid });
           const artistNames = map(
             filter(users, { position: MEMBER_POSITIONS.MOCKUP }),
@@ -285,6 +412,7 @@ const BriefsTable = ({
                           name,
                           uid: foundMockup?.uid,
                         },
+                        mockupId: foundMockup?.uid,
                       };
                     }
                     return x;
@@ -293,62 +421,9 @@ const BriefsTable = ({
                 const data = {
                   mockupId: foundMockup?.uid || "",
                 };
-                handleUpdateBrief({ uid, data });
-              }}
-            />
-          );
-        },
-      },
-      {
-        accessorKey: "screenShot",
-        header: "Chụp SP",
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
-        size: 100,
-        Cell: ({ row }) => {
-          const uid = row.original.uid;
-          const foundBrief = find(payloads, { uid });
-          return (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-              onClick={() => {
-                const data = {
-                  isPhotography:
-                    foundBrief?.isPhotography === true ? false : true,
-                };
-                handleUpdateBrief({ uid, data, isTrigger: true });
-              }}
-            >
-              <Checkbox value={foundBrief?.isPhotography === true} />
-            </div>
-          );
-        },
-      },
-      {
-        id: "photographyLink",
-        header: "Hình chụp",
-        enableEditing: false,
-        enableSorting: false,
-        size: 170,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Cell: ({ row }) => {
-          const uid = row.original.uid;
-          const foundBrief = find(payloads, { uid });
-          return (
-            <TextInput
-              styles={{
-                input: {
-                  cursor: "pointer",
-                },
-              }}
-              value={foundBrief?.photographyLink || ""}
-              readOnly
-              onClick={() => {
-                window.open(foundBrief?.photographyLink, "_blank");
+                if (!foundBrief?.isDraft) {
+                  handleUpdateBrief({ uid, data });
+                }
               }}
             />
           );
@@ -392,24 +467,50 @@ const BriefsTable = ({
                 } else {
                   if (!urlPattern.test(value)) {
                     showNotification("Thất bại", "Link không hợp lệ", "red");
+                    setPayloads((prev) => {
+                      return map(prev, (x) => {
+                        if (x.uid === uid) {
+                          return {
+                            ...x,
+                            mockupLink: "",
+                          };
+                        }
+                        return x;
+                      });
+                    });
                     return;
                   }
                   data = {
                     mockupLink: value,
                   };
                 }
-                handleUpdateBrief({ uid, data });
+                if (!foundBrief?.isDraft) {
+                  handleUpdateBrief({ uid, data });
+                }
               }}
               onPaste={(e) => {
                 const value = e.clipboardData.getData("Text");
                 if (!urlPattern.test(value)) {
                   showNotification("Thất bại", "Link không hợp lệ", "red");
+                  setPayloads((prev) => {
+                    return map(prev, (x) => {
+                      if (x.uid === uid) {
+                        return {
+                          ...x,
+                          mockupLink: "",
+                        };
+                      }
+                      return x;
+                    });
+                  });
                   return;
                 }
                 const data = {
                   mockupLink: value,
                 };
-                handleUpdateBrief({ uid, data });
+                if (!foundBrief?.isDraft) {
+                  handleUpdateBrief({ uid, data });
+                }
               }}
             />
           );
@@ -425,6 +526,7 @@ const BriefsTable = ({
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
+
           return (
             <Group justify="center">
               <Button
@@ -433,16 +535,20 @@ const BriefsTable = ({
                 size="sx"
                 loading={loadingUpdateBriefUID === uid}
                 disabled={
-                  foundBrief?.status === 4 ||
+                  foundBrief?.status ===
+                    NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE ||
                   foundBrief?.mockupLink === "" ||
-                  (foundBrief?.isPhotography === true &&
-                    foundBrief?.photographyLink === "")
+                  isEmpty(foundBrief?.mockup?.name) ||
+                  isEmpty(foundBrief?.imageRef) ||
+                  isEmpty(foundBrief?.name)
                 }
                 onClick={() => {
                   if (
                     foundBrief?.mockupLink === "" ||
-                    (foundBrief?.isPhotography === true &&
-                      foundBrief?.photographyLink === "")
+                    isEmpty(foundBrief?.mockup?.name) ||
+                    isEmpty(foundBrief?.imageRef) ||
+                    isEmpty(foundBrief?.name) ||
+                    isEmpty(foundBrief?.name)
                   ) {
                     showNotification(
                       "Thất bại",
@@ -451,13 +557,18 @@ const BriefsTable = ({
                     );
                     return;
                   }
-                  const data = {
-                    status: 4,
-                  };
-                  handleUpdateBrief({ uid, data, isTrigger: true });
+                  if (foundBrief?.isDraft) {
+                    // create a new brief
+                    handleCreateNewBrief({ data: foundBrief });
+                  } else {
+                    const data = {
+                      status: NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE,
+                    };
+                    handleUpdateBrief({ uid, data, isTrigger: true });
+                  }
                 }}
               >
-                DONE
+                {foundBrief?.isDraft ? "Create" : "Done"}
               </Button>
             </Group>
           );
@@ -473,7 +584,14 @@ const BriefsTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
     ],
-    [validationErrors, briefs, query, payloads, loadingUpdateBriefUID]
+    [
+      validationErrors,
+      briefs,
+      query,
+      payloads,
+      loadingUpdateBriefUID,
+      loadingUploadFile,
+    ]
   );
 
   const [clipartName, setClipartName] = useState("");
@@ -605,24 +723,6 @@ const BriefsTable = ({
               }}
             />
             <Select
-              placeholder="Team"
-              data={["BD1", "BD2", "BD3", "POD-Biz"]}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={query?.rndTeam}
-              onChange={(value) => setQuery({ ...query, rndTeam: value })}
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  rndTeam: null,
-                });
-              }}
-            />
-            <Select
               placeholder="RND"
               data={map(filter(users, { position: "rnd" }), "name") || []}
               styles={{
@@ -689,7 +789,10 @@ const BriefsTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  status: value === "Done" ? [4] : [3],
+                  status:
+                    value === "Done"
+                      ? [NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE]
+                      : [NewProductLineBriefStatus.OPTIMIZED_MOCKUP_UNDONE],
                   statusValue: value,
                 })
               }
@@ -697,7 +800,10 @@ const BriefsTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [3, 4],
+                  status: [
+                    NewProductLineBriefStatus.OPTIMIZED_MOCKUP_UNDONE,
+                    NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE,
+                  ],
                   statusValue: null,
                 });
               }}
@@ -711,7 +817,10 @@ const BriefsTable = ({
                   rndTeam: null,
                   rndId: null,
                   epm: null,
-                  status: [3, 4],
+                  status: [
+                    NewProductLineBriefStatus.OPTIMIZED_MOCKUP_UNDONE,
+                    NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE,
+                  ],
                   sizeValue: null,
                   rndName: null,
                   statusValue: null,
@@ -773,6 +882,128 @@ const BriefsTable = ({
   return (
     <>
       <MantineReactTable table={table} />
+      <Button
+        radius="xl"
+        style={{
+          marginTop: "20px",
+          width: rem(60),
+          height: rem(60),
+        }}
+        color="#3751D7"
+        onClick={() => {
+          setPayloads([
+            ...payloads,
+            {
+              ...defaultRow,
+            },
+          ]);
+          setData([
+            ...data,
+            {
+              ...defaultRow,
+            },
+          ]);
+        }}
+      >
+        <IconPlus
+          style={{
+            width: rem(20),
+            height: rem(20),
+          }}
+        />
+      </Button>
+      <Modal
+        opened={opened}
+        onClose={close}
+        transitionProps={{ transition: "fade", duration: 200 }}
+        overlayProps={{
+          backgroundOpacity: 0.55,
+          blur: 3,
+        }}
+        radius="md"
+        size="lg"
+      >
+        <Grid>
+          <Grid.Col span={12}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "10px",
+                backgroundColor: "#D9F5D6",
+                border: "1px solid #62D256",
+                color: "#000000",
+                borderColor: "#62D256",
+                fontSize: "18px",
+                borderRadius: "12px",
+              }}
+            >
+              Edit Note
+            </div>
+          </Grid.Col>
+          <Grid.Col span={12}>
+            <Editor
+              state={productLineNote}
+              onChange={setProductLineNote}
+              classEditorWrapper={styles.editor}
+            />
+          </Grid.Col>
+          <Grid.Col
+            span={12}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Button
+              color="green"
+              style={{
+                width: rem(100),
+              }}
+              loading={!isEmpty(loadingUpdateBriefUID)}
+              onClick={async () => {
+                const data = {
+                  note: {
+                    newProductLine: getEditorStateAsString(productLineNote),
+                  },
+                };
+                if (!selectedBrief?.isDraft) {
+                  await handleUpdateBrief({
+                    uid: selectedBrief.uid,
+                    data,
+                    isTrigger: true,
+                  });
+                } else {
+                  setPayloads((prev) => {
+                    return map(prev, (x) => {
+                      if (x.uid === selectedBrief.uid) {
+                        return {
+                          ...x,
+                          note: {
+                            newProductLine:
+                              getEditorStateAsString(productLineNote),
+                          },
+                        };
+                      }
+                      return x;
+                    });
+                  });
+                }
+                close();
+              }}
+            >
+              <IconCheck
+                style={{
+                  width: rem(20),
+                  height: rem(20),
+                }}
+              />
+            </Button>
+          </Grid.Col>
+        </Grid>
+      </Modal>
     </>
   );
 };

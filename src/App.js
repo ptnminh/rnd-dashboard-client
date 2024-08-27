@@ -28,6 +28,7 @@ import BriefProductLineTask from "./screens/ProductLineTask";
 import ProductLineReadyToLaunch from "./screens/ProductLineReadyToLaunch";
 import MockupTask from "./screens/MockupTask";
 import ScreenshotTask from "./screens/ScreenShotTask";
+import Mockup from "./screens/Mockup";
 
 function App() {
   return (
@@ -109,7 +110,7 @@ function App() {
         path="/pl/mockup"
         element={
           <Page title="Product Line">
-            <MockupTask />
+            <Mockup />
           </Page>
         }
       />
@@ -121,7 +122,6 @@ function App() {
           </Page>
         }
       />
-
 
       <Route
         path="/designer/feedback"

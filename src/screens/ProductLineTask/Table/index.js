@@ -21,7 +21,7 @@ import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
 } from "../../../utils";
-import { artistServices, productlineService } from "../../../services";
+import { productlineService } from "../../../services";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
 import { showNotification } from "../../../utils/index";
 
@@ -55,8 +55,7 @@ const BriefsTable = ({
   }, [briefs]);
 
   const handleUpdateBrief = async ({ uid, data, isTrigger = false }) => {
-    if (isTrigger)
-      setLoadingUpdateBriefUID(uid);
+    if (isTrigger) setLoadingUpdateBriefUID(uid);
     await productlineService.update({
       uid,
       data,
@@ -238,7 +237,7 @@ const BriefsTable = ({
               }}
               onBlur={(e) => {
                 const value = e.target.value;
-                let data = {}
+                let data = {};
                 if (value === "") {
                   data = {
                     ...foundBrief,
@@ -300,7 +299,7 @@ const BriefsTable = ({
               }}
               onBlur={(e) => {
                 const value = e.target.value;
-                let data = {}
+                let data = {};
                 if (value === "") {
                   data = {
                     ...foundBrief,
@@ -349,10 +348,15 @@ const BriefsTable = ({
                 color="green"
                 size="sx"
                 loading={loadingUpdateBriefUID === uid}
-                disabled={foundBrief?.status === 2 || foundBrief?.templateLink === "" || foundBrief?.productLink === ""}
+                disabled={
+                  [2, 3, 4].includes(foundBrief?.status) ||
+                  foundBrief?.templateLink === "" ||
+                  foundBrief?.productLink === ""
+                }
                 onClick={() => {
                   if (
-                    foundBrief?.productLink === "" || foundBrief?.templateLink === ""
+                    foundBrief?.productLink === "" ||
+                    foundBrief?.templateLink === ""
                   ) {
                     showNotification(
                       "Thất bại",
@@ -553,7 +557,7 @@ const BriefsTable = ({
                 setQuery({
                   ...query,
                   rndName: null,
-                  rnd: null,
+                  rndId: null,
                 });
               }}
             />
@@ -620,7 +624,7 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Undone: {metadata?.totalUndoneBriefsWithFilter}
+              Undone: {metadata?.totalUndoneNewProductLineBriefsWithFilter}
             </div>
             <div
               style={{
@@ -628,7 +632,8 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
+              Time to done:{" "}
+              {metadata?.totalTimeToDoneNewProductLineBriefsWithFilter}h
             </div>
           </Flex>
         </div>

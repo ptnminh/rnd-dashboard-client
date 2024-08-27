@@ -279,7 +279,7 @@ const BriefsTable = ({
                     }
                     return x;
                   });
-                })
+                });
                 const data = {
                   ...foundBrief,
                   artistId: foundArtist?.uid,
@@ -414,12 +414,13 @@ const BriefsTable = ({
                 color="green"
                 size="sx"
                 loading={loadingUpdateBriefUID === uid}
-                disabled={foundBrief?.status === 2 || (
+                disabled={
+                  foundBrief?.status === 2 ||
                   !foundBrief?.size?.artist ||
                   !foundBrief?.artist?.name ||
                   foundBrief?.name === "" ||
                   foundBrief?.clipartLinkRef === ""
-                )}
+                }
                 onClick={() => {
                   if (
                     !foundBrief?.size?.artist &&
@@ -722,7 +723,7 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Undone: {metadata?.totalUndoneBriefsWithFilter}
+              Undone: {metadata?.totalUndoneArtBriefsWithFilter}
             </div>
             <div
               style={{
@@ -730,7 +731,7 @@ const BriefsTable = ({
                 fontSize: "16px",
               }}
             >
-              Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
+              Time to done: {metadata?.totalTimeToDoneArtBriefsWithFilter}h
             </div>
           </Flex>
         </div>

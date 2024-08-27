@@ -131,6 +131,10 @@ export const PERMISSIONS_RELATIONSHIP = [
     childPermissions: ["read:mockup", "read:new_product_line"],
   },
   {
+    parentPermissions: ["update:optimized_mockup", "create:optimized_mockup"],
+    childPermissions: ["read:optimized_mockup", "read:new_product_line"],
+  },
+  {
     parentPermissions: ["read:new_product_line"],
     childPermissions: ["read:brief"],
   },
