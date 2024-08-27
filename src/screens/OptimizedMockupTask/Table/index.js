@@ -58,7 +58,6 @@ const defaultRow = {
   mockupId: "",
   mockupLink: "",
   date: moment().tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY"),
-  uid: generateRandomString(10),
   isDraft: true,
   newProductLineInfo: {
     time: "0h",
@@ -91,7 +90,7 @@ const BriefsTable = ({
     setData(briefs);
     setPayloads(briefs);
   }, [briefs]);
-
+  console.log({ users });
   const handleUpdateBrief = async ({ uid, data, isTrigger = false }) => {
     if (isTrigger) {
       setLoadingUpdateBriefUID(uid);
@@ -671,6 +670,7 @@ const BriefsTable = ({
       payloads,
       loadingUpdateBriefUID,
       loadingUploadFile,
+      users,
     ]
   );
 
@@ -971,16 +971,19 @@ const BriefsTable = ({
         }}
         color="#3751D7"
         onClick={() => {
+          const uid = generateRandomString(10);
           setPayloads([
             ...payloads,
             {
               ...defaultRow,
+              uid,
             },
           ]);
           setData([
             ...data,
             {
               ...defaultRow,
+              uid,
             },
           ]);
         }}
