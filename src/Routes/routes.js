@@ -27,6 +27,14 @@ const PATH_NAMES = {
     title: "Chụp - Task",
     url: "/pl/screenshot",
   },
+  PRODUCT_LINE_SETTING: {
+    title: "New PL - Setting",
+    url: "/pl/setting",
+  },
+  MOCKUP_SETTING: {
+    title: "Mockup - Setting",
+    url: "/pl/mockup/setting",
+  },
   RND_PRODUCT_LINE: {
     title: "List - Product Line",
     url: "/rnd/product-line",
@@ -208,6 +216,16 @@ export const NAVIGATION = [
         title: PATH_NAMES.PRODUCT_LINE_SCREENSHOT.title,
         url: PATH_NAMES.PRODUCT_LINE_SCREENSHOT.url,
         permissions: ["read:photography"],
+      },
+      {
+        title: PATH_NAMES.PRODUCT_LINE_SETTING.title,
+        url: PATH_NAMES.PRODUCT_LINE_SETTING.url,
+        permissions: ["read:new_product_line_setting"],
+      },
+      {
+        title: PATH_NAMES.MOCKUP_SETTING.title,
+        url: PATH_NAMES.MOCKUP_SETTING.url,
+        permissions: ["read:mockup_setting"],
       },
     ],
   },

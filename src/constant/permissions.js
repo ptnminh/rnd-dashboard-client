@@ -138,4 +138,15 @@ export const PERMISSIONS_RELATIONSHIP = [
     parentPermissions: ["read:new_product_line"],
     childPermissions: ["read:brief"],
   },
+  {
+    parentPermissions: ["update:mockup_setting"],
+    childPermissions: ["read:mockup_setting", "read:new_product_line"],
+  },
+  {
+    parentPermissions: ["update:new_product_line_setting"],
+    childPermissions: [
+      "read:new_product_line_setting",
+      "read:new_product_line",
+    ],
+  },
 ];

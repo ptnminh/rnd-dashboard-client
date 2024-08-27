@@ -47,6 +47,7 @@ import {
   filter,
   find,
   flatMap,
+  isEmpty,
   keys,
   map,
   omit,
@@ -284,6 +285,18 @@ const CreateUser = ({
       roleId: role?.uid,
       ...(data?.position && { position: toLower(data.position) }),
     };
+    if (toLower(data?.position) === MEMBER_POSITIONS.RND) {
+      if (isEmpty(data?.shortName)) {
+        showNotification("Thất bại", "Vui lòng nhập Short Name", "red");
+        setLoadingCreateUser(false);
+        return;
+      }
+      if (isEmpty(data?.team)) {
+        showNotification("Thất bại", "Vui lòng chọn Team", "red");
+        setLoadingCreateUser(false);
+        return;
+      }
+    }
     const createUserResponse = await userServices.createUser(payload);
     if (createUserResponse) {
       showNotification("Thành công", "Tạo người dùng thành công", "green");

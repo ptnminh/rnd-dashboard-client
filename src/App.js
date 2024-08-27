@@ -276,6 +276,22 @@ function App() {
         }
       />
       <Route
+        path="/pl/setting"
+        element={
+          <Page title="MKT">
+            <Setting name="new-product-line" />
+          </Page>
+        }
+      />
+      <Route
+        path="/pl/mockup/setting"
+        element={
+          <Page title="MKT">
+            <Setting name="mockup" />
+          </Page>
+        }
+      />
+      <Route
         path="/users"
         element={
           <Page title="MKT">
