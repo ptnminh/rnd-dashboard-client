@@ -214,6 +214,7 @@ const BriefsTable = ({
           return (
             <Select
               data={["Small", "Medium", "Big"]}
+              allowDeselect={false}
               value={CONVERT_NUMBER_TO_STATUS[foundBrief?.size?.artist] || null}
               onChange={(value) => {
                 setPayloads((prev) => {
@@ -263,6 +264,7 @@ const BriefsTable = ({
           return (
             <Select
               data={artistNames || []}
+              allowDeselect={false}
               value={foundBrief?.artist?.name || null}
               onChange={(name) => {
                 const foundArtist = find(users, { name });

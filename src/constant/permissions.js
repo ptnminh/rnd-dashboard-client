@@ -23,6 +23,14 @@ export const PERMISSIONS_RELATIONSHIP = [
     childPermissions: ["read:collection", "read:brief"],
   },
   {
+    parentPermissions: ["read:collection"],
+    childPermissions: ["read:brief"],
+  },
+  {
+    parentPermissions: ["read:layout"],
+    childPermissions: ["read:brief"],
+  },
+  {
     parentPermissions: ["create:layout", "update:layout", "delete:layout"],
     childPermissions: ["read:layout", "read:brief"],
   },
@@ -47,8 +55,12 @@ export const PERMISSIONS_RELATIONSHIP = [
     childPermissions: ["read:design_feedback"],
   },
   {
-    parentPermissions: ["update:design_feedback"],
-    childPermissions: ["read:design_feedback"],
+    parentPermissions: ["read:design_setting"],
+    childPermissions: ["read:design"],
+  },
+  {
+    parentPermissions: ["read:design_feedback"],
+    childPermissions: ["read:design"],
   },
   {
     parentPermissions: ["update:video"],
@@ -67,8 +79,28 @@ export const PERMISSIONS_RELATIONSHIP = [
     childPermissions: ["read:epm_setting", "read:epm"],
   },
   {
+    parentPermissions: ["read:epm_setting"],
+    childPermissions: ["read:epm"],
+  },
+  {
     parentPermissions: ["create:mkt_post", "update:mkt_post"],
     childPermissions: ["read:mkt_post", "read:mkt"],
+  },
+  {
+    parentPermissions: ["read:mkt_post"],
+    childPermissions: ["read:mkt"],
+  },
+  {
+    parentPermissions: ["read:mkt_account"],
+    childPermissions: ["read:mkt"],
+  },
+  {
+    parentPermissions: ["read:mkt_sample_campaign"],
+    childPermissions: ["read:mkt"],
+  },
+  {
+    parentPermissions: ["read:mkt_setting"],
+    childPermissions: ["read:mkt"],
   },
   {
     parentPermissions: ["create:mkt_camp", "update:mkt_camp"],
@@ -107,8 +139,16 @@ export const PERMISSIONS_RELATIONSHIP = [
     childPermissions: ["read:artist", "read:brief"],
   },
   {
+    parentPermissions: ["read:artist"],
+    childPermissions: ["read:brief"],
+  },
+  {
     parentPermissions: ["update:artist_setting"],
     childPermissions: ["read:artist", "read:artist_setting"],
+  },
+  {
+    parentPermissions: ["read:artist_setting"],
+    childPermissions: ["read:artist"],
   },
   {
     parentPermissions: ["update:user", "create:user"],
@@ -131,6 +171,18 @@ export const PERMISSIONS_RELATIONSHIP = [
     childPermissions: ["read:mockup", "read:new_product_line"],
   },
   {
+    parentPermissions: ["read:mockup"],
+    childPermissions: ["read:new_product_line"],
+  },
+  {
+    parentPermissions: ["read:photography"],
+    childPermissions: ["read:new_product_line"],
+  },
+  {
+    parentPermissions: ["read:ready_to_launch"],
+    childPermissions: ["read:new_product_line"],
+  },
+  {
     parentPermissions: ["update:optimized_mockup", "create:optimized_mockup"],
     childPermissions: ["read:optimized_mockup", "read:new_product_line"],
   },
@@ -148,5 +200,13 @@ export const PERMISSIONS_RELATIONSHIP = [
       "read:new_product_line_setting",
       "read:new_product_line",
     ],
+  },
+  {
+    parentPermissions: ["read:new_product_line_setting"],
+    childPermissions: ["read:new_product_line"],
+  },
+  {
+    parentPermissions: ["read:mockup_setting"],
+    childPermissions: ["read:new_product_line"],
   },
 ];

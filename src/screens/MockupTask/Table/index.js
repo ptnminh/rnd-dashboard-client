@@ -274,6 +274,7 @@ const BriefsTable = ({
             <Select
               data={artistNames || []}
               value={foundBrief?.mockup?.name || null}
+              allowDeselect={false}
               onChange={(name) => {
                 const foundMockup = find(users, { name });
                 setPayloads((prev) => {
