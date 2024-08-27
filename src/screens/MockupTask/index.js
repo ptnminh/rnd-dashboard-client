@@ -8,7 +8,11 @@ import { useDisclosure } from "@mantine/hooks";
 import { Flex, Grid, Modal, Pagination, TextInput } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
-import { artistServices, productlineService, rndServices } from "../../services";
+import {
+  artistServices,
+  productlineService,
+  rndServices,
+} from "../../services";
 import ArtistRef from "../Artist/ArtistRef";
 import Editor from "../../components/Editor";
 import { CONVERT_NUMBER_TO_STATUS, getStringAsEditorState } from "../../utils";
@@ -205,13 +209,15 @@ const MockupTask = () => {
                   fontWeight: 600,
                   lineHeight: 1.7,
                   fontSize: "14px",
-                }
+                },
               }}
               readOnly
               required
             />
             <Editor
-              state={getStringAsEditorState(selectedBrief?.note?.artist)}
+              state={getStringAsEditorState(
+                selectedBrief?.note?.newProductLine
+              )}
               classEditorWrapper={styles.editor}
               readOnly={true}
             />

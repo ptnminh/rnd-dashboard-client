@@ -147,8 +147,8 @@ export const NAVIGATION = [
       {
         title: PATH_NAMES.RND_BRIEF_PRODUCT_LINE.title,
         url: PATH_NAMES.RND_BRIEF_PRODUCT_LINE.url,
-        permissions: ["read:product_line"],
-      }
+        permissions: ["read:new_product_line"],
+      },
     ],
   },
   {
@@ -189,7 +189,7 @@ export const NAVIGATION = [
   {
     title: PATH_NAMES.PRODUCT_LINE_TASK.title,
     arrowDown: true,
-    permissions: ["read:product_line"],
+    permissions: ["read:new_product_line"],
     icon: "diamond",
     slug: PATH_NAMES.PRODUCT_LINE_TASK.url,
     pathname: PATH_NAMES.PRODUCT_LINE_TASK.url,
@@ -197,18 +197,18 @@ export const NAVIGATION = [
       {
         title: PATH_NAMES.PRODUCT_LINE_READY_TO_LAUNCH.title,
         url: PATH_NAMES.PRODUCT_LINE_READY_TO_LAUNCH.url,
-        permissions: ["read:product_line"],
+        permissions: ["read:ready_to_launch"],
       },
       {
         title: PATH_NAMES.PRODUCT_LINE_MOCKUP.title,
         url: PATH_NAMES.PRODUCT_LINE_MOCKUP.url,
-        permissions: ["read:product_line"],
+        permissions: ["read:mockup"],
       },
       {
         title: PATH_NAMES.PRODUCT_LINE_SCREENSHOT.title,
         url: PATH_NAMES.PRODUCT_LINE_SCREENSHOT.url,
-        permissions: ["read:product_line"],
-      }
+        permissions: ["read:photography"],
+      },
     ],
   },
   // {

@@ -31,7 +31,7 @@ const ScreenshotTask = () => {
     status: [3, 4],
     isPhotography: true,
     statusValue: "Undone",
-    photographyStatus: -1
+    photographyStatus: -1,
   });
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
@@ -208,13 +208,15 @@ const ScreenshotTask = () => {
                   fontWeight: 600,
                   lineHeight: 1.7,
                   fontSize: "14px",
-                }
+                },
               }}
               readOnly
               required
             />
             <Editor
-              state={getStringAsEditorState(selectedBrief?.note?.artist)}
+              state={getStringAsEditorState(
+                selectedBrief?.note?.newProductLine
+              )}
               classEditorWrapper={styles.editor}
               readOnly={true}
             />

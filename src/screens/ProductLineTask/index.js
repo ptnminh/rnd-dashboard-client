@@ -206,13 +206,15 @@ const BriefProductLineTask = () => {
                   fontWeight: 600,
                   lineHeight: 1.7,
                   fontSize: "14px",
-                }
+                },
               }}
               readOnly
               required
             />
             <Editor
-              state={getStringAsEditorState(selectedBrief?.note?.artist)}
+              state={getStringAsEditorState(
+                selectedBrief?.note?.newProductLine
+              )}
               classEditorWrapper={styles.editor}
               readOnly={true}
             />
