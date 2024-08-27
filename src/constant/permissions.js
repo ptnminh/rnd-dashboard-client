@@ -115,8 +115,8 @@ export const PERMISSIONS_RELATIONSHIP = [
     childPermissions: ["read:user"],
   },
   {
-    parentPermissions: ["update:new_product_line"],
-    childPermissions: ["read:new_product_line"],
+    parentPermissions: ["update:new_product_line", "create:new_product_line"],
+    childPermissions: ["read:new_product_line", "read:brief"],
   },
   {
     parentPermissions: ["update:photography"],

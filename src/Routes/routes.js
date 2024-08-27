@@ -135,6 +135,11 @@ export const NAVIGATION = [
     pathname: PATH_NAMES.RND_BRIEFS.url,
     dropdown: [
       {
+        title: PATH_NAMES.RND_BRIEF_PRODUCT_LINE.title,
+        url: PATH_NAMES.RND_BRIEF_PRODUCT_LINE.url,
+        permissions: ["read:new_product_line"],
+      },
+      {
         title: PATH_NAMES.RND_PRODUCT_LINE.title,
         url: PATH_NAMES.RND_PRODUCT_LINE.url,
         permissions: ["read:collection", "read:layout"],
@@ -143,11 +148,6 @@ export const NAVIGATION = [
         title: PATH_NAMES.RND_BRIEFS_ARTIST.title,
         url: PATH_NAMES.RND_BRIEFS_ARTIST.url,
         permissions: ["read:artist"],
-      },
-      {
-        title: PATH_NAMES.RND_BRIEF_PRODUCT_LINE.title,
-        url: PATH_NAMES.RND_BRIEF_PRODUCT_LINE.url,
-        permissions: ["read:new_product_line"],
       },
     ],
   },
