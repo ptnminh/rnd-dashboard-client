@@ -276,7 +276,7 @@ function App() {
         }
       />
       <Route
-        path="/pl/setting"
+        path="/pl/new-pl-setting"
         element={
           <Page title="MKT">
             <Setting name="new-product-line" />

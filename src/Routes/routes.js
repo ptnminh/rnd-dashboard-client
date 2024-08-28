@@ -29,7 +29,7 @@ const PATH_NAMES = {
   },
   PRODUCT_LINE_SETTING: {
     title: "New PL - Setting",
-    url: "/pl/setting",
+    url: "/pl/new-pl-setting",
   },
   MOCKUP_SETTING: {
     title: "Mockup - Setting",
