@@ -15,7 +15,7 @@ import LazyLoad from "react-lazyload";
 import { uploadServices } from "../../../services/uploads";
 import { showNotification } from "../../../utils/index";
 import Loader from "../../../components/Loader";
-import { isEmpty, set } from "lodash";
+import { isEmpty } from "lodash";
 import Editor from "../../../components/Editor";
 
 function generateRandomString(length) {
