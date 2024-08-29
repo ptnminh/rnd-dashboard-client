@@ -267,6 +267,9 @@ const generateScaleNewDesign = ({
         designLinkRef: x?.designLinkRef,
         nextAccumulator: currentRnDAccumulator + designs.length,
         skuPrefix: prefix,
+        ...(x?.note && {
+          note: getEditorStateAsString(x?.note),
+        }),
       };
     })
   );
@@ -865,7 +868,12 @@ const NewCampaigns = () => {
       return;
     }
     const data = map(generatedSKUs, (x) => {
-      const { SKU: sku, nextAccumulator, skuPrefix } = x;
+      const {
+        SKU: sku,
+        nextAccumulator,
+        skuPrefix,
+        note: refDesignMarketNote,
+      } = x;
       return {
         skuRef: SKU?.sku || "",
         linkProductRef: SKU?.productLink || "",
@@ -918,6 +926,7 @@ const NewCampaigns = () => {
           imageRef: x.Design,
           clipartIds: x.clipartIds,
           designLinkRef: x.designLinkRef,
+          refDesignMarketNote,
         }),
         nextSkuAccumulator: nextAccumulator,
         ...(skuPrefix && skuPrefix !== "XX" && { skuPrefix }),

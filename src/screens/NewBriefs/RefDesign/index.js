@@ -21,6 +21,7 @@ import { showNotification } from "../../../utils/index";
 import Loader from "../../../components/Loader";
 import { useDisclosure } from "@mantine/hooks";
 import Clipart from "../Clipart";
+import Editor from "../../../components/Editor";
 function generateRandomString(length) {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -31,6 +32,7 @@ function generateRandomString(length) {
   }
   return result;
 }
+// Phủ Market
 const RefDesign = ({
   designs,
   setDesigns,
@@ -64,6 +66,7 @@ const RefDesign = ({
           imageRef: updateFileResponse.data.url,
           clipart: null,
           designLinkRef: null,
+          note: "",
         },
         ...designs,
       ];
@@ -105,6 +108,7 @@ const RefDesign = ({
               imageRef: updateFileResponse.data.url,
               clipart: null,
               designLinkRef: null,
+              note: "",
             },
             ...designs,
           ];
@@ -128,7 +132,7 @@ const RefDesign = ({
         classTitle={cn("title-green", styles.title)}
       >
         <ScrollArea
-          h={550}
+          h={600}
           scrollbars="y"
           scrollbarSize={4}
           scrollHideDelay={1000}
@@ -137,10 +141,9 @@ const RefDesign = ({
             style={{
               marginTop: "10px",
             }}
-            columns={12}
           >
             <Grid.Col
-              span={{ sm: 4, md: 3, lg: 2 }}
+              span={3}
               style={{
                 position: "relative",
               }}
@@ -150,6 +153,8 @@ const RefDesign = ({
                 padding="sm"
                 style={{
                   height: "364px",
+
+                  maxWidth: "300px",
                   backgroundColor: "#EFF0F1",
                 }}
               >
@@ -219,7 +224,7 @@ const RefDesign = ({
             </Grid.Col>
             {map(designs, (item, index) => (
               <Grid.Col
-                span={{ sm: 4, md: 3, lg: 2 }}
+                span={3}
                 key={index}
                 style={{
                   position: "relative",
@@ -230,6 +235,8 @@ const RefDesign = ({
                   padding="sm"
                   style={{
                     cursor: "pointer",
+
+                    maxWidth: "100%",
                   }}
                 >
                   <MantineCard.Section
@@ -345,6 +352,28 @@ const RefDesign = ({
                       Add Clipart (UID)
                     </Button>
                   )}
+                  <MantineCard.Section
+                    style={{
+                      padding: "calc(0.75rem * 1)",
+                    }}
+                  >
+                    <Editor
+                      isHideToolbar={true}
+                      state={item.note}
+                      onChange={(newEditorState) => {
+                        const foundDesignIndex = findIndex(designs, {
+                          imageRef: item.imageRef,
+                        });
+                        if (foundDesignIndex === -1) return;
+                        const newDesigns = [...designs];
+                        newDesigns[foundDesignIndex] = {
+                          ...item,
+                          note: newEditorState,
+                        };
+                        setDesigns(newDesigns);
+                      }}
+                    />
+                  </MantineCard.Section>
                 </MantineCard>
               </Grid.Col>
             ))}

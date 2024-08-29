@@ -282,7 +282,15 @@ const Niche = ({
             {!isEmpty(selectedSKU?.cliparts) && (
               <List.Item>
                 Clipart:{" "}
-                <span>{join(map(selectedSKU?.cliparts, "name"), " ,")}</span>
+                <span>
+                  {map(selectedSKU?.cliparts, (clipart) => {
+                    return (
+                      <a href={clipart?.refLink} target="_blank">
+                        {clipart.name}, {""}
+                      </a>
+                    );
+                  })}
+                </span>
               </List.Item>
             )}
             {selectedSKU?.linkDesign && (

@@ -107,7 +107,7 @@ const MarketBriefDesign = ({ marketBrief, setMarketBrief, title }) => {
           >
             {isEmpty(marketBrief) && (
               <Grid.Col
-                span={{ sm: 4, md: 3, lg: 2 }}
+                span={3}
                 style={{
                   position: "relative",
                   height: "100%",

@@ -497,7 +497,10 @@ const NewDesign = ({
 
         <Grid.Col span={12}>
           <Editor
-            state={getStringAsEditorState(selectedSKU?.note?.designer)}
+            state={getStringAsEditorState(
+              selectedSKU?.attribute?.refDesignMarketNote ||
+                selectedSKU?.note?.designer
+            )}
             classEditor={styles.editor}
             label="Designer Note"
             readOnly={true}

@@ -19,7 +19,7 @@ import {
   IconArrowBigRightLinesFilled,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
-import { join, map } from "lodash";
+import { isEmpty, join, map } from "lodash";
 import { STATUS } from "../../../constant";
 
 const Clipart = ({
@@ -279,12 +279,20 @@ const Clipart = ({
               </ThemeIcon>
             }
           >
-            {
+            {!isEmpty(selectedSKU?.cliparts) && (
               <List.Item>
                 Clipart:{" "}
-                <span>{join(map(selectedSKU?.cliparts, "name"), " ,")}</span>
+                <span>
+                  {map(selectedSKU?.cliparts, (clipart) => {
+                    return (
+                      <a href={clipart?.refLink} target="_blank">
+                        {clipart.name}, {""}
+                      </a>
+                    );
+                  })}
+                </span>
               </List.Item>
-            }
+            )}
             {selectedSKU?.linkDesign && (
               <List.Item>
                 Link Design (NAS):{" "}

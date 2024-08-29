@@ -28,6 +28,7 @@ const Editor = ({
   button,
   readOnly = false,
   classEditorWrapper,
+  isHideToolbar = false,
 }) => {
   const handlePastedFiles = useCallback(
     (files) => {
@@ -86,14 +87,9 @@ const Editor = ({
         editorClassName={styles.editorMain}
         onEditorStateChange={onChange}
         toolbar={{
-          options: [
-            "inline",
-            "list",
-            "textAlign",
-            "embedded",
-            "emoji",
-            "image",
-          ],
+          options: isHideToolbar
+            ? ["inline", "list", "textAlign"]
+            : ["inline", "list", "textAlign", "emoji", "embedded", "image"],
           inline: {
             options: ["bold", "italic", "underline"],
           },

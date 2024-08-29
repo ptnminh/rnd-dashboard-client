@@ -253,7 +253,7 @@ const BriefsTable = ({
                   });
                   return newPayloads;
                 });
-                rndServices.updateBriefDesign({
+                rndServices.updateBriefListing({
                   uid,
                   data: {
                     size: {
@@ -354,7 +354,7 @@ const BriefsTable = ({
                 rndServices.updateBriefListing({
                   uid,
                   data: {
-                    epm: find(users, { name: value })?.uid,
+                    epmId: find(users, { name: value })?.uid,
                   },
                 });
               }}
