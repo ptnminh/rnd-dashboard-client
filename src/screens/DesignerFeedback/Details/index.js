@@ -265,10 +265,17 @@ const Table = ({
           }
           return color ? (
             <Badge color={color} variant="filled">
-              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}
+              {
+                CONVERT_NUMBER_TO_STATUS[
+                  row?.original?.size?.rnd || row?.original?.size?.design
+                ]
+              }
             </Badge>
           ) : (
-            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}</span>
+            <span>
+              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd] ||
+                row?.original?.size?.design}
+            </span>
           );
         },
       },

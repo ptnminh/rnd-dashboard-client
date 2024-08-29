@@ -67,7 +67,6 @@ const DesignerScreens = () => {
 
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedSKU, setSelectedSKU] = useState();
-  const [selectedCollection, setSelectedCollection] = useState();
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
   const [trigger, setTrigger] = useState(false);
@@ -84,6 +83,7 @@ const DesignerScreens = () => {
       page,
       limit: 30,
       sorting,
+      view: "design",
       ...query,
     });
     const { data, metadata } = response;

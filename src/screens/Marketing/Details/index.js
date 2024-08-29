@@ -536,7 +536,9 @@ const BriefsTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  size: CONVERT_STATUS_TO_NUMBER[value],
+                  size: {
+                    "size.rnd": CONVERT_STATUS_TO_NUMBER[value],
+                  },
                   sizeValue: value,
                 })
               }

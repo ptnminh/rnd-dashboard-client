@@ -888,9 +888,9 @@ const NewCampaigns = () => {
         value: {
           rnd: CONVERT_STATUS_TO_NUMBER[briefValue],
         },
-        rnd: find(users, { name: rndMember })?.uid,
-        epm: find(users, { name: epmMember })?.uid,
-        designer: find(users, { name: designerMember })?.uid,
+        rndId: find(users, { name: rndMember })?.uid,
+        epmId: find(users, { name: epmMember })?.uid,
+        designerId: find(users, { name: designerMember })?.uid,
         ...(epmNote || designerNote || mktNote || marketBrief?.note
           ? {
               note: {
@@ -908,7 +908,7 @@ const NewCampaigns = () => {
           : {}),
         status: 1,
         ...(briefType === BRIEF_TYPES[0] && {
-          productLine: x?.uid,
+          productLineId: x?.uid,
         }),
         ...(briefType === BRIEF_TYPES[1] && {
           clipartIds: x?.clipartIds,
@@ -922,7 +922,7 @@ const NewCampaigns = () => {
         }),
         designLinkRef: SKU?.designLink || "",
         ...(briefType === BRIEF_TYPES[3] && {
-          productLine: selectedProductBases[0]?.uid,
+          productLineId: selectedProductBases[0]?.uid,
           imageRef: x.Design,
           clipartIds: x.clipartIds,
           designLinkRef: x.designLinkRef,
@@ -931,14 +931,14 @@ const NewCampaigns = () => {
         nextSkuAccumulator: nextAccumulator,
         ...(skuPrefix && skuPrefix !== "XX" && { skuPrefix }),
         ...(briefType === BRIEF_TYPES[4] && {
-          productLine: selectedProductBases[0]?.uid,
+          productLineId: selectedProductBases[0]?.uid,
           designLinkRef: x.designLinkRef,
           imageRef: x.imageRef,
           skuId: x.uid,
           skuRef: x.skuRef,
         }),
         ...(briefType === BRIEF_TYPES[5] && {
-          productLine: selectedProductBases[0]?.uid,
+          productLineId: selectedProductBases[0]?.uid,
           clipartIds: x.clipartIds,
           designLinkRef: x.designLinkRef,
           imageRef: x["Ref"],

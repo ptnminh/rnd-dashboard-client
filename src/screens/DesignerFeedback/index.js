@@ -66,6 +66,7 @@ const DesignerFeedbackScreens = () => {
       page,
       limit: 30,
       sorting,
+      view: "design-feedback",
       ...query,
     });
     const { data, metadata } = response;
