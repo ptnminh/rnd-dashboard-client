@@ -234,8 +234,8 @@ const BriefsTable = ({
                   width: "100px",
                 },
               }}
-              defaultValue={CONVERT_NUMBER_TO_STATUS[foundBrief.size?.rnd]}
-              value={CONVERT_NUMBER_TO_STATUS[foundBrief.size?.epm]}
+              defaultValue={CONVERT_NUMBER_TO_STATUS[foundBrief?.size?.epm]}
+              value={CONVERT_NUMBER_TO_STATUS[foundBrief?.size?.epm]}
               onChange={(value) => {
                 setPayloads((prev) => {
                   const newPayloads = map(prev, (x) => {
