@@ -226,8 +226,10 @@ const KeywordTable = ({
                   width: "100px",
                 },
               }}
-              value={CONVERT_NUMBER_TO_STATUS[foundBrief.size?.design]}
-              defaultValue={CONVERT_NUMBER_TO_STATUS[foundBrief.size?.rnd]}
+              value={
+                CONVERT_NUMBER_TO_STATUS[foundBrief.size?.design] ||
+                CONVERT_NUMBER_TO_STATUS[foundBrief.size?.rnd]
+              }
               onChange={(value) => {
                 setPayloads((prev) => {
                   const newPayloads = map(prev, (x) => {
