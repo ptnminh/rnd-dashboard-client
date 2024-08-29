@@ -56,9 +56,11 @@ const KeywordTable = ({
     defaultValue: [],
   });
   permissions = map(permissions, "name");
+  const [payloads, setPayloads] = useState([]);
   const [data, setData] = useState(briefs || []);
   useEffect(() => {
     setData(briefs);
+    setPayloads(briefs);
   }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
     await rndServices.updateBriefDesign({
@@ -106,6 +108,11 @@ const KeywordTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        Cell: ({ row }) => (
+          <Badge color={row?.original?.attribute?.batchColor} variant="filled">
+            {row.original.batch}
+          </Badge>
+        ),
       },
       {
         accessorKey: "sku",
@@ -207,26 +214,65 @@ const KeywordTable = ({
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => {
-          let color = null;
-          switch (row?.original?.size?.rnd) {
-            case 1:
-              color = "green";
-              break;
-            case 2:
-              color = "yellow";
-              break;
-            case 3:
-              color = "red";
-              break;
-            default:
-              break;
-          }
-          return color ? (
-            <Badge color={color} variant="filled">
-              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}
-            </Badge>
-          ) : (
-            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}</span>
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <Select
+              placeholder="Size"
+              allowDeselect={false}
+              data={["Small", "Medium", "Big"]}
+              styles={{
+                input: {
+                  width: "100px",
+                },
+              }}
+              value={CONVERT_NUMBER_TO_STATUS[foundBrief.size?.design]}
+              defaultValue={CONVERT_NUMBER_TO_STATUS[foundBrief.size?.rnd]}
+              onChange={(value) => {
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        size: {
+                          design: CONVERT_STATUS_TO_NUMBER[value],
+                        },
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
+                });
+                rndServices.updateBriefDesign({
+                  uid,
+                  data: {
+                    size: {
+                      design: CONVERT_STATUS_TO_NUMBER[value],
+                    },
+                  },
+                });
+              }}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "priority",
+        header: "PRIORITY",
+        enableSorting: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        size: 100,
+        Cell: ({ row }) => {
+          return (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Checkbox value={row?.original?.priority === 2} />
+            </div>
           );
         },
       },
@@ -276,6 +322,7 @@ const KeywordTable = ({
                   },
                 });
               }}
+              readOnly={row?.original?.status === 2}
             />
           );
         },
@@ -328,26 +375,6 @@ const KeywordTable = ({
         },
       },
       {
-        accessorKey: "priority",
-        header: "PRIORITY",
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
-        size: 100,
-        Cell: ({ row }) => {
-          return (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <Checkbox value={row?.original?.priority === 2} />
-            </div>
-          );
-        },
-      },
-      {
         id: "time",
         accessorFn: (row) => row?.designInfo?.time,
         header: "TIME",
@@ -389,7 +416,7 @@ const KeywordTable = ({
         ),
       },
     ],
-    [validationErrors]
+    [validationErrors, data, payloads]
   );
 
   //DELETE action

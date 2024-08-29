@@ -22,7 +22,12 @@ import {
   IconDeviceFloppy,
   IconBan,
 } from "@tabler/icons-react";
-import { CHOOSE_BRIEF_TYPES, LOCAL_STORAGE_KEY } from "../../../constant";
+import {
+  CHOOSE_BRIEF_TYPES,
+  LOCAL_STORAGE_KEY,
+  MEMBER_POSITIONS,
+  STATUS,
+} from "../../../constant";
 import moment from "moment-timezone";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -55,10 +60,12 @@ const BriefsTable = ({
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
     defaultValue: [],
   });
+  const [payloads, setPayloads] = useState([]);
   permissions = map(permissions, "name");
   const [data, setData] = useState(briefs || []);
   useEffect(() => {
     setData(briefs);
+    setPayloads(briefs);
   }, [briefs]);
   const handleUpdateStatus = async ({ uid, status }) => {
     await rndServices.updateBriefListing({
@@ -106,6 +113,11 @@ const BriefsTable = ({
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         enableSorting: false,
+        Cell: ({ row }) => (
+          <Badge color={row?.original?.attribute?.batchColor} variant="filled">
+            {row.original.batch}
+          </Badge>
+        ),
       },
       {
         accessorKey: "sku",
@@ -210,26 +222,65 @@ const BriefsTable = ({
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => {
-          let color = null;
-          switch (row?.original?.size?.rnd) {
-            case 1:
-              color = "green";
-              break;
-            case 2:
-              color = "yellow";
-              break;
-            case 3:
-              color = "red";
-              break;
-            default:
-              break;
-          }
-          return color ? (
-            <Badge color={color} variant="filled">
-              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}
-            </Badge>
-          ) : (
-            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd]}</span>
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <Select
+              placeholder="Size"
+              allowDeselect={false}
+              data={["Small", "Medium", "Big"]}
+              styles={{
+                input: {
+                  width: "100px",
+                },
+              }}
+              defaultValue={CONVERT_NUMBER_TO_STATUS[foundBrief.size?.rnd]}
+              value={CONVERT_NUMBER_TO_STATUS[foundBrief.size?.epm]}
+              onChange={(value) => {
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        size: {
+                          epm: CONVERT_STATUS_TO_NUMBER[value],
+                        },
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
+                });
+                rndServices.updateBriefDesign({
+                  uid,
+                  data: {
+                    size: {
+                      epm: CONVERT_STATUS_TO_NUMBER[value],
+                    },
+                  },
+                });
+              }}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "priority",
+        header: "PRIORITY",
+        enableSorting: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        size: 100,
+        Cell: ({ row }) => {
+          return (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Checkbox value={row?.original?.priority === 2} />
+            </div>
           );
         },
       },
@@ -267,6 +318,47 @@ const BriefsTable = ({
         size: 130,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <Select
+              placeholder="Size"
+              allowDeselect={false}
+              data={filter(users, { position: MEMBER_POSITIONS.EPM }).map(
+                (x) => x.name
+              )}
+              styles={{
+                input: {
+                  width: "100px",
+                },
+              }}
+              value={foundBrief?.epm?.name}
+              onChange={(value) => {
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        epm: {
+                          name: value,
+                        },
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
+                });
+                rndServices.updateBriefListing({
+                  uid,
+                  data: {
+                    epm: find(users, { name: value })?.uid,
+                  },
+                });
+              }}
+            />
+          );
+        },
       },
       {
         accessorKey: "linkProduct",
@@ -279,6 +371,7 @@ const BriefsTable = ({
           return (
             <TextInput
               value={updateBrief[row.original.uid]?.linkProduct}
+              readOnly={row.original.status === STATUS.LISTED}
               onChange={(e) => {
                 setUpdateBrief({
                   ...updateBrief,
@@ -336,26 +429,6 @@ const BriefsTable = ({
             >
               {row.original.status === 3 ? "Undone" : "Done"}
             </Button>
-          );
-        },
-      },
-      {
-        accessorKey: "priority",
-        header: "PRIORITY",
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
-        size: 100,
-        Cell: ({ row }) => {
-          return (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <Checkbox value={row?.original?.priority === 2} />
-            </div>
           );
         },
       },

@@ -28,6 +28,7 @@ import {
 import Editor from "../../../components/Editor";
 import styles from "./ScaleNiche.module.sass";
 import { map } from "lodash";
+import { STATUS } from "../../../constant";
 
 const ScaleNiche = ({
   close,
@@ -71,7 +72,7 @@ const ScaleNiche = ({
               borderRadius: "12px",
             }}
           >
-            Scale Clipart
+            Scale Niche
           </div>
         </Grid.Col>
         <Grid.Col span={5}>
@@ -368,6 +369,7 @@ const ScaleNiche = ({
                 backgroundColor: "#62D256",
                 color: "#ffffff",
               }}
+              disabled={selectedSKU?.status === STATUS.DESIGNED}
               onClick={() => {
                 handleUpdateLinkDesign(selectedSKU?.uid);
               }}

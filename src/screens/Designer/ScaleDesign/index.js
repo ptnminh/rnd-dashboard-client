@@ -21,6 +21,7 @@ import {
 import Editor from "../../../components/Editor";
 import styles from "./NewDesign.module.sass";
 import { isEmpty } from "lodash";
+import { STATUS } from "../../../constant";
 
 const ScaleDesign = ({
   close,
@@ -276,6 +277,7 @@ const ScaleDesign = ({
                 backgroundColor: "#62D256",
                 color: "#ffffff",
               }}
+              disabled={selectedSKU?.status === STATUS.DESIGNED}
               onClick={() => {
                 handleUpdateLinkDesign(selectedSKU?.uid);
               }}

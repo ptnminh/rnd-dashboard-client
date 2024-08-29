@@ -22,6 +22,7 @@ import {
   Pagination,
   MultiSelect,
   Select,
+  Tooltip,
 } from "@mantine/core";
 import { showNotification } from "../../utils/index";
 
@@ -53,6 +54,7 @@ import {
   IconEye,
   IconRotateClockwise,
   IconCodePlus,
+  IconCodeMinus,
 } from "@tabler/icons-react";
 import LazyLoad from "react-lazyload";
 import { useNavigate } from "react-router";
@@ -418,6 +420,7 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
 const NewCampaigns = () => {
   const navigate = useNavigate();
 
+  const myClipartHeaderRef = useRef(null);
   const [designerNote, setDesignerNote] = useState("");
   const [epmNote, setEPMNote] = useState("");
   const [mktNote, setMKTNote] = useState("");
@@ -720,6 +723,7 @@ const NewCampaigns = () => {
     setMarketBrief({});
     setUsingProductBaseData(false);
     setGrouppedCliparts([]);
+    setKeepClipArt(KEEP_CLIPARTS[0]);
   };
 
   useEffect(() => {
@@ -985,14 +989,17 @@ const NewCampaigns = () => {
     ]);
     setSelectedClipArts([]);
   };
+  const handleSeparateClipart = () => {
+    const cliparts = map(selectedClipArts, (x) => ({
+      index: Date.now() + Math.floor(Math.random() * 1000),
+      cliparts: [x],
+    }));
+    setGrouppedCliparts([...grouppedCliparts, ...cliparts]);
+    setSelectedClipArts([]);
+  };
   return (
     <>
       <div style={{ position: "relative" }}>
-        <LoadingOverlay
-          visible={createBriefLoading}
-          zIndex={1000}
-          overlayProps={{ radius: "sm", blur: 2 }}
-        />
         <div className={styles.row}>
           <div className={styles.col}>
             <RndInfo
@@ -1080,18 +1087,35 @@ const NewCampaigns = () => {
                     justifyContent: "center",
                     gap: "20px",
                   }}
+                  ref={myClipartHeaderRef}
                 >
                   {!isEmpty(selectedClipArts) &&
                     briefType === BRIEF_TYPES[1] && (
-                      <Text>
-                        <Button
-                          leftSection={<IconCodePlus />}
-                          onClick={handleMergeClipart}
-                        >
-                          Group
-                        </Button>
-                      </Text>
+                      <Tooltip label="1 clipart/brief">
+                        <Text>
+                          <Button
+                            leftSection={<IconCodeMinus />}
+                            onClick={handleSeparateClipart}
+                          >
+                            Separate
+                          </Button>
+                        </Text>
+                      </Tooltip>
                     )}
+                  {!isEmpty(selectedClipArts) &&
+                    briefType === BRIEF_TYPES[1] && (
+                      <Tooltip label="n clipart/brief">
+                        <Text>
+                          <Button
+                            leftSection={<IconCodePlus />}
+                            onClick={handleMergeClipart}
+                          >
+                            Group
+                          </Button>
+                        </Text>
+                      </Tooltip>
+                    )}
+
                   <Flex gap={10}>
                     {!isEmpty(grouppedCliparts) &&
                       briefType === BRIEF_TYPES[1] && (
@@ -1667,17 +1691,33 @@ const NewCampaigns = () => {
                       justifyContent: "center",
                       gap: "20px",
                     }}
+                    ref={myClipartHeaderRef}
                   >
                     {!isEmpty(selectedClipArts) && (
-                      <Text>
-                        <Button
-                          leftSection={<IconCodePlus />}
-                          onClick={handleMergeClipart}
-                        >
-                          Group
-                        </Button>
-                      </Text>
+                      <Tooltip label="1 clipart/brief">
+                        <Text>
+                          <Button
+                            leftSection={<IconCodeMinus />}
+                            onClick={handleSeparateClipart}
+                          >
+                            Separate
+                          </Button>
+                        </Text>
+                      </Tooltip>
                     )}
+                    {!isEmpty(selectedClipArts) && (
+                      <Tooltip label="n clipart/brief">
+                        <Text>
+                          <Button
+                            leftSection={<IconCodePlus />}
+                            onClick={handleMergeClipart}
+                          >
+                            Group
+                          </Button>
+                        </Text>
+                      </Tooltip>
+                    )}
+
                     <Flex gap={10}>
                       {!isEmpty(grouppedCliparts) && (
                         <Button
@@ -1779,6 +1819,21 @@ const NewCampaigns = () => {
                       return;
                     }
                     if (
+                      (briefType === BRIEF_TYPES[1] ||
+                        briefType === BRIEF_TYPES[5]) &&
+                      isEmpty(grouppedCliparts)
+                    ) {
+                      showNotification(
+                        "Thất bại",
+                        "Vui lòng chọn Clipart. Chọn Clipart & di chuột vào button Group hoặc Separate để biết thêm chi tiết",
+                        "red"
+                      );
+                      myClipartHeaderRef.current.scrollIntoView({
+                        behavior: "smooth",
+                      });
+                      return;
+                    }
+                    if (
                       isEmpty(grouppedCliparts) &&
                       isEmpty(selectedQuotes) &&
                       isEmpty(selectedProductBases) &&
@@ -1839,14 +1894,26 @@ const NewCampaigns = () => {
                     if (briefType !== BRIEF_TYPES[5]) {
                       open();
                     } else {
-                      if (
-                        isEmpty(marketBrief) &&
-                        isEmpty(grouppedCliparts) &&
-                        isEmpty(selectedProductBases)
-                      ) {
+                      if (isEmpty(marketBrief)) {
                         showNotification(
                           "Thất bại",
                           "Vui lòng nhập thông tin Ref",
+                          "red"
+                        );
+                        return;
+                      }
+                      if (isEmpty(grouppedCliparts)) {
+                        showNotification(
+                          "Thất bại",
+                          "Vui lòng chọn Clipart",
+                          "red"
+                        );
+                        return;
+                      }
+                      if (isEmpty(selectedProductBases)) {
+                        showNotification(
+                          "Thất bại",
+                          "Vui lòng chọn Product Line",
                           "red"
                         );
                         return;
@@ -2032,11 +2099,12 @@ const NewCampaigns = () => {
                 width: "100%",
               }}
             >
-              <button
+              <Button
                 className={cn(
                   "button-stroke-blue button-small",
                   styles.createButton
                 )}
+                loading={createBriefLoading}
                 onClick={handleSubmitBrief}
                 style={{
                   marginTop: "24px",
@@ -2049,7 +2117,7 @@ const NewCampaigns = () => {
                 }}
               >
                 <span>Tạo Brief</span>
-              </button>
+              </Button>
             </div>
           </Grid.Col>
         </Grid>

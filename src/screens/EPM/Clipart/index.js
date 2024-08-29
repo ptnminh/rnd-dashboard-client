@@ -20,6 +20,7 @@ import {
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
 import { join, map } from "lodash";
+import { STATUS } from "../../../constant";
 
 const Clipart = ({
   close,
@@ -331,6 +332,7 @@ const Clipart = ({
                 backgroundColor: "#62D256",
                 color: "#ffffff",
               }}
+              disabled={selectedSKU?.status === STATUS.LISTED}
               onClick={() => {
                 handleUpdateLinkProduct(selectedSKU?.uid);
               }}

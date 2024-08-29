@@ -581,6 +581,7 @@ const EPMScreens = () => {
                       backgroundColor: "#62D256",
                       color: "#ffffff",
                     }}
+                    disabled={selectedSKU?.status === STATUS.LISTED}
                     onClick={() => {
                       handleUpdateLinkProduct(selectedSKU?.uid);
                     }}

@@ -19,7 +19,8 @@ import {
   IconArrowBigRightLinesFilled,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
-import { join, map } from "lodash";
+import { isEmpty, join, map } from "lodash";
+import { STATUS } from "../../../constant";
 
 const Niche = ({
   close,
@@ -278,12 +279,12 @@ const Niche = ({
               </ThemeIcon>
             }
           >
-            {
+            {!isEmpty(selectedSKU?.cliparts) && (
               <List.Item>
                 Clipart:{" "}
                 <span>{join(map(selectedSKU?.cliparts, "name"), " ,")}</span>
               </List.Item>
-            }
+            )}
             {selectedSKU?.linkDesign && (
               <List.Item>
                 Link Design (NAS):{" "}
@@ -331,6 +332,7 @@ const Niche = ({
                 backgroundColor: "#62D256",
                 color: "#ffffff",
               }}
+              disabled={selectedSKU?.status === STATUS.LISTED}
               onClick={() => {
                 handleUpdateLinkProduct(selectedSKU?.uid);
               }}

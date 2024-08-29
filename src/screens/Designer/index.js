@@ -612,6 +612,7 @@ const DesignerScreens = () => {
                       backgroundColor: "#62D256",
                       color: "#ffffff",
                     }}
+                    disabled={selectedSKU?.status === STATUS.DESIGNED}
                     onClick={() => {
                       handleUpdateLinkDesign(selectedSKU?.uid);
                     }}
