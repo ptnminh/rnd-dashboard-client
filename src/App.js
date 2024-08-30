@@ -239,7 +239,7 @@ function App() {
         path="/mkt/setting"
         element={
           <Page title="MKT">
-            <Setting name="mkt" />
+            <Setting name="mkt-camp" />
           </Page>
         }
       />
