@@ -273,7 +273,7 @@ export const rndServices = {
                 : "asc",
           }
         : {};
-      let url = `/briefs?page=${page}&pageSize=${limit}&view=${view}`;
+      let url = `/briefs/${view}?page=${page}&pageSize=${limit}`;
       if (Object.keys(filter).length !== 0) {
         const queryString = `filter=${encodeURIComponent(
           JSON.stringify(filter)

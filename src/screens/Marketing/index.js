@@ -75,7 +75,7 @@ export const CreateWaitingPosts = () => {
       search,
       page,
       limit: 30,
-      view: "mkt",
+      view: "mkt-post",
       sorting,
       ...query,
     });

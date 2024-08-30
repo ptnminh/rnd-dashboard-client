@@ -187,30 +187,49 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
-          let color = null;
-          switch (row?.original?.value?.rnd) {
-            case 1:
-              color = "#cfcfcf";
-              break;
-            case 2:
-              color = "yellow";
-              break;
-            case 3:
-              color = "green";
-              break;
-            case 4:
-              color = "#38761C";
-              break;
-            default:
-              break;
-          }
-          return color ? (
-            <Badge color={color} variant="filled">
-              {CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}
-            </Badge>
-          ) : (
-            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}</span>
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <Select
+              placeholder="Value"
+              disabled={foundBrief?.status === STATUS.LISTED}
+              allowDeselect={false}
+              data={["Small", "Medium", "Big", "Super Big"]}
+              styles={{
+                input: {
+                  width: "100px",
+                },
+              }}
+              value={CONVERT_NUMBER_TO_STATUS[foundBrief.value?.rnd]}
+              onChange={(value) => {
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        value: {
+                          ...x.value,
+                          rnd: CONVERT_STATUS_TO_NUMBER[value],
+                        },
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
+                });
+                rndServices.updateBriefListing({
+                  uid,
+                  data: {
+                    value: {
+                      ...foundBrief.value,
+                      rnd: CONVERT_STATUS_TO_NUMBER[value],
+                    },
+                  },
+                });
+              }}
+            />
           );
         },
       },
@@ -221,6 +240,7 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row?.original?.uid;
           const foundBrief = find(payloads, { uid });
@@ -228,6 +248,7 @@ const BriefsTable = ({
             <Select
               placeholder="Size"
               allowDeselect={false}
+              disabled={foundBrief?.status === STATUS.LISTED}
               data={["Small", "Medium", "Big"]}
               styles={{
                 input: {
@@ -245,6 +266,7 @@ const BriefsTable = ({
                       return {
                         ...x,
                         size: {
+                          ...x.size,
                           epm: CONVERT_STATUS_TO_NUMBER[value],
                         },
                       };
@@ -257,6 +279,7 @@ const BriefsTable = ({
                   uid,
                   data: {
                     size: {
+                      ...foundBrief.size,
                       epm: CONVERT_STATUS_TO_NUMBER[value],
                     },
                   },
@@ -664,7 +687,9 @@ const BriefsTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  size: CONVERT_STATUS_TO_NUMBER[value],
+                  size: {
+                    "size.epm": CONVERT_STATUS_TO_NUMBER[value],
+                  },
                   sizeValue: value,
                 })
               }

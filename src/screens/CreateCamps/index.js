@@ -84,7 +84,7 @@ const CreateCampsScreen = () => {
       search,
       page,
       limit: 30,
-      view: "mkt",
+      view: "mkt-camp",
       sorting,
       ...query,
     });
@@ -127,9 +127,9 @@ const CreateCampsScreen = () => {
           briefId: x.uid,
           team: x.rndTeam,
           sku: x.sku,
-          ads: map(x?.adsLinks, ad => ({
+          ads: map(x?.adsLinks, (ad) => ({
             ...ad,
-            thumbLink: x?.designInfo?.thumbLink
+            thumbLink: x?.designInfo?.thumbLink,
           })),
           exCampIds: map(
             filter(x?.adsLinks, (link) => link.campaignId),
@@ -399,9 +399,9 @@ const CreateCampsScreen = () => {
                         href={
                           selectedSKU?.briefType === BRIEF_TYPES[5]
                             ? `https://${selectedSKU.designLinkRef.replace(
-                              /^(https?:\/\/)?/,
-                              ""
-                            )}`
+                                /^(https?:\/\/)?/,
+                                ""
+                              )}`
                             : selectedSKU?.designLinkRef
                         }
                         target="_blank"
@@ -513,7 +513,7 @@ const CreateCampsScreen = () => {
                   }
                 >
                   {selectedSKU?.briefType === BRIEF_TYPES[4] ||
-                    selectedSKU?.briefType === BRIEF_TYPES[5] ? (
+                  selectedSKU?.briefType === BRIEF_TYPES[5] ? (
                     <List.Item>
                       Product Base: {""}
                       <span>
@@ -531,7 +531,7 @@ const CreateCampsScreen = () => {
                         {
                           selectedSKU?.[
                             CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                            selectedSKU?.briefType
+                              selectedSKU?.briefType
                             ]
                           ]?.name
                         }
