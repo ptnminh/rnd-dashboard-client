@@ -9,6 +9,7 @@ import {
   Flex,
   TextInput,
   Button,
+  TagsInput,
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -19,7 +20,7 @@ import {
   IconArrowBigRightLinesFilled,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
-import { isEmpty, join, map } from "lodash";
+import { isEmpty, map } from "lodash";
 import { STATUS } from "../../../constant";
 
 const Clipart = ({
@@ -282,15 +283,49 @@ const Clipart = ({
             {!isEmpty(selectedSKU?.cliparts) && (
               <List.Item>
                 Clipart:{" "}
-                <span>
-                  {map(selectedSKU?.cliparts, (clipart) => {
+                <List listStyleType="disc">
+                  <TagsInput
+                    value={map(selectedSKU?.cliparts, (x) => x.name)}
+                    clearable={false}
+                    renderOption={(clipart) => {
+                      return (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <span>{clipart.name}</span>
+                          <a
+                            href={clipart.refLink}
+                            target="_blank"
+                            style={{
+                              color: "#228be6",
+                              textDecoration: "none",
+                              marginLeft: "5px",
+                            }}
+                          >
+                            Link
+                          </a>
+                        </div>
+                      );
+                    }}
+                  />
+                  {/* {map(selectedSKU?.cliparts, (clipart) => {
                     return (
-                      <a href={clipart?.refLink} target="_blank">
-                        {clipart.name}, {""}
-                      </a>
+                      <List.Item
+                        style={{
+                          fontSize: "12px",
+                        }}
+                      >
+                        <a href={clipart?.refLink} target="_blank">
+                          {clipart.name}
+                        </a>
+                      </List.Item>
                     );
-                  })}
-                </span>
+                  })} */}
+                </List>
               </List.Item>
             )}
             {selectedSKU?.linkDesign && (
