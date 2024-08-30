@@ -78,6 +78,14 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
       </div>
     );
   };
+  console.log(
+    `pathname:::${pathname}::::item.pathname:::${
+      item.pathname
+    }++++pathname.includes(item.slug || item.pathname):::${pathname.includes(
+      item.slug || item.pathname
+    )}`,
+    visible && item.pathname === pathname
+  );
 
   return (
     <div
@@ -86,7 +94,8 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
         className,
         { [styles.active]: visible && item.pathname === pathname },
         {
-          [styles.active]: pathname.includes(item.slug || item.pathname),
+          [styles.active]:
+            pathname.includes(item.slug || item.pathname) && visible,
         },
         { [styles.wide]: visibleSidebar }
       )}
