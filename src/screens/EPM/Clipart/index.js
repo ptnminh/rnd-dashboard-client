@@ -10,6 +10,8 @@ import {
   TextInput,
   Button,
   TagsInput,
+  HoverCard,
+  Text,
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -18,6 +20,7 @@ import {
 import {
   IconCircleCheck,
   IconArrowBigRightLinesFilled,
+  IconCircleDashed
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
 import { isEmpty, map } from "lodash";
@@ -283,48 +286,33 @@ const Clipart = ({
             {!isEmpty(selectedSKU?.cliparts) && (
               <List.Item>
                 Clipart:{" "}
-                <List listStyleType="disc">
-                  <TagsInput
-                    value={map(selectedSKU?.cliparts, (x) => x.name)}
-                    clearable={false}
-                    renderOption={(clipart) => {
-                      return (
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <span>{clipart.name}</span>
-                          <a
-                            href={clipart.refLink}
-                            target="_blank"
-                            style={{
-                              color: "#228be6",
-                              textDecoration: "none",
-                              marginLeft: "5px",
-                            }}
-                          >
-                            Link
-                          </a>
-                        </div>
-                      );
-                    }}
-                  />
-                  {/* {map(selectedSKU?.cliparts, (clipart) => {
+                <List listStyleType="disc"
+                  withPadding
+                  style={{
+                    marginTop: "10px"
+                  }}
+                >
+                  {map(selectedSKU?.cliparts, (clipart) => {
                     return (
                       <List.Item
                         style={{
                           fontSize: "12px",
                         }}
                       >
-                        <a href={clipart?.refLink} target="_blank">
-                          {clipart.name}
-                        </a>
+                        <HoverCard width={280} shadow="md">
+                          <HoverCard.Target>
+                            <a href={clipart?.refLink} target="_blank">
+                              {clipart.name}
+                            </a>
+                          </HoverCard.Target>
+                          <HoverCard.Dropdown>
+                            <iframe src={clipart?.refLink} title={clipart.name}></iframe>
+                          </HoverCard.Dropdown>
+                        </HoverCard>
+
                       </List.Item>
                     );
-                  })} */}
+                  })}
                 </List>
               </List.Item>
             )}
