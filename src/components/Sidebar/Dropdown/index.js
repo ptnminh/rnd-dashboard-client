@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import cn from "classnames";
 import styles from "./Dropdown.module.sass";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
@@ -6,16 +6,20 @@ import Icon from "../../Icon";
 import { isEmpty, isEqual, map } from "lodash";
 
 const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
-  const [visible, setVisible] = useState(false);
   const [chooseDropdown, setChooseDropdown] = useState([]);
 
   const { pathname } = useLocation();
+  const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
 
   const handleClick = () => {
-    setVisible(!visible);
     navigate(item.pathname);
+    setVisible(!visible);
   };
+
+  useEffect(() => {
+    setVisible(item.pathname === pathname);
+  }, []);
 
   const Head = () => {
     return (
@@ -46,7 +50,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
           <div key={index}>
             <NavLink
               className={({ isActive }) => {
-                return isActive && isEmpty(x.dropdown)
+                return isActive && isEmpty(x.dropdown) && (pathname === x.url || pathname === item.pathname)
                   ? `${styles.link} ${styles.active}`
                   : styles.link;
               }}
@@ -70,7 +74,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
                 <Dropdown
                   className={cn(
                     styles.nestedDropdown,
-                    styles.nestedDropdownLink
+                    styles.nestedDropdownLink,
                   )}
                   setValue={setVisible}
                   key={index}
@@ -81,11 +85,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
         ))}
       </div>
     );
-  };
-  console.log(`------------------`);
-  console.log("pathname", pathname);
-  console.log("item.pathname", item.pathname);
-  console.log(`------------------`);
+  }
   return (
     <div
       className={cn(
@@ -105,7 +105,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
     >
       <Head />
       <Body {...item} />
-    </div>
+    </div >
   );
 };
 

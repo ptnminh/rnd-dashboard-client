@@ -19,7 +19,6 @@ const PATH_NAMES = {
           },
         },
       },
-
       NEW_MOCKUP: {
         title: "2. Mockup",
         children: {
@@ -164,6 +163,10 @@ const PATH_NAMES = {
       },
     },
   },
+  USER: {
+    title: "7. User",
+    url: "/users",
+  }
 };
 
 export const NAVIGATION = [
@@ -174,7 +177,7 @@ export const NAVIGATION = [
     pathname: "/",
     arrowDown: true,
     turnOffActive: true,
-    permissions: ["read:mkt"],
+    permissions: ["read:new_product_line"],
     dropdown: [
       {
         title: PATH_NAMES.PRODUCT_BASE.children.NEW_PRODUCT_LINE.title,
@@ -187,7 +190,7 @@ export const NAVIGATION = [
             pathname:
               PATH_NAMES.PRODUCT_BASE.children.NEW_PRODUCT_LINE.children.BRIEF
                 .url,
-            permissions: ["read:mkt_post"],
+            permissions: ["create:new_product_line"],
           },
           {
             title:
@@ -196,7 +199,7 @@ export const NAVIGATION = [
             pathname:
               PATH_NAMES.PRODUCT_BASE.children.NEW_PRODUCT_LINE.children.TASK
                 .url,
-            permissions: ["create:mkt_post"],
+            permissions: ["read:new_product_line"],
           },
           {
             title:
@@ -205,7 +208,7 @@ export const NAVIGATION = [
             pathname:
               PATH_NAMES.PRODUCT_BASE.children.NEW_PRODUCT_LINE.children.SETTING
                 .url,
-            permissions: ["create:mkt_post"],
+            permissions: ["read:new_product_line_setting"],
           },
         ],
       },
@@ -220,12 +223,14 @@ export const NAVIGATION = [
             pathname:
               PATH_NAMES.PRODUCT_BASE.children.NEW_MOCKUP.children
                 .READY_TO_LAUNCH.url,
+            permissions: ["read:ready_to_launch"]
           },
           {
             title:
               PATH_NAMES.PRODUCT_BASE.children.NEW_MOCKUP.children.TASK.title,
             pathname:
               PATH_NAMES.PRODUCT_BASE.children.NEW_MOCKUP.children.TASK.url,
+            permissions: ["read:mockup", "read:optimized_mockup"],
           },
           {
             title:
@@ -234,6 +239,7 @@ export const NAVIGATION = [
             pathname:
               PATH_NAMES.PRODUCT_BASE.children.NEW_MOCKUP.children.PHOTOGRAPHY
                 .url,
+            permissions: ["read:photography"],
           },
           {
             title:
@@ -241,6 +247,7 @@ export const NAVIGATION = [
                 .title,
             pathname:
               PATH_NAMES.PRODUCT_BASE.children.NEW_MOCKUP.children.SETTING.url,
+            permissions: ["read:mockup_setting"],
           },
         ],
       },
@@ -253,14 +260,14 @@ export const NAVIGATION = [
               PATH_NAMES.PRODUCT_BASE.children.NEW_CLIPART.children.BRIEF.title,
             pathname:
               PATH_NAMES.PRODUCT_BASE.children.NEW_CLIPART.children.BRIEF.url,
-            permissions: ["read:mkt_post"],
+            permissions: ["create:artist"],
           },
           {
             title:
               PATH_NAMES.PRODUCT_BASE.children.NEW_CLIPART.children.TASK.title,
             pathname:
               PATH_NAMES.PRODUCT_BASE.children.NEW_CLIPART.children.TASK.url,
-            permissions: ["create:mkt_post"],
+            permissions: ["read:artist"],
           },
           {
             title:
@@ -268,7 +275,7 @@ export const NAVIGATION = [
                 .title,
             pathname:
               PATH_NAMES.PRODUCT_BASE.children.NEW_CLIPART.children.SETTING.url,
-            permissions: ["create:mkt_post"],
+            permissions: ["read:artist_setting"],
           },
         ],
       },
@@ -281,12 +288,13 @@ export const NAVIGATION = [
     pathname: "/rnd",
     arrowDown: true,
     turnOffActive: true,
-    permissions: ["read:mkt"],
+    permissions: ["read:brief"],
     dropdown: [
       {
         title: PATH_NAMES.RND.children.BRIEF_DESIGN.title,
         url: PATH_NAMES.RND.children.BRIEF_DESIGN.url,
         arrowDown: true,
+        permissions: ["create:brief"],
       },
       {
         title: PATH_NAMES.RND.children.SETTING.title,
@@ -297,7 +305,7 @@ export const NAVIGATION = [
               PATH_NAMES.RND.children.SETTING.children.LIST_PRODUCT_LINE.title,
             pathname:
               PATH_NAMES.RND.children.SETTING.children.LIST_PRODUCT_LINE.url,
-            permissions: ["read:mkt_post"],
+            permissions: ["read:collection", "read:layout"],
           },
         ],
       },
@@ -310,22 +318,25 @@ export const NAVIGATION = [
     pathname: "/designer",
     turnOffActive: true,
     arrowDown: true,
-    permissions: ["read:mkt"],
+    permissions: ["read:design"],
     dropdown: [
       {
         title: PATH_NAMES.DESIGNER.children.TASK.title,
         url: PATH_NAMES.DESIGNER.children.TASK.url,
+        permissions: ["read:design"],
         arrowDown: true,
       },
       {
         title: PATH_NAMES.DESIGNER.children.FEEDBACK.title,
         url: PATH_NAMES.DESIGNER.children.FEEDBACK.url,
+        permissions: ["read:design_feedback"],
         arrowDown: true,
       },
       {
         title: PATH_NAMES.DESIGNER.children.SETTING.title,
         url: PATH_NAMES.DESIGNER.children.SETTING.url,
         arrowDown: true,
+        permissions: ["read:design_setting"]
       },
     ],
   },
@@ -336,17 +347,19 @@ export const NAVIGATION = [
     pathname: "/epm",
     turnOffActive: true,
     arrowDown: true,
-    permissions: ["read:mkt"],
+    permissions: ["read:epm"],
     dropdown: [
       {
         title: PATH_NAMES.EPM.children.TASK.title,
         url: PATH_NAMES.EPM.children.TASK.url,
         arrowDown: true,
+        permissions: ["read:epm"],
       },
       {
         title: PATH_NAMES.EPM.children.SETTING.title,
         url: PATH_NAMES.EPM.children.SETTING.url,
         arrowDown: true,
+        permissions: ["read:epm_setting"],
       },
     ],
   },
@@ -363,6 +376,7 @@ export const NAVIGATION = [
         title: PATH_NAMES.MKT.children.LIST_SKU.title,
         url: PATH_NAMES.MKT.children.LIST_SKU.url,
         arrowDown: true,
+        permissions: ["read:mkt_post", "read:mkt_camp"],
       },
       {
         title: PATH_NAMES.MKT.children.POST.title,
@@ -402,30 +416,37 @@ export const NAVIGATION = [
           {
             title: PATH_NAMES.MKT.children.MATERIAL.children.ACCOUNT.title,
             pathname: PATH_NAMES.MKT.children.MATERIAL.children.ACCOUNT.url,
-            permissions: ["read:mkt_camp"],
+            permissions: ["read:mkt_account"],
           },
           {
             title:
               PATH_NAMES.MKT.children.MATERIAL.children.ROOT_CAMPAIGN.title,
             pathname:
               PATH_NAMES.MKT.children.MATERIAL.children.ROOT_CAMPAIGN.url,
-            permissions: ["create:mkt_camp"],
+            permissions: ["read:mkt_sample_campaign"],
           },
           {
             title:
               PATH_NAMES.MKT.children.MATERIAL.children.CAMPAIGN_CAPTION.title,
             pathname:
               PATH_NAMES.MKT.children.MATERIAL.children.CAMPAIGN_CAPTION.url,
-            permissions: ["create:mkt_camp"],
+            permissions: ["read:mkt_caption"],
           },
           {
             title: PATH_NAMES.MKT.children.MATERIAL.children.SETTING.title,
             pathname: PATH_NAMES.MKT.children.MATERIAL.children.SETTING.url,
-            permissions: ["create:mkt_camp"],
+            permissions: ["read:mkt_setting"],
           },
         ],
         arrowDown: true,
       },
     ],
+  },
+  {
+    title: PATH_NAMES.USER.title,
+    url: PATH_NAMES.USER.url,
+    icon: "diamond",
+    arrowDown: true,
+    permissions: ["read:user"],
   },
 ];

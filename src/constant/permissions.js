@@ -136,11 +136,7 @@ export const PERMISSIONS_RELATIONSHIP = [
   },
   {
     parentPermissions: ["update:artist", "create:artist"],
-    childPermissions: ["read:artist", "read:brief"],
-  },
-  {
-    parentPermissions: ["read:artist"],
-    childPermissions: ["read:brief"],
+    childPermissions: ["read:artist"],
   },
   {
     parentPermissions: ["update:artist_setting"],
@@ -156,7 +152,7 @@ export const PERMISSIONS_RELATIONSHIP = [
   },
   {
     parentPermissions: ["update:new_product_line", "create:new_product_line"],
-    childPermissions: ["read:new_product_line", "read:brief"],
+    childPermissions: ["read:new_product_line"],
   },
   {
     parentPermissions: ["update:photography"],
@@ -185,10 +181,6 @@ export const PERMISSIONS_RELATIONSHIP = [
   {
     parentPermissions: ["update:optimized_mockup", "create:optimized_mockup"],
     childPermissions: ["read:optimized_mockup", "read:new_product_line"],
-  },
-  {
-    parentPermissions: ["read:new_product_line"],
-    childPermissions: ["read:brief"],
   },
   {
     parentPermissions: ["update:mockup_setting"],
