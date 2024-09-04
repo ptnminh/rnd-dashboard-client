@@ -28,6 +28,7 @@ import BriefProductLineTask from "./screens/ProductLineTask";
 import ProductLineReadyToLaunch from "./screens/ProductLineReadyToLaunch";
 import ScreenshotTask from "./screens/ScreenShotTask";
 import Mockup from "./screens/Mockup";
+import ComingSoon from "./screens/ComingSoon";
 
 function App() {
   return (
@@ -36,7 +37,7 @@ function App() {
         path="/"
         element={
           <Page title="Board">
-            <BriefProductLine />
+            <ComingSoon />
           </Page>
         }
       />
@@ -81,7 +82,7 @@ function App() {
         }
       />
       <Route
-        path="/product-base/new-product-line/brief"
+        path="/product-base/new-product-line"
         element={
           <Page title="Product Line">
             <BriefProductLine />

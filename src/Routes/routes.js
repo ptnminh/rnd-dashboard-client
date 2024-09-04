@@ -1,4 +1,8 @@
 const PATH_NAMES = {
+  DIRECTION: {
+    title: "1. Direction",
+    url: "/",
+  },
   PRODUCT_BASE: {
     title: "2. Product Base",
     children: {
@@ -7,7 +11,7 @@ const PATH_NAMES = {
         children: {
           BRIEF: {
             title: "1.1 - Brief",
-            url: "/",
+            url: "/product-base/new-product-line",
           },
           TASK: {
             title: "1.2 - Task",
@@ -166,15 +170,23 @@ const PATH_NAMES = {
   USER: {
     title: "7. User",
     url: "/users",
-  }
+  },
 };
 
 export const NAVIGATION = [
   {
+    title: PATH_NAMES.DIRECTION.title,
+    icon: "diamond",
+    pathname: "/",
+    isParent: true,
+    turnOffActive: true,
+    arrowDown: true,
+  },
+  {
     title: PATH_NAMES.PRODUCT_BASE.title,
     icon: "diamond",
     isParent: true,
-    pathname: "/",
+    pathname: "/product-base/new-product-line",
     arrowDown: true,
     turnOffActive: true,
     permissions: ["read:new_product_line"],
@@ -223,7 +235,7 @@ export const NAVIGATION = [
             pathname:
               PATH_NAMES.PRODUCT_BASE.children.NEW_MOCKUP.children
                 .READY_TO_LAUNCH.url,
-            permissions: ["read:ready_to_launch"]
+            permissions: ["read:ready_to_launch"],
           },
           {
             title:
@@ -336,7 +348,7 @@ export const NAVIGATION = [
         title: PATH_NAMES.DESIGNER.children.SETTING.title,
         url: PATH_NAMES.DESIGNER.children.SETTING.url,
         arrowDown: true,
-        permissions: ["read:design_setting"]
+        permissions: ["read:design_setting"],
       },
     ],
   },
