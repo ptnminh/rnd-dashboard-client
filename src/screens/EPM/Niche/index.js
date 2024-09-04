@@ -9,6 +9,7 @@ import {
   Flex,
   TextInput,
   Button,
+  HoverCard,
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -282,15 +283,34 @@ const Niche = ({
             {!isEmpty(selectedSKU?.cliparts) && (
               <List.Item>
                 Clipart:{" "}
-                <span>
+                <List listStyleType="disc"
+                  withPadding
+                  style={{
+                    marginTop: "10px"
+                  }}
+                >
                   {map(selectedSKU?.cliparts, (clipart) => {
                     return (
-                      <a href={clipart?.refLink} target="_blank">
-                        {clipart.name}, {""}
-                      </a>
+                      <List.Item
+                        style={{
+                          fontSize: "12px",
+                        }}
+                      >
+                        <HoverCard width={280} shadow="md">
+                          <HoverCard.Target>
+                            <a href={clipart?.refLink} target="_blank">
+                              {clipart.name}
+                            </a>
+                          </HoverCard.Target>
+                          <HoverCard.Dropdown>
+                            <iframe src={clipart?.refLink} title={clipart.name}></iframe>
+                          </HoverCard.Dropdown>
+                        </HoverCard>
+
+                      </List.Item>
                     );
                   })}
-                </span>
+                </List>
               </List.Item>
             )}
             {selectedSKU?.linkDesign && (

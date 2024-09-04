@@ -26,9 +26,9 @@ import BriefProductLine from "./screens/BriefProductLine";
 import ArtistTask from "./screens/ArtistTask";
 import BriefProductLineTask from "./screens/ProductLineTask";
 import ProductLineReadyToLaunch from "./screens/ProductLineReadyToLaunch";
-import MockupTask from "./screens/MockupTask";
 import ScreenshotTask from "./screens/ScreenShotTask";
 import Mockup from "./screens/Mockup";
+import ComingSoon from "./screens/ComingSoon";
 
 function App() {
   return (
@@ -37,12 +37,12 @@ function App() {
         path="/"
         element={
           <Page title="Board">
-            <NewBriefs />
+            <ComingSoon />
           </Page>
         }
       />
       <Route
-        path="/rnd/brief"
+        path="/rnd"
         element={
           <Page title="Board">
             <NewBriefs />
@@ -66,7 +66,7 @@ function App() {
         }
       />
       <Route
-        path="/artist"
+        path="/product-base/new-clipart/task"
         element={
           <Page title="Artist">
             <ArtistTask />
@@ -74,7 +74,7 @@ function App() {
         }
       />
       <Route
-        path="/rnd/artist"
+        path="/product-base/new-clipart/brief"
         element={
           <Page title="Artist">
             <ArtistScreen />
@@ -82,7 +82,7 @@ function App() {
         }
       />
       <Route
-        path="/rnd/brief-pl"
+        path="/product-base"
         element={
           <Page title="Product Line">
             <BriefProductLine />
@@ -90,7 +90,7 @@ function App() {
         }
       />
       <Route
-        path="/pl"
+        path="/product-base/new-product-line/task"
         element={
           <Page title="Product Line">
             <BriefProductLineTask />
@@ -99,7 +99,7 @@ function App() {
       />
 
       <Route
-        path="/pl/ready-to-launch"
+        path="/product-base/mockup/ready-to-launch"
         element={
           <Page title="Product Line">
             <ProductLineReadyToLaunch />
@@ -107,7 +107,7 @@ function App() {
         }
       />
       <Route
-        path="/pl/mockup"
+        path="/product-base/mockup/task"
         element={
           <Page title="Product Line">
             <Mockup />
@@ -115,7 +115,7 @@ function App() {
         }
       />
       <Route
-        path="/pl/screenshot"
+        path="/product-base/mockup/photography"
         element={
           <Page title="Product Line">
             <ScreenshotTask />
@@ -172,7 +172,7 @@ function App() {
         }
       />
       <Route
-        path="/mkt/root-campaign"
+        path="/mkt/material/root-campaign"
         element={
           <Page title="MKT">
             <RootCampaign />
@@ -180,7 +180,7 @@ function App() {
         }
       />
       <Route
-        path="/mkt/caption"
+        path="/mkt/material/caption"
         element={
           <Page title="MKT">
             <Caption />
@@ -188,7 +188,7 @@ function App() {
         }
       />
       <Route
-        path="/mkt/account"
+        path="/mkt/material/account"
         element={
           <Page title="MKT">
             <ManageAccounts />
@@ -236,7 +236,7 @@ function App() {
         }
       />
       <Route
-        path="/mkt/setting"
+        path="/mkt/material/setting"
         element={
           <Page title="MKT">
             <Setting name="mkt-camp" />
@@ -244,7 +244,7 @@ function App() {
         }
       />
       <Route
-        path="/artist/setting"
+        path="/product-base/new-clipart/setting"
         element={
           <Page title="MKT">
             <Setting name="art" />
@@ -276,7 +276,7 @@ function App() {
         }
       />
       <Route
-        path="/pl/new-pl-setting"
+        path="/product-base/new-product-line/setting"
         element={
           <Page title="MKT">
             <Setting name="new-product-line" />
@@ -284,7 +284,7 @@ function App() {
         }
       />
       <Route
-        path="/pl/setting/mockup"
+        path="/product-base/mockup/setting"
         element={
           <Page title="MKT">
             <Setting name="mockup" />
@@ -293,6 +293,15 @@ function App() {
       />
       <Route
         path="/users"
+        element={
+          <Page title="MKT">
+            <UserScreen />
+          </Page>
+        }
+      />
+
+      <Route
+        path="/rnd"
         element={
           <Page title="MKT">
             <UserScreen />
