@@ -11,7 +11,7 @@ const PATH_NAMES = {
         children: {
           BRIEF: {
             title: "1.1 - Brief",
-            url: "/product-base/new-product-line",
+            url: "/product-base",
           },
           TASK: {
             title: "1.2 - Task",
@@ -186,7 +186,7 @@ export const NAVIGATION = [
     title: PATH_NAMES.PRODUCT_BASE.title,
     icon: "diamond",
     isParent: true,
-    pathname: "/product-base/new-product-line",
+    pathname: "/product-base",
     arrowDown: true,
     turnOffActive: true,
     permissions: ["read:new_product_line"],

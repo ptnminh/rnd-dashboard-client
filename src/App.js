@@ -82,7 +82,7 @@ function App() {
         }
       />
       <Route
-        path="/product-base/new-product-line"
+        path="/product-base"
         element={
           <Page title="Product Line">
             <BriefProductLine />
