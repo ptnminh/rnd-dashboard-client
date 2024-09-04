@@ -215,7 +215,7 @@ const BriefsTable = ({
             <Select
               data={["Small", "Medium", "Big"]}
               allowDeselect={false}
-              value={CONVERT_NUMBER_TO_STATUS[foundBrief?.size?.artist] || null}
+              value={CONVERT_NUMBER_TO_STATUS[foundBrief?.size?.rnd] || null}
               onChange={(value) => {
                 setPayloads((prev) => {
                   return map(prev, (x) => {
@@ -224,7 +224,7 @@ const BriefsTable = ({
                         ...x,
                         size: {
                           ...x.size,
-                          artist: CONVERT_STATUS_TO_NUMBER[value],
+                          rnd: CONVERT_STATUS_TO_NUMBER[value],
                         },
                       };
                     }
@@ -236,7 +236,7 @@ const BriefsTable = ({
                   size: {
                     ...foundBrief?.size,
                     ...(value && {
-                      artist: CONVERT_STATUS_TO_NUMBER[value],
+                      rnd: CONVERT_STATUS_TO_NUMBER[value],
                     }),
                   },
                 };
