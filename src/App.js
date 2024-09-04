@@ -29,7 +29,6 @@ import ProductLineReadyToLaunch from "./screens/ProductLineReadyToLaunch";
 import ScreenshotTask from "./screens/ScreenShotTask";
 import Mockup from "./screens/Mockup";
 import ComingSoon from "./screens/ComingSoon";
-
 function App() {
   return (
     <Routes>
