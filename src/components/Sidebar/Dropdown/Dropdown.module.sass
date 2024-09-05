@@ -117,11 +117,16 @@
             +m
                 margin-right: 12px
         &:last-child
-            margin-left: auto
+            // margin-left: auto
             +d
                 display: none
             +m
                 display: inline-block
+    &.hasArrow
+        svg
+            &:last-child
+                margin-left: auto
+               
 
 .add
     position: absolute

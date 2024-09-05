@@ -36,13 +36,18 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
           {
             [styles.turnOff]: item.isParent,
           },
-          { [styles.wide]: visibleSidebar }
+          { [styles.wide]: visibleSidebar },
+          {
+            [styles.hasArrow]: !isEmpty(item.dropdown),
+          }
         )}
         onClick={() => handleClick()}
       >
         {item.icon && <Icon name={item.icon} size="24" />}
         {item.title}
-        {item.arrowDown && <Icon name="arrow-down" size="24" />}
+        {item.arrowDown && !isEmpty(item.dropdown) && (
+          <Icon name="arrow-down" size="24" />
+        )}
       </button>
     );
   };

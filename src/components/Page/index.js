@@ -77,11 +77,12 @@ const Page = ({ wide, children }) => {
             ); // find first route that user has permission
             if (foundFirstRoute) {
               setIsForbidden(false);
-              if (foundFirstRoute.pathname === "/product-base") {
-                navigate("/product-base/new-product-line");
-              } else {
-                navigate(foundFirstRoute.pathname || foundFirstRoute.url);
-              }
+              // if (foundFirstRoute.pathname === "/product-base") {
+              //   navigate("/product-base/new-product-line");
+              // } else {
+              //   navigate(foundFirstRoute.pathname || foundFirstRoute.url);
+              // }
+              navigate("/");
             } else {
               setIsForbidden(true);
               navigate("/forbidden");
