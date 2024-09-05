@@ -23,8 +23,12 @@ import {
   MultiSelect,
   Select,
   Tooltip,
+  Group,
+  TextInput,
+  Textarea,
 } from "@mantine/core";
 import { showNotification } from "../../utils/index";
+import { modals } from "@mantine/modals";
 
 import Dropdown from "../../components/Dropdown";
 import CustomTable from "../../components/Table";
@@ -55,6 +59,7 @@ import {
   IconRotateClockwise,
   IconCodePlus,
   IconCodeMinus,
+  IconPlus,
 } from "@tabler/icons-react";
 import LazyLoad from "react-lazyload";
 import { useNavigate } from "react-router";
@@ -420,6 +425,81 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
   }
 };
 
+const CreateNewQuote = ({
+  quote,
+  setQuote,
+  quoteFilters,
+  close,
+  fetchQuotes,
+  quotePagination,
+}) => {
+  const [loading, setLoading] = useState(false);
+  const handleCreateQuote = async () => {
+    setLoading(true);
+    const createQuoteResponse = await rndServices.createQuote({
+      payloads: [quote],
+    });
+    if (createQuoteResponse) {
+      await fetchQuotes(quotePagination.currentPage);
+      setQuote({});
+    }
+    setLoading(false);
+    close();
+  };
+  return (
+    <>
+      <Select
+        label="Quote Name"
+        placeholder="Choose Quote Name"
+        data={quoteFilters?.names || []}
+        value={quote?.name || null}
+        data-autofocus
+        styles={{
+          label: {
+            marginBottom: "10px",
+          },
+        }}
+        onChange={(value) => {
+          setQuote((prev) => ({
+            ...prev,
+            name: value,
+          }));
+        }}
+      />
+      <Textarea
+        label="Quote"
+        placeholder="Enter Quote"
+        value={quote?.quote || ""}
+        autosize
+        minRows={5}
+        maxRows={5}
+        onChange={(e) => {
+          setQuote({
+            ...quote,
+            quote: e.target.value,
+          });
+        }}
+        styles={{
+          label: {
+            marginBottom: "10px",
+          },
+        }}
+      />
+      <Button
+        fullWidth
+        loading={loading}
+        onClick={async () => {
+          await handleCreateQuote();
+          close();
+        }}
+        mt="md"
+      >
+        Submit
+      </Button>
+    </>
+  );
+};
+
 const NewCampaigns = () => {
   const navigate = useNavigate();
 
@@ -467,6 +547,10 @@ const NewCampaigns = () => {
       close: closeModalPreviewGroupClipart,
     },
   ] = useDisclosure(false);
+  const [
+    openedModalCreateQuote,
+    { open: openModalCreateQuote, close: closeModalCreateQuote },
+  ] = useDisclosure(false);
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -488,6 +572,10 @@ const NewCampaigns = () => {
   const [grouppedCliparts, setGrouppedCliparts] = useState([]);
   const [selectedProductBases, setSelectedProductBases] = useState([]);
   const [selectedSKUs, setSelectedSKUs] = useState([]);
+  const [quote, setQuote] = useState({
+    quote: "",
+    name: "",
+  });
   const [loadingProductBase, setLoadingProductBase] = useState(false);
   const [loadingSKU, setLoadingSKU] = useState(false);
   const [queryQuote, setQueryQuote] = useState({});
@@ -1402,18 +1490,26 @@ const NewCampaigns = () => {
               classCardHead={styles.classCardHead}
               classSpanTitle={styles.classScaleSpanTitle}
               head={
-                <Button
-                  onClick={handleSyncQuotes}
-                  leftSection={
-                    loaderIcon ? (
-                      <Loader white={true} />
-                    ) : (
-                      <IconRotateClockwise />
-                    )
-                  }
-                >
-                  Sync Quotes
-                </Button>
+                <Group>
+                  <Button
+                    onClick={handleSyncQuotes}
+                    leftSection={
+                      loaderIcon ? (
+                        <Loader white={true} />
+                      ) : (
+                        <IconRotateClockwise />
+                      )
+                    }
+                  >
+                    Sync Quotes
+                  </Button>
+                  <Button
+                    leftSection={<IconPlus />}
+                    onClick={openModalCreateQuote}
+                  >
+                    Create Quote
+                  </Button>
+                </Group>
               }
             >
               <div
@@ -2157,6 +2253,26 @@ const NewCampaigns = () => {
         grouppedCliparts={grouppedCliparts}
         setGrouppedCliparts={setGrouppedCliparts}
       />
+      <Modal
+        opened={openedModalCreateQuote}
+        onClose={closeModalCreateQuote}
+        transitionProps={{ transition: "fade", duration: 200 }}
+        overlayProps={{
+          backgroundOpacity: 0.55,
+          blur: 3,
+        }}
+        radius="md"
+        size="md"
+      >
+        <CreateNewQuote
+          quote={quote}
+          setQuote={setQuote}
+          quoteFilters={quoteFilters}
+          close={closeModalCreateQuote}
+          fetchQuotes={fetchQuotes}
+          quotePagination={quotePagination}
+        />
+      </Modal>
     </>
   );
 };

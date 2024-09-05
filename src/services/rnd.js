@@ -533,7 +533,6 @@ export const rndServices = {
           "red"
         );
       } else {
-        console.log("Error at deleteBrief:", error);
         showNotification("Thất bại", "Xóa brief thất bại", "red");
       }
       return false;
@@ -713,8 +712,17 @@ export const rndServices = {
       showNotification("Thành công", "Tạo collection thành công", "green");
       return result;
     } catch (error) {
-      console.log("Error at createCollection:", error);
-      showNotification("Thất bại", "Tạo collection thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        showNotification("Thất bại", "Tạo collection thất bại", "red");
+      }
+
       return false;
     }
   },
@@ -729,8 +737,16 @@ export const rndServices = {
       showNotification("Thành công", "Cập nhật collection thành công", "green");
       return result;
     } catch (error) {
-      console.log("Error at updateCollection:", error);
-      showNotification("Thất bại", "Cập nhật collection thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        showNotification("Thất bại", "Cập nhật collection thất bại", "red");
+      }
       return false;
     }
   },
@@ -769,8 +785,16 @@ export const rndServices = {
       showNotification("Thành công", "Tạo layout thành công", "green");
       return result;
     } catch (error) {
-      console.log("Error at createLayout:", error);
-      showNotification("Thất bại", "Tạo layout thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        showNotification("Thất bại", "Tạo layout thất bại", "red");
+      }
       return false;
     }
   },
@@ -785,8 +809,16 @@ export const rndServices = {
       showNotification("Thành công", "Cập nhật layout thành công", "green");
       return result;
     } catch (error) {
-      console.log("Error at updateLayout:", error);
-      showNotification("Thất bại", "Cập nhật layout thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        showNotification("Thất bại", "Cập nhật layout thất bại", "red");
+      }
       return false;
     }
   },
@@ -800,8 +832,39 @@ export const rndServices = {
       }
       return true;
     } catch (error) {
-      console.log("Error at deleteLayout:", error);
-      showNotification("Thất bại", "Xóa layout thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        showNotification("Thất bại", "Xóa layout thất bại", "red");
+      }
+      return false;
+    }
+  },
+  createQuote: async (data) => {
+    try {
+      const response = await apiClient.post(`/quotes/create-batch`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        showNotification("Thất bại", "Tạo quote thất bại", "red");
+        return false;
+      }
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        showNotification("Thất bại", "Tạo quote thất bại", "red");
+      }
       return false;
     }
   },
