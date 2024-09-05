@@ -11,7 +11,7 @@ const PATH_NAMES = {
         children: {
           BRIEF: {
             title: "1.1 - Brief",
-            url: "/product-base",
+            url: "/product-base/new-product-line",
           },
           TASK: {
             title: "1.2 - Task",

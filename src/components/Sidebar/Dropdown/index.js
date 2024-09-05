@@ -9,11 +9,15 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
   const [chooseDropdown, setChooseDropdown] = useState([]);
 
   const { pathname } = useLocation();
+  const [showBody, setShowBody] = useState(false);
   const [visible, setVisible] = useState(false);
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(item.pathname);
+    if (!item.isParent) {
+      navigate(item.pathname);
+    }
+    setShowBody(!showBody);
     setVisible(!visible);
   };
 
@@ -50,7 +54,9 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
           <div key={index}>
             <NavLink
               className={({ isActive }) => {
-                return isActive && isEmpty(x.dropdown) && (pathname === x.url || pathname === item.pathname)
+                return isActive &&
+                  isEmpty(x.dropdown) &&
+                  (pathname === x.url || pathname === item.pathname)
                   ? `${styles.link} ${styles.active}`
                   : styles.link;
               }}
@@ -74,7 +80,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
                 <Dropdown
                   className={cn(
                     styles.nestedDropdown,
-                    styles.nestedDropdownLink,
+                    styles.nestedDropdownLink
                   )}
                   setValue={setVisible}
                   key={index}
@@ -85,7 +91,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
         ))}
       </div>
     );
-  }
+  };
   return (
     <div
       className={cn(
@@ -100,12 +106,15 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
         {
           [styles.turnOff]: !item.isParent,
         },
+        {
+          [styles.showBody]: showBody,
+        },
         { [styles.wide]: visibleSidebar }
       )}
     >
       <Head />
-      <Body {...item} />
-    </div >
+      {showBody && <Body {...item} />}
+    </div>
   );
 };
 

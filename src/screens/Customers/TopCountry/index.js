@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styles from "./TopCountry.module.sass";
 import cn from "classnames";
 import Card from "../../../components/Card";
