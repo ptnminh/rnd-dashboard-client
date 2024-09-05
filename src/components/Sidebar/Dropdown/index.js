@@ -73,7 +73,7 @@ const Dropdown = ({ className, item, visibleSidebar, setValue, onClose }) => {
               exact
             >
               {x.title}
-              <Icon name="arrow-next" size="24" />
+              {!isEmpty(x.dropdown) && <Icon name="arrow-next" size="24" />}
             </NavLink>
             {isEqual(x.dropdown, chooseDropdown) &&
               map(chooseDropdown, (y, index) => (
