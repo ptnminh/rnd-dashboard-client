@@ -178,7 +178,6 @@ export const NAVIGATION = [
     title: PATH_NAMES.DIRECTION.title,
     icon: "diamond",
     pathname: "/",
-    isParent: true,
     turnOffActive: true,
     arrowDown: true,
   },
