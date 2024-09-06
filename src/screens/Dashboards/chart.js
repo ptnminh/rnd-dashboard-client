@@ -154,7 +154,15 @@ const CardDistributionByType = ({ data }) => {
     },
   };
 
-  return <Pie data={chartData} options={options} />;
+  return (
+    <Pie
+      data={chartData}
+      options={options}
+      style={{
+        height: "350px",
+      }}
+    />
+  );
 };
 
 const CardDistributionByGroup = ({ data }) => {
@@ -206,7 +214,7 @@ const CardDistributionByGroup = ({ data }) => {
       data={chartData}
       options={options}
       style={{
-        height: "100%",
+        height: "350px",
         width: "100%",
       }}
     />
@@ -1301,30 +1309,6 @@ const CombinedChart = () => {
         >
           <div className={styles.chartjs}>
             <MonthlyChart data={data} />
-          </div>
-        </Card>
-      </Grid.Col>
-      <Grid.Col span={6}>
-        <Card
-          className={cn(styles.card)}
-          title="Card Distribution by Type"
-          classTitle={cn("title-purple", styles.title)}
-          classCardHead={styles.head}
-        >
-          <div className={styles.chartjs}>
-            <CardDistributionByType data={data} />
-          </div>
-        </Card>
-      </Grid.Col>
-      <Grid.Col span={6}>
-        <Card
-          className={cn(styles.card)}
-          title="Card Distribution by Group"
-          classTitle={cn("title-purple", styles.title)}
-          classCardHead={styles.head}
-        >
-          <div className={styles.chartjs}>
-            <CardDistributionByGroup data={data} />
           </div>
         </Card>
       </Grid.Col>
