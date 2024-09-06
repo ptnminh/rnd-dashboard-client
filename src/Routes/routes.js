@@ -171,6 +171,20 @@ const PATH_NAMES = {
     title: "7. User",
     url: "/users",
   },
+  DASHBOARD: {
+    title: "8. Dashboard",
+    url: "/dashboard",
+    children: {
+      RECHARTS: {
+        title: "Recharts",
+        url: "/dashboard/rechart",
+      },
+      CHARTJS: {
+        title: "ChartJS",
+        url: "/dashboard/chartjs",
+      },
+    },
+  },
 };
 
 export const NAVIGATION = [
@@ -455,9 +469,30 @@ export const NAVIGATION = [
   },
   {
     title: PATH_NAMES.USER.title,
-    url: PATH_NAMES.USER.url,
+    pathname: PATH_NAMES.USER.url,
     icon: "diamond",
     arrowDown: true,
     permissions: ["read:user"],
+  },
+  {
+    title: PATH_NAMES.DASHBOARD.title,
+    pathname: PATH_NAMES.DASHBOARD.url,
+    icon: "diamond",
+    arrowDown: true,
+    isParent: true,
+    turnOffActive: true,
+    permissions: ["read:user"],
+    dropdown: [
+      {
+        title: PATH_NAMES.DASHBOARD.children.RECHARTS.title,
+        url: PATH_NAMES.DASHBOARD.children.RECHARTS.url,
+        permissions: ["read:user"],
+      },
+      {
+        title: PATH_NAMES.DASHBOARD.children.CHARTJS.title,
+        url: PATH_NAMES.DASHBOARD.children.CHARTJS.url,
+        permissions: ["read:user"],
+      },
+    ],
   },
 ];

@@ -29,6 +29,9 @@ import ProductLineReadyToLaunch from "./screens/ProductLineReadyToLaunch";
 import ScreenshotTask from "./screens/ScreenShotTask";
 import Mockup from "./screens/Mockup";
 import ComingSoon from "./screens/ComingSoon";
+import Dashboards from "./screens/Dashboards";
+import DashboardChartJS from "./screens/Dashboards/chart";
+
 function App() {
   return (
     <Routes>
@@ -312,6 +315,22 @@ function App() {
         element={
           <Page title="MKT">
             <UserScreen />
+          </Page>
+        }
+      />
+      <Route
+        path="/dashboard/rechart"
+        element={
+          <Page title="MKT">
+            <Dashboards />
+          </Page>
+        }
+      />
+      <Route
+        path="/dashboard/chartjs"
+        element={
+          <Page title="MKT">
+            <DashboardChartJS />
           </Page>
         }
       />
