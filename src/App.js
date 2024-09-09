@@ -31,6 +31,7 @@ import Mockup from "./screens/Mockup";
 import ComingSoon from "./screens/ComingSoon";
 import Dashboards from "./screens/Dashboards";
 import DashboardChartJS from "./screens/Dashboards/chart";
+import DashboardSetting from "./screens/DashboardSetting";
 
 function App() {
   return (
@@ -322,7 +323,7 @@ function App() {
         path="/dashboard/rechart"
         element={
           <Page title="MKT">
-            <Dashboards />
+            <DashboardSetting />
           </Page>
         }
       />

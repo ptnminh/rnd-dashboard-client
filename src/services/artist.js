@@ -82,8 +82,17 @@ export const artistServices = {
       }
       return result;
     } catch (error) {
-      console.log("Error at updateBrief:", error);
-      showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at fetchQuotes:", error);
+        showNotification("Thất bại", "Cập nhật brief thất bại", "red");
+      }
       return false;
     }
   },
