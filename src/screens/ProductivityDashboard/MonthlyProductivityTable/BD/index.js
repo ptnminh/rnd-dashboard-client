@@ -13,26 +13,28 @@ import {
   toNumber,
   uniqBy,
 } from "lodash";
-import classes from "./MyTable.module.css";
 import { IconArrowNarrowLeft, IconArrowNarrowRight } from "@tabler/icons-react";
+
+import classes from "./MyTable.module.css";
 import {
   generateAscendingArray,
   generateDescendingArray,
 } from "../../../../utils";
 
-const ProductivityOPTable = ({
+const ProductivityBDTable = ({
   tableData,
   query,
   loading,
   setTrigger,
   sorting,
   setSorting,
-  setQuery,
   weeks: allWeeks,
+  setQuery,
   currentWeek,
 }) => {
   const [payloads, setPayloads] = useState([]);
   const [customColumns, setCustomColumns] = useState([]);
+  const [data, setData] = useState(tableData || []);
   const handleSlideWeeks = (direction) => {
     const formattedWeeks = map(allWeeks, (week) => split(week, " ")[1]);
     const weeks = orderBy(
@@ -52,18 +54,13 @@ const ProductivityOPTable = ({
       setQuery({ ...query, weeks });
     }
   };
-  const [data, setData] = useState(tableData || []);
   const generateCustomColumn = (data) => {
-    const weeks = orderBy(
-      map(keys(groupBy(data, "week")), (item) => toNumber(item)),
-      [],
-      "desc"
-    );
-    const columns = map(weeks, (week) => {
+    const weeks = keys(groupBy(data, "week"));
+    return map(weeks, (week) => {
       return {
         accessorKey: `W${week}`,
         header: `W${week}`,
-        size: 100,
+        size: 120,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: {
@@ -78,21 +75,18 @@ const ProductivityOPTable = ({
             team: opTeam,
             week: toNumber(week),
           });
-          const quota = payload?.quota || 0;
-          const actualQuota = payload?.actualQuota || 0;
-          const isExceed = actualQuota < quota;
+          const quota = payload?.totalQuota || 0;
+          const actualQuota = payload?.actualRevenue || 0;
           return (
             <TextInput
               placeholder="Quota"
-              error={isExceed ? true : false}
-              value={`${actualQuota}/${quota}`}
+              value={`${actualQuota}$/${quota}h`}
               readOnly={true}
             />
           );
         },
       };
     });
-    return columns;
   };
   useEffect(() => {
     setData(uniqBy(tableData, "team"));
@@ -104,10 +98,9 @@ const ProductivityOPTable = ({
     () => [
       {
         accessorKey: "team",
-        header: "OP",
+        header: "BD",
         size: 50,
         enableEditing: false,
-        enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
           return {
             className: classes["body-cells-op-team"],
@@ -125,26 +118,34 @@ const ProductivityOPTable = ({
             </Text>
           );
         },
+        enableSorting: false,
       },
       ...customColumns,
     ],
-    [payloads, customColumns, data]
+    [tableData, query, payloads, customColumns]
   );
+
   const table = useMantineReactTable({
     columns,
     data,
     editDisplayMode: "cell",
     enableEditing: true,
     enablePagination: false,
-    enableSorting: false,
+    enableTopToolbar: true,
     getRowId: (row) => row.id,
     enableRowSelection: false,
     enableFilters: false,
     enableColumnActions: false,
-    enableTopToolbar: true,
     mantineTableHeadCellProps: { className: classes["head-cells"] },
     mantineTableProps: {
       className: classes["disable-hover"],
+    },
+    enableDensityToggle: false,
+    state: {
+      showProgressBars: loading,
+      sorting,
+      hoveredColumn: false,
+      hoveredRow: false,
     },
     renderTopToolbar: () => {
       return (
@@ -167,15 +168,15 @@ const ProductivityOPTable = ({
             }}
           >
             <Select
-              data={allWeeks}
-              placeholder="Choose Week"
-              value={`Week ${query?.week}` || null}
+              data={Array.from({ length: 12 }, (_, i) => `T${i + 1}`)}
+              placeholder="Choose Month"
+              value={`Week ${query?.month}` || null}
               onChange={(value) => {
-                const realWeek = split(value, " ")[1];
+                const realMonth = parseInt(value.slice(1), 10);
                 setQuery({
                   ...query,
-                  week: realWeek,
-                  weeks: null,
+                  month: realMonth,
+                  months: null,
                 });
               }}
             />
@@ -218,13 +219,6 @@ const ProductivityOPTable = ({
         </div>
       );
     },
-    enableDensityToggle: false,
-    state: {
-      showProgressBars: loading,
-      sorting,
-      hoveredColumn: false,
-      hoveredRow: false,
-    },
     mantineTableBodyCellProps: () => ({
       className: classes["body-cells"],
       sx: {
@@ -241,4 +235,4 @@ const ProductivityOPTable = ({
   );
 };
 
-export default ProductivityOPTable;
+export default ProductivityBDTable;

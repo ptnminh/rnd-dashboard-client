@@ -53,6 +53,31 @@ export const dashboardServices = {
       return false;
     }
   },
+  fetchQuotasMonth: async ({ page, limit, query }) => {
+    try {
+      let url = `/quotas/month?page=${page}&pageSize=${limit}`;
+      const queryKeys = keys(query);
+      const transformedQuery = filter(queryKeys, (key) => query[key]);
+      const emptyKeys = filter(queryKeys, (key) => !query[key]);
+      if (!isEmpty(transformedQuery)) {
+        const queryString = `filter=${encodeURIComponent(
+          JSON.stringify({
+            ...omit(query, emptyKeys),
+          })
+        )}`;
+        url = `${url}&${queryString}`;
+      }
+      const response = await apiClient.get(url);
+      const { data: result } = response;
+      if (result?.success === false) {
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at fetchDefaultQuota:", error);
+      return false;
+    }
+  },
   updateQuota: async ({ uid, data }) => {
     try {
       const { data: result } = await apiClient.put(`/quotas/${uid}`, data);

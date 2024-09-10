@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import { Flex, Group, Text, TextInput } from "@mantine/core";
+import { Flex, Group, Select, Text, TextInput } from "@mantine/core";
 import {
   find,
   groupBy,
@@ -11,6 +11,7 @@ import {
   orderBy,
   split,
   toNumber,
+  uniqBy,
 } from "lodash";
 import { IconArrowNarrowLeft, IconArrowNarrowRight } from "@tabler/icons-react";
 
@@ -29,6 +30,7 @@ const ProductivityBDTable = ({
   setSorting,
   weeks: allWeeks,
   setQuery,
+  currentWeek,
 }) => {
   const [payloads, setPayloads] = useState([]);
   const [customColumns, setCustomColumns] = useState([]);
@@ -69,7 +71,7 @@ const ProductivityBDTable = ({
         },
         Cell: ({ row }) => {
           const { team: opTeam } = row.original;
-          const payload = find(payloads, {
+          const payload = find(data, {
             team: opTeam,
             week: toNumber(week),
           });
@@ -87,7 +89,7 @@ const ProductivityBDTable = ({
     });
   };
   useEffect(() => {
-    setData(tableData);
+    setData(uniqBy(tableData, "team"));
     setPayloads(tableData);
     const columns = generateCustomColumn(tableData);
     setCustomColumns(columns);
@@ -150,13 +152,35 @@ const ProductivityBDTable = ({
         <div
           style={{
             display: "flex",
-            justifyContent: "end",
+            justifyContent: "space-between",
             alignItems: "center",
             padding: "10px 5px",
             gap: "10px",
             flexWrap: "wrap-reverse",
           }}
         >
+          <Flex
+            style={{
+              gap: "8px",
+              padding: "10px",
+              borderRadius: "10px",
+              flexWrap: "wrap",
+            }}
+          >
+            <Select
+              data={allWeeks}
+              placeholder="Choose Week"
+              value={`Week ${query?.week}` || null}
+              onChange={(value) => {
+                const realWeek = split(value, " ")[1];
+                setQuery({
+                  ...query,
+                  week: realWeek,
+                  weeks: null,
+                });
+              }}
+            />
+          </Flex>
           <Flex
             style={{
               gap: "8px",

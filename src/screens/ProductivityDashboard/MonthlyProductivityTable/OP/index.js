@@ -3,6 +3,7 @@ import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import { Flex, Group, Select, Text, TextInput } from "@mantine/core";
 import {
   find,
+  flatMap,
   groupBy,
   keys,
   map,
@@ -24,45 +25,19 @@ const ProductivityOPTable = ({
   tableData,
   query,
   loading,
-  setTrigger,
   sorting,
   setSorting,
   setQuery,
   weeks: allWeeks,
-  currentWeek,
 }) => {
   const [payloads, setPayloads] = useState([]);
   const [customColumns, setCustomColumns] = useState([]);
-  const handleSlideWeeks = (direction) => {
-    const formattedWeeks = map(allWeeks, (week) => split(week, " ")[1]);
-    const weeks = orderBy(
-      map(keys(groupBy(tableData, "week")), (item) => toNumber(item)),
-      [],
-      "desc"
-    );
-    const maxWeek = toNumber(weeks[0]);
-    const minWeek = toNumber(weeks[weeks.length - 1]);
-    if (direction === "left") {
-      if (maxWeek + 1 > max(formattedWeeks)) return;
-      const weeks = generateAscendingArray(maxWeek + 1);
-      setQuery({ ...query, weeks });
-    } else {
-      if (minWeek - 1 < min(formattedWeeks)) return;
-      const weeks = generateDescendingArray(minWeek - 1);
-      setQuery({ ...query, weeks });
-    }
-  };
   const [data, setData] = useState(tableData || []);
   const generateCustomColumn = (data) => {
-    const weeks = orderBy(
-      map(keys(groupBy(data, "week")), (item) => toNumber(item)),
-      [],
-      "desc"
-    );
-    const columns = map(weeks, (week) => {
+    const columns = map(data, (item) => {
       return {
-        accessorKey: `W${week}`,
-        header: `W${week}`,
+        accessorKey: `T${item?.month}`,
+        header: `T${item?.month}`,
         size: 100,
         enableEditing: false,
         enableSorting: false,
@@ -74,10 +49,11 @@ const ProductivityOPTable = ({
         },
         Cell: ({ row }) => {
           const { team: opTeam } = row.original;
-          const payload = find(data, {
-            team: opTeam,
-            week: toNumber(week),
+          const monthData = find(data, {
+            month: toNumber(item?.month),
           });
+          const payload = find(monthData?.teamData, { team: opTeam });
+
           const quota = payload?.quota || 0;
           const actualQuota = payload?.actualQuota || 0;
           const isExceed = actualQuota < quota;
@@ -95,7 +71,11 @@ const ProductivityOPTable = ({
     return columns;
   };
   useEffect(() => {
-    setData(uniqBy(tableData, "team"));
+    const allTeams = uniqBy(
+      flatMap(tableData, (item) => item.teamData),
+      "team"
+    );
+    setData(allTeams);
     setPayloads(tableData);
     const columns = generateCustomColumn(tableData);
     setCustomColumns(columns);
@@ -167,53 +147,18 @@ const ProductivityOPTable = ({
             }}
           >
             <Select
-              data={allWeeks}
-              placeholder="Choose Week"
-              value={`Week ${query?.week}` || null}
+              data={Array.from({ length: 12 }, (_, i) => `T${i + 1}`)}
+              placeholder="Choose Month"
+              value={`Week ${query?.month}` || null}
               onChange={(value) => {
-                const realWeek = split(value, " ")[1];
+                const realMonth = parseInt(value.slice(1), 10);
                 setQuery({
                   ...query,
-                  week: realWeek,
-                  weeks: null,
+                  month: realMonth,
+                  months: null,
                 });
               }}
             />
-          </Flex>
-          <Flex
-            style={{
-              gap: "8px",
-              padding: "10px",
-              borderRadius: "10px",
-              flexWrap: "wrap",
-            }}
-          >
-            <Group>
-              <span
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={() => handleSlideWeeks("left")}
-              >
-                <IconArrowNarrowLeft
-                  style={{ width: "100%", height: "100%" }}
-                  stroke={1.5}
-                  color="#3751D7"
-                />
-              </span>
-              <span
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={() => handleSlideWeeks("right")}
-              >
-                <IconArrowNarrowRight
-                  style={{ width: "100%", height: "100%" }}
-                  stroke={1.5}
-                  color="#3751D7"
-                />
-              </span>
-            </Group>
           </Flex>
         </div>
       );

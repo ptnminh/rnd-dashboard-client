@@ -3,9 +3,9 @@ import { Box, Grid } from "@mantine/core";
 
 import ProductivityBDTable from "./BD";
 import ProductivityOPTable from "./OP";
-import { filter, set } from "lodash";
+import { filter } from "lodash";
 
-const ProductivityTable = ({
+const MonthlyProductivityTable = ({
   opData,
   bdData,
   opQuery,
@@ -24,9 +24,9 @@ const ProductivityTable = ({
   return (
     <Box>
       <Grid>
-        <Grid.Col span={6}>
+        <Grid.Col span={12}>
           <ProductivityBDTable
-            tableData={filter(bdData, { department: "bd" })}
+            tableData={bdData}
             query={bdQuery}
             loading={bdloading}
             setTrigger={setBDTrigger}
@@ -37,9 +37,9 @@ const ProductivityTable = ({
             currentWeek={currentWeek}
           />
         </Grid.Col>
-        <Grid.Col span={6}>
+        <Grid.Col span={12}>
           <ProductivityOPTable
-            tableData={filter(opData, { department: "op" })}
+            tableData={opData}
             query={opQuery}
             loading={oploading}
             setTrigger={setOPTrigger}
@@ -55,4 +55,4 @@ const ProductivityTable = ({
   );
 };
 
-export default ProductivityTable;
+export default MonthlyProductivityTable;

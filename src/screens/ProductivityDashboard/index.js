@@ -10,6 +10,7 @@ import InputDashboard from "./InputDashboard";
 import ProductivityTable from "./ProductivityTable";
 import moment from "moment-timezone";
 import { generateDescendingArray } from "../../utils";
+import MonthlyProductivityTable from "./MonthlyProductivityTable";
 
 const TABS_FILTER = {
   WEEK: "Week",
@@ -25,10 +26,15 @@ const ProductivityDashboard = () => {
   const initialSearch = queryParams.get("search") || "";
   const [search, setSearch] = useState(initialSearch);
   const [listWeeks, setListWeeks] = useState([`Week ${currentWeek}`]);
+  const [activeTab, setActiveTab] = useState(TABS_FILTER.WEEK);
   const [visible, setVisible] = useState(true);
   const [quotas, setQuotas] = useState([]);
   const [quotasProductivity, setQuotasProductivity] = useState([]);
   const [quotasBDProductivity, setQuotasBDProductivity] = useState([]);
+  const [quotasOPMonthlyProductivity, setQuotasOPMonthlyProductivity] =
+    useState([]);
+  const [quotasBDMonthlyProductivity, setQuotasBDMonthlyProductivity] =
+    useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
   const [pagination, setPaginatFion] = useState({
     currentPage: initialPage,
@@ -39,6 +45,14 @@ const ProductivityDashboard = () => {
   });
   const [queryBDProductivity, setQueryBDProductivity] = useState({
     weeks: generateDescendingArray(currentWeek),
+  });
+  const [queryOPMonthlyProductivity, setQueryOPMonthlyProductivity] = useState({
+    months: Array.from({ length: 12 }, (_, i) => i + 1),
+    department: "op",
+  });
+  const [queryBDMonthlyProductivity, setQueryBDMonthlyProductivity] = useState({
+    months: Array.from({ length: 12 }, (_, i) => i + 1),
+    department: "bd",
   });
   const [query, setQuery] = useState({
     week: currentWeek,
@@ -54,6 +68,14 @@ const ProductivityDashboard = () => {
     useState(false);
   const [loadingFetchTeamProductivity, setLoadingFetchTeamProductivity] =
     useState(false);
+  const [
+    loadingFetchOPMonthlyTeamProductivity,
+    setLoadingFetchOPMonthlyTeamProductivity,
+  ] = useState(false);
+  const [
+    loadingFetchBDMonthlyTeamProductivity,
+    setLoadingFetchBDMonthlyTeamProductivity,
+  ] = useState(false);
   const [loadingFetchBDTeamProductivity, setLoadingFetchBDTeamProductivity] =
     useState(false);
   const fetchDashboardQuota = async () => {
@@ -105,6 +127,37 @@ const ProductivityDashboard = () => {
     setLoadingFetchBDTeamProductivity(false);
     setTriggerFetchBDProductivity(false);
   };
+  const fetchBDMonthlyTeamProductivity = async () => {
+    setLoadingFetchBDMonthlyTeamProductivity(true);
+    const response = await dashboardServices.fetchQuotasMonth({
+      page: -1,
+      query: queryBDMonthlyProductivity,
+      limit: 30,
+    });
+    const { data } = response;
+    if (data) {
+      setQuotasBDMonthlyProductivity(orderBy(data, ["no"], ["asc"]));
+    } else {
+      setQuotasBDMonthlyProductivity([]);
+    }
+    setLoadingFetchBDMonthlyTeamProductivity(false);
+    setTriggerFetchBDProductivity(false);
+  };
+  const fetchOPMonthlyTeamProductivity = async () => {
+    setLoadingFetchOPMonthlyTeamProductivity(true);
+    const response = await dashboardServices.fetchQuotasMonth({
+      page: -1,
+      query: queryOPMonthlyProductivity,
+      limit: 30,
+    });
+    const { data } = response;
+    if (data) {
+      setQuotasOPMonthlyProductivity(orderBy(data, ["no"], ["asc"]));
+    } else {
+      setQuotasOPMonthlyProductivity([]);
+    }
+    setLoadingFetchOPMonthlyTeamProductivity(false);
+  };
   useEffect(() => {
     fetchDashboardQuota(pagination.currentPage);
   }, [search, query, trigger, sorting]);
@@ -114,6 +167,32 @@ const ProductivityDashboard = () => {
   useEffect(() => {
     fetchBDTeamProductivity(pagination.currentPage);
   }, [queryBDProductivity, trigerFetchBDProductivity]);
+  useEffect(() => {
+    fetchBDMonthlyTeamProductivity(pagination.currentPage);
+  }, [queryBDMonthlyProductivity]);
+  useEffect(() => {
+    fetchOPMonthlyTeamProductivity(pagination.currentPage);
+  }, [queryOPMonthlyProductivity]);
+
+  useEffect(() => {
+    if (activeTab === TABS_FILTER.WEEK) {
+      setQueryProductivity({
+        weeks: generateDescendingArray(currentWeek),
+      });
+      setQueryBDProductivity({
+        weeks: generateDescendingArray(currentWeek),
+      });
+    } else {
+      setQueryOPMonthlyProductivity({
+        months: Array.from({ length: 12 }, (_, i) => i + 1),
+        department: "op",
+      });
+      setQueryBDMonthlyProductivity({
+        months: Array.from({ length: 12 }, (_, i) => i + 1),
+        department: "bd",
+      });
+    }
+  }, [activeTab]);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -123,7 +202,6 @@ const ProductivityDashboard = () => {
     navigate(`?${params.toString()}`, { replace: true });
   }, [search, navigate]);
 
-  const [activeTab, setActiveTab] = useState(TABS_FILTER.WEEK);
   return (
     <>
       <Card
@@ -278,19 +356,26 @@ const ProductivityDashboard = () => {
                   setSorting={setSorting}
                   sorting={sorting}
                   weeks={listWeeks}
+                  currentWeek={currentWeek}
                 />
               </Tabs.Panel>
               <Tabs.Panel value={TABS_FILTER.MONTH}>
-                <ProductivityTable
+                <MonthlyProductivityTable
                   className={styles.Table}
-                  tableData={quotasProductivity}
-                  query={queryProductivity}
-                  setQuery={setQueryProductivity}
-                  loading={loadingFetchTeamProductivity}
-                  setTrigger={setTriggerFetchProductivity}
+                  opData={quotasOPMonthlyProductivity}
+                  bdData={quotasBDMonthlyProductivity}
+                  opQuery={queryOPMonthlyProductivity}
+                  bdQuery={queryBDMonthlyProductivity}
+                  setOpQuery={setQueryOPMonthlyProductivity}
+                  setBDQuery={setQueryBDMonthlyProductivity}
+                  oploading={loadingFetchOPMonthlyTeamProductivity}
+                  bdloading={loadingFetchBDMonthlyTeamProductivity}
+                  setOPTrigger={setTriggerFetchProductivity}
+                  setBDTrigger={setTriggerFetchBDProductivity}
                   setSorting={setSorting}
                   sorting={sorting}
                   weeks={listWeeks}
+                  currentWeek={currentWeek}
                 />
               </Tabs.Panel>
             </Tabs>
