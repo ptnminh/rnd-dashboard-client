@@ -1,16 +1,22 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
+import { Text, TextInput } from "@mantine/core";
 import {
-  Text,
-  TextInput,
-} from "@mantine/core";
-import { filter, find, map, sumBy, toNumber } from "lodash";
+  filter,
+  find,
+  groupBy,
+  includes,
+  keys,
+  map,
+  max,
+  sumBy,
+  toNumber,
+} from "lodash";
 import classes from "./MyTable.module.css";
-import { LOCAL_STORAGE_KEY } from "../../../constant";
 import { IconStack } from "@tabler/icons-react";
 
 import { dashboardServices } from "../../../services";
-import { useLocalStorage } from "../../../hooks/useLocalStorage";
+import { OGZ_BD_TEAMS, OP_TEAMS } from "../../../constant";
 
 const QuotaBD = ({
   tableData,
@@ -19,20 +25,31 @@ const QuotaBD = ({
   setTrigger,
   sorting,
   setSorting,
-  defaultQuota
+  defaultQuota,
 }) => {
-  let [permissions] = useLocalStorage({
-    key: LOCAL_STORAGE_KEY.PERMISSIONS,
-    defaultValue: [],
-  });
   const [payloads, setPayloads] = useState([]);
-  permissions = map(permissions, "name");
-  const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(tableData || []);
   useEffect(() => {
-    setData(defaultQuota);
+    const groupByTeam = groupBy(tableData, "team");
+    const teams = keys(groupByTeam);
+    const teamData = map(teams, (team, index) => {
+      const highestPartnerTeamQuotas = max(
+        map(
+          filter(tableData, (item) => item.team === team),
+          "quota"
+        )
+      );
+      return {
+        id: index,
+        team: team,
+        ...(find(defaultQuota, (item) => item.team === team) || {}),
+        no: index + 1,
+        highestPartnerTeamQuotas,
+      };
+    });
+    setData(teamData);
     setPayloads(tableData);
-  }, [tableData, defaultQuota]);
+  }, [tableData]);
 
   const handleUpdate = async ({ uid, data, isTrigger = false }) => {
     await dashboardServices.updateDefaultDemandQuota({
@@ -54,8 +71,8 @@ const QuotaBD = ({
         mantineTableBodyCellProps: ({ row }) => {
           return {
             className: classes["body-cells"],
-          }
-        }
+          };
+        },
       },
       {
         accessorKey: "team",
@@ -65,7 +82,7 @@ const QuotaBD = ({
         mantineTableBodyCellProps: ({ row }) => {
           return {
             className: classes["body-cells"],
-          }
+          };
         },
         enableSorting: false,
       },
@@ -74,43 +91,58 @@ const QuotaBD = ({
         header: "Quota",
         size: 120,
         enableEditing: false,
-        mantineTableBodyCellProps: {
-          className: classes["body-cells"]
-        },
         enableSorting: false,
+        mantineTableBodyCellProps: {
+          className: classes["body-cells"],
+        },
         Cell: ({ row }) => {
           const opTeam = row.original?.team;
           const payload = find(data, (item) => item.team === opTeam);
           return (
-            <Text
-              rightSection={<IconStack />}
-            >{payload?.numOfMember * 8 * 5}</Text>
-          )
+            <Text rightSection={<IconStack />}>
+              {payload?.numOfMember * 8 * 5}
+            </Text>
+          );
         },
       },
       {
-        accessorKey: "BD1",
-        header: "BD1",
+        accessorKey: OGZ_BD_TEAMS.BD1,
+        header: OGZ_BD_TEAMS.BD1,
         size: 120,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: {
-          className: classes["body-cells"]
+          className: classes["body-cells"],
         },
         mantineTableHeadCellProps: { className: classes["edit-header"] },
-        enableSorting: false,
         Cell: ({ row }) => {
           const opTeam = row.original?.team;
-          const bdTeam = "BD1";
-          const payload = find(payloads, (item) => item.team === opTeam && item.partnerTeam === bdTeam);
-          const bdQuotas = filter(payloads, (item) => item.team === opTeam);
+          const bdTeam = OGZ_BD_TEAMS.BD1;
+          const isRender = opTeam !== OP_TEAMS.DS2 && opTeam !== OP_TEAMS.DS3;
+          const payload = find(
+            payloads,
+            (item) => item.team === opTeam && item.partnerTeam === bdTeam
+          );
+          const bdQuotas = !includes(
+            [OP_TEAMS.DS1, OP_TEAMS.DS2, OP_TEAMS.DS3],
+            opTeam
+          )
+            ? sumBy(
+                filter(payloads, (item) => item.team === opTeam),
+                "quota"
+              ) || 0
+            : payload?.quota;
           const opPayload = find(data, (item) => item.team === opTeam);
-          const quota = opPayload?.numOfMember * 8 * 5 || 0;
-          const totalQuotas = sumBy(bdQuotas, "quota") || 0;
-          return (
+          const opQuota = opPayload?.numOfMember * 8 * 5 || 0;
+          const highestPartnerTeamQuotas =
+            row.original?.highestPartnerTeamQuotas;
+          const isError =
+            bdQuotas > opQuota && payload?.quota === highestPartnerTeamQuotas;
+          return isRender ? (
             <TextInput
               rightSection={<IconStack />}
               value={payload?.quota}
-              error={totalQuotas > quota ? true : false}
+              error={isError}
               onChange={(event) => {
                 const newPayloads = payloads.map((item) => {
                   if (item.team === opTeam && item.partnerTeam === bdTeam) {
@@ -122,40 +154,72 @@ const QuotaBD = ({
                   return item;
                 });
                 setPayloads(newPayloads);
+                const highestPartnerTeamQuotas = max(
+                  map(
+                    filter(newPayloads, (item) => item.team === opTeam),
+                    "quota"
+                  )
+                );
+                setData((prev) => {
+                  return prev.map((item) => {
+                    if (item.team === opTeam) {
+                      return {
+                        ...item,
+                        highestPartnerTeamQuotas,
+                      };
+                    }
+                    return item;
+                  });
+                });
                 handleUpdate({
                   uid: payload?.uid,
                   data: {
                     quota: toNumber(event.target.value),
-                  }
-                })
+                  },
+                });
               }}
             />
-          )
+          ) : null;
         },
       },
       {
-        accessorKey: "BD2",
-        header: "BD2",
+        accessorKey: OGZ_BD_TEAMS.BD2,
+        header: OGZ_BD_TEAMS.BD2,
         size: 120,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: {
-          className: classes["body-cells"]
+          className: classes["body-cells"],
         },
         mantineTableHeadCellProps: { className: classes["edit-header"] },
-        enableSorting: false,
         Cell: ({ row }) => {
           const opTeam = row.original?.team;
-          const bdTeam = "BD2";
-          const payload = find(payloads, (item) => item.team === opTeam && item.partnerTeam === bdTeam);
-          const bdQuotas = filter(payloads, (item) => item.team === opTeam);
+          const bdTeam = OGZ_BD_TEAMS.BD2;
+          const payload = find(
+            payloads,
+            (item) => item.team === opTeam && item.partnerTeam === bdTeam
+          );
+          const isRender = opTeam !== OP_TEAMS.DS1 && opTeam !== OP_TEAMS.DS3;
+          const bdQuotas = !includes(
+            [OP_TEAMS.DS1, OP_TEAMS.DS2, OP_TEAMS.DS3],
+            opTeam
+          )
+            ? sumBy(
+                filter(payloads, (item) => item.team === opTeam),
+                "quota"
+              ) || 0
+            : payload?.quota;
           const opPayload = find(data, (item) => item.team === opTeam);
-          const quota = opPayload?.numOfMember * 8 * 5;
-          const totalQuotas = sumBy(bdQuotas, "quota");
-          return (
+          const opQuota = opPayload?.numOfMember * 8 * 5 || 0;
+          const highestPartnerTeamQuotas =
+            row.original?.highestPartnerTeamQuotas;
+          const isError =
+            bdQuotas > opQuota && payload?.quota === highestPartnerTeamQuotas;
+          return isRender ? (
             <TextInput
               rightSection={<IconStack />}
               value={payload?.quota}
-              error={totalQuotas > quota ? true : false}
+              error={isError}
               onChange={(event) => {
                 const newPayloads = payloads.map((item) => {
                   if (item.team === opTeam && item.partnerTeam === bdTeam) {
@@ -167,40 +231,72 @@ const QuotaBD = ({
                   return item;
                 });
                 setPayloads(newPayloads);
+                const highestPartnerTeamQuotas = max(
+                  map(
+                    filter(newPayloads, (item) => item.team === opTeam),
+                    "quota"
+                  )
+                );
+                setData((prev) => {
+                  return prev.map((item) => {
+                    if (item.team === opTeam) {
+                      return {
+                        ...item,
+                        highestPartnerTeamQuotas,
+                      };
+                    }
+                    return item;
+                  });
+                });
                 handleUpdate({
                   uid: payload?.uid,
                   data: {
                     quota: toNumber(event.target.value),
-                  }
-                })
+                  },
+                });
               }}
             />
-          )
+          ) : null;
         },
       },
       {
-        accessorKey: "BD3",
-        header: "BD3",
+        accessorKey: OGZ_BD_TEAMS.BD3,
+        header: OGZ_BD_TEAMS.BD3,
         size: 120,
         enableEditing: false,
         mantineTableBodyCellProps: {
-          className: classes["body-cells"]
+          className: classes["body-cells"],
         },
         mantineTableHeadCellProps: { className: classes["edit-header"] },
         enableSorting: false,
         Cell: ({ row }) => {
           const opTeam = row.original?.team;
-          const bdTeam = "BD3";
-          const payload = find(payloads, (item) => item.team === opTeam && item.partnerTeam === bdTeam);
-          const bdQuotas = filter(payloads, (item) => item.team === opTeam);
+          const bdTeam = OGZ_BD_TEAMS.BD3;
+          const payload = find(
+            payloads,
+            (item) => item.team === opTeam && item.partnerTeam === bdTeam
+          );
+          const isRender = opTeam !== OP_TEAMS.DS2 && opTeam !== OP_TEAMS.DS1;
+          const bdQuotas = !includes(
+            [OP_TEAMS.DS1, OP_TEAMS.DS2, OP_TEAMS.DS3],
+            opTeam
+          )
+            ? sumBy(
+                filter(payloads, (item) => item.team === opTeam),
+                "quota"
+              ) || 0
+            : payload?.quota;
           const opPayload = find(data, (item) => item.team === opTeam);
-          const quota = opPayload?.numOfMember * 8 * 5;
-          const totalQuotas = sumBy(bdQuotas, "quota");
-          return (
+          const opQuota = opPayload?.numOfMember * 8 * 5 || 0;
+          const highestPartnerTeamQuotas =
+            row.original?.highestPartnerTeamQuotas;
+          const isError =
+            bdQuotas > opQuota && payload?.quota === highestPartnerTeamQuotas;
+          return isRender ? (
             <TextInput
               rightSection={<IconStack />}
               value={payload?.quota}
-              error={totalQuotas > quota ? true : false}
+              error={isError}
               onChange={(event) => {
                 const newPayloads = payloads.map((item) => {
                   if (item.team === opTeam && item.partnerTeam === bdTeam) {
@@ -212,40 +308,77 @@ const QuotaBD = ({
                   return item;
                 });
                 setPayloads(newPayloads);
+                const highestPartnerTeamQuotas = max(
+                  map(
+                    filter(newPayloads, (item) => item.team === opTeam),
+                    "quota"
+                  )
+                );
+                setData((prev) => {
+                  return prev.map((item) => {
+                    if (item.team === opTeam) {
+                      return {
+                        ...item,
+                        highestPartnerTeamQuotas,
+                      };
+                    }
+                    return item;
+                  });
+                });
                 handleUpdate({
                   uid: payload?.uid,
                   data: {
                     quota: toNumber(event.target.value),
-                  }
-                })
+                  },
+                });
               }}
             />
-          )
+          ) : null;
         },
       },
       {
-        accessorKey: "AMZ",
-        header: "AMZ",
+        accessorKey: OGZ_BD_TEAMS.AMZ,
+        header: OGZ_BD_TEAMS.AMZ,
         size: 120,
         enableEditing: false,
         mantineTableBodyCellProps: {
-          className: classes["body-cells"]
+          className: classes["body-cells"],
         },
         mantineTableHeadCellProps: { className: classes["edit-header"] },
         enableSorting: false,
         Cell: ({ row }) => {
           const opTeam = row.original?.team;
-          const bdTeam = "AMZ";
-          const payload = find(payloads, (item) => item.team === opTeam && item.partnerTeam === bdTeam);
-          const bdQuotas = filter(payloads, (item) => item.team === opTeam);
+          const bdTeam = OGZ_BD_TEAMS.AMZ;
+          const payload = find(
+            payloads,
+            (item) => item.team === opTeam && item.partnerTeam === bdTeam
+          );
+          const isRender =
+            opTeam !== OP_TEAMS.DS1 &&
+            opTeam !== OP_TEAMS.DS2 &&
+            opTeam !== OP_TEAMS.DS3 &&
+            opTeam !== OP_TEAMS.ARTIST &&
+            opTeam !== OP_TEAMS.EPM;
+          const bdQuotas = !includes(
+            [OP_TEAMS.DS1, OP_TEAMS.DS2, OP_TEAMS.DS3],
+            opTeam
+          )
+            ? sumBy(
+                filter(payloads, (item) => item.team === opTeam),
+                "quota"
+              ) || 0
+            : payload?.quota;
           const opPayload = find(data, (item) => item.team === opTeam);
-          const quota = opPayload?.numOfMember * 8 * 5;
-          const totalQuotas = sumBy(bdQuotas, "quota");
-          return (
+          const opQuota = opPayload?.numOfMember * 8 * 5 || 0;
+          const highestPartnerTeamQuotas =
+            row.original?.highestPartnerTeamQuotas;
+          const isError =
+            bdQuotas > opQuota && payload?.quota === highestPartnerTeamQuotas;
+          return isRender ? (
             <TextInput
               rightSection={<IconStack />}
               value={payload?.quota}
-              error={totalQuotas > quota ? true : false}
+              error={isError}
               onChange={(event) => {
                 const newPayloads = payloads.map((item) => {
                   if (item.team === opTeam && item.partnerTeam === bdTeam) {
@@ -257,19 +390,36 @@ const QuotaBD = ({
                   return item;
                 });
                 setPayloads(newPayloads);
+                const highestPartnerTeamQuotas = max(
+                  map(
+                    filter(newPayloads, (item) => item.team === opTeam),
+                    "quota"
+                  )
+                );
+                setData((prev) => {
+                  return prev.map((item) => {
+                    if (item.team === opTeam) {
+                      return {
+                        ...item,
+                        highestPartnerTeamQuotas,
+                      };
+                    }
+                    return item;
+                  });
+                });
                 handleUpdate({
                   uid: payload?.uid,
                   data: {
                     quota: toNumber(event.target.value),
-                  }
-                })
+                  },
+                });
               }}
             />
-          )
+          ) : null;
         },
       },
     ],
-    [validationErrors, tableData, query, payloads]
+    [tableData, query, payloads]
   );
 
   const table = useMantineReactTable({
@@ -286,9 +436,7 @@ const QuotaBD = ({
     mantineTableHeadCellProps: { className: classes["head-cells"] },
     mantineTableProps: {
       className: classes["disable-hover"],
-    }, // Apply the custom class here },
-    onCreatingRowCancel: () => setValidationErrors({}),
-    onEditingRowCancel: () => setValidationErrors({}),
+    },
     enableDensityToggle: false,
     state: {
       showProgressBars: loadingFetchDashboardSettings,
@@ -299,7 +447,7 @@ const QuotaBD = ({
     mantineTableBodyCellProps: () => ({
       className: classes["body-cells"],
       sx: {
-        cursor: "pointer", //you might want to change the cursor too when adding an onClick
+        cursor: "pointer",
       },
     }),
     onSortingChange: setSorting,

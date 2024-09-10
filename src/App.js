@@ -32,6 +32,7 @@ import ComingSoon from "./screens/ComingSoon";
 import Dashboards from "./screens/Dashboards";
 import DashboardChartJS from "./screens/Dashboards/chart";
 import DashboardSetting from "./screens/DashboardSetting";
+import ProductivityDashboard from "./screens/ProductivityDashboard";
 
 function App() {
   return (
@@ -328,10 +329,18 @@ function App() {
         }
       />
       <Route
-        path="/dashboard/chartjs"
+        path="/dashboard/default-setting"
         element={
           <Page title="MKT">
-            <DashboardChartJS />
+            <DashboardSetting />
+          </Page>
+        }
+      />
+      <Route
+        path="/dashboard/sales"
+        element={
+          <Page title="MKT">
+            <ProductivityDashboard />
           </Page>
         }
       />

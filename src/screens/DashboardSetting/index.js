@@ -7,7 +7,7 @@ import { Flex, Grid, Tabs, Text } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
 import { artistServices, dashboardServices } from "../../services";
-import DesignerTable from './DesignerTable'
+import DesignerTable from "./DesignerTable";
 import QuotaOP from "./QuotaOP";
 import QuotaBD from "./QuotaBD";
 
@@ -16,7 +16,7 @@ const TABS_VIEW = {
   EPM: "EPM",
   MOCKUP: "Mockup",
   ARTIST: "Artist",
-}
+};
 
 const DashboardSetting = () => {
   const navigate = useNavigate();
@@ -39,7 +39,8 @@ const DashboardSetting = () => {
   });
   const [sorting, setSorting] = useState([]);
   const [trigger, setTrigger] = useState(false);
-  const [loadingFetchDashboardSettings, setLoadingFetchDashboardSettings] = useState(false);
+  const [loadingFetchDashboardSettings, setLoadingFetchDashboardSettings] =
+    useState(false);
 
   const fetchDashboardSettings = async () => {
     setLoadingFetchDashboardSettings(true);
@@ -51,7 +52,11 @@ const DashboardSetting = () => {
     const { data } = response;
     if (data) {
       setDashboardSettings(
-        orderBy(filter(data, (item) => item.team === toLower(activeTab)), ["no"], ["asc"])
+        orderBy(
+          filter(data, (item) => item.team === toLower(activeTab)),
+          ["no"],
+          ["asc"]
+        )
       );
     } else {
       setDashboardSettings([]);
@@ -71,7 +76,7 @@ const DashboardSetting = () => {
     } else {
       setDefaultQuota([]);
     }
-  }
+  };
   const fetchDefaultQuotaDemand = async () => {
     const response = await dashboardServices.fetchDefaultQuotaDemand({
       page: -1,
@@ -84,7 +89,7 @@ const DashboardSetting = () => {
     } else {
       setDefaultQuotaDemand([]);
     }
-  }
+  };
   useEffect(() => {
     fetchDashboardSettings(pagination.currentPage);
   }, [search, query, trigger, sorting]);
@@ -99,9 +104,9 @@ const DashboardSetting = () => {
 
   const [activeTab, setActiveTab] = useState(TABS_VIEW.DESIGNER);
   useEffect(() => {
-    fetchDefaultQuota()
-    fetchDefaultQuotaDemand()
-  }, [])
+    fetchDefaultQuota();
+    fetchDefaultQuotaDemand();
+  }, []);
 
   return (
     <>
@@ -118,9 +123,13 @@ const DashboardSetting = () => {
             </Text>
           </Grid.Col>
           <Grid.Col span="12">
-            <Tabs value={activeTab} onChange={setActiveTab} style={{
-              width: "100%",
-            }}>
+            <Tabs
+              value={activeTab}
+              onChange={setActiveTab}
+              style={{
+                width: "100%",
+              }}
+            >
               <Tabs.List>
                 <div
                   style={{
@@ -143,43 +152,66 @@ const DashboardSetting = () => {
                       width: "100%",
                     }}
                   >
-                    <Tabs.Tab value={TABS_VIEW.DESIGNER} styles={{
-                      ...(activeTab === TABS_VIEW.DESIGNER && {
-                        tab: {
-                          backgroundColor: "#7C4DFF",
-                          color: "#fff",
-                          borderRadius: "10px",
-                        }
-                      })
-                    }}>{
-                        TABS_VIEW.DESIGNER}</Tabs.Tab>
-                    <Tabs.Tab value={TABS_VIEW.ARTIST} styles={{
-                      ...(activeTab === TABS_VIEW.ARTIST && {
-                        tab: {
-                          backgroundColor: "#7C4DFF",
-                          color: "#fff",
-                          borderRadius: "10px",
-                        }
-                      })
-                    }}>{TABS_VIEW.ARTIST}</Tabs.Tab>
-                    <Tabs.Tab value={TABS_VIEW.MOCKUP} styles={{
-                      ...(activeTab === TABS_VIEW.MOCKUP && {
-                        tab: {
-                          backgroundColor: "#7C4DFF",
-                          color: "#fff",
-                          borderRadius: "10px",
-                        }
-                      })
-                    }}>{TABS_VIEW.MOCKUP}</Tabs.Tab>
-                    <Tabs.Tab value={TABS_VIEW.EPM} styles={{
-                      ...(activeTab === TABS_VIEW.EPM && {
-                        tab: {
-                          backgroundColor: "#7C4DFF",
-                          color: "#fff",
-                          borderRadius: "10px",
-                        }
-                      })
-                    }}>{TABS_VIEW.EPM}</Tabs.Tab>
+                    <Tabs.Tab
+                      value={TABS_VIEW.DESIGNER}
+                      styles={{
+                        ...(activeTab === TABS_VIEW.DESIGNER && {
+                          tab: {
+                            backgroundColor: "#7C4DFF",
+                            color: "#fff",
+                            borderRadius: "10px",
+                            borderColor: "transparent",
+                          },
+                        }),
+                      }}
+                    >
+                      {TABS_VIEW.DESIGNER}
+                    </Tabs.Tab>
+                    <Tabs.Tab
+                      value={TABS_VIEW.ARTIST}
+                      styles={{
+                        ...(activeTab === TABS_VIEW.ARTIST && {
+                          tab: {
+                            backgroundColor: "#7C4DFF",
+                            color: "#fff",
+                            borderRadius: "10px",
+                            borderColor: "transparent",
+                          },
+                        }),
+                      }}
+                    >
+                      {TABS_VIEW.ARTIST}
+                    </Tabs.Tab>
+                    <Tabs.Tab
+                      value={TABS_VIEW.MOCKUP}
+                      styles={{
+                        ...(activeTab === TABS_VIEW.MOCKUP && {
+                          tab: {
+                            backgroundColor: "#7C4DFF",
+                            color: "#fff",
+                            borderRadius: "10px",
+                            borderColor: "transparent",
+                          },
+                        }),
+                      }}
+                    >
+                      {TABS_VIEW.MOCKUP}
+                    </Tabs.Tab>
+                    <Tabs.Tab
+                      value={TABS_VIEW.EPM}
+                      styles={{
+                        ...(activeTab === TABS_VIEW.EPM && {
+                          tab: {
+                            backgroundColor: "#7C4DFF",
+                            color: "#fff",
+                            borderRadius: "10px",
+                            borderColor: "transparent",
+                          },
+                        }),
+                      }}
+                    >
+                      {TABS_VIEW.EPM}
+                    </Tabs.Tab>
                   </Flex>
                 </div>
               </Tabs.List>
@@ -199,7 +231,6 @@ const DashboardSetting = () => {
               <Tabs.Panel value="first">First panel</Tabs.Panel>
               <Tabs.Panel value={TABS_VIEW.ARTIST}>Second panel</Tabs.Panel>
             </Tabs>
-
           </Grid.Col>
         </Grid>
       </Card>
@@ -211,10 +242,15 @@ const DashboardSetting = () => {
       >
         <Grid>
           <Grid.Col span="5">
-            <Flex justify="center" style={{
-              marginBottom: "20px",
-            }}>
-              <Text align="center" size="xl" fw={700}>DEFAULT QUOTA (OP)</Text>
+            <Flex
+              justify="center"
+              style={{
+                marginBottom: "20px",
+              }}
+            >
+              <Text align="center" size="xl" fw={700}>
+                DEFAULT QUOTA (OP)
+              </Text>
             </Flex>
             <QuotaOP
               className={styles.Table}
@@ -228,10 +264,15 @@ const DashboardSetting = () => {
             />
           </Grid.Col>
           <Grid.Col span="7">
-            <Flex justify="center" style={{
-              marginBottom: "20px",
-            }}>
-              <Text align="center" size="xl" fw={700}>DEFAULT QUOTA (BD)</Text>
+            <Flex
+              justify="center"
+              style={{
+                marginBottom: "20px",
+              }}
+            >
+              <Text align="center" size="xl" fw={700}>
+                DEFAULT QUOTA (BD)
+              </Text>
             </Flex>
             <QuotaBD
               className={styles.Table}
@@ -245,7 +286,6 @@ const DashboardSetting = () => {
               sorting={sorting}
             />
           </Grid.Col>
-
         </Grid>
       </Card>
     </>

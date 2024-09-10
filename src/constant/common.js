@@ -28,3 +28,19 @@ export const NewProductLineBriefStatus = {
   OPTIMIZED_MOCKUP_UNDONE: 8,
   OPTIMIZED_MOCKUP_DONE: 9,
 };
+
+export const OP_TEAMS = {
+  DS1: "DS1",
+  DS2: "DS2",
+  DS3: "DS3",
+  ARTIST: "ARTIST",
+  EPM: "EPM",
+  MOCKUP: "MOCKUP",
+};
+
+export const OGZ_BD_TEAMS = {
+  BD1: "BD1",
+  BD2: "BD2",
+  BD3: "BD3",
+  AMZ: "AMZ",
+};
