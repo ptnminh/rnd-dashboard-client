@@ -32,28 +32,8 @@ const ProductivityBDTable = ({
   setQuery,
   currentWeek,
 }) => {
-  const [payloads, setPayloads] = useState([]);
   const [customColumns, setCustomColumns] = useState([]);
   const [data, setData] = useState(tableData || []);
-  const handleSlideWeeks = (direction) => {
-    const formattedWeeks = map(allWeeks, (week) => split(week, " ")[1]);
-    const weeks = orderBy(
-      map(keys(groupBy(tableData, "week")), (item) => toNumber(item)),
-      [],
-      "desc"
-    );
-    const maxWeek = toNumber(weeks[0]);
-    const minWeek = toNumber(weeks[weeks.length - 1]);
-    if (direction === "left") {
-      if (maxWeek + 1 > max(formattedWeeks)) return;
-      const weeks = generateAscendingArray(maxWeek + 1);
-      setQuery({ ...query, weeks });
-    } else {
-      if (minWeek - 1 < min(formattedWeeks)) return;
-      const weeks = generateDescendingArray(minWeek - 1);
-      setQuery({ ...query, weeks });
-    }
-  };
   const generateCustomColumn = (data) => {
     const weeks = keys(groupBy(data, "week"));
     return map(weeks, (week) => {
@@ -90,10 +70,20 @@ const ProductivityBDTable = ({
   };
   useEffect(() => {
     setData(uniqBy(tableData, "team"));
-    setPayloads(tableData);
-    const columns = generateCustomColumn(tableData);
-    setCustomColumns(columns);
+    setCustomColumns(generateCustomColumn(tableData));
   }, [tableData]);
+  // Sorting the columns right after generating them
+  const sortedCustomColumns = useMemo(() => {
+    return orderBy(
+      customColumns,
+      (col) => {
+        // Extract the numeric part of the accessorKey (e.g., 'W50' -> 50)
+        return toNumber(col.accessorKey.replace("W", ""));
+      },
+      "desc" // or 'asc' for ascending order
+    );
+  }, [customColumns]);
+  // UseMemo to construct final columns array
   const columns = useMemo(
     () => [
       {
@@ -101,6 +91,7 @@ const ProductivityBDTable = ({
         header: "BD",
         size: 50,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
           return {
             className: classes["body-cells-op-team"],
@@ -120,9 +111,9 @@ const ProductivityBDTable = ({
         },
         enableSorting: false,
       },
-      ...customColumns,
+      ...sortedCustomColumns,
     ],
-    [tableData, query, payloads, customColumns]
+    [sortedCustomColumns, data]
   );
 
   const table = useMantineReactTable({
@@ -132,6 +123,7 @@ const ProductivityBDTable = ({
     enableEditing: true,
     enablePagination: false,
     enableTopToolbar: true,
+    enableSorting: false,
     getRowId: (row) => row.id,
     enableRowSelection: false,
     enableFilters: false,
@@ -228,11 +220,7 @@ const ProductivityBDTable = ({
     onSortingChange: setSorting,
   });
 
-  return (
-    <>
-      <MantineReactTable table={table} />
-    </>
-  );
+  return <MantineReactTable table={table} />;
 };
 
 export default ProductivityBDTable;

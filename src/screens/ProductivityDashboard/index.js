@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./ProductivityDashboard.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
-import { map, orderBy, split } from "lodash";
+import { isEmpty, map, orderBy, split } from "lodash";
 import { Flex, Grid, Select, Tabs, Text } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { dashboardServices } from "../../services";
@@ -25,7 +25,7 @@ const ProductivityDashboard = () => {
   const queryParams = new URLSearchParams(location.search);
   const initialSearch = queryParams.get("search") || "";
   const [search, setSearch] = useState(initialSearch);
-  const [listWeeks, setListWeeks] = useState([`Week ${currentWeek}`]);
+  const [listWeeks, setListWeeks] = useState([]);
   const [activeTab, setActiveTab] = useState(TABS_FILTER.WEEK);
   const [visible, setVisible] = useState(true);
   const [quotas, setQuotas] = useState([]);
@@ -41,10 +41,10 @@ const ProductivityDashboard = () => {
     totalPages: 1,
   });
   const [queryProductivity, setQueryProductivity] = useState({
-    weeks: map(listWeeks, (week) => split(week, " ")[1]),
+    weeks: [],
   });
   const [queryBDProductivity, setQueryBDProductivity] = useState({
-    weeks: map(listWeeks, (week) => split(week, " ")[1]),
+    weeks: [],
   });
   const [queryOPMonthlyProductivity, setQueryOPMonthlyProductivity] = useState({
     months: Array.from({ length: 12 }, (_, i) => i + 1),
@@ -121,7 +121,7 @@ const ProductivityDashboard = () => {
     setLoadingFetchBDTeamProductivity(true);
     const response = await dashboardServices.fetchQuotas({
       page: -1,
-      query: queryProductivity,
+      query: queryBDProductivity,
       limit: 30,
     });
     const { data } = response;
@@ -183,10 +183,14 @@ const ProductivityDashboard = () => {
   useEffect(() => {
     if (activeTab === TABS_FILTER.WEEK) {
       setQueryProductivity({
-        weeks: map(listWeeks, (week) => split(week, " ")[1]),
+        weeks: isEmpty(listWeeks)
+          ? []
+          : map(listWeeks, (week) => split(week, " ")[1]),
       });
       setQueryBDProductivity({
-        weeks: map(listWeeks, (week) => split(week, " ")[1]),
+        weeks: isEmpty(listWeeks)
+          ? []
+          : map(listWeeks, (week) => split(week, " ")[1]),
       });
     } else {
       setQueryOPMonthlyProductivity({
