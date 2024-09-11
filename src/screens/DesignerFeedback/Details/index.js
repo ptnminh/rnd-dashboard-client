@@ -260,6 +260,9 @@ const Table = ({
             case 3:
               color = "red";
               break;
+            case 1.5:
+              color = "#006400";
+              break;
             default:
               break;
           }
