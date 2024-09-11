@@ -24,7 +24,7 @@ const ProductivityTable = ({
   return (
     <Box>
       <Grid>
-        <Grid.Col span={6}>
+        <Grid.Col span={12}>
           <ProductivityBDTable
             tableData={filter(bdData, { department: "bd" })}
             query={bdQuery}
@@ -37,7 +37,7 @@ const ProductivityTable = ({
             currentWeek={currentWeek}
           />
         </Grid.Col>
-        <Grid.Col span={6}>
+        <Grid.Col span={12}>
           <ProductivityOPTable
             tableData={filter(opData, { department: "op" })}
             query={opQuery}

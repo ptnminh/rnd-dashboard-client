@@ -1,9 +1,18 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import { Flex, Group, Select, Text, TextInput } from "@mantine/core";
 import {
+  Flex,
+  Group,
+  MultiSelect,
+  Select,
+  Text,
+  TextInput,
+} from "@mantine/core";
+import {
+  debounce,
   find,
   groupBy,
+  isEmpty,
   keys,
   map,
   max,
@@ -84,9 +93,18 @@ const ProductivityOPTable = ({
           return (
             <TextInput
               placeholder="Quota"
-              error={isExceed ? true : false}
               value={`${actualQuota}/${quota}`}
               readOnly={true}
+              styles={{
+                input: {
+                  ...(actualQuota === quota && {
+                    color: "#32A645",
+                  }),
+                  ...(actualQuota < quota && {
+                    color: "#ea102d",
+                  }),
+                },
+              }}
             />
           );
         },
@@ -146,78 +164,46 @@ const ProductivityOPTable = ({
     mantineTableProps: {
       className: classes["disable-hover"],
     },
-    renderTopToolbar: () => {
-      return (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "10px 5px",
-            gap: "10px",
-            flexWrap: "wrap-reverse",
-          }}
-        >
-          <Flex
-            style={{
-              gap: "8px",
-              padding: "10px",
-              borderRadius: "10px",
-              flexWrap: "wrap",
-            }}
-          >
-            <Select
-              data={allWeeks}
-              placeholder="Choose Week"
-              value={`Week ${query?.week}` || null}
-              onChange={(value) => {
-                const realWeek = split(value, " ")[1];
-                setQuery({
-                  ...query,
-                  week: realWeek,
-                  weeks: null,
-                });
-              }}
-            />
-          </Flex>
-          <Flex
-            style={{
-              gap: "8px",
-              padding: "10px",
-              borderRadius: "10px",
-              flexWrap: "wrap",
-            }}
-          >
-            <Group>
-              <span
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={() => handleSlideWeeks("left")}
-              >
-                <IconArrowNarrowLeft
-                  style={{ width: "100%", height: "100%" }}
-                  stroke={1.5}
-                  color="#3751D7"
-                />
-              </span>
-              <span
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={() => handleSlideWeeks("right")}
-              >
-                <IconArrowNarrowRight
-                  style={{ width: "100%", height: "100%" }}
-                  stroke={1.5}
-                  color="#3751D7"
-                />
-              </span>
-            </Group>
-          </Flex>
-        </div>
-      );
-    },
+    // renderTopToolbar: () => {
+    //   return (
+    //     <div
+    //       style={{
+    //         display: "flex",
+    //         justifyContent: "space-between",
+    //         alignItems: "center",
+    //         padding: "10px 5px",
+    //         gap: "10px",
+    //         flexWrap: "wrap-reverse",
+    //       }}
+    //     >
+    //       <MultiSelect
+    //         data={allWeeks}
+    //         placeholder="Choose Weeks"
+    //         value={map(query?.weeks, (week) => `Week ${week}`) || []}
+    //         searchable
+    //         clearable
+    //         onClear={() => {
+    //           setQuery({
+    //             ...query,
+    //             weeks: [currentWeek],
+    //           });
+    //         }}
+    //         onChange={(value) => {
+    //           if (!isEmpty(value)) {
+    //             setQuery({
+    //               ...query,
+    //               weeks: orderBy(
+    //                 map(value, (week) => toNumber(split(week, " ")[1])),
+    //                 [],
+    //                 "desc"
+    //               ),
+    //             });
+    //           }
+    //         }}
+    //       />
+    //     </div>
+    //   );
+    // },
     enableDensityToggle: false,
     state: {
       showProgressBars: loading,
@@ -234,11 +220,7 @@ const ProductivityOPTable = ({
     onSortingChange: setSorting,
   });
 
-  return (
-    <>
-      <MantineReactTable table={table} />
-    </>
-  );
+  return <MantineReactTable table={table} />;
 };
 
 export default ProductivityOPTable;

@@ -41,10 +41,10 @@ const ProductivityDashboard = () => {
     totalPages: 1,
   });
   const [queryProductivity, setQueryProductivity] = useState({
-    weeks: generateDescendingArray(currentWeek),
+    weeks: map(listWeeks, (week) => split(week, " ")[1]),
   });
   const [queryBDProductivity, setQueryBDProductivity] = useState({
-    weeks: generateDescendingArray(currentWeek),
+    weeks: map(listWeeks, (week) => split(week, " ")[1]),
   });
   const [queryOPMonthlyProductivity, setQueryOPMonthlyProductivity] = useState({
     months: Array.from({ length: 12 }, (_, i) => i + 1),
@@ -60,7 +60,7 @@ const ProductivityDashboard = () => {
 
   const [sorting, setSorting] = useState([]);
   const [trigger, setTrigger] = useState(false);
-  const [trigerFetchProductivity, setTriggerFetchProductivity] =
+  const [triggerFetchProductivity, setTriggerFetchProductivity] =
     useState(false);
   const [trigerFetchBDProductivity, setTriggerFetchBDProductivity] =
     useState(false);
@@ -89,6 +89,12 @@ const ProductivityDashboard = () => {
     if (data) {
       setQuotas(orderBy(data, ["no"], ["asc"]));
       setListWeeks(map(metadata?.currentAllWeeks, (week) => `Week ${week}`));
+      setQueryProductivity({
+        weeks: map(metadata?.currentAllWeeks, (week) => week),
+      });
+      setQueryBDProductivity({
+        weeks: map(metadata?.currentAllWeeks, (week) => week),
+      });
     } else {
       setQuotas([]);
     }
@@ -104,7 +110,7 @@ const ProductivityDashboard = () => {
     });
     const { data } = response;
     if (data) {
-      setQuotasProductivity(orderBy(data, ["no"], ["asc"]));
+      setQuotasProductivity(orderBy(data, ["week"], ["desc"]));
     } else {
       setQuotasProductivity([]);
     }
@@ -120,7 +126,7 @@ const ProductivityDashboard = () => {
     });
     const { data } = response;
     if (data) {
-      setQuotasBDProductivity(orderBy(data, ["no"], ["asc"]));
+      setQuotasBDProductivity(orderBy(data, ["week"], ["desc"]));
     } else {
       setQuotasBDProductivity([]);
     }
@@ -136,7 +142,7 @@ const ProductivityDashboard = () => {
     });
     const { data } = response;
     if (data) {
-      setQuotasBDMonthlyProductivity(orderBy(data, ["no"], ["asc"]));
+      setQuotasBDMonthlyProductivity(orderBy(data, ["month"], ["desc"]));
     } else {
       setQuotasBDMonthlyProductivity([]);
     }
@@ -152,7 +158,7 @@ const ProductivityDashboard = () => {
     });
     const { data } = response;
     if (data) {
-      setQuotasOPMonthlyProductivity(orderBy(data, ["no"], ["asc"]));
+      setQuotasOPMonthlyProductivity(orderBy(data, ["month"], ["desc"]));
     } else {
       setQuotasOPMonthlyProductivity([]);
     }
@@ -163,10 +169,10 @@ const ProductivityDashboard = () => {
   }, [search, query, trigger, sorting]);
   useEffect(() => {
     fetchTeamProductivity(pagination.currentPage);
-  }, [queryProductivity, trigerFetchProductivity]);
+  }, [queryProductivity, listWeeks]);
   useEffect(() => {
     fetchBDTeamProductivity(pagination.currentPage);
-  }, [queryBDProductivity, trigerFetchBDProductivity]);
+  }, [queryBDProductivity, listWeeks]);
   useEffect(() => {
     fetchBDMonthlyTeamProductivity(pagination.currentPage);
   }, [queryBDMonthlyProductivity]);
@@ -177,10 +183,10 @@ const ProductivityDashboard = () => {
   useEffect(() => {
     if (activeTab === TABS_FILTER.WEEK) {
       setQueryProductivity({
-        weeks: generateDescendingArray(currentWeek),
+        weeks: map(listWeeks, (week) => split(week, " ")[1]),
       });
       setQueryBDProductivity({
-        weeks: generateDescendingArray(currentWeek),
+        weeks: map(listWeeks, (week) => split(week, " ")[1]),
       });
     } else {
       setQueryOPMonthlyProductivity({

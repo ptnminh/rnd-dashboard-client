@@ -80,7 +80,7 @@ const ProductivityBDTable = ({
           return (
             <TextInput
               placeholder="Quota"
-              value={`${actualQuota}$/${quota}h`}
+              value={`${actualQuota}💸 / ${quota}h`}
               readOnly={true}
             />
           );
@@ -147,78 +147,78 @@ const ProductivityBDTable = ({
       hoveredColumn: false,
       hoveredRow: false,
     },
-    renderTopToolbar: () => {
-      return (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "10px 5px",
-            gap: "10px",
-            flexWrap: "wrap-reverse",
-          }}
-        >
-          <Flex
-            style={{
-              gap: "8px",
-              padding: "10px",
-              borderRadius: "10px",
-              flexWrap: "wrap",
-            }}
-          >
-            <Select
-              data={allWeeks}
-              placeholder="Choose Week"
-              value={`Week ${query?.week}` || null}
-              onChange={(value) => {
-                const realWeek = split(value, " ")[1];
-                setQuery({
-                  ...query,
-                  week: realWeek,
-                  weeks: null,
-                });
-              }}
-            />
-          </Flex>
-          <Flex
-            style={{
-              gap: "8px",
-              padding: "10px",
-              borderRadius: "10px",
-              flexWrap: "wrap",
-            }}
-          >
-            <Group>
-              <span
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={() => handleSlideWeeks("left")}
-              >
-                <IconArrowNarrowLeft
-                  style={{ width: "100%", height: "100%" }}
-                  stroke={1.5}
-                  color="#3751D7"
-                />
-              </span>
-              <span
-                style={{
-                  cursor: "pointer",
-                }}
-                onClick={() => handleSlideWeeks("right")}
-              >
-                <IconArrowNarrowRight
-                  style={{ width: "100%", height: "100%" }}
-                  stroke={1.5}
-                  color="#3751D7"
-                />
-              </span>
-            </Group>
-          </Flex>
-        </div>
-      );
-    },
+    // renderTopToolbar: () => {
+    //   return (
+    //     <div
+    //       style={{
+    //         display: "flex",
+    //         justifyContent: "space-between",
+    //         alignItems: "center",
+    //         padding: "10px 5px",
+    //         gap: "10px",
+    //         flexWrap: "wrap-reverse",
+    //       }}
+    //     >
+    //       <Flex
+    //         style={{
+    //           gap: "8px",
+    //           padding: "10px",
+    //           borderRadius: "10px",
+    //           flexWrap: "wrap",
+    //         }}
+    //       >
+    //         <Select
+    //           data={allWeeks}
+    //           placeholder="Choose Week"
+    //           value={`Week ${query?.week}` || null}
+    //           onChange={(value) => {
+    //             const realWeek = split(value, " ")[1];
+    //             setQuery({
+    //               ...query,
+    //               week: realWeek,
+    //               weeks: null,
+    //             });
+    //           }}
+    //         />
+    //       </Flex>
+    //       <Flex
+    //         style={{
+    //           gap: "8px",
+    //           padding: "10px",
+    //           borderRadius: "10px",
+    //           flexWrap: "wrap",
+    //         }}
+    //       >
+    //         <Group>
+    //           <span
+    //             style={{
+    //               cursor: "pointer",
+    //             }}
+    //             onClick={() => handleSlideWeeks("left")}
+    //           >
+    //             <IconArrowNarrowLeft
+    //               style={{ width: "100%", height: "100%" }}
+    //               stroke={1.5}
+    //               color="#3751D7"
+    //             />
+    //           </span>
+    //           <span
+    //             style={{
+    //               cursor: "pointer",
+    //             }}
+    //             onClick={() => handleSlideWeeks("right")}
+    //           >
+    //             <IconArrowNarrowRight
+    //               style={{ width: "100%", height: "100%" }}
+    //               stroke={1.5}
+    //               color="#3751D7"
+    //             />
+    //           </span>
+    //         </Group>
+    //       </Flex>
+    //     </div>
+    //   );
+    // },
     mantineTableBodyCellProps: () => ({
       className: classes["body-cells"],
       sx: {

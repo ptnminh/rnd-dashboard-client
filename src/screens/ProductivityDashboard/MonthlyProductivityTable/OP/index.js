@@ -60,9 +60,18 @@ const ProductivityOPTable = ({
           return (
             <TextInput
               placeholder="Quota"
-              error={isExceed ? true : false}
               value={`${actualQuota}/${quota}`}
               readOnly={true}
+              styles={{
+                input: {
+                  ...(actualQuota === quota && {
+                    color: "#32A645",
+                  }),
+                  ...(actualQuota < quota && {
+                    color: "#ea102d",
+                  }),
+                },
+              }}
             />
           );
         },
@@ -126,43 +135,43 @@ const ProductivityOPTable = ({
     mantineTableProps: {
       className: classes["disable-hover"],
     },
-    renderTopToolbar: () => {
-      return (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "10px 5px",
-            gap: "10px",
-            flexWrap: "wrap-reverse",
-          }}
-        >
-          <Flex
-            style={{
-              gap: "8px",
-              padding: "10px",
-              borderRadius: "10px",
-              flexWrap: "wrap",
-            }}
-          >
-            <Select
-              data={Array.from({ length: 12 }, (_, i) => `T${i + 1}`)}
-              placeholder="Choose Month"
-              value={`Week ${query?.month}` || null}
-              onChange={(value) => {
-                const realMonth = parseInt(value.slice(1), 10);
-                setQuery({
-                  ...query,
-                  month: realMonth,
-                  months: null,
-                });
-              }}
-            />
-          </Flex>
-        </div>
-      );
-    },
+    // renderTopToolbar: () => {
+    //   return (
+    //     <div
+    //       style={{
+    //         display: "flex",
+    //         justifyContent: "space-between",
+    //         alignItems: "center",
+    //         padding: "10px 5px",
+    //         gap: "10px",
+    //         flexWrap: "wrap-reverse",
+    //       }}
+    //     >
+    //       <Flex
+    //         style={{
+    //           gap: "8px",
+    //           padding: "10px",
+    //           borderRadius: "10px",
+    //           flexWrap: "wrap",
+    //         }}
+    //       >
+    //         <Select
+    //           data={Array.from({ length: 12 }, (_, i) => `T${i + 1}`)}
+    //           placeholder="Choose Month"
+    //           value={`Week ${query?.month}` || null}
+    //           onChange={(value) => {
+    //             const realMonth = parseInt(value.slice(1), 10);
+    //             setQuery({
+    //               ...query,
+    //               month: realMonth,
+    //               months: null,
+    //             });
+    //           }}
+    //         />
+    //       </Flex>
+    //     </div>
+    //   );
+    // },
     enableDensityToggle: false,
     state: {
       showProgressBars: loading,
