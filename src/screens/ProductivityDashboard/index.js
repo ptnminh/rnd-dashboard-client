@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import styles from "./ProductivityDashboard.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
-import { isEmpty, map, orderBy, split } from "lodash";
-import { Flex, Grid, Select, Tabs, Text } from "@mantine/core";
+import { filter, isEmpty, map, orderBy, split } from "lodash";
+import { Button, Flex, Grid, Select, Tabs, Text } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { dashboardServices } from "../../services";
 import InputDashboard from "./InputDashboard";
@@ -264,7 +264,7 @@ const ProductivityDashboard = () => {
             </div>
             <InputDashboard
               className={styles.Table}
-              tableData={quotas}
+              tableData={filter(quotas, (quota) => quota.department === "op")}
               query={query}
               setQuery={setQuery}
               loadingFetchDashboardSettings={loadingFetchDashboardSettings}

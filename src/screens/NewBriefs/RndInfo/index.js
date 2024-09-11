@@ -83,15 +83,6 @@ const RndInfo = ({
               classOutSideClick={styles.memberDropdown}
             />{" "}
             <Dropdown
-              label={"Size"}
-              className={styles.dropdown}
-              classDropdownHead={styles.dropdownHead}
-              value={rndSize}
-              setValue={setRndSize}
-              options={RND_SIZES}
-              classOutSideClick={styles.memberDropdown}
-            />{" "}
-            <Dropdown
               className={styles.dropdown}
               label={"RND"}
               classDropdownHead={styles.dropdownHead}

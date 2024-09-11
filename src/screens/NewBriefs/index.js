@@ -24,12 +24,9 @@ import {
   Select,
   Tooltip,
   Group,
-  TextInput,
   Textarea,
 } from "@mantine/core";
 import { showNotification } from "../../utils/index";
-import { modals } from "@mantine/modals";
-
 import Dropdown from "../../components/Dropdown";
 import CustomTable from "../../components/Table";
 import {
@@ -49,7 +46,7 @@ import {
   toLower,
   uniq,
 } from "lodash";
-import { rndServices } from "../../services";
+import { dashboardServices, rndServices } from "../../services";
 import { CONVERT_STATUS_TO_NUMBER, getEditorStateAsString } from "../../utils";
 import {
   IconSearch,
@@ -569,6 +566,7 @@ const NewCampaigns = () => {
   });
   const [queryProductBase, setQueryProductBase] = useState({});
   const [querySKU, setQuerySKU] = useState({});
+  const [timeSettings, setTimeSettings] = useState([]);
   const [grouppedCliparts, setGrouppedCliparts] = useState([]);
   const [selectedProductBases, setSelectedProductBases] = useState([]);
   const [selectedSKUs, setSelectedSKUs] = useState([]);
@@ -613,6 +611,24 @@ const NewCampaigns = () => {
     await rndServices.syncQuotes();
     await fetchQuotes(quotePagination.currentPage);
     setLoaderIcon(false);
+  };
+  const fetchDashboardSettings = async () => {
+    const response = await dashboardServices.fetchDashboardsSetting({
+      page: -1,
+      query: {
+        actives: [0, 1],
+      },
+      limit: 30,
+    });
+    const { data } = response;
+    if (data) {
+      setTimeSettings(
+        map(data, (time) => ({
+          ...time,
+          option: toLower(time.option),
+        }))
+      );
+    }
   };
   const handleSyncProductBases = async () => {
     setLoaderIcon(true);
@@ -843,6 +859,7 @@ const NewCampaigns = () => {
     fetchUsers();
     fetchFilters();
     fetchQuotesFilter();
+    fetchDashboardSettings();
   }, []);
   useEffect(() => {
     // Update the URL when search or page changes
@@ -916,7 +933,6 @@ const NewCampaigns = () => {
       !epmMember ||
       !designerMember ||
       !briefType ||
-      !rndSize ||
       !briefValue
     ) {
       if (!workGroup) {
@@ -939,10 +955,6 @@ const NewCampaigns = () => {
         showNotification("Thất bại", "Vui lòng chọn Brief Type", "red");
         return;
       }
-      if (!rndSize) {
-        showNotification("Thất bại", "Vui lòng chọn Size", "red");
-        return;
-      }
       if (!briefValue) {
         showNotification("Thất bại", "Vui lòng chọn Value", "red");
         return;
@@ -955,6 +967,77 @@ const NewCampaigns = () => {
       setCreateBriefLoading(false);
       return;
     }
+    let designerTime;
+    let epmTime;
+
+    switch (briefType) {
+      case BRIEF_TYPES[0]: {
+        const option =
+          layout === LAYOUT_TYPES[0] ? "chung layout" : "khác layout";
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+          option,
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+          option,
+        });
+        break;
+      }
+      case BRIEF_TYPES[1]: {
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+        });
+        break;
+      }
+      case BRIEF_TYPES[3]: {
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+          size: CONVERT_STATUS_TO_NUMBER[rndSize],
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+          size: CONVERT_STATUS_TO_NUMBER[rndSize],
+        });
+        break;
+      }
+      case BRIEF_TYPES[4]: {
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+        });
+        break;
+      }
+      case BRIEF_TYPES[5]: {
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+          size: CONVERT_STATUS_TO_NUMBER[rndSize],
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+          size: CONVERT_STATUS_TO_NUMBER[rndSize],
+        });
+        break;
+      }
+      default: {
+        break;
+      }
+    }
     const data = map(generatedSKUs, (x) => {
       const {
         SKU: sku,
@@ -962,7 +1045,47 @@ const NewCampaigns = () => {
         skuPrefix,
         note: refDesignMarketNote,
       } = x;
+      // get time setting for designer and epm
+      if (briefType === BRIEF_TYPES[2]) {
+        const quote = x.Quote;
+        let option;
+        if (quote.length > 20) {
+          option = "quote dài";
+        } else {
+          option = "quote ngắn";
+        }
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+          option,
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+          option,
+        });
+      }
+      if (!designerTime) {
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+          option: "common",
+        });
+      }
+      if (!epmTime) {
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+          option: "common",
+        });
+      }
       return {
+        ...(designerTime && {
+          designerTimeId: designerTime?.uid,
+        }),
+        ...(epmTime && {
+          epmTimeId: epmTime?.uid,
+        }),
         skuRef: SKU?.sku || "",
         linkProductRef: SKU?.productLink || "",
         imageRef: SKU?.image || "",
@@ -970,9 +1093,6 @@ const NewCampaigns = () => {
         batch,
         briefType,
         rndTeam: workGroup,
-        size: {
-          rnd: CONVERT_STATUS_TO_NUMBER[rndSize],
-        },
         value: {
           rnd: CONVERT_STATUS_TO_NUMBER[briefValue],
         },
@@ -1183,6 +1303,7 @@ const NewCampaigns = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "20px",
+                    flexWrap: "wrap",
                   }}
                   ref={myClipartHeaderRef}
                 >
@@ -1273,6 +1394,7 @@ const NewCampaigns = () => {
                         padding: "10px",
                         borderRadius: "10px",
                         backgroundColor: "#EFF0F1",
+                        flexWrap: "wrap",
                       }}
                     >
                       <MantineTextInput
@@ -1309,6 +1431,7 @@ const NewCampaigns = () => {
                         gap: "8px",
                         padding: "10px",
                         borderRadius: "10px",
+                        flexWrap: "wrap",
                       }}
                     >
                       {map(filtersClipArt, (filter, index) => (
@@ -1737,6 +1860,8 @@ const NewCampaigns = () => {
                 BRIEF_TYPES={BRIEF_TYPES}
                 fetchClipArtsLoading={fetchClipArtsLoading}
                 setQuery={setQuery}
+                rndSize={rndSize}
+                setRndSize={setRndSize}
               />
             </div>
           </>
@@ -1779,6 +1904,8 @@ const NewCampaigns = () => {
                 marketBrief={marketBrief}
                 setMarketBrief={setMarketBrief}
                 title={"2. Input Ref"}
+                rndSize={rndSize}
+                setRndSize={setRndSize}
               />
             </div>
             <div className={styles.row}>

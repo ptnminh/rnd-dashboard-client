@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import styles from "./DashboardSetting.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
-import { filter, map, orderBy, toLower } from "lodash";
+import { filter, orderBy, toLower } from "lodash";
 import { Flex, Grid, Tabs, Text } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
-import moment from "moment-timezone";
-import { artistServices, dashboardServices } from "../../services";
+import { dashboardServices } from "../../services";
 import DesignerTable from "./DesignerTable";
+import EpmTable from "./EpmTable";
 import QuotaOP from "./QuotaOP";
 import QuotaBD from "./QuotaBD";
 
@@ -51,13 +51,7 @@ const DashboardSetting = () => {
     });
     const { data } = response;
     if (data) {
-      setDashboardSettings(
-        orderBy(
-          filter(data, (item) => item.team === toLower(activeTab)),
-          ["no"],
-          ["asc"]
-        )
-      );
+      setDashboardSettings(data);
     } else {
       setDashboardSettings([]);
     }
@@ -107,6 +101,21 @@ const DashboardSetting = () => {
     fetchDefaultQuota();
     fetchDefaultQuotaDemand();
   }, []);
+
+  const [currentTeam, setCurrentTeam] = useState("designer");
+
+  useEffect(() => {
+    if (activeTab === TABS_VIEW.DESIGNER) {
+      setCurrentTeam(toLower(TABS_VIEW.DESIGNER));
+    } else if (activeTab === TABS_VIEW.ARTIST) {
+      setCurrentTeam(toLower(TABS_VIEW.ARTIST));
+    } else if (activeTab === TABS_VIEW.MOCKUP) {
+      setCurrentTeam(toLower(TABS_VIEW.MOCKUP));
+    } else if (activeTab === TABS_VIEW.EPM) {
+      setCurrentTeam(toLower(TABS_VIEW.EPM));
+    }
+    fetchDashboardSettings();
+  }, [activeTab]);
 
   return (
     <>
@@ -218,7 +227,14 @@ const DashboardSetting = () => {
               <Tabs.Panel value={TABS_VIEW.DESIGNER}>
                 <DesignerTable
                   className={styles.Table}
-                  tableData={dashboardSettings}
+                  tableData={orderBy(
+                    filter(
+                      dashboardSettings,
+                      (item) => item.team === currentTeam
+                    ),
+                    ["no", "position"],
+                    ["asc", "asc"]
+                  )}
                   query={query}
                   setQuery={setQuery}
                   loadingFetchDashboardSettings={loadingFetchDashboardSettings}
@@ -229,7 +245,25 @@ const DashboardSetting = () => {
               </Tabs.Panel>
               <Tabs.Panel value={TABS_VIEW.ARTIST}>Second panel</Tabs.Panel>
               <Tabs.Panel value="first">First panel</Tabs.Panel>
-              <Tabs.Panel value={TABS_VIEW.ARTIST}>Second panel</Tabs.Panel>
+              <Tabs.Panel value={TABS_VIEW.EPM}>
+                <EpmTable
+                  className={styles.Table}
+                  tableData={orderBy(
+                    filter(
+                      dashboardSettings,
+                      (item) => item.team === currentTeam
+                    ),
+                    ["no", "position"],
+                    ["asc", "asc"]
+                  )}
+                  query={query}
+                  setQuery={setQuery}
+                  loadingFetchDashboardSettings={loadingFetchDashboardSettings}
+                  setTrigger={setTrigger}
+                  setSorting={setSorting}
+                  sorting={sorting}
+                />
+              </Tabs.Panel>
             </Tabs>
           </Grid.Col>
         </Grid>
@@ -271,7 +305,7 @@ const DashboardSetting = () => {
               }}
             >
               <Text align="center" size="xl" fw={700}>
-                DEFAULT QUOTA (BD)
+                DEFAULT DEMAND QUOTA (BD)
               </Text>
             </Flex>
             <QuotaBD

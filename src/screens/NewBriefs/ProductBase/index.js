@@ -83,7 +83,7 @@ const ProductBase = ({
               alignItems: "center",
               padding: "10px 5px",
               gap: "10px",
-              flexWrap: "wrap-reverse",
+              flexWrap: "wrap",
               borderRadius: "10px",
             }}
           >
@@ -106,7 +106,7 @@ const ProductBase = ({
             justifyContent: "space-between",
             alignItems: "center",
             padding: "10px 5px",
-            flexWrap: "wrap-reverse",
+            flexWrap: "wrap",
             backgroundColor: "#EFF0F1",
             borderRadius: "10px",
           }}
@@ -117,6 +117,7 @@ const ProductBase = ({
               padding: "10px",
               borderRadius: "10px",
               backgroundColor: "#EFF0F1",
+              flexWrap: "wrap",
             }}
           >
             {briefType === BRIEF_TYPES[0] && (

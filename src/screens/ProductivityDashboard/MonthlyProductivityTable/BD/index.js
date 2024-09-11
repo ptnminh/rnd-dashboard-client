@@ -54,9 +54,8 @@ const ProductivityOPTable = ({
           });
           const payload = find(monthData?.teamData, { team: opTeam });
 
-          const actualQuota = payload?.actualQuota || 0;
+          const actualQuota = payload?.totalQuota || 0;
           const actualRevenue = payload?.actualRevenue || 0;
-          const isExceed = actualRevenue < actualQuota;
           return (
             <TextInput
               placeholder="Quota"

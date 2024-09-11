@@ -17,6 +17,8 @@ import { showNotification } from "../../../utils/index";
 import Loader from "../../../components/Loader";
 import { isEmpty } from "lodash";
 import Editor from "../../../components/Editor";
+import Dropdown from "../../../components/Dropdown";
+import { RND_SIZES } from "../../../constant";
 
 function generateRandomString(length) {
   const characters =
@@ -28,7 +30,13 @@ function generateRandomString(length) {
   }
   return result;
 }
-const MarketBriefDesign = ({ marketBrief, setMarketBrief, title }) => {
+const MarketBriefDesign = ({
+  marketBrief,
+  setMarketBrief,
+  title,
+  rndSize,
+  setRndSize,
+}) => {
   const [showingSelectFile, setShowingSelectFile] = useState(false);
   const [loadingUploadFile, setLoadingUploadFile] = useState(false);
   const [briefNote, setBriefNote] = useState("");
@@ -92,6 +100,17 @@ const MarketBriefDesign = ({ marketBrief, setMarketBrief, title }) => {
         classSpanTitle={styles.classScaleSpanTitle}
         title={title || "3. Ref Design (Market)"}
         classTitle={cn("title-green", styles.title)}
+        head={
+          <Dropdown
+            label={"Size"}
+            className={styles.dropdown}
+            classDropdownHead={styles.dropdownHead}
+            value={rndSize}
+            setValue={setRndSize}
+            options={RND_SIZES}
+            classOutSideClick={styles.memberDropdown}
+          />
+        }
       >
         <ScrollArea
           h={550}

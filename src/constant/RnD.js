@@ -19,7 +19,7 @@ export const CHOOSE_BRIEF_TYPES = [
   "New - Mix Match",
 ];
 export const BRIEF_VALUES = ["Small", "Medium", "Big", "Super Big"];
-export const RND_SIZES = ["Small", "Medium", "Big"];
+export const RND_SIZES = ["Small", "+Small", "Medium", "Big"];
 export const LAYOUT_TYPES = [
   "Product Base - Chung Layout",
   "Product Base - Khác Layout",

@@ -177,6 +177,26 @@ const KeywordTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
+        accessorKey: "priority",
+        header: "PRIORITY",
+        enableSorting: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        size: 100,
+        Cell: ({ row }) => {
+          return (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Checkbox value={row?.original?.priority === 2} />
+            </div>
+          );
+        },
+      },
+      {
         accessorKey: "value",
         header: "VALUE",
         size: 100,
@@ -229,6 +249,62 @@ const KeywordTable = ({
           );
         },
       },
+      // {
+      //   accessorKey: "size",
+      //   header: "SIZE",
+      //   size: 100,
+      //   enableEditing: false,
+      //   enableSorting: false,
+      //   mantineTableBodyCellProps: { className: classes["body-cells"] },
+      //   mantineTableHeadCellProps: { className: classes["linkDesign"] },
+      //   Cell: ({ row }) => {
+      //     const uid = row?.original?.uid;
+      //     const foundBrief = find(payloads, { uid });
+      //     return (
+      //       <Select
+      //         placeholder="Size"
+      //         allowDeselect={false}
+      //         disabled={foundBrief.status === STATUS.DESIGNED}
+      //         data={["Small", "Medium", "Big"]}
+      //         styles={{
+      //           input: {
+      //             width: "100px",
+      //           },
+      //         }}
+      //         value={
+      //           CONVERT_NUMBER_TO_STATUS[foundBrief.size?.design] ||
+      //           CONVERT_NUMBER_TO_STATUS[foundBrief.size?.rnd]
+      //         }
+      //         onChange={(value) => {
+      //           setPayloads((prev) => {
+      //             const newPayloads = map(prev, (x) => {
+      //               if (x.uid === uid) {
+      //                 return {
+      //                   ...x,
+      //                   size: {
+      //                     ...x.size,
+      //                     design: CONVERT_STATUS_TO_NUMBER[value],
+      //                   },
+      //                 };
+      //               }
+      //               return x;
+      //             });
+      //             return newPayloads;
+      //           });
+      //           rndServices.updateBriefDesign({
+      //             uid,
+      //             data: {
+      //               size: {
+      //                 ...foundBrief.size,
+      //                 design: CONVERT_STATUS_TO_NUMBER[value],
+      //               },
+      //             },
+      //           });
+      //         }}
+      //       />
+      //     );
+      //   },
+      // },
       {
         accessorKey: "size",
         header: "SIZE",
@@ -236,72 +312,30 @@ const KeywordTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
-          const uid = row?.original?.uid;
-          const foundBrief = find(payloads, { uid });
-          return (
-            <Select
-              placeholder="Size"
-              allowDeselect={false}
-              disabled={foundBrief.status === STATUS.DESIGNED}
-              data={["Small", "Medium", "Big"]}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={
-                CONVERT_NUMBER_TO_STATUS[foundBrief.size?.design] ||
-                CONVERT_NUMBER_TO_STATUS[foundBrief.size?.rnd]
-              }
-              onChange={(value) => {
-                setPayloads((prev) => {
-                  const newPayloads = map(prev, (x) => {
-                    if (x.uid === uid) {
-                      return {
-                        ...x,
-                        size: {
-                          ...x.size,
-                          design: CONVERT_STATUS_TO_NUMBER[value],
-                        },
-                      };
-                    }
-                    return x;
-                  });
-                  return newPayloads;
-                });
-                rndServices.updateBriefDesign({
-                  uid,
-                  data: {
-                    size: {
-                      ...foundBrief.size,
-                      design: CONVERT_STATUS_TO_NUMBER[value],
-                    },
-                  },
-                });
-              }}
-            />
-          );
-        },
-      },
-      {
-        accessorKey: "priority",
-        header: "PRIORITY",
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
-        size: 100,
-        Cell: ({ row }) => {
-          return (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <Checkbox value={row?.original?.priority === 2} />
-            </div>
+          let color = null;
+          switch (row?.original?.size?.design) {
+            case 1:
+              color = "green";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "red";
+              break;
+            case 1.5:
+              color = "#006400";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.design]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.size?.design]}</span>
           );
         },
       },
@@ -393,9 +427,10 @@ const KeywordTable = ({
                 row.original.status === 2 ? <IconBan /> : <IconCheck />
               }
               disabled={
-                row?.original?.status === 1 &&
-                !row?.original?.linkDesign &&
-                !updateBrief[row.original.uid]?.linkDesign
+                (row?.original?.status === 1 &&
+                  !row?.original?.linkDesign &&
+                  !updateBrief[row.original.uid]?.linkDesign) ||
+                row?.original?.status === 2
               }
             >
               {row.original.status === 2 ? "Undone" : "Done"}
@@ -490,7 +525,7 @@ const KeywordTable = ({
     onCreatingRowCancel: () => setValidationErrors({}),
     onEditingRowCancel: () => setValidationErrors({}),
     enableDensityToggle: false,
-    renderTopToolbar: ({ table }) => {
+    renderTopToolbar: () => {
       return (
         <div
           style={{
