@@ -82,13 +82,18 @@ const ProductivityOPTable = ({
     () => [
       {
         accessorKey: "team",
-        header: "OP",
+        header: "BD",
         size: 50,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
           return {
-            className: classes["body-cells-op-team"],
+            className: classes["body-cells-bd-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-bd-team"],
           };
         },
         Cell: ({ row }) => {

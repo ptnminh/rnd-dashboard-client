@@ -102,6 +102,11 @@ const ProductivityOPTable = ({
             className: classes["body-cells-op-team"],
           };
         },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
         Cell: ({ row }) => {
           return (
             <Text

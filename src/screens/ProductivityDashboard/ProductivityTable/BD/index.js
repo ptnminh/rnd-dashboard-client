@@ -97,6 +97,11 @@ const ProductivityBDTable = ({
             className: classes["body-cells-op-team"],
           };
         },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-bd-team"],
+          };
+        },
         Cell: ({ row }) => {
           return (
             <Text

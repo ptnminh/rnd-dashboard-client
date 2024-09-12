@@ -45,9 +45,9 @@ const DashboardSetting = () => {
   const fetchDashboardSettings = async () => {
     setLoadingFetchDashboardSettings(true);
     const response = await dashboardServices.fetchDashboardsSetting({
-      page: -1,
+      page: 1,
       query,
-      limit: 30,
+      limit: -1,
     });
     const { data } = response;
     if (data) {
@@ -60,9 +60,9 @@ const DashboardSetting = () => {
   };
   const fetchDefaultQuota = async () => {
     const response = await dashboardServices.fetchDefaultQuota({
-      page: -1,
+      page: 1,
       query: {},
-      limit: 30,
+      limit: -1,
     });
     const { data } = response;
     if (data) {
@@ -73,9 +73,9 @@ const DashboardSetting = () => {
   };
   const fetchDefaultQuotaDemand = async () => {
     const response = await dashboardServices.fetchDefaultQuotaDemand({
-      page: -1,
+      page: 1,
       query: {},
-      limit: 30,
+      limit: -1,
     });
     const { data } = response;
     if (data) {

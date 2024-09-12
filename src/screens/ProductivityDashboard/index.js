@@ -81,9 +81,9 @@ const ProductivityDashboard = () => {
   const fetchDashboardQuota = async () => {
     setLoadingFetchDashboardSettings(true);
     const response = await dashboardServices.fetchQuotas({
-      page: -1,
+      page: 1,
       query,
-      limit: 30,
+      limit: -1,
     });
     const { data, metadata } = response;
     if (data) {
@@ -104,9 +104,9 @@ const ProductivityDashboard = () => {
   const fetchTeamProductivity = async () => {
     setLoadingFetchTeamProductivity(true);
     const response = await dashboardServices.fetchQuotas({
-      page: -1,
+      page: 1,
       query: queryProductivity,
-      limit: 30,
+      limit: -1,
     });
     const { data } = response;
     if (data) {
@@ -120,9 +120,9 @@ const ProductivityDashboard = () => {
   const fetchBDTeamProductivity = async () => {
     setLoadingFetchBDTeamProductivity(true);
     const response = await dashboardServices.fetchQuotas({
-      page: -1,
+      page: 1,
       query: queryBDProductivity,
-      limit: 30,
+      limit: -1,
     });
     const { data } = response;
     if (data) {
@@ -136,9 +136,9 @@ const ProductivityDashboard = () => {
   const fetchBDMonthlyTeamProductivity = async () => {
     setLoadingFetchBDMonthlyTeamProductivity(true);
     const response = await dashboardServices.fetchQuotasMonth({
-      page: -1,
+      page: 1,
       query: queryBDMonthlyProductivity,
-      limit: 30,
+      limit: -1,
     });
     const { data } = response;
     if (data) {
@@ -152,9 +152,9 @@ const ProductivityDashboard = () => {
   const fetchOPMonthlyTeamProductivity = async () => {
     setLoadingFetchOPMonthlyTeamProductivity(true);
     const response = await dashboardServices.fetchQuotasMonth({
-      page: -1,
+      page: 1,
       query: queryOPMonthlyProductivity,
-      limit: 30,
+      limit: -1,
     });
     const { data } = response;
     if (data) {
