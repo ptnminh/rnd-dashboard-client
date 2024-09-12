@@ -525,29 +525,27 @@ const BriefsTable = ({
               }}
             />
             <Select
-              placeholder="Size"
-              data={["Small", "Medium", "Big"]}
+              placeholder="Value"
+              data={["Small", "Medium", "Big", "Super Big"]}
               styles={{
                 input: {
                   width: "100px",
                 },
               }}
-              value={query?.sizeValue}
+              value={query?.rndValue}
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  size: {
-                    "size.rnd": CONVERT_STATUS_TO_NUMBER[value],
-                  },
-                  sizeValue: value,
+                  value: CONVERT_STATUS_TO_NUMBER[value],
+                  rndValue: value,
                 })
               }
               clearable
               onClear={() => {
                 setQuery({
                   ...query,
-                  size: null,
-                  sizeValue: null,
+                  value: null,
+                  rndValue: null,
                 });
               }}
             />
@@ -667,6 +665,8 @@ const BriefsTable = ({
                   epmName: null,
                   statusValue: null,
                   dateValue: null,
+                  value: null,
+                  rndValue: null,
                 });
                 setBatch("");
                 setSearchSKU("");
