@@ -9,7 +9,7 @@ import {
   Button,
   MultiSelect,
 } from "@mantine/core";
-import { find, map, flatten, uniq, join } from "lodash";
+import { find, map, flatten, uniq, join, isEmpty } from "lodash";
 import { IconCurrencyDollar, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import {
@@ -235,7 +235,7 @@ const SellerboardTable = ({
                   width: "300px",
                 },
               }}
-              value={query?.storeValues}
+              value={!isEmpty(query?.storeValues) ? query.storeValues : []}
               onChange={(value) =>
                 setQuery({
                   ...query,
@@ -260,7 +260,7 @@ const SellerboardTable = ({
                   width: "250px",
                 },
               }}
-              value={query?.fulfillmentChannel}
+              value={query?.fulfillmentChannel || null}
               onChange={(value) =>
                 setQuery({ ...query, fulfillmentChannel: value })
               }
@@ -281,7 +281,7 @@ const SellerboardTable = ({
                   width: "250px",
                 },
               }}
-              value={query?.sortValue}
+              value={query?.sortValue || null}
               onChange={(value) => {
                 let sortBy = "";
                 let sortDir = "";
