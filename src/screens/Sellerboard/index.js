@@ -223,14 +223,14 @@ const Sellerboard = () => {
                   setSorting={setSorting}
                   sorting={sorting}
                 />
-                {/* <Pagination
+                <Pagination
                   total={pagination.totalPages}
                   page={pagination.currentPage}
                   onChange={handlePageChange}
                   color="pink"
                   size="md"
                   style={{ marginTop: "20px", marginRight: "auto" }}
-                /> */}
+                />
               </Tabs.Panel>
             </Tabs>
           </Grid.Col>
