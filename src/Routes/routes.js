@@ -191,6 +191,10 @@ const PATH_NAMES = {
         title: "2. Sale - các SKU test",
         url: "/dashboard/sales",
       },
+      AMZ_SELLER_BOARD: {
+        title: "3. AMZ Seller Board",
+        url: "/dashboard/amz-seller-board",
+      },
     },
   },
 };
@@ -499,6 +503,11 @@ export const NAVIGATION = [
       {
         title: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.title,
         url: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.url,
+        permissions: ["read:user"],
+      },
+      {
+        title: PATH_NAMES.DASHBOARD.children.AMZ_SELLER_BOARD.title,
+        url: PATH_NAMES.DASHBOARD.children.AMZ_SELLER_BOARD.url,
         permissions: ["read:user"],
       },
     ],
