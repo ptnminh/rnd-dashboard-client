@@ -59,7 +59,7 @@ const ProductivityOPTable = ({
                   ...(actualQuota < quota && {
                     color: "#ea102d",
                   }),
-                  width: "90px",
+                  width: "150px",
                   textAlign: "center",
                 },
               }}

@@ -61,6 +61,11 @@ const ProductivityOPTable = ({
               placeholder="Quota"
               value={`${actualRevenue}💸 / ${actualQuota}h`}
               readOnly={true}
+              styles={{
+                input: {
+                  width: "150px",
+                },
+              }}
             />
           );
         },

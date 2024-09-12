@@ -960,6 +960,13 @@ const NewCampaigns = () => {
         return;
       }
     }
+    if (
+      !rndSize &&
+      (briefType === BRIEF_TYPES[3] || briefType === BRIEF_TYPES[5])
+    ) {
+      showNotification("Thất bại", "Vui lòng chọn Size", "red");
+      return;
+    }
     setCreateBriefLoading(true);
     const generatedSKUs = prepareSubmitData();
     if (isEmpty(generatedSKUs)) {

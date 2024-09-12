@@ -43,6 +43,11 @@ const ProductivityBDTable = ({
               placeholder="Quota"
               value={`${actualQuota}💸 / ${quota}h`}
               readOnly={true}
+              styles={{
+                input: {
+                  width: "150px",
+                },
+              }}
             />
           );
         },
