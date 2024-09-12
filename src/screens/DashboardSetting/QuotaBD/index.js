@@ -1,18 +1,16 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import { NumberInput, Text, TextInput } from "@mantine/core";
+import { NumberInput, Text } from "@mantine/core";
 import {
   filter,
   find,
   groupBy,
   includes,
-  isEmpty,
   keys,
   map,
   max,
   sumBy,
   toNumber,
-  toString,
 } from "lodash";
 import classes from "./MyTable.module.css";
 import { IconStack } from "@tabler/icons-react";

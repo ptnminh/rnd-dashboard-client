@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import { Button, NumberInput, Text, TextInput } from "@mantine/core";
-import { filter, find, includes, map, max, sumBy, toNumber } from "lodash";
+import { Button, NumberInput, Text } from "@mantine/core";
+import { find, map, max, sumBy, toNumber } from "lodash";
 import classes from "./MyTable.module.css";
 import { IconCheck } from "@tabler/icons-react";
 
@@ -182,8 +182,9 @@ const InputDashboard = ({
             ? distribution?.quota || 0
             : sumBy(distributions, "quota") || 0;
           const opQuota = payload?.quota || payload?.defaultQuota || 0;
-          const isError =
-            bdQuotas > opQuota && uidOnChange === OGZ_BD_TEAMS.BD1;
+          const isError = uidOnChange
+            ? bdQuotas > opQuota && uidOnChange === OGZ_BD_TEAMS.BD1
+            : bdQuotas > opQuota;
           return isRender ? (
             <NumberInput
               rightSection={
@@ -267,8 +268,9 @@ const InputDashboard = ({
           )
             ? distribution?.quota || 0
             : sumBy(distributions, "quota") || 0;
-          const isError =
-            bdQuotas > opQuota && uidOnChange === OGZ_BD_TEAMS.BD2;
+          const isError = uidOnChange
+            ? bdQuotas > opQuota && uidOnChange === OGZ_BD_TEAMS.BD2
+            : bdQuotas > opQuota;
           return isRender ? (
             <NumberInput
               rightSection={<IconCheck color="#4E83FD" />}
@@ -350,8 +352,9 @@ const InputDashboard = ({
             : sumBy(distributions, "quota") || 0;
           const bdQuota = distribution?.quota || 0;
           const opQuota = payload?.quota || payload?.defaultQuota || 0;
-          const isError =
-            bdQuotas > opQuota && uidOnChange === OGZ_BD_TEAMS.BD3;
+          const isError = uidOnChange
+            ? bdQuotas > opQuota && uidOnChange === OGZ_BD_TEAMS.BD3
+            : bdQuotas > opQuota;
 
           return isRender ? (
             <NumberInput
@@ -439,8 +442,9 @@ const InputDashboard = ({
             : sumBy(distributions, "quota") || 0;
           const bdQuota = distribution?.quota || 0;
           const opQuota = payload?.quota || payload?.defaultQuota || 0;
-          const isError =
-            bdQuotas > opQuota && uidOnChange === OGZ_BD_TEAMS.AMZ;
+          const isError = uidOnChange
+            ? bdQuotas > opQuota && uidOnChange === OGZ_BD_TEAMS.AMZ
+            : bdQuotas > opQuota;
 
           return isRender ? (
             <NumberInput

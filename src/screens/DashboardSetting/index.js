@@ -39,6 +39,7 @@ const DashboardSetting = () => {
   });
   const [sorting, setSorting] = useState([]);
   const [trigger, setTrigger] = useState(false);
+  const [triggerFetchQuota, setTriggerQuota] = useState(false);
   const [loadingFetchDashboardSettings, setLoadingFetchDashboardSettings] =
     useState(false);
 
@@ -70,6 +71,7 @@ const DashboardSetting = () => {
     } else {
       setDefaultQuota([]);
     }
+    setTriggerQuota(false);
   };
   const fetchDefaultQuotaDemand = async () => {
     const response = await dashboardServices.fetchDefaultQuotaDemand({
@@ -83,6 +85,7 @@ const DashboardSetting = () => {
     } else {
       setDefaultQuotaDemand([]);
     }
+    setTriggerQuota(false);
   };
   useEffect(() => {
     fetchDashboardSettings(pagination.currentPage);
@@ -100,7 +103,7 @@ const DashboardSetting = () => {
   useEffect(() => {
     fetchDefaultQuota();
     fetchDefaultQuotaDemand();
-  }, []);
+  }, [triggerFetchQuota]);
 
   const [currentTeam, setCurrentTeam] = useState("designer");
 
@@ -292,7 +295,7 @@ const DashboardSetting = () => {
               query={query}
               setQuery={setQuery}
               loadingFetchDashboardSettings={loadingFetchDashboardSettings}
-              setTrigger={setTrigger}
+              setTrigger={setTriggerQuota}
               setSorting={setSorting}
               sorting={sorting}
             />
@@ -315,7 +318,7 @@ const DashboardSetting = () => {
               query={query}
               setQuery={setQuery}
               loadingFetchDashboardSettings={loadingFetchDashboardSettings}
-              setTrigger={setTrigger}
+              setTrigger={setTriggerQuota}
               setSorting={setSorting}
               sorting={sorting}
             />

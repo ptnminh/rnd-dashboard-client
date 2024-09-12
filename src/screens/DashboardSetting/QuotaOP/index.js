@@ -103,6 +103,9 @@ const QuotaOP = ({
                   },
                 });
               }}
+              onBlur={() => {
+                setTrigger(true);
+              }}
             />
           );
         },
