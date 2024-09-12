@@ -102,6 +102,7 @@ const ProductivityDashboard = () => {
     setTrigger(false);
   };
   const fetchTeamProductivity = async () => {
+    if (isEmpty(listWeeks)) return;
     setLoadingFetchTeamProductivity(true);
     const response = await dashboardServices.fetchQuotas({
       page: 1,
@@ -118,6 +119,7 @@ const ProductivityDashboard = () => {
     setTriggerFetchProductivity(false);
   };
   const fetchBDTeamProductivity = async () => {
+    if (isEmpty(listWeeks)) return;
     setLoadingFetchBDTeamProductivity(true);
     const response = await dashboardServices.fetchQuotas({
       page: 1,

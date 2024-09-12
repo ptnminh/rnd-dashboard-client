@@ -107,12 +107,15 @@ const InputDashboard = ({
                   return item;
                 });
                 setData(newPayloads);
-                handleUpdate({
-                  uid,
-                  data: {
-                    quota: toNumber(value),
-                  },
-                });
+                setPayloads(newPayloads);
+                if (currentQuota >= toNumber(value)) {
+                  handleUpdate({
+                    uid,
+                    data: {
+                      quota: toNumber(value),
+                    },
+                  });
+                }
               }}
             />
           );
