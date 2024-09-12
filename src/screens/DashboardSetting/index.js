@@ -177,6 +177,21 @@ const DashboardSetting = () => {
                       {TABS_VIEW.DESIGNER}
                     </Tabs.Tab>
                     <Tabs.Tab
+                      value={TABS_VIEW.EPM}
+                      styles={{
+                        ...(activeTab === TABS_VIEW.EPM && {
+                          tab: {
+                            backgroundColor: "#7C4DFF",
+                            color: "#fff",
+                            borderRadius: "10px",
+                            borderColor: "transparent",
+                          },
+                        }),
+                      }}
+                    >
+                      {TABS_VIEW.EPM}
+                    </Tabs.Tab>
+                    <Tabs.Tab
                       value={TABS_VIEW.ARTIST}
                       styles={{
                         ...(activeTab === TABS_VIEW.ARTIST && {
@@ -205,21 +220,6 @@ const DashboardSetting = () => {
                       }}
                     >
                       {TABS_VIEW.MOCKUP}
-                    </Tabs.Tab>
-                    <Tabs.Tab
-                      value={TABS_VIEW.EPM}
-                      styles={{
-                        ...(activeTab === TABS_VIEW.EPM && {
-                          tab: {
-                            backgroundColor: "#7C4DFF",
-                            color: "#fff",
-                            borderRadius: "10px",
-                            borderColor: "transparent",
-                          },
-                        }),
-                      }}
-                    >
-                      {TABS_VIEW.EPM}
                     </Tabs.Tab>
                   </Flex>
                 </div>
