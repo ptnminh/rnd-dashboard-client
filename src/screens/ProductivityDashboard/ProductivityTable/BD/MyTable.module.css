@@ -14,6 +14,15 @@
   display: none;
 }
 
+
+.edit-header {
+  background-color: #646A72;
+  color: #ffffff;
+  width: 100%;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
 .head-cells>div {
   align-items: center !important;
   justify-content: center !important;
@@ -28,13 +37,6 @@
   border-right: 1px solid #d1d6e3;
 }
 
-.edit-header {
-  background-color: #646A72;
-  color: #ffffff;
-  width: 100%;
-  height: 70px;
-  border-right: 1px solid #d1d6e3;
-}
 .head-cells-bd-team {
   font-weight: bold;
   color: #ffffff;

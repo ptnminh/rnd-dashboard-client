@@ -29,7 +29,7 @@ const ProductivityOPTable = ({
       return {
         accessorKey: `W${week}`,
         header: `W${week}`,
-        size: 100,
+        size: 50,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: {

@@ -1,31 +1,12 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import { Flex, Group, Select, Text, TextInput } from "@mantine/core";
-import {
-  find,
-  groupBy,
-  keys,
-  map,
-  max,
-  min,
-  orderBy,
-  split,
-  toNumber,
-  uniqBy,
-} from "lodash";
-import { IconArrowNarrowLeft, IconArrowNarrowRight } from "@tabler/icons-react";
-
+import { Text, TextInput } from "@mantine/core";
+import { find, groupBy, keys, map, orderBy, toNumber, uniqBy } from "lodash";
 import classes from "./MyTable.module.css";
-import {
-  generateAscendingArray,
-  generateDescendingArray,
-} from "../../../../utils";
 
 const ProductivityBDTable = ({
   tableData,
-  query,
   loading,
-  setTrigger,
   sorting,
   setSorting,
   weeks: allWeeks,
@@ -94,7 +75,7 @@ const ProductivityBDTable = ({
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
           return {
-            className: classes["body-cells-op-team"],
+            className: classes["body-cells-bd-team"],
           };
         },
         mantineTableHeadCellProps: () => {

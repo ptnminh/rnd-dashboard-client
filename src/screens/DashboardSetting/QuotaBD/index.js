@@ -1,16 +1,18 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import { Text, TextInput } from "@mantine/core";
+import { NumberInput, Text, TextInput } from "@mantine/core";
 import {
   filter,
   find,
   groupBy,
   includes,
+  isEmpty,
   keys,
   map,
   max,
   sumBy,
   toNumber,
+  toString,
 } from "lodash";
 import classes from "./MyTable.module.css";
 import { IconStack } from "@tabler/icons-react";
@@ -29,6 +31,7 @@ const QuotaBD = ({
 }) => {
   const [payloads, setPayloads] = useState([]);
   const [data, setData] = useState(tableData || []);
+  const [uidOnChange, setUidOnChange] = useState(null);
   useEffect(() => {
     const groupByTeam = groupBy(tableData, "team");
     const teams = keys(groupByTeam);
@@ -59,6 +62,19 @@ const QuotaBD = ({
     if (isTrigger) {
       setTrigger(true);
     }
+  };
+  const calcQuotas = ({ opTeam, payload, payloads }) => {
+    const bdQuotas = !includes(
+      [OP_TEAMS.DS1, OP_TEAMS.DS2, OP_TEAMS.DS3],
+      opTeam
+    )
+      ? sumBy(
+          filter(payloads, (item) => item.team === opTeam),
+          "quota"
+        ) || 0
+      : payload?.quota;
+
+    return bdQuotas;
   };
   const columns = useMemo(
     () => [
@@ -134,25 +150,23 @@ const QuotaBD = ({
             : payload?.quota;
           const opPayload = find(data, (item) => item.team === opTeam);
           const opQuota = opPayload?.numOfMember * 8 * 5 || 0;
-          const highestPartnerTeamQuotas =
-            row.original?.highestPartnerTeamQuotas;
-          const isError =
-            bdQuotas > opQuota && payload?.quota === highestPartnerTeamQuotas;
+          const isError = bdQuotas > opQuota && uidOnChange === payload?.uid;
           return isRender ? (
-            <TextInput
+            <NumberInput
               rightSection={<IconStack />}
               value={payload?.quota}
               error={isError}
-              onChange={(event) => {
+              onChange={(value) => {
                 const newPayloads = payloads.map((item) => {
                   if (item.team === opTeam && item.partnerTeam === bdTeam) {
                     return {
                       ...item,
-                      quota: toNumber(event.target.value),
+                      quota: toNumber(value),
                     };
                   }
                   return item;
                 });
+                setUidOnChange(payload?.uid);
                 setPayloads(newPayloads);
                 const highestPartnerTeamQuotas = max(
                   map(
@@ -171,12 +185,23 @@ const QuotaBD = ({
                     return item;
                   });
                 });
-                handleUpdate({
-                  uid: payload?.uid,
-                  data: {
-                    quota: toNumber(event.target.value),
-                  },
+                const newPayload = find(
+                  newPayloads,
+                  (item) => item.team === opTeam && item.partnerTeam === bdTeam
+                );
+                const newBDQuotas = calcQuotas({
+                  opTeam,
+                  payload: newPayload,
+                  payloads: newPayloads,
                 });
+                if (newBDQuotas <= opQuota) {
+                  handleUpdate({
+                    uid: payload?.uid,
+                    data: {
+                      quota: toNumber(value),
+                    },
+                  });
+                }
               }}
             />
           ) : null;
@@ -211,25 +236,23 @@ const QuotaBD = ({
             : payload?.quota;
           const opPayload = find(data, (item) => item.team === opTeam);
           const opQuota = opPayload?.numOfMember * 8 * 5 || 0;
-          const highestPartnerTeamQuotas =
-            row.original?.highestPartnerTeamQuotas;
-          const isError =
-            bdQuotas > opQuota && payload?.quota === highestPartnerTeamQuotas;
+          const isError = bdQuotas > opQuota && uidOnChange === payload?.uid;
           return isRender ? (
-            <TextInput
+            <NumberInput
               rightSection={<IconStack />}
               value={payload?.quota}
               error={isError}
-              onChange={(event) => {
+              onChange={(value) => {
                 const newPayloads = payloads.map((item) => {
                   if (item.team === opTeam && item.partnerTeam === bdTeam) {
                     return {
                       ...item,
-                      quota: toNumber(event.target.value),
+                      quota: toNumber(value),
                     };
                   }
                   return item;
                 });
+                setUidOnChange(payload?.uid);
                 setPayloads(newPayloads);
                 const highestPartnerTeamQuotas = max(
                   map(
@@ -248,12 +271,23 @@ const QuotaBD = ({
                     return item;
                   });
                 });
-                handleUpdate({
-                  uid: payload?.uid,
-                  data: {
-                    quota: toNumber(event.target.value),
-                  },
+                const newPayload = find(
+                  newPayloads,
+                  (item) => item.team === opTeam && item.partnerTeam === bdTeam
+                );
+                const newBDQuotas = calcQuotas({
+                  opTeam,
+                  payload: newPayload,
+                  payloads: newPayloads,
                 });
+                if (newBDQuotas <= opQuota) {
+                  handleUpdate({
+                    uid: payload?.uid,
+                    data: {
+                      quota: toNumber(value),
+                    },
+                  });
+                }
               }}
             />
           ) : null;
@@ -288,25 +322,23 @@ const QuotaBD = ({
             : payload?.quota;
           const opPayload = find(data, (item) => item.team === opTeam);
           const opQuota = opPayload?.numOfMember * 8 * 5 || 0;
-          const highestPartnerTeamQuotas =
-            row.original?.highestPartnerTeamQuotas;
-          const isError =
-            bdQuotas > opQuota && payload?.quota === highestPartnerTeamQuotas;
+          const isError = bdQuotas > opQuota && uidOnChange === payload?.uid;
           return isRender ? (
-            <TextInput
+            <NumberInput
               rightSection={<IconStack />}
               value={payload?.quota}
               error={isError}
-              onChange={(event) => {
+              onChange={(value) => {
                 const newPayloads = payloads.map((item) => {
                   if (item.team === opTeam && item.partnerTeam === bdTeam) {
                     return {
                       ...item,
-                      quota: toNumber(event.target.value),
+                      quota: toNumber(value),
                     };
                   }
                   return item;
                 });
+                setUidOnChange(payload?.uid);
                 setPayloads(newPayloads);
                 const highestPartnerTeamQuotas = max(
                   map(
@@ -325,12 +357,23 @@ const QuotaBD = ({
                     return item;
                   });
                 });
-                handleUpdate({
-                  uid: payload?.uid,
-                  data: {
-                    quota: toNumber(event.target.value),
-                  },
+                const newPayload = find(
+                  newPayloads,
+                  (item) => item.team === opTeam && item.partnerTeam === bdTeam
+                );
+                const newBDQuotas = calcQuotas({
+                  opTeam,
+                  payload: newPayload,
+                  payloads: newPayloads,
                 });
+                if (newBDQuotas <= opQuota) {
+                  handleUpdate({
+                    uid: payload?.uid,
+                    data: {
+                      quota: toNumber(value),
+                    },
+                  });
+                }
               }}
             />
           ) : null;
@@ -370,21 +413,19 @@ const QuotaBD = ({
             : payload?.quota;
           const opPayload = find(data, (item) => item.team === opTeam);
           const opQuota = opPayload?.numOfMember * 8 * 5 || 0;
-          const highestPartnerTeamQuotas =
-            row.original?.highestPartnerTeamQuotas;
-          const isError =
-            bdQuotas > opQuota && payload?.quota === highestPartnerTeamQuotas;
+          const isError = bdQuotas > opQuota && uidOnChange === payload?.uid;
           return isRender ? (
-            <TextInput
+            <NumberInput
               rightSection={<IconStack />}
               value={payload?.quota}
               error={isError}
-              onChange={(event) => {
+              onChange={(value) => {
+                setUidOnChange(payload?.uid);
                 const newPayloads = payloads.map((item) => {
                   if (item.team === opTeam && item.partnerTeam === bdTeam) {
                     return {
                       ...item,
-                      quota: toNumber(event.target.value),
+                      quota: toNumber(value),
                     };
                   }
                   return item;
@@ -407,12 +448,23 @@ const QuotaBD = ({
                     return item;
                   });
                 });
-                handleUpdate({
-                  uid: payload?.uid,
-                  data: {
-                    quota: toNumber(event.target.value),
-                  },
+                const newPayload = find(
+                  newPayloads,
+                  (item) => item.team === opTeam && item.partnerTeam === bdTeam
+                );
+                const newBDQuotas = calcQuotas({
+                  opTeam,
+                  payload: newPayload,
+                  payloads: newPayloads,
                 });
+                if (newBDQuotas <= opQuota) {
+                  handleUpdate({
+                    uid: payload?.uid,
+                    data: {
+                      quota: toNumber(value),
+                    },
+                  });
+                }
               }}
             />
           ) : null;

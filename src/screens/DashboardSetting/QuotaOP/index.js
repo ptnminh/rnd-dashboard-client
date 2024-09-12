@@ -1,11 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import {
-  Group,
-  Text,
-  TextInput,
-} from "@mantine/core";
-import { find, map, toNumber } from "lodash";
+import { Group, Text, TextInput } from "@mantine/core";
+import { find, isEmpty, map, toNumber } from "lodash";
 import classes from "./MyTable.module.css";
 import { LOCAL_STORAGE_KEY } from "../../../constant";
 import { IconUser } from "@tabler/icons-react";
@@ -54,8 +50,8 @@ const QuotaOP = ({
         mantineTableBodyCellProps: ({ row }) => {
           return {
             className: classes["body-cells"],
-          }
-        }
+          };
+        },
       },
       {
         accessorKey: "team",
@@ -65,8 +61,7 @@ const QuotaOP = ({
         mantineTableBodyCellProps: ({ row }) => {
           return {
             className: classes["body-cells"],
-
-          }
+          };
         },
         enableSorting: false,
       },
@@ -74,7 +69,7 @@ const QuotaOP = ({
         accessorKey: "option",
         header: "Số member",
         mantineTableBodyCellProps: {
-          className: classes["body-cells"]
+          className: classes["body-cells"],
         },
         size: 150,
         enableEditing: false,
@@ -91,7 +86,9 @@ const QuotaOP = ({
                   if (item.uid === uid) {
                     return {
                       ...item,
-                      numOfMember: event.target.value,
+                      numOfMember: !isEmpty(event.target.value)
+                        ? toNumber(event.target.value)
+                        : 0,
                     };
                   }
                   return item;
@@ -100,12 +97,14 @@ const QuotaOP = ({
                 handleUpdate({
                   uid,
                   data: {
-                    numOfMember: toNumber(event.target.value),
-                  }
-                })
+                    numOfMember: !isEmpty(event.target.value)
+                      ? toNumber(event.target.value)
+                      : 0,
+                  },
+                });
               }}
             />
-          )
+          );
         },
       },
       {
@@ -113,37 +112,49 @@ const QuotaOP = ({
         size: 120,
         enableEditing: false,
         mantineTableBodyCellProps: {
-          className: classes["body-cells"]
+          className: classes["body-cells"],
         },
         enableSorting: false,
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const payload = find(payloads, (item) => item.uid === uid);
           return (
-            <Text
-              rightSection={<IconUser />}
-            >{payload?.numOfMember * 8 * 5}</Text>
-          )
+            <Text rightSection={<IconUser />}>
+              {payload?.numOfMember * 8 * 5}
+            </Text>
+          );
         },
         Header: () => {
           return (
-            <Group style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "5px",
-
-            }}>
-              <Text fw={700} style={{
-                fontSize: "14px",
-              }}>Quota</Text>
-              <Text fw={300} size="sx" style={{
-                color: "#8c939d",
-                fontSize: "12px",
-              }}>(member x8 x5)</Text>
+            <Group
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <Text
+                fw={700}
+                style={{
+                  fontSize: "14px",
+                }}
+              >
+                Quota
+              </Text>
+              <Text
+                fw={300}
+                size="sx"
+                style={{
+                  color: "#8c939d",
+                  fontSize: "12px",
+                }}
+              >
+                (member x8 x5)
+              </Text>
             </Group>
-          )
-        }
+          );
+        },
       },
     ],
     [validationErrors, tableData, query, payloads]
