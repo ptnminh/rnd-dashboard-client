@@ -972,6 +972,9 @@ const NewCampaigns = () => {
 
     switch (briefType) {
       case BRIEF_TYPES[0]: {
+        if (!layout) {
+          break;
+        }
         const option =
           layout === LAYOUT_TYPES[0] ? "chung layout" : "khác layout";
         designerTime = find(timeSettings, {
