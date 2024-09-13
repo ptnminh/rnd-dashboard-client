@@ -15,6 +15,7 @@ const InputDashboard = ({
   setTrigger,
   sorting,
   setSorting,
+  currentWeek,
 }) => {
   const [uidOnChange, setUidOnChange] = useState(null);
   const [payloads, setPayloads] = useState([]);
@@ -95,7 +96,7 @@ const InputDashboard = ({
               value={quota}
               defaultValue={currentQuota}
               error={currentQuota < payload?.quota ? true : false}
-              disabled={payload?.isConfirm}
+              disabled={payload?.isConfirm || currentWeek > payload?.week}
               onChange={(value) => {
                 const newPayloads = data.map((item) => {
                   if (item.uid === uid) {
@@ -137,7 +138,7 @@ const InputDashboard = ({
           return (
             <Button
               color="#3751D7"
-              disabled={payload?.isConfirm}
+              disabled={payload?.isConfirm || currentWeek > payload?.week}
               size="md"
               onClick={() => {
                 handleUpdate({
@@ -192,6 +193,7 @@ const InputDashboard = ({
               }
               value={bdQuota}
               error={isError}
+              disabled={currentWeek > payload?.week}
               onChange={(value) => {
                 let distributionsPayload = [];
                 const newPayloads = payloads.map((item) => {
@@ -276,6 +278,7 @@ const InputDashboard = ({
               rightSection={<IconCheck color="#4E83FD" />}
               value={bdQuota}
               error={isError}
+              disabled={currentWeek > payload?.week}
               onChange={(value) => {
                 let distributionsPayload = [];
                 const newPayloads = payloads.map((item) => {
@@ -361,6 +364,7 @@ const InputDashboard = ({
               rightSection={<IconCheck color="#4E83FD" />}
               value={bdQuota}
               error={isError}
+              disabled={currentWeek > payload?.week}
               onChange={(value) => {
                 let distributionsPayload = [];
                 const newPayloads = payloads.map((item) => {
@@ -451,6 +455,7 @@ const InputDashboard = ({
               rightSection={<IconCheck color="#4E83FD" />}
               value={bdQuota}
               error={isError}
+              disabled={currentWeek > payload?.week}
               onChange={(value) => {
                 let distributionsPayload = [];
                 const newPayloads = payloads.map((item) => {

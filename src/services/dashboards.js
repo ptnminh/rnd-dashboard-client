@@ -28,6 +28,33 @@ export const dashboardServices = {
       return false;
     }
   },
+  createNewWeek: async (payload) => {
+    try {
+      const { data: result } = await apiClient.post(`/quotas`, payload);
+      if (result?.success === false) {
+        showNotification(
+          "Thất bại",
+          result?.message || "Tạo mới thất bại",
+          "red"
+        );
+        return false;
+      }
+      return result;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at fetchQuotes:", error);
+        showNotification("Thất bại", "Tạo mới thất bại", "red");
+      }
+      return false;
+    }
+  },
   fetchQuotas: async ({ page, limit, query }) => {
     try {
       let url = `/quotas?page=${page}&pageSize=${limit}`;

@@ -9,8 +9,8 @@ import { dashboardServices } from "../../services";
 import InputDashboard from "./InputDashboard";
 import ProductivityTable from "./ProductivityTable";
 import moment from "moment-timezone";
-import { generateDescendingArray } from "../../utils";
 import MonthlyProductivityTable from "./MonthlyProductivityTable";
+import { showNotification } from "../../utils/index";
 
 const TABS_FILTER = {
   WEEK: "Week",
@@ -68,6 +68,7 @@ const ProductivityDashboard = () => {
     useState(false);
   const [loadingFetchTeamProductivity, setLoadingFetchTeamProductivity] =
     useState(false);
+  const [loadingCreateNewWeek, setLoadingCreateNewWeek] = useState(false);
   const [
     loadingFetchOPMonthlyTeamProductivity,
     setLoadingFetchOPMonthlyTeamProductivity,
@@ -166,6 +167,20 @@ const ProductivityDashboard = () => {
     }
     setLoadingFetchOPMonthlyTeamProductivity(false);
   };
+  const handleCreateNewWeek = async (newWeek) => {
+    setLoadingCreateNewWeek(true);
+    const response = await dashboardServices.createNewWeek({
+      week: newWeek,
+    });
+    if (response) {
+      setQuery({
+        ...query,
+        week: newWeek,
+      });
+      showNotification("Thành công", "Tạo tuần mới thành công", "success");
+    }
+    setLoadingCreateNewWeek(false);
+  };
   useEffect(() => {
     fetchDashboardQuota(pagination.currentPage);
   }, [search, query, trigger, sorting]);
@@ -262,6 +277,14 @@ const ProductivityDashboard = () => {
                     });
                   }}
                 />
+                <Button
+                  onClick={() => {
+                    handleCreateNewWeek(currentWeek + 1);
+                  }}
+                  loading={loadingCreateNewWeek}
+                >
+                  Tạo tuần mới
+                </Button>
               </Flex>
             </div>
             <InputDashboard
@@ -273,6 +296,7 @@ const ProductivityDashboard = () => {
               setTrigger={setTrigger}
               setSorting={setSorting}
               sorting={sorting}
+              currentWeek={currentWeek}
             />
           </Grid.Col>
         </Grid>
