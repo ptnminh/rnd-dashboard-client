@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import { Flex, Group, Select, Text, TextInput } from "@mantine/core";
 import {
+  ceil,
   find,
   flatMap,
   groupBy,
@@ -10,6 +11,7 @@ import {
   max,
   min,
   orderBy,
+  round,
   split,
   toNumber,
   uniqBy,
@@ -59,7 +61,7 @@ const ProductivityOPTable = ({
           return (
             <TextInput
               placeholder="Quota"
-              value={`${actualRevenue}💸 / ${actualQuota}h`}
+              value={ceil(round(actualRevenue / actualQuota, 0))}
               readOnly={true}
               styles={{
                 input: {

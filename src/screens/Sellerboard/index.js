@@ -29,6 +29,9 @@ const Sellerboard = () => {
   });
   const [query, setQuery] = useState({
     groupByKey: toLower(TABS_VIEW.Date),
+    stores: "PFH,QZL,GGT",
+    storeValues: ["PFH", "QZL", "GGT"],
+    fulfillmentChannel: ["FBA", "FBM"],
   });
   const [sorting, setSorting] = useState([]);
   const [trigger, setTrigger] = useState(false);
@@ -40,6 +43,7 @@ const Sellerboard = () => {
       page,
       query: omit(query, ["sortValue", "storeValues"]),
       limit: 10,
+      sorting,
     });
     const { data, metaData } = response;
     if (data) {
@@ -72,6 +76,9 @@ const Sellerboard = () => {
     if (!isEmpty(saleMetrics)) {
       setQuery({
         groupByKey: toLower(activeTab),
+        stores: "PFH,QZL,GGT",
+        storeValues: ["PFH", "QZL", "GGT"],
+        fulfillmentChannel: ["FBA", "FBM"],
       });
       setPagination({
         currentPage: 1,
@@ -182,6 +189,7 @@ const Sellerboard = () => {
                   setTrigger={setTrigger}
                   setSorting={setSorting}
                   sorting={sorting}
+                  activeTab={activeTab}
                 />
                 <Pagination
                   total={pagination.totalPages}
@@ -202,6 +210,7 @@ const Sellerboard = () => {
                   setTrigger={setTrigger}
                   setSorting={setSorting}
                   sorting={sorting}
+                  activeTab={activeTab}
                 />
                 <Pagination
                   total={pagination.totalPages}
@@ -222,6 +231,7 @@ const Sellerboard = () => {
                   setTrigger={setTrigger}
                   setSorting={setSorting}
                   sorting={sorting}
+                  activeTab={activeTab}
                 />
                 <Pagination
                   total={pagination.totalPages}

@@ -2215,33 +2215,61 @@ const NewCampaigns = () => {
             </div>
           </Grid.Col>
           <Grid.Col span={12}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "5px",
-                fontSize: "18px",
-              }}
-            >
-              Scale{" "}
-              <Badge
-                size="md"
-                variant="gradient"
-                gradient={{ from: "blue", to: "cyan", deg: 90 }}
-                style={{ margin: "0 5px" }}
-              >
-                {generateTextPreview(briefType, layout)}
-              </Badge>{" "}
-              {SKU?.sku && (
-                <>
-                  từ{" "}
-                  <Badge size="md" color="pink" style={{ marginLeft: "5px" }}>
-                    {SKU?.sku}
+            <Grid>
+              <Grid.Col span={12}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "5px",
+                    fontSize: "18px",
+                    position: "relative",
+                  }}
+                >
+                  <span>Scale </span>
+                  <Badge
+                    size="md"
+                    variant="gradient"
+                    gradient={{ from: "blue", to: "cyan", deg: 90 }}
+                    style={{ margin: "0 5px" }}
+                  >
+                    {generateTextPreview(briefType, layout)}
                   </Badge>{" "}
-                </>
-              )}
-            </div>
+                  {SKU?.sku && (
+                    <>
+                      <span>từ </span>
+                      <Badge
+                        size="md"
+                        color="pink"
+                        style={{ marginLeft: "5px" }}
+                      >
+                        {SKU?.sku}
+                      </Badge>{" "}
+                    </>
+                  )}
+                  <Button
+                    className={cn(
+                      "button-stroke-blue button-small",
+                      styles.createButton
+                    )}
+                    loading={createBriefLoading}
+                    onClick={handleSubmitBrief}
+                    style={{
+                      width: "100px",
+                      borderRadius: "20px",
+                      borderWidth: "2px",
+                      backgroundColor: "#3FA433",
+                      color: "#ffffff",
+                      position: "absolute",
+                      right: "10px",
+                    }}
+                  >
+                    <span>Tạo Brief</span>
+                  </Button>
+                </div>
+              </Grid.Col>
+            </Grid>
           </Grid.Col>
           <Grid.Col span={12}>
             <div
@@ -2333,35 +2361,7 @@ const NewCampaigns = () => {
               />
             </ScrollArea>
           </Grid.Col>
-          <Grid.Col span={12}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                width: "100%",
-              }}
-            >
-              <Button
-                className={cn(
-                  "button-stroke-blue button-small",
-                  styles.createButton
-                )}
-                loading={createBriefLoading}
-                onClick={handleSubmitBrief}
-                style={{
-                  marginTop: "24px",
-                  marginBottom: "12px",
-                  width: "150px",
-                  borderRadius: "20px",
-                  borderWidth: "2px",
-                  backgroundColor: "#3FA433",
-                  color: "#ffffff",
-                }}
-              >
-                <span>Tạo Brief</span>
-              </Button>
-            </div>
-          </Grid.Col>
+          <Grid.Col span={12}></Grid.Col>
         </Grid>
       </Modal>
       <ModalPreviewMixMatch

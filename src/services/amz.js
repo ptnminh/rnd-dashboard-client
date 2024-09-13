@@ -3,21 +3,29 @@ import axios from "axios";
 import { AMZ_URL } from "../constant";
 
 export const amzServices = {
-  fetchSaleMetrics: async ({ query, page, limit }) => {
+  fetchSaleMetrics: async ({ query, page, limit, sorting }) => {
     try {
       let url = `${AMZ_URL}/sales-metrics?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
       const emptyKeys = filter(queryKeys, (key) => !query[key]);
-      let queryString = {};
+      let queryParams = {};
+      let sortingParams = {};
       if (!isEmpty(transformedQuery)) {
-        queryString = {
+        queryParams = {
           ...omit(query, emptyKeys),
+        };
+      }
+      if (!isEmpty(sorting)) {
+        sortingParams = {
+          sortBy: sorting[0].id,
+          sortDir: sorting[0].desc ? "desc" : "asc",
         };
       }
       const response = await axios.get(url, {
         params: {
-          ...queryString,
+          ...queryParams,
+          ...sortingParams,
         },
       });
       const { data: result } = response;

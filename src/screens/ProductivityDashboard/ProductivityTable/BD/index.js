@@ -1,7 +1,17 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import { Text, TextInput } from "@mantine/core";
-import { find, groupBy, keys, map, orderBy, toNumber, uniqBy } from "lodash";
+import {
+  ceil,
+  find,
+  groupBy,
+  keys,
+  map,
+  orderBy,
+  round,
+  toNumber,
+  uniqBy,
+} from "lodash";
 import classes from "./MyTable.module.css";
 
 const ProductivityBDTable = ({
@@ -41,7 +51,7 @@ const ProductivityBDTable = ({
           return (
             <TextInput
               placeholder="Quota"
-              value={`${actualQuota}💸 / ${quota}h`}
+              value={ceil(round(actualQuota / quota, 0))}
               readOnly={true}
               styles={{
                 input: {

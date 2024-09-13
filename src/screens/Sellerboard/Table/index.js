@@ -5,18 +5,34 @@ import {
   Flex,
   Grid,
   Image,
-  Select,
   Button,
   MultiSelect,
+  Badge,
+  Tooltip,
+  Group,
+  ActionIcon,
 } from "@mantine/core";
-import { find, map, flatten, uniq, join, isEmpty } from "lodash";
-import { IconCurrencyDollar, IconFilterOff } from "@tabler/icons-react";
-import classes from "./MyTable.module.css";
 import {
-  AMZ_SORTING,
-  AMZ_STORES,
-  FULFILLMENT_CHANNELS,
-} from "../../../constant";
+  find,
+  map,
+  flatten,
+  uniq,
+  join,
+  isEmpty,
+  split,
+  includes,
+} from "lodash";
+import { IconFilterOff } from "@tabler/icons-react";
+import classes from "./MyTable.module.css";
+import { AMZ_STORES, FULFILLMENT_CHANNELS } from "../../../constant";
+import moment from "moment-timezone";
+import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
+import { DateRangePicker } from "rsuite";
+import {
+  IconArrowsSort,
+  IconSortDescending,
+  IconSortAscending,
+} from "@tabler/icons-react";
 
 const SellerboardTable = ({
   tableData,
@@ -25,6 +41,7 @@ const SellerboardTable = ({
   sorting,
   setSorting,
   setQuery,
+  activeTab,
 }) => {
   // Function to extract unique keys from the data array
   const extractUniqueKeys = (dataset) => {
@@ -38,17 +55,17 @@ const SellerboardTable = ({
   };
   const [data, setData] = useState(tableData || []);
   const [customColumns, setCustomColumns] = useState([]);
-
   // Function to generate columns based on the data
   const generateCustomColumn = (data) => {
     const keyLevels = extractUniqueKeys(data);
     const columns = map(keyLevels, (keyLevel) => {
       return {
         accessorKey: keyLevel,
-        header: keyLevel,
-        size: 50,
+        header: join(split(keyLevel, " ").slice(0, -1), " "),
+        size: 100,
+        maxSize: 150,
         enableEditing: false,
-        enableSorting: false,
+        enableSorting: true,
         mantineTableBodyCellProps: {
           className: classes["body-cells"],
         },
@@ -62,20 +79,11 @@ const SellerboardTable = ({
             <Flex direction="column">
               <Text
                 style={{
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: "bold",
                 }}
-                left={<IconCurrencyDollar />}
               >
-                ${keyData.revenue}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: "gray",
-                }}
-              >
-                Order: {keyData.orders}
+                {keyData.orders}
               </Text>
             </Flex>
           );
@@ -91,6 +99,36 @@ const SellerboardTable = ({
     setCustomColumns(generateCustomColumn(tableData));
   }, [tableData]);
 
+  useEffect(() => {
+    if (
+      customColumns.length < 8 &&
+      customColumns.length > 0 &&
+      activeTab === "Month"
+    ) {
+      let virtualColumn = [];
+      virtualColumn = Array(10 - customColumns.length)
+        .fill(0)
+        .map((_, i) => ({
+          accessorKey: `virtualColumn${i}`,
+          header: "",
+          size: 100, // Set default size
+          maxSize: 150, // Maximum size
+          enableEditing: false,
+          enableSorting: false,
+          mantineTableBodyCellProps: {
+            className: classes["body-cells"],
+          },
+          mantineTableHeadCellProps: {
+            className: classes["edit-header"],
+          },
+          Cell: () => {
+            return <Text style={{ fontSize: 16, fontWeight: "bold" }}></Text>;
+          },
+        }));
+      setCustomColumns([...customColumns, ...virtualColumn]);
+    }
+  }, [data]);
+
   // UseMemo to construct final columns array
   const columns = useMemo(
     () => [
@@ -98,8 +136,10 @@ const SellerboardTable = ({
         accessorKey: "product",
         header: "Product",
         size: 200,
+        maxSize: 200,
         enableEditing: false,
         enableSorting: false,
+        enableMultiSort: true,
         mantineTableBodyCellProps: ({ row }) => {
           return {
             className: classes["body-cells-op-team"],
@@ -113,43 +153,43 @@ const SellerboardTable = ({
         Cell: ({ row }) => {
           const { ASIN, title, image, store, fulfillmentChannel, sku } =
             row.original;
+          const url = `https://www.amazon.com/dp/${ASIN}`;
           return (
             <Flex direction="column">
               <Grid>
                 <Grid.Col span={4}>
-                  <Image
-                    src={image || "/images/content/not_found_2.jpg"}
-                    width="100%"
-                    height="50px"
-                  />
+                  <Tooltip label={url}>
+                    <Image
+                      src={image || "/images/content/not_found_2.jpg"}
+                      width="100%"
+                      height="50px"
+                      style={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        window.open(url, "_blank");
+                      }}
+                    />
+                  </Tooltip>
                 </Grid.Col>
                 <Grid.Col span={8}>
                   <Grid>
                     <Grid.Col span={12}>
                       <Flex>
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: "gray",
-                          }}
-                        >
-                          <span
+                        <Tooltip label={url}>
+                          <Text
                             style={{
-                              color: "orange",
+                              fontSize: 14,
+                              fontWeight: "bold",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => {
+                              window.open(url, "_blank");
                             }}
                           >
-                            {store}
-                          </span>{" "}
-                          -{" "}
-                          <span
-                            style={{
-                              color: "green",
-                            }}
-                          >
-                            {fulfillmentChannel}
-                          </span>{" "}
-                          - {ASIN} - {sku}
-                        </Text>
+                            {sku}
+                          </Text>
+                        </Tooltip>
                       </Flex>
                     </Grid.Col>
 
@@ -162,22 +202,173 @@ const SellerboardTable = ({
                     >
                       <Text
                         style={{
-                          display: "inline-block",
-                          width: "250px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textDecoration: "none",
-                          fontSize: 14,
+                          fontSize: 12,
+                          color: "gray",
                         }}
                       >
-                        {title}
+                        {ASIN}
                       </Text>
                     </Grid.Col>
                   </Grid>
                 </Grid.Col>
               </Grid>
             </Flex>
+          );
+        },
+      },
+      {
+        accessorKey: "createdDate",
+        size: 150,
+        maxSize: 150,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className: classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Header: () => {
+          return (
+            <Group gap={5}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "bold",
+                }}
+              >
+                Created time
+              </Text>
+              {!query?.primarySortBy && (
+                <ActionIcon
+                  aria-label="Settings"
+                  variant="default"
+                  style={{
+                    background: "none",
+                    border: "none",
+                  }}
+                  onClick={() => {
+                    setQuery({
+                      ...query,
+                      primarySortBy: "createdDate",
+                      primarySortDir: "desc",
+                    });
+                  }}
+                >
+                  <IconArrowsSort
+                    style={{ width: "60%", height: "60%" }}
+                    stroke={2}
+                  />
+                </ActionIcon>
+              )}
+
+              {query?.primarySortBy === "createdDate" &&
+                query?.primarySortDir === "desc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setQuery({
+                        ...query,
+                        primarySortBy: "createdDate",
+                        primarySortDir: "asc",
+                      });
+                    }}
+                  >
+                    <IconSortDescending
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+              {query?.primarySortBy === "createdDate" &&
+                query?.primarySortDir === "asc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setQuery({
+                        ...query,
+                        primarySortBy: null,
+                        primarySortDir: null,
+                      });
+                    }}
+                  >
+                    <IconSortAscending
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+            </Group>
+          );
+        },
+        Cell: ({ row }) => {
+          const { createdDate } = row.original;
+          return (
+            <Text
+              style={{
+                fontSize: 14,
+                fontWeight: "bold",
+              }}
+            >
+              {moment(createdDate)
+                .tz("America/Los_Angeles")
+                .format("YYYY-MM-DD")}
+            </Text>
+          );
+        },
+      },
+      {
+        accessorKey: "value",
+        header: "Value",
+        size: 150,
+        maxSize: 150,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className: classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          let color = null;
+          const value = row.original.value || 2;
+          switch (value) {
+            case 1:
+              color = "#cfcfcf";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "green";
+              break;
+            case 4:
+              color = "#38761C";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[value]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[value]}</span>
           );
         },
       },
@@ -191,7 +382,6 @@ const SellerboardTable = ({
     data,
     editDisplayMode: "cell",
     enablePagination: false,
-    enableSorting: false,
     getRowId: (row) => row.id,
     enableRowSelection: false,
     enableFilters: false,
@@ -232,17 +422,26 @@ const SellerboardTable = ({
               data={AMZ_STORES}
               styles={{
                 input: {
-                  width: "300px",
+                  width: "350px",
                 },
               }}
               value={!isEmpty(query?.storeValues) ? query.storeValues : []}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  stores: join(value, ","),
-                  storeValues: value,
-                })
-              }
+              onChange={(value) => {
+                if (includes(value, "All")) {
+                  const realValues = ["PFH", "QZL", "GGT"];
+                  setQuery({
+                    ...query,
+                    stores: join(realValues, ","),
+                    storeValues: realValues,
+                  });
+                } else {
+                  setQuery({
+                    ...query,
+                    stores: join(value, ","),
+                    storeValues: value,
+                  });
+                }
+              }}
               clearable
               searchable
               onClear={() => {
@@ -252,18 +451,26 @@ const SellerboardTable = ({
                 });
               }}
             />
-            <Select
+            <MultiSelect
               placeholder="Channel"
               data={FULFILLMENT_CHANNELS}
               styles={{
                 input: {
-                  width: "250px",
+                  width: "300px",
                 },
               }}
               value={query?.fulfillmentChannel || null}
-              onChange={(value) =>
-                setQuery({ ...query, fulfillmentChannel: value })
-              }
+              onChange={(value) => {
+                if (includes(value, "All")) {
+                  const realValues = ["FBA", "FBM"];
+                  setQuery({
+                    ...query,
+                    fulfillmentChannel: realValues,
+                  });
+                } else {
+                  setQuery({ ...query, fulfillmentChannel: value });
+                }
+              }}
               clearable
               searchable
               onClear={() => {
@@ -273,51 +480,41 @@ const SellerboardTable = ({
                 });
               }}
             />
-            <Select
-              placeholder="Sorting"
-              data={AMZ_SORTING}
-              styles={{
-                input: {
-                  width: "250px",
-                },
-              }}
-              value={query?.sortValue || null}
-              onChange={(value) => {
-                let sortBy = "";
-                let sortDir = "";
-                switch (value) {
-                  case "Revenue (A-Z)":
-                    sortBy = "revenue";
-                    sortDir = "asc";
-                    break;
-                  case "Revenue (Z-A)":
-                    sortBy = "revenue";
-                    sortDir = "desc";
-                    break;
-                  case "Orders (A-Z)":
-                    sortBy = "orders";
-                    sortDir = "asc";
-                    break;
-                  case "Orders (Z-A)":
-                    sortBy = "orders";
-                    sortDir = "desc";
-                    break;
-                  default:
-                    value = null;
+            {activeTab === "Date" && (
+              <DateRangePicker
+                size="sx"
+                placeholder="Date"
+                style={{
+                  width: "100px",
+                }}
+                value={query.dateValue}
+                onOk={(value) =>
+                  setQuery({
+                    ...query,
+                    dateValue: value,
+                    startDate: moment(value[0]).format("YYYY-MM-DD"),
+                    endDate: moment(value[1]).format("YYYY-MM-DD"),
+                  })
                 }
-                setQuery({ ...query, sortValue: value, sortBy, sortDir });
-              }}
-              clearable
-              searchable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  sortValue: null,
-                  sortBy: null,
-                  sortDir: null,
-                });
-              }}
-            />
+                onClean={() => {
+                  setQuery({
+                    ...query,
+                    dateValue: null,
+                    startDate: null,
+                    endDate: null,
+                  });
+                }}
+                onShortcutClick={(shortcut, event) => {
+                  setQuery({
+                    ...query,
+                    dateValue: shortcut.value,
+                    startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
+                    endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
+                  });
+                }}
+              />
+            )}
+
             <Button
               onClick={() => {
                 setQuery({
@@ -327,6 +524,9 @@ const SellerboardTable = ({
                   sortBy: null,
                   sortDir: null,
                   storeValues: [],
+                  dateValue: null,
+                  startDate: null,
+                  endDate: null,
                 });
               }}
             >
@@ -343,6 +543,10 @@ const SellerboardTable = ({
       },
     }),
     onSortingChange: setSorting,
+    enableColumnResizing: false,
+    enableSorting: true,
+    enableMultiSort: false,
+    manualSorting: true,
   });
 
   return <MantineReactTable table={table} />;

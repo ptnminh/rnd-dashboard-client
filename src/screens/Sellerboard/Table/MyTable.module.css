@@ -43,8 +43,8 @@
 }
 .body-cells-op-team {
   background-color: #E1EAFF;
-  vertical-align: middle;
-  text-align: center;
+  vertical-align: middle !important;
+  text-align: center !important;
 }
 
 .edit-header {
@@ -66,8 +66,8 @@
 }
 
 .body-cells {
-  vertical-align: middle;
-  text-align: center;
+  vertical-align: middle !important;
+  text-align: center !important;
 }
 
 .linkDesign {
