@@ -260,7 +260,7 @@ const SellerboardTable = ({
                   }}
                 >
                   <IconArrowsSort
-                    style={{ width: "60%", height: "60%" }}
+                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
                     stroke={2}
                   />
                 </ActionIcon>
@@ -302,7 +302,11 @@ const SellerboardTable = ({
                     }}
                   >
                     <IconSortAscending
-                      style={{ width: "70%", height: "70%" }}
+                      style={{
+                        width: "70%",
+                        height: "70%",
+                        fontWeight: "bold",
+                      }}
                       stroke={2}
                       color="#70B1ED"
                     />
@@ -519,7 +523,7 @@ const SellerboardTable = ({
               onClick={() => {
                 setQuery({
                   stores: null,
-                  fulfillmentChannel: null,
+                  fulfillmentChannel: [],
                   sortValue: null,
                   sortBy: null,
                   sortDir: null,
