@@ -174,22 +174,21 @@ const SellerboardTable = ({
                 </Grid.Col>
                 <Grid.Col span={8}>
                   <Grid>
-                    <Grid.Col span={12}>
+                    <Grid.Col
+                      span={12}
+                      style={{
+                        padding: "0 5px",
+                      }}
+                    >
                       <Flex>
-                        <Tooltip label={url}>
-                          <Text
-                            style={{
-                              fontSize: 14,
-                              fontWeight: "bold",
-                              cursor: "pointer",
-                            }}
-                            onClick={() => {
-                              window.open(url, "_blank");
-                            }}
-                          >
-                            {sku}
-                          </Text>
-                        </Tooltip>
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {sku}
+                        </Text>
                       </Flex>
                     </Grid.Col>
 
@@ -200,14 +199,20 @@ const SellerboardTable = ({
                         justifyContent: "start",
                       }}
                     >
-                      <Text
-                        style={{
-                          fontSize: 12,
-                          color: "gray",
-                        }}
-                      >
-                        {ASIN}
-                      </Text>
+                      <Tooltip label={url}>
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: "gray",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            window.open(url, "_blank");
+                          }}
+                        >
+                          {ASIN}
+                        </Text>
+                      </Tooltip>
                     </Grid.Col>
                   </Grid>
                 </Grid.Col>
