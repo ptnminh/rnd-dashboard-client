@@ -227,121 +227,121 @@ const SellerboardTable = ({
           );
         },
       },
-      {
-        accessorKey: "createdDate",
-        size: 150,
-        maxSize: 150,
-        enableEditing: false,
-        enableSorting: false,
-        mantineTableBodyCellProps: ({ row }) => {
-          return {
-            className: classes["body-cells-op-team"],
-          };
-        },
-        mantineTableHeadCellProps: () => {
-          return {
-            className: classes["head-cells-op-team"],
-          };
-        },
-        Header: () => {
-          return (
-            <Group gap={5}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "bold",
-                }}
-              >
-                Created time
-              </Text>
-              {!query?.primarySortBy && (
-                <ActionIcon
-                  aria-label="Settings"
-                  variant="default"
-                  style={{
-                    background: "none",
-                    border: "none",
-                  }}
-                  onClick={() => {
-                    setQuery({
-                      ...query,
-                      primarySortBy: "createdDate",
-                      primarySortDir: "desc",
-                    });
-                  }}
-                >
-                  <IconArrowsSort
-                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
-                    stroke={2}
-                  />
-                </ActionIcon>
-              )}
+      // {
+      //   accessorKey: "createdDate",
+      //   size: 150,
+      //   maxSize: 150,
+      //   enableEditing: false,
+      //   enableSorting: false,
+      //   mantineTableBodyCellProps: ({ row }) => {
+      //     return {
+      //       className: classes["body-cells-op-team"],
+      //     };
+      //   },
+      //   mantineTableHeadCellProps: () => {
+      //     return {
+      //       className: classes["head-cells-op-team"],
+      //     };
+      //   },
+      //   Header: () => {
+      //     return (
+      //       <Group gap={5}>
+      //         <Text
+      //           style={{
+      //             fontSize: 14,
+      //             fontWeight: "bold",
+      //           }}
+      //         >
+      //           Created time
+      //         </Text>
+      //         {!query?.primarySortBy && (
+      //           <ActionIcon
+      //             aria-label="Settings"
+      //             variant="default"
+      //             style={{
+      //               background: "none",
+      //               border: "none",
+      //             }}
+      //             onClick={() => {
+      //               setQuery({
+      //                 ...query,
+      //                 primarySortBy: "createdDate",
+      //                 primarySortDir: "desc",
+      //               });
+      //             }}
+      //           >
+      //             <IconArrowsSort
+      //               style={{ width: "60%", height: "60%", fontWeight: "bold" }}
+      //               stroke={2}
+      //             />
+      //           </ActionIcon>
+      //         )}
 
-              {query?.primarySortBy === "createdDate" &&
-                query?.primarySortDir === "desc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    onClick={() => {
-                      setQuery({
-                        ...query,
-                        primarySortBy: "createdDate",
-                        primarySortDir: "asc",
-                      });
-                    }}
-                  >
-                    <IconSortDescending
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
-              {query?.primarySortBy === "createdDate" &&
-                query?.primarySortDir === "asc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    onClick={() => {
-                      setQuery({
-                        ...query,
-                        primarySortBy: null,
-                        primarySortDir: null,
-                      });
-                    }}
-                  >
-                    <IconSortAscending
-                      style={{
-                        width: "70%",
-                        height: "70%",
-                        fontWeight: "bold",
-                      }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
-            </Group>
-          );
-        },
-        Cell: ({ row }) => {
-          const { createdDate } = row.original;
-          return (
-            <Text
-              style={{
-                fontSize: 14,
-                fontWeight: "bold",
-              }}
-            >
-              {moment(createdDate)
-                .tz("America/Los_Angeles")
-                .format("YYYY-MM-DD")}
-            </Text>
-          );
-        },
-      },
+      //         {query?.primarySortBy === "createdDate" &&
+      //           query?.primarySortDir === "desc" && (
+      //             <ActionIcon
+      //               variant="filled"
+      //               aria-label="Settings"
+      //               color="transparent"
+      //               onClick={() => {
+      //                 setQuery({
+      //                   ...query,
+      //                   primarySortBy: "createdDate",
+      //                   primarySortDir: "asc",
+      //                 });
+      //               }}
+      //             >
+      //               <IconSortDescending
+      //                 style={{ width: "70%", height: "70%" }}
+      //                 stroke={2}
+      //                 color="#70B1ED"
+      //               />
+      //             </ActionIcon>
+      //           )}
+      //         {query?.primarySortBy === "createdDate" &&
+      //           query?.primarySortDir === "asc" && (
+      //             <ActionIcon
+      //               variant="filled"
+      //               aria-label="Settings"
+      //               color="transparent"
+      //               onClick={() => {
+      //                 setQuery({
+      //                   ...query,
+      //                   primarySortBy: null,
+      //                   primarySortDir: null,
+      //                 });
+      //               }}
+      //             >
+      //               <IconSortAscending
+      //                 style={{
+      //                   width: "70%",
+      //                   height: "70%",
+      //                   fontWeight: "bold",
+      //                 }}
+      //                 stroke={2}
+      //                 color="#70B1ED"
+      //               />
+      //             </ActionIcon>
+      //           )}
+      //       </Group>
+      //     );
+      //   },
+      //   Cell: ({ row }) => {
+      //     const { createdDate } = row.original;
+      //     return (
+      //       <Text
+      //         style={{
+      //           fontSize: 14,
+      //           fontWeight: "bold",
+      //         }}
+      //       >
+      //         {moment(createdDate)
+      //           .tz("America/Los_Angeles")
+      //           .format("YYYY-MM-DD")}
+      //       </Text>
+      //     );
+      //   },
+      // },
       {
         accessorKey: "value",
         header: "Value",
@@ -495,10 +495,61 @@ const SellerboardTable = ({
                 });
               }}
             />
+            <Select
+              placeholder="Value"
+              data={["Small", "Medium", "Big"]}
+              styles={{
+                input: {
+                  width: "100px",
+                },
+              }}
+              value={query?.sortValue || null}
+              onChange={(value) => {}}
+              clearable
+              searchable
+              onClear={() => {}}
+            />
             {activeTab === "Date" && (
               <DateRangePicker
                 size="sx"
                 placeholder="Date"
+                style={{
+                  width: "200px",
+                }}
+                value={query.dateValue}
+                onOk={(value) =>
+                  setQuery({
+                    ...query,
+                    dateValue: value,
+                    startDate: moment(value[0]).format("YYYY-MM-DD"),
+                    endDate: moment(value[1]).format("YYYY-MM-DD"),
+                  })
+                }
+                onClean={() => {
+                  setQuery({
+                    ...query,
+                    dateValue: null,
+                    startDate: null,
+                    endDate: null,
+                  });
+                }}
+                onShortcutClick={(shortcut) => {
+                  setQuery({
+                    ...query,
+                    dateValue: shortcut.value,
+                    startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
+                    endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
+                  });
+                }}
+              />
+            )}
+            {activeTab === "Week" && (
+              <DateRangePicker
+                size="sx"
+                showWeekNumbers
+                hoverRange="week"
+                isoWeek
+                placeholder="Week"
                 style={{
                   width: "100px",
                 }}
@@ -529,15 +580,15 @@ const SellerboardTable = ({
                 }}
               />
             )}
-            {activeTab === "Week" && (
+            {activeTab === "Month" && (
               <DateRangePicker
                 size="sx"
-                showWeekNumbers
-                hoverRange="week"
+                showMonthNumbers
+                hoverRange="month"
                 isoWeek
-                placeholder="Week"
+                placeholder="Month"
                 style={{
-                  width: "100px",
+                  width: "150px",
                 }}
                 value={query.dateValue}
                 onOk={(value) =>

@@ -41,7 +41,7 @@ const Sellerboard = () => {
     setLoadingFetchSaleMetrics(true);
     const response = await amzServices.fetchSaleMetrics({
       page,
-      query: omit(query, ["sortValue", "storeValues"]),
+      query: omit(query, ["sortValue", "storeValues", "dateValue"]),
       limit: 10,
       sorting,
     });

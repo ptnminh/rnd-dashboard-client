@@ -177,7 +177,7 @@ const ProductivityDashboard = () => {
         ...query,
         week: newWeek,
       });
-      showNotification("Thành công", "Tạo tuần mới thành công", "success");
+      showNotification("Thành công", "Tạo tuần mới thành công", "green");
     }
     setLoadingCreateNewWeek(false);
   };
@@ -279,7 +279,7 @@ const ProductivityDashboard = () => {
                 />
                 <Button
                   onClick={() => {
-                    handleCreateNewWeek(currentWeek + 1);
+                    handleCreateNewWeek(currentWeek + 2);
                   }}
                   loading={loadingCreateNewWeek}
                 >
