@@ -143,7 +143,7 @@ const ScaleTimeSetting = ({
           const payload = find(payloads, (item) => item.uid === uid);
           return (
             <Select
-              data={["Small", "+Small", "Medium", "Big"]}
+              data={["Small", "Small+", "Medium", "Big"]}
               allowDeselect={false}
               value={CONVERT_NUMBER_TO_STATUS[payload.size]}
               onChange={(value) => {

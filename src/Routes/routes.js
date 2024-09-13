@@ -183,13 +183,13 @@ const PATH_NAMES = {
         title: "ChartJS",
         url: "/dashboard/chartjs",
       },
-      SETTING: {
-        title: "1. Setting",
-        url: "/dashboard/default-setting",
-      },
       QUOTA_SETTING: {
-        title: "2. Sale - các SKU test",
+        title: "1. Dashboard - Quota",
         url: "/dashboard/sales",
+      },
+      SETTING: {
+        title: "2. Setting",
+        url: "/dashboard/default-setting",
       },
       AMZ_SELLER_BOARD: {
         title: "3. AMZ Seller Board",
@@ -496,13 +496,13 @@ export const NAVIGATION = [
     permissions: ["read:user"],
     dropdown: [
       {
-        title: PATH_NAMES.DASHBOARD.children.SETTING.title,
-        url: PATH_NAMES.DASHBOARD.children.SETTING.url,
+        title: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.title,
+        url: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.url,
         permissions: ["read:user"],
       },
       {
-        title: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.title,
-        url: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.url,
+        title: PATH_NAMES.DASHBOARD.children.SETTING.title,
+        url: PATH_NAMES.DASHBOARD.children.SETTING.url,
         permissions: ["read:user"],
       },
       {

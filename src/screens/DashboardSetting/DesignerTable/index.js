@@ -1,11 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import {
-  Flex,
-  Image,
-  Select,
-  TextInput,
-} from "@mantine/core";
+import { Flex, Image, Select, TextInput } from "@mantine/core";
 import { find, map, toNumber } from "lodash";
 import classes from "./MyTable.module.css";
 import { LOCAL_STORAGE_KEY } from "../../../constant";
@@ -13,8 +8,10 @@ import { IconClock } from "@tabler/icons-react";
 
 import { dashboardServices } from "../../../services";
 import { useLocalStorage } from "../../../hooks/useLocalStorage";
-import { CONVERT_NUMBER_TO_STATUS, CONVERT_STATUS_TO_NUMBER } from "../../../utils";
-
+import {
+  CONVERT_NUMBER_TO_STATUS,
+  CONVERT_STATUS_TO_NUMBER,
+} from "../../../utils";
 
 const ScaleTimeSetting = ({
   tableData,
@@ -37,7 +34,11 @@ const ScaleTimeSetting = ({
     setPayloads(tableData);
   }, [tableData]);
 
-  const handleUpdateDashboardSetting = async ({ uid, data, isTrigger = false }) => {
+  const handleUpdateDashboardSetting = async ({
+    uid,
+    data,
+    isTrigger = false,
+  }) => {
     await dashboardServices.update({
       uid,
       data,
@@ -54,7 +55,8 @@ const ScaleTimeSetting = ({
       return 0; // If the previous item has the same value, return 0 to avoid rendering
     }
     // Count how many items share the same value
-    return data?.slice(index).filter(item => item[key] === currentItem[key])?.length;
+    return data?.slice(index).filter((item) => item[key] === currentItem[key])
+      ?.length;
   };
   const columns = useMemo(
     () => [
@@ -66,9 +68,7 @@ const ScaleTimeSetting = ({
         enableSorting: false,
         Cell: ({ row }) => {
           const rowSpan = calculateRowSpan(row.index, "scaleType");
-          return rowSpan > 0 ? (
-            row.original.no
-          ) : null; // Render `null` if rowSpan is 0
+          return rowSpan > 0 ? row.original.no : null; // Render `null` if rowSpan is 0
         },
         mantineTableBodyCellProps: ({ row }) => {
           const rowSpan = calculateRowSpan(row.index, "scaleType");
@@ -82,9 +82,9 @@ const ScaleTimeSetting = ({
               style: {
                 display: "none",
               },
-            })
-          }
-        }
+            }),
+          };
+        },
       },
       {
         accessorKey: "scaleType",
@@ -92,7 +92,7 @@ const ScaleTimeSetting = ({
         size: 240,
         enableEditing: false,
         mantineTableHeadCellProps: {
-          colSpan: 2
+          colSpan: 2,
         },
         mantineTableBodyCellProps: ({ row }) => {
           const rowSpan = calculateRowSpan(row.index, "scaleType");
@@ -106,23 +106,21 @@ const ScaleTimeSetting = ({
               style: {
                 display: "none",
               },
-            })
-
-          }
+            }),
+          };
         },
         enableSorting: false,
         Cell: ({ row }) => {
           const rowSpan = calculateRowSpan(row.index, "scaleType");
-          return rowSpan > 0 ? (
-            row.original.scaleType
-          ) : null;
+          return rowSpan > 0 ? row.original.scaleType : null;
         },
       },
       {
         accessorKey: "option",
         header: "Chi tiết",
         mantineTableBodyCellProps: {
-          className: classes["body-cells"], style: {
+          className: classes["body-cells"],
+          style: {
             borderRight: "1px solid #E3E4E6",
           },
         },
@@ -131,7 +129,7 @@ const ScaleTimeSetting = ({
         mantineTableHeadCellProps: {
           style: {
             display: "none",
-          }
+          },
         },
         enableSorting: false,
       },
@@ -141,7 +139,8 @@ const ScaleTimeSetting = ({
         size: 120,
         enableEditing: false,
         mantineTableBodyCellProps: {
-          className: classes["body-cells"], style: {
+          className: classes["body-cells"],
+          style: {
             borderRight: "1px solid #E3E4E6",
           },
         },
@@ -149,35 +148,32 @@ const ScaleTimeSetting = ({
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const payload = find(payloads, (item) => item.uid === uid);
-          return <Select
-            data={[
-              "Small",
-              "+Small",
-              "Medium",
-              "Big"
-            ]}
-            allowDeselect={false}
-            value={CONVERT_NUMBER_TO_STATUS[payload.size]}
-            onChange={value => {
-              const newPayloads = payloads.map((item) => {
-                if (item.uid === uid) {
-                  return {
-                    ...item,
+          return (
+            <Select
+              data={["Small", "Small+", "Medium", "Big"]}
+              allowDeselect={false}
+              value={CONVERT_NUMBER_TO_STATUS[payload.size]}
+              onChange={(value) => {
+                const newPayloads = payloads.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
+                      size: CONVERT_STATUS_TO_NUMBER[value],
+                    };
+                  }
+                  return item;
+                });
+                setPayloads(newPayloads);
+                handleUpdateDashboardSetting({
+                  uid,
+                  data: {
                     size: CONVERT_STATUS_TO_NUMBER[value],
-                  };
-                }
-                return item;
-              });
-              setPayloads(newPayloads);
-              handleUpdateDashboardSetting({
-                uid,
-                data: {
-                  size: CONVERT_STATUS_TO_NUMBER[value]
-                },
-              });
-            }}
-          />
-        }
+                  },
+                });
+              }}
+            />
+          );
+        },
       },
       {
         accessorKey: "time",
@@ -186,7 +182,8 @@ const ScaleTimeSetting = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: {
-          className: classes["body-cells"], style: {
+          className: classes["body-cells"],
+          style: {
             borderRight: "1px solid #E3E4E6",
           },
         },
@@ -216,8 +213,8 @@ const ScaleTimeSetting = ({
                 });
               }}
             />
-          )
-        }
+          );
+        },
       },
     ],
     [validationErrors, tableData, query, payloads]

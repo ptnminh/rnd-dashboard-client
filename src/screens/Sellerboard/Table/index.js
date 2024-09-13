@@ -11,6 +11,7 @@ import {
   Tooltip,
   Group,
   ActionIcon,
+  Select,
 } from "@mantine/core";
 import {
   find,
@@ -21,10 +22,15 @@ import {
   isEmpty,
   split,
   includes,
+  values,
 } from "lodash";
 import { IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
-import { AMZ_STORES, FULFILLMENT_CHANNELS } from "../../../constant";
+import {
+  AMZ_SORTING,
+  AMZ_STORES,
+  FULFILLMENT_CHANNELS,
+} from "../../../constant";
 import moment from "moment-timezone";
 import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { DateRangePicker } from "rsuite";
@@ -523,7 +529,102 @@ const SellerboardTable = ({
                 }}
               />
             )}
+            {activeTab === "Week" && (
+              <DateRangePicker
+                size="sx"
+                showWeekNumbers
+                hoverRange="week"
+                isoWeek
+                placeholder="Week"
+                style={{
+                  width: "100px",
+                }}
+                value={query.dateValue}
+                onOk={(value) =>
+                  setQuery({
+                    ...query,
+                    dateValue: value,
+                    startDate: moment(value[0]).format("YYYY-MM-DD"),
+                    endDate: moment(value[1]).format("YYYY-MM-DD"),
+                  })
+                }
+                onClean={() => {
+                  setQuery({
+                    ...query,
+                    dateValue: null,
+                    startDate: null,
+                    endDate: null,
+                  });
+                }}
+                onShortcutClick={(shortcut, event) => {
+                  setQuery({
+                    ...query,
+                    dateValue: shortcut.value,
+                    startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
+                    endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
+                  });
+                }}
+              />
+            )}
 
+            <Select
+              placeholder="Sorting"
+              data={values(AMZ_SORTING)}
+              styles={{
+                input: {
+                  width: "250px",
+                },
+              }}
+              value={query?.sortValue || null}
+              onChange={(value) => {
+                let primarySortBy = "";
+                let primarySortDir = "";
+                switch (value) {
+                  case AMZ_SORTING.ordersAsc:
+                    primarySortBy = "revenue";
+                    primarySortDir = "asc";
+                    break;
+                  case AMZ_SORTING.ordersDesc:
+                    primarySortBy = "revenue";
+                    primarySortDir = "desc";
+                    break;
+                  case AMZ_SORTING.saleInRangeAsc:
+                    primarySortBy = "saleInRange";
+                    primarySortDir = "asc";
+                    break;
+                  case AMZ_SORTING.saleInRangeDesc:
+                    primarySortBy = "saleInRange";
+                    primarySortDir = "desc";
+                    break;
+                  case AMZ_SORTING.createdDateAsc:
+                    primarySortBy = "createdDate";
+                    primarySortDir = "asc";
+                    break;
+                  case AMZ_SORTING.createdDateDesc:
+                    primarySortBy = "createdDate";
+                    primarySortDir = "desc";
+                    break;
+                  default:
+                    value = null;
+                }
+                setQuery({
+                  ...query,
+                  sortValue: value,
+                  primarySortBy,
+                  primarySortDir,
+                });
+              }}
+              clearable
+              searchable
+              onClear={() => {
+                setQuery({
+                  ...query,
+                  sortValue: null,
+                  primarySortBy: null,
+                  primarySortDir: null,
+                });
+              }}
+            />
             <Button
               onClick={() => {
                 setQuery({
@@ -536,6 +637,8 @@ const SellerboardTable = ({
                   dateValue: null,
                   startDate: null,
                   endDate: null,
+                  primarySortBy: null,
+                  primarySortDir: null,
                 });
               }}
             >
