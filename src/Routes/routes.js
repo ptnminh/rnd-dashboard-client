@@ -171,6 +171,32 @@ const PATH_NAMES = {
     title: "7. User",
     url: "/users",
   },
+  DASHBOARD: {
+    title: "8. Dashboard",
+    url: "/dashboard",
+    children: {
+      RECHARTS: {
+        title: "Recharts",
+        url: "/dashboard/rechart",
+      },
+      CHARTJS: {
+        title: "ChartJS",
+        url: "/dashboard/chartjs",
+      },
+      QUOTA_SETTING: {
+        title: "1. Dashboard - Quota",
+        url: "/dashboard/sales",
+      },
+      SETTING: {
+        title: "2. Setting",
+        url: "/dashboard/default-setting",
+      },
+      AMZ_SELLER_BOARD: {
+        title: "3. AMZ Seller Board",
+        url: "/dashboard/amz-seller-board",
+      },
+    },
+  },
 };
 
 export const NAVIGATION = [
@@ -343,12 +369,12 @@ export const NAVIGATION = [
         permissions: ["read:design_feedback"],
         arrowDown: true,
       },
-      {
-        title: PATH_NAMES.DESIGNER.children.SETTING.title,
-        url: PATH_NAMES.DESIGNER.children.SETTING.url,
-        arrowDown: true,
-        permissions: ["read:design_setting"],
-      },
+      // {
+      //   title: PATH_NAMES.DESIGNER.children.SETTING.title,
+      //   url: PATH_NAMES.DESIGNER.children.SETTING.url,
+      //   arrowDown: true,
+      //   permissions: ["read:design_setting"],
+      // },
     ],
   },
   {
@@ -366,12 +392,12 @@ export const NAVIGATION = [
         arrowDown: true,
         permissions: ["read:epm"],
       },
-      {
-        title: PATH_NAMES.EPM.children.SETTING.title,
-        url: PATH_NAMES.EPM.children.SETTING.url,
-        arrowDown: true,
-        permissions: ["read:epm_setting"],
-      },
+      // {
+      //   title: PATH_NAMES.EPM.children.SETTING.title,
+      //   url: PATH_NAMES.EPM.children.SETTING.url,
+      //   arrowDown: true,
+      //   permissions: ["read:epm_setting"],
+      // },
     ],
   },
   {
@@ -455,9 +481,35 @@ export const NAVIGATION = [
   },
   {
     title: PATH_NAMES.USER.title,
-    url: PATH_NAMES.USER.url,
+    pathname: PATH_NAMES.USER.url,
     icon: "diamond",
     arrowDown: true,
     permissions: ["read:user"],
+  },
+  {
+    title: PATH_NAMES.DASHBOARD.title,
+    pathname: PATH_NAMES.DASHBOARD.url,
+    icon: "diamond",
+    arrowDown: true,
+    isParent: true,
+    turnOffActive: true,
+    permissions: ["read:user"],
+    dropdown: [
+      {
+        title: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.title,
+        url: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.url,
+        permissions: ["read:user"],
+      },
+      {
+        title: PATH_NAMES.DASHBOARD.children.SETTING.title,
+        url: PATH_NAMES.DASHBOARD.children.SETTING.url,
+        permissions: ["read:user"],
+      },
+      {
+        title: PATH_NAMES.DASHBOARD.children.AMZ_SELLER_BOARD.title,
+        url: PATH_NAMES.DASHBOARD.children.AMZ_SELLER_BOARD.url,
+        permissions: ["read:user"],
+      },
+    ],
   },
 ];

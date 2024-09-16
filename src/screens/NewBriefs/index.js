@@ -24,12 +24,9 @@ import {
   Select,
   Tooltip,
   Group,
-  TextInput,
   Textarea,
 } from "@mantine/core";
 import { showNotification } from "../../utils/index";
-import { modals } from "@mantine/modals";
-
 import Dropdown from "../../components/Dropdown";
 import CustomTable from "../../components/Table";
 import {
@@ -49,7 +46,7 @@ import {
   toLower,
   uniq,
 } from "lodash";
-import { rndServices } from "../../services";
+import { dashboardServices, rndServices } from "../../services";
 import { CONVERT_STATUS_TO_NUMBER, getEditorStateAsString } from "../../utils";
 import {
   IconSearch,
@@ -194,9 +191,8 @@ const generateScaleClipArtTable = ({
   return compact(
     map(grouppedCliparts, (x, index) => {
       const realRnDAccumulator = currentRnDAccumulator + index + 1;
-      const name = `${
-        SKU?.skuPrefix ? SKU?.skuPrefix : "XX"
-      }-${rndSortName}${String(realRnDAccumulator).padStart(4, "0")}`;
+      const name = `${SKU?.skuPrefix ? SKU?.skuPrefix : "XX"
+        }-${rndSortName}${String(realRnDAccumulator).padStart(4, "0")}`;
       return {
         No: index + 1,
         Hình: map(x.cliparts, "imageSrc"),
@@ -226,9 +222,8 @@ const generateScaleQuoteTable = ({
       sortBy(selectedQuotes, (quote) => toLower(quote.name)),
       (x, index) => {
         const realRnDAccumulator = currentRnDAccumulator + index + 1;
-        const name = `${
-          SKU?.skuPrefix ? SKU?.skuPrefix : "XX"
-        }-${rndSortName}${String(realRnDAccumulator).padStart(4, "0")}`;
+        const name = `${SKU?.skuPrefix ? SKU?.skuPrefix : "XX"
+          }-${rndSortName}${String(realRnDAccumulator).padStart(4, "0")}`;
         return {
           No: index + 1,
           Quote: x.quote.slice(0, 50) + (x.quote.length > 50 ? "..." : ""),
@@ -394,11 +389,11 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
     case BRIEF_TYPES[2]:
       return isKeepClipArt === KEEP_CLIPARTS[0]
         ? {
-            headers: ["No", "Quote", "SKU", "Remove", "uid"],
-          }
+          headers: ["No", "Quote", "SKU", "Remove", "uid"],
+        }
         : {
-            headers: ["No", "Quote", "Hình", "SKU", "Remove", "uid"],
-          };
+          headers: ["No", "Quote", "Hình", "SKU", "Remove", "uid"],
+        };
     case BRIEF_TYPES[3]:
       return {
         headers: ["No", "Design", "Hình", "SKU", "Remove"],
@@ -569,6 +564,7 @@ const NewCampaigns = () => {
   });
   const [queryProductBase, setQueryProductBase] = useState({});
   const [querySKU, setQuerySKU] = useState({});
+  const [timeSettings, setTimeSettings] = useState([]);
   const [grouppedCliparts, setGrouppedCliparts] = useState([]);
   const [selectedProductBases, setSelectedProductBases] = useState([]);
   const [selectedSKUs, setSelectedSKUs] = useState([]);
@@ -614,6 +610,24 @@ const NewCampaigns = () => {
     await fetchQuotes(quotePagination.currentPage);
     setLoaderIcon(false);
   };
+  const fetchDashboardSettings = async () => {
+    const response = await dashboardServices.fetchDashboardsSetting({
+      page: -1,
+      query: {
+        actives: [0, 1],
+      },
+      limit: 30,
+    });
+    const { data } = response;
+    if (data) {
+      setTimeSettings(
+        map(data, (time) => ({
+          ...time,
+          option: toLower(time.option),
+        }))
+      );
+    }
+  };
   const handleSyncProductBases = async () => {
     setLoaderIcon(true);
     await rndServices.syncProductBases();
@@ -638,11 +652,12 @@ const NewCampaigns = () => {
         );
         break;
       case BRIEF_TYPES[1]:
-        setSelectedClipArts(
-          filter(
-            grouppedCliparts,
-            (x) => x.index.toString() !== name.toString()
-          )
+        const newGroupCliparts = filter(
+          grouppedCliparts,
+          (x) => x.index.toString() !== name.toString()
+        )
+        setGrouppedCliparts(
+          newGroupCliparts
         );
         break;
       case BRIEF_TYPES[2]:
@@ -655,7 +670,8 @@ const NewCampaigns = () => {
         setSelectedSKUs(filter(selectedSKUs, (x) => x.uid !== name));
         break;
       case BRIEF_TYPES[5]:
-        setSelectedClipArts(filter(selectedClipArts, (x) => x.uid !== name));
+        setGrouppedCliparts(filter(grouppedCliparts,
+          (x) => x.index.toString() !== name.toString()));
         break;
       default:
         break;
@@ -669,7 +685,7 @@ const NewCampaigns = () => {
     setValue,
   } = useForm();
 
-  const onSubmit = async (data) => {};
+  const onSubmit = async (data) => { };
   const fetchUsers = async () => {
     let { data } = await rndServices.getUsers({
       limit: -1,
@@ -843,6 +859,7 @@ const NewCampaigns = () => {
     fetchUsers();
     fetchFilters();
     fetchQuotesFilter();
+    fetchDashboardSettings();
   }, []);
   useEffect(() => {
     // Update the URL when search or page changes
@@ -916,7 +933,6 @@ const NewCampaigns = () => {
       !epmMember ||
       !designerMember ||
       !briefType ||
-      !rndSize ||
       !briefValue
     ) {
       if (!workGroup) {
@@ -939,14 +955,17 @@ const NewCampaigns = () => {
         showNotification("Thất bại", "Vui lòng chọn Brief Type", "red");
         return;
       }
-      if (!rndSize) {
-        showNotification("Thất bại", "Vui lòng chọn Size", "red");
-        return;
-      }
       if (!briefValue) {
         showNotification("Thất bại", "Vui lòng chọn Value", "red");
         return;
       }
+    }
+    if (
+      !rndSize &&
+      (briefType === BRIEF_TYPES[3] || briefType === BRIEF_TYPES[5])
+    ) {
+      showNotification("Thất bại", "Vui lòng chọn Size", "red");
+      return;
     }
     setCreateBriefLoading(true);
     const generatedSKUs = prepareSubmitData();
@@ -955,6 +974,80 @@ const NewCampaigns = () => {
       setCreateBriefLoading(false);
       return;
     }
+    let designerTime;
+    let epmTime;
+
+    switch (briefType) {
+      case BRIEF_TYPES[0]: {
+        if (!layout) {
+          break;
+        }
+        const option =
+          layout === LAYOUT_TYPES[0] ? "chung layout" : "khác layout";
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+          option,
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+          option,
+        });
+        break;
+      }
+      case BRIEF_TYPES[1]: {
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+        });
+        break;
+      }
+      case BRIEF_TYPES[3]: {
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+          size: CONVERT_STATUS_TO_NUMBER[rndSize],
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+          size: CONVERT_STATUS_TO_NUMBER[rndSize],
+        });
+        break;
+      }
+      case BRIEF_TYPES[4]: {
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+        });
+        break;
+      }
+      case BRIEF_TYPES[5]: {
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+          size: CONVERT_STATUS_TO_NUMBER[rndSize],
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+          size: CONVERT_STATUS_TO_NUMBER[rndSize],
+        });
+        break;
+      }
+      default: {
+        break;
+      }
+    }
     const data = map(generatedSKUs, (x) => {
       const {
         SKU: sku,
@@ -962,7 +1055,47 @@ const NewCampaigns = () => {
         skuPrefix,
         note: refDesignMarketNote,
       } = x;
+      // get time setting for designer and epm
+      if (briefType === BRIEF_TYPES[2]) {
+        const quote = x.Quote;
+        let option;
+        if (quote.length > 20) {
+          option = "quote dài";
+        } else {
+          option = "quote ngắn";
+        }
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+          option,
+        });
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+          option,
+        });
+      }
+      if (!designerTime) {
+        designerTime = find(timeSettings, {
+          team: "designer",
+          scaleType: briefType,
+          option: "common",
+        });
+      }
+      if (!epmTime) {
+        epmTime = find(timeSettings, {
+          team: "epm",
+          scaleType: briefType,
+          option: "common",
+        });
+      }
       return {
+        ...(designerTime && {
+          designerTimeId: designerTime?.uid,
+        }),
+        ...(epmTime && {
+          epmTimeId: epmTime?.uid,
+        }),
         skuRef: SKU?.sku || "",
         linkProductRef: SKU?.productLink || "",
         imageRef: SKU?.image || "",
@@ -970,9 +1103,6 @@ const NewCampaigns = () => {
         batch,
         briefType,
         rndTeam: workGroup,
-        size: {
-          rnd: CONVERT_STATUS_TO_NUMBER[rndSize],
-        },
         value: {
           rnd: CONVERT_STATUS_TO_NUMBER[briefValue],
         },
@@ -981,18 +1111,18 @@ const NewCampaigns = () => {
         designerId: find(users, { name: designerMember })?.uid,
         ...(epmNote || designerNote || mktNote || marketBrief?.note
           ? {
-              note: {
-                ...(epmNote && { epm: getEditorStateAsString(epmNote) }),
-                ...(designerNote && {
-                  designer: getEditorStateAsString(designerNote),
-                }),
-                ...(mktNote && { mkt: getEditorStateAsString(mktNote) }),
-                ...(marketBrief &&
-                  marketBrief.note && {
-                    mixMatch: getEditorStateAsString(marketBrief?.note),
-                  }),
-              },
-            }
+            note: {
+              ...(epmNote && { epm: getEditorStateAsString(epmNote) }),
+              ...(designerNote && {
+                designer: getEditorStateAsString(designerNote),
+              }),
+              ...(mktNote && { mkt: getEditorStateAsString(mktNote) }),
+              ...(marketBrief &&
+                marketBrief.note && {
+                mixMatch: getEditorStateAsString(marketBrief?.note),
+              }),
+            },
+          }
           : {}),
         status: 1,
         ...(briefType === BRIEF_TYPES[0] && {
@@ -1005,8 +1135,8 @@ const NewCampaigns = () => {
           quote: x.uid,
           ...(isKeepClipArt === KEEP_CLIPARTS[1] &&
             !isEmpty(selectedClipArts) && {
-              clipartIds: x?.clipartIds,
-            }),
+            clipartIds: x?.clipartIds,
+          }),
         }),
         designLinkRef: SKU?.designLink || "",
         ...(briefType === BRIEF_TYPES[3] && {
@@ -1020,10 +1150,11 @@ const NewCampaigns = () => {
         ...(skuPrefix && skuPrefix !== "XX" && { skuPrefix }),
         ...(briefType === BRIEF_TYPES[4] && {
           productLineId: selectedProductBases[0]?.uid,
-          designLinkRef: x.designLinkRef,
+          designLinkRef: x.designLinkRef || SKU?.attribute?.nasShareLink,
           imageRef: x.imageRef,
           skuId: x.uid,
           skuRef: x.skuRef,
+          linkProductRef: SKU?.productInfo?.url || "",
         }),
         ...(briefType === BRIEF_TYPES[5] && {
           productLineId: selectedProductBases[0]?.uid,
@@ -1183,6 +1314,7 @@ const NewCampaigns = () => {
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "20px",
+                    flexWrap: "wrap",
                   }}
                   ref={myClipartHeaderRef}
                 >
@@ -1254,230 +1386,232 @@ const NewCampaigns = () => {
               </div>
               {(isKeepClipArt === KEEP_CLIPARTS[1] ||
                 briefType === BRIEF_TYPES[1]) && (
-                <>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      padding: "10px 5px",
-                      gap: "10px",
-                      flexWrap: "wrap-reverse",
-                      backgroundColor: "#EFF0F1",
-                      borderRadius: "10px",
-                    }}
-                  >
-                    <Flex
+                  <>
+                    <div
                       style={{
-                        gap: "8px",
-                        padding: "10px",
-                        borderRadius: "10px",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        padding: "10px 5px",
+                        gap: "10px",
+                        flexWrap: "wrap-reverse",
                         backgroundColor: "#EFF0F1",
-                      }}
-                    >
-                      <MantineTextInput
-                        placeholder="Clipart Name / Niche / Note / ..."
-                        size="sm"
-                        leftSection={
-                          <span
-                            onClick={() => {
-                              setSearchClipArt(searchClipArt);
-                            }}
-                            style={{
-                              cursor: "pointer",
-                            }}
-                          >
-                            <IconSearch size={16} />
-                          </span>
-                        }
-                        styles={{
-                          input: {
-                            width: "300px",
-                          },
-                        }}
-                        value={searchClipArt}
-                        onChange={(e) => setSearchClipArt(e.target.value)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter") {
-                            fetchClipArts(pagination.currentPage);
-                          }
-                        }}
-                      />
-                    </Flex>
-                    <Flex
-                      style={{
-                        gap: "8px",
-                        padding: "10px",
                         borderRadius: "10px",
                       }}
                     >
-                      {map(filtersClipArt, (filter, index) => (
-                        <MultiSelect
-                          key={index}
-                          placeholder={filter.name}
-                          data={filter.value}
-                          styles={{
-                            input: {
-                              width: "150px",
-                            },
-                          }}
-                          value={query[filter.name]}
-                          onChange={(value) =>
-                            setQuery({ ...query, [filter.name]: value })
-                          }
-                          clearable
-                          onClear={() => {
-                            setQuery({
-                              ...query,
-                              [filter.key]: null,
-                            });
-                          }}
-                        />
-                      ))}
-                      <Button
-                        onClick={() => {
-                          const queryKeys = keys(query);
-                          const transformedQuery = map(queryKeys, (key) => ({
-                            [key]: [],
-                          }));
-                          setQuery(merge({}, ...transformedQuery));
-                          setSearchClipArt("");
+                      <Flex
+                        style={{
+                          gap: "8px",
+                          padding: "10px",
+                          borderRadius: "10px",
+                          backgroundColor: "#EFF0F1",
+                          flexWrap: "wrap",
                         }}
                       >
-                        <IconFilterOff />
-                      </Button>
-                    </Flex>
-                  </div>
-
-                  <ScrollArea
-                    h={800}
-                    scrollbars="y"
-                    scrollbarSize={4}
-                    scrollHideDelay={1000}
-                  >
-                    <LoadingOverlay
-                      visible={fetchClipArtsLoading}
-                      zIndex={1000}
-                      overlayProps={{ radius: "sm", blur: 2 }}
-                    />
-                    <Grid
-                      style={{
-                        marginTop: "10px",
-                      }}
-                      columns={12}
-                    >
-                      {map(clipArts, (clipArt, index) => (
-                        <Grid.Col
-                          span={{ sm: 4, md: 3, lg: 2 }}
-                          key={index}
-                          style={{
-                            position: "relative",
-                          }}
-                          onClick={() => {
-                            if (
-                              includes(
-                                map(selectedClipArts, "name"),
-                                clipArt.name
-                              )
-                            ) {
-                              setSelectedClipArts(
-                                selectedClipArts.filter(
-                                  (x) => x.name !== clipArt.name
-                                )
-                              );
-                            } else {
-                              setSelectedClipArts((selectedClipArts) => [
-                                ...selectedClipArts,
-                                clipArt,
-                              ]);
-                            }
-                          }}
-                        >
-                          <MantineCard
-                            shadow="sm"
-                            padding="sm"
-                            style={{
-                              cursor: "pointer",
-                            }}
-                          >
-                            <MantineCard.Section>
-                              <LazyLoad height={200} once={true}>
-                                <Image
-                                  src={
-                                    clipArt.imageSrc ||
-                                    "/images/content/not_found_2.jpg"
-                                  }
-                                  h={200}
-                                  alt="No way!"
-                                  fit="contain"
-                                />
-                              </LazyLoad>
-                            </MantineCard.Section>
-                            <Text
-                              fw={500}
-                              size="sm"
-                              mt="md"
+                        <MantineTextInput
+                          placeholder="Clipart Name / Niche / Note / ..."
+                          size="sm"
+                          leftSection={
+                            <span
+                              onClick={() => {
+                                setSearchClipArt(searchClipArt);
+                              }}
                               style={{
-                                display: "inline-block",
-                                width: "200px",
-                                whiteSpace: "nowrap",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                textDecoration: "none",
-                                verticalAlign: "middle",
+                                cursor: "pointer",
                               }}
                             >
-                              {clipArt.name}
-                            </Text>
-                          </MantineCard>
-                          {includes(
-                            map(selectedClipArts, "name"),
-                            clipArt.name
-                          ) && (
-                            <>
-                              <div
+                              <IconSearch size={16} />
+                            </span>
+                          }
+                          styles={{
+                            input: {
+                              width: "300px",
+                            },
+                          }}
+                          value={searchClipArt}
+                          onChange={(e) => setSearchClipArt(e.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter") {
+                              fetchClipArts(pagination.currentPage);
+                            }
+                          }}
+                        />
+                      </Flex>
+                      <Flex
+                        style={{
+                          gap: "8px",
+                          padding: "10px",
+                          borderRadius: "10px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {map(filtersClipArt, (filter, index) => (
+                          <MultiSelect
+                            key={index}
+                            placeholder={filter.name}
+                            data={filter.value}
+                            styles={{
+                              input: {
+                                width: "150px",
+                              },
+                            }}
+                            value={query[filter.name]}
+                            onChange={(value) =>
+                              setQuery({ ...query, [filter.name]: value })
+                            }
+                            clearable
+                            onClear={() => {
+                              setQuery({
+                                ...query,
+                                [filter.key]: null,
+                              });
+                            }}
+                          />
+                        ))}
+                        <Button
+                          onClick={() => {
+                            const queryKeys = keys(query);
+                            const transformedQuery = map(queryKeys, (key) => ({
+                              [key]: [],
+                            }));
+                            setQuery(merge({}, ...transformedQuery));
+                            setSearchClipArt("");
+                          }}
+                        >
+                          <IconFilterOff />
+                        </Button>
+                      </Flex>
+                    </div>
+
+                    <ScrollArea
+                      h={800}
+                      scrollbars="y"
+                      scrollbarSize={4}
+                      scrollHideDelay={1000}
+                    >
+                      <LoadingOverlay
+                        visible={fetchClipArtsLoading}
+                        zIndex={1000}
+                        overlayProps={{ radius: "sm", blur: 2 }}
+                      />
+                      <Grid
+                        style={{
+                          marginTop: "10px",
+                        }}
+                        columns={12}
+                      >
+                        {map(clipArts, (clipArt, index) => (
+                          <Grid.Col
+                            span={{ sm: 4, md: 3, lg: 2 }}
+                            key={index}
+                            style={{
+                              position: "relative",
+                            }}
+                            onClick={() => {
+                              if (
+                                includes(
+                                  map(selectedClipArts, "name"),
+                                  clipArt.name
+                                )
+                              ) {
+                                setSelectedClipArts(
+                                  selectedClipArts.filter(
+                                    (x) => x.name !== clipArt.name
+                                  )
+                                );
+                              } else {
+                                setSelectedClipArts((selectedClipArts) => [
+                                  ...selectedClipArts,
+                                  clipArt,
+                                ]);
+                              }
+                            }}
+                          >
+                            <MantineCard
+                              shadow="sm"
+                              padding="sm"
+                              style={{
+                                cursor: "pointer",
+                              }}
+                            >
+                              <MantineCard.Section>
+                                <LazyLoad height={200} once={true}>
+                                  <Image
+                                    src={
+                                      clipArt.imageSrc ||
+                                      "/images/content/not_found_2.jpg"
+                                    }
+                                    h={200}
+                                    alt="No way!"
+                                    fit="contain"
+                                  />
+                                </LazyLoad>
+                              </MantineCard.Section>
+                              <Text
+                                fw={500}
+                                size="sm"
+                                mt="md"
                                 style={{
-                                  padding: "5px",
-                                  position: "absolute",
-                                  top: "15px",
-                                  right: "13px",
-                                  borderRadius: "50%",
-                                  backgroundColor: "#64CD73",
-                                  zIndex: 2,
+                                  display: "inline-block",
+                                  width: "200px",
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  textDecoration: "none",
+                                  verticalAlign: "middle",
                                 }}
                               >
-                                <IconCheck color="#ffffff" />
-                              </div>
-                              <div
-                                style={{
-                                  position: "absolute",
-                                  top: "9px",
-                                  right: "0",
-                                  height: "94%",
-                                  width: "99%",
-                                  cursor: "pointer",
-                                  padding: "10px",
-                                  borderRadius: "10px",
-                                  backgroundColor: "rgba(244, 252, 243,0.5)",
-                                  zIndex: 1,
-                                }}
-                              ></div>
-                            </>
-                          )}
-                        </Grid.Col>
-                      ))}
-                    </Grid>
-                  </ScrollArea>
-                  <Pagination
-                    total={pagination.totalPages}
-                    page={pagination.currentPage}
-                    onChange={handlePageChange}
-                    color="pink"
-                    size="md"
-                    style={{ marginTop: "20px", marginLeft: "auto" }}
-                  />
-                </>
-              )}
+                                {clipArt.name}
+                              </Text>
+                            </MantineCard>
+                            {includes(
+                              map(selectedClipArts, "name"),
+                              clipArt.name
+                            ) && (
+                                <>
+                                  <div
+                                    style={{
+                                      padding: "5px",
+                                      position: "absolute",
+                                      top: "15px",
+                                      right: "13px",
+                                      borderRadius: "50%",
+                                      backgroundColor: "#64CD73",
+                                      zIndex: 2,
+                                    }}
+                                  >
+                                    <IconCheck color="#ffffff" />
+                                  </div>
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      top: "9px",
+                                      right: "0",
+                                      height: "94%",
+                                      width: "99%",
+                                      cursor: "pointer",
+                                      padding: "10px",
+                                      borderRadius: "10px",
+                                      backgroundColor: "rgba(244, 252, 243,0.5)",
+                                      zIndex: 1,
+                                    }}
+                                  ></div>
+                                </>
+                              )}
+                          </Grid.Col>
+                        ))}
+                      </Grid>
+                    </ScrollArea>
+                    <Pagination
+                      total={pagination.totalPages}
+                      page={pagination.currentPage}
+                      onChange={handlePageChange}
+                      color="pink"
+                      size="md"
+                      style={{ marginTop: "20px", marginLeft: "auto" }}
+                    />
+                  </>
+                )}
             </Card>
           </div>
         )}
@@ -1737,6 +1871,8 @@ const NewCampaigns = () => {
                 BRIEF_TYPES={BRIEF_TYPES}
                 fetchClipArtsLoading={fetchClipArtsLoading}
                 setQuery={setQuery}
+                rndSize={rndSize}
+                setRndSize={setRndSize}
               />
             </div>
           </>
@@ -1779,6 +1915,8 @@ const NewCampaigns = () => {
                 marketBrief={marketBrief}
                 setMarketBrief={setMarketBrief}
                 title={"2. Input Ref"}
+                rndSize={rndSize}
+                setRndSize={setRndSize}
               />
             </div>
             <div className={styles.row}>
@@ -2078,33 +2216,61 @@ const NewCampaigns = () => {
             </div>
           </Grid.Col>
           <Grid.Col span={12}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "5px",
-                fontSize: "18px",
-              }}
-            >
-              Scale{" "}
-              <Badge
-                size="md"
-                variant="gradient"
-                gradient={{ from: "blue", to: "cyan", deg: 90 }}
-                style={{ margin: "0 5px" }}
-              >
-                {generateTextPreview(briefType, layout)}
-              </Badge>{" "}
-              {SKU?.sku && (
-                <>
-                  từ{" "}
-                  <Badge size="md" color="pink" style={{ marginLeft: "5px" }}>
-                    {SKU?.sku}
+            <Grid>
+              <Grid.Col span={12}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "5px",
+                    fontSize: "18px",
+                    position: "relative",
+                  }}
+                >
+                  <span>Scale </span>
+                  <Badge
+                    size="md"
+                    variant="gradient"
+                    gradient={{ from: "blue", to: "cyan", deg: 90 }}
+                    style={{ margin: "0 5px" }}
+                  >
+                    {generateTextPreview(briefType, layout)}
                   </Badge>{" "}
-                </>
-              )}
-            </div>
+                  {SKU?.sku && (
+                    <>
+                      <span>từ </span>
+                      <Badge
+                        size="md"
+                        color="pink"
+                        style={{ marginLeft: "5px" }}
+                      >
+                        {SKU?.sku}
+                      </Badge>{" "}
+                    </>
+                  )}
+                  <Button
+                    className={cn(
+                      "button-stroke-blue button-small",
+                      styles.createButton
+                    )}
+                    loading={createBriefLoading}
+                    onClick={handleSubmitBrief}
+                    style={{
+                      width: "100px",
+                      borderRadius: "20px",
+                      borderWidth: "2px",
+                      backgroundColor: "#3FA433",
+                      color: "#ffffff",
+                      position: "absolute",
+                      right: "10px",
+                    }}
+                  >
+                    <span>Tạo Brief</span>
+                  </Button>
+                </div>
+              </Grid.Col>
+            </Grid>
           </Grid.Col>
           <Grid.Col span={12}>
             <div
@@ -2196,35 +2362,7 @@ const NewCampaigns = () => {
               />
             </ScrollArea>
           </Grid.Col>
-          <Grid.Col span={12}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                width: "100%",
-              }}
-            >
-              <Button
-                className={cn(
-                  "button-stroke-blue button-small",
-                  styles.createButton
-                )}
-                loading={createBriefLoading}
-                onClick={handleSubmitBrief}
-                style={{
-                  marginTop: "24px",
-                  marginBottom: "12px",
-                  width: "150px",
-                  borderRadius: "20px",
-                  borderWidth: "2px",
-                  backgroundColor: "#3FA433",
-                  color: "#ffffff",
-                }}
-              >
-                <span>Tạo Brief</span>
-              </Button>
-            </div>
-          </Grid.Col>
+          <Grid.Col span={12}></Grid.Col>
         </Grid>
       </Modal>
       <ModalPreviewMixMatch

@@ -153,7 +153,6 @@ const UpdatePassword = ({ closeModal, user }) => {
 const Sidebar = ({ className, onClose }) => {
   const [visible, setVisible] = useState(false);
   const { logout, user } = useAuth0();
-  console.log({ user });
   const [opened, { open, close }] = useDisclosure(false);
   const [token, setToken, removeToken] = useLocalStorage({
     key: LOCAL_STORAGE_KEY.ACCESS_TOKEN,

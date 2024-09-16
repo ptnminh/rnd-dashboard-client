@@ -97,7 +97,7 @@ const ScaleNiche = ({
             }}
           >
             Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} - Size:{" "}
-            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
+            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.design]}
             {selectedSKU?.priority === 2 ? " - Priority" : ""}
           </div>
         </Grid.Col>
@@ -178,13 +178,13 @@ const ScaleNiche = ({
                 </a>
               </List.Item>
             )}
-            {selectedSKU?.productLine?.designLink && (
+            {(selectedSKU?.designLinkRef?.designLink || selectedSKU?.designLinkRef) && (
               <List.Item>
                 Link Design (NAS):{" "}
                 <a
                   style={{
                     display: "inline-block",
-                    width: "50px",
+                    width: "120px",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -192,11 +192,11 @@ const ScaleNiche = ({
                     color: "#228be6",
                     verticalAlign: "middle",
                   }}
-                  href={selectedSKU?.productLine?.designLink}
+                  href={selectedSKU?.designLinkRef || selectedSKU?.productLine?.designLink}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {selectedSKU?.productLine?.designLink}
+                  {selectedSKU?.designLinkRef || selectedSKU?.productLine?.designLink}
                 </a>
               </List.Item>
             )}

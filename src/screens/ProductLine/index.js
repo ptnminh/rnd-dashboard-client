@@ -102,6 +102,11 @@ const Collection = ({
               <TextInput
                 placeholder="Search collection"
                 value={searchCollections}
+                styles={{
+                  input: {
+                    width: "100px",
+                  },
+                }}
                 onChange={(event) => {
                   setSearchCollections(event.target.value);
                   handleSearchCollections(event.target.value);

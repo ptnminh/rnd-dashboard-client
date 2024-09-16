@@ -181,9 +181,29 @@ const BriefsTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
+        accessorKey: "priority",
+        header: "PRIORITY",
+        enableSorting: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        size: 100,
+        Cell: ({ row }) => {
+          return (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Checkbox value={row?.original?.priority === 2} />
+            </div>
+          );
+        },
+      },
+      {
         accessorKey: "value",
         header: "VALUE",
-        size: 100,
+        size: 150,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
@@ -199,7 +219,7 @@ const BriefsTable = ({
               data={["Small", "Medium", "Big", "Super Big"]}
               styles={{
                 input: {
-                  width: "100px",
+                  width: "100%",
                 },
               }}
               value={CONVERT_NUMBER_TO_STATUS[foundBrief.value?.rnd]}
@@ -233,6 +253,62 @@ const BriefsTable = ({
           );
         },
       },
+      // {
+      //   accessorKey: "size",
+      //   header: "SIZE",
+      //   size: 100,
+      //   enableEditing: false,
+      //   enableSorting: false,
+      //   mantineTableBodyCellProps: { className: classes["body-cells"] },
+      //   mantineTableHeadCellProps: { className: classes["linkDesign"] },
+      //   Cell: ({ row }) => {
+      //     const uid = row?.original?.uid;
+      //     const foundBrief = find(payloads, { uid });
+      //     return (
+      //       <Select
+      //         placeholder="Size"
+      //         allowDeselect={false}
+      //         disabled={foundBrief?.status === STATUS.LISTED}
+      //         data={["Small", "Medium", "Big"]}
+      //         styles={{
+      //           input: {
+      //             width: "100px",
+      //           },
+      //         }}
+      //         value={
+      //           CONVERT_NUMBER_TO_STATUS[foundBrief?.size?.epm] ||
+      //           CONVERT_NUMBER_TO_STATUS[foundBrief?.size?.rnd]
+      //         }
+      //         onChange={(value) => {
+      //           setPayloads((prev) => {
+      //             const newPayloads = map(prev, (x) => {
+      //               if (x.uid === uid) {
+      //                 return {
+      //                   ...x,
+      //                   size: {
+      //                     ...x.size,
+      //                     epm: CONVERT_STATUS_TO_NUMBER[value],
+      //                   },
+      //                 };
+      //               }
+      //               return x;
+      //             });
+      //             return newPayloads;
+      //           });
+      //           rndServices.updateBriefListing({
+      //             uid,
+      //             data: {
+      //               size: {
+      //                 ...foundBrief.size,
+      //                 epm: CONVERT_STATUS_TO_NUMBER[value],
+      //               },
+      //             },
+      //           });
+      //         }}
+      //       />
+      //     );
+      //   },
+      // },
       {
         accessorKey: "size",
         header: "SIZE",
@@ -240,75 +316,34 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
-          const uid = row?.original?.uid;
-          const foundBrief = find(payloads, { uid });
-          return (
-            <Select
-              placeholder="Size"
-              allowDeselect={false}
-              disabled={foundBrief?.status === STATUS.LISTED}
-              data={["Small", "Medium", "Big"]}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={
-                CONVERT_NUMBER_TO_STATUS[foundBrief?.size?.epm] ||
-                CONVERT_NUMBER_TO_STATUS[foundBrief?.size?.rnd]
-              }
-              onChange={(value) => {
-                setPayloads((prev) => {
-                  const newPayloads = map(prev, (x) => {
-                    if (x.uid === uid) {
-                      return {
-                        ...x,
-                        size: {
-                          ...x.size,
-                          epm: CONVERT_STATUS_TO_NUMBER[value],
-                        },
-                      };
-                    }
-                    return x;
-                  });
-                  return newPayloads;
-                });
-                rndServices.updateBriefListing({
-                  uid,
-                  data: {
-                    size: {
-                      ...foundBrief.size,
-                      epm: CONVERT_STATUS_TO_NUMBER[value],
-                    },
-                  },
-                });
-              }}
-            />
+          let color = null;
+          switch (row?.original?.size?.epm) {
+            case 1:
+              color = "green";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "red";
+              break;
+            case 1.5:
+              color = "#006400";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.epm]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.size?.epm]}</span>
           );
         },
       },
-      {
-        accessorKey: "priority",
-        header: "PRIORITY",
-        enableSorting: false,
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
-        size: 100,
-        Cell: ({ row }) => {
-          return (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <Checkbox value={row?.original?.priority === 2} />
-            </div>
-          );
-        },
-      },
+
       {
         accessorKey: "rndTeam",
         header: "TEAM",
@@ -421,7 +456,7 @@ const BriefsTable = ({
             }
           >
             {row.original.linkProduct ||
-            updateBrief[row.original.uid]?.linkProduct ? (
+              updateBrief[row.original.uid]?.linkProduct ? (
               <Badge color="blue" variant="filled">
                 {" "}
                 <u>Link</u>{" "}
@@ -447,9 +482,10 @@ const BriefsTable = ({
                 row.original.status === 3 ? <IconBan /> : <IconCheck />
               }
               disabled={
-                row?.original?.status === 2 &&
-                !row?.original?.linkProduct &&
-                !updateBrief[row.original.uid]?.linkProduct
+                (row?.original?.status === 2 &&
+                  !row?.original?.linkProduct &&
+                  !updateBrief[row.original.uid]?.linkProduct) ||
+                row.original.status === 3
               }
             >
               {row.original.status === 3 ? "Undone" : "Done"}
@@ -615,7 +651,13 @@ const BriefsTable = ({
                 },
               }}
               value={searchSKU}
-              onChange={(e) => setSearchSKU(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchSKU(value)
+                if (!value) {
+                  setQuery({ ...query, sku: value });
+                }
+              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   setQuery({ ...query, sku: searchSKU });

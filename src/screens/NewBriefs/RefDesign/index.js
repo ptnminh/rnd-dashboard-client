@@ -22,6 +22,8 @@ import Loader from "../../../components/Loader";
 import { useDisclosure } from "@mantine/hooks";
 import Clipart from "../Clipart";
 import Editor from "../../../components/Editor";
+import Dropdown from "../../../components/Dropdown";
+import { RND_SIZES } from "../../../constant";
 function generateRandomString(length) {
   const characters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -50,6 +52,8 @@ const RefDesign = ({
   briefType,
   BRIEF_TYPES,
   handlePageChange,
+  rndSize,
+  setRndSize,
 }) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedDesign, setSelectedDesign] = useState(null);
@@ -130,6 +134,17 @@ const RefDesign = ({
         classSpanTitle={styles.classScaleSpanTitle}
         title="3. Ref Design (Market)"
         classTitle={cn("title-green", styles.title)}
+        head={
+          <Dropdown
+            label={"Size"}
+            className={styles.dropdown}
+            classDropdownHead={styles.dropdownHead}
+            value={rndSize}
+            setValue={setRndSize}
+            options={RND_SIZES}
+            classOutSideClick={styles.memberDropdown}
+          />
+        }
       >
         <ScrollArea
           h={600}

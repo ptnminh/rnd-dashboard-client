@@ -29,6 +29,12 @@ import ProductLineReadyToLaunch from "./screens/ProductLineReadyToLaunch";
 import ScreenshotTask from "./screens/ScreenShotTask";
 import Mockup from "./screens/Mockup";
 import ComingSoon from "./screens/ComingSoon";
+import Dashboards from "./screens/Dashboards";
+import DashboardChartJS from "./screens/Dashboards/chart";
+import DashboardSetting from "./screens/DashboardSetting";
+import ProductivityDashboard from "./screens/ProductivityDashboard";
+import Sellerboard from "./screens/Sellerboard";
+
 function App() {
   return (
     <Routes>
@@ -312,6 +318,38 @@ function App() {
         element={
           <Page title="MKT">
             <UserScreen />
+          </Page>
+        }
+      />
+      <Route
+        path="/dashboard/rechart"
+        element={
+          <Page title="MKT">
+            <DashboardSetting />
+          </Page>
+        }
+      />
+      <Route
+        path="/dashboard/default-setting"
+        element={
+          <Page title="MKT">
+            <DashboardSetting />
+          </Page>
+        }
+      />
+      <Route
+        path="/dashboard/sales"
+        element={
+          <Page title="MKT">
+            <ProductivityDashboard />
+          </Page>
+        }
+      />
+      <Route
+        path="/dashboard/amz-seller-board"
+        element={
+          <Page title="MKT">
+            <Sellerboard />
           </Page>
         }
       />

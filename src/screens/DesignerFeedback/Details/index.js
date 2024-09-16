@@ -250,7 +250,7 @@ const Table = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => {
           let color = null;
-          switch (row?.original?.size?.rnd) {
+          switch (row?.original?.size?.design) {
             case 1:
               color = "green";
               break;
@@ -260,22 +260,18 @@ const Table = ({
             case 3:
               color = "red";
               break;
+            case 1.5:
+              color = "#006400";
+              break;
             default:
               break;
           }
           return color ? (
             <Badge color={color} variant="filled">
-              {
-                CONVERT_NUMBER_TO_STATUS[
-                  row?.original?.size?.rnd || row?.original?.size?.design
-                ]
-              }
+              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.design]}
             </Badge>
           ) : (
-            <span>
-              {CONVERT_NUMBER_TO_STATUS[row?.original?.size?.rnd] ||
-                row?.original?.size?.design}
-            </span>
+            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.size?.design]}</span>
           );
         },
       },
