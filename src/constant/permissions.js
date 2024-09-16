@@ -55,10 +55,6 @@ export const PERMISSIONS_RELATIONSHIP = [
     childPermissions: ["read:design_feedback"],
   },
   {
-    parentPermissions: ["read:design_setting"],
-    childPermissions: ["read:design"],
-  },
-  {
     parentPermissions: ["read:design_feedback"],
     childPermissions: ["read:design"],
   },
@@ -77,10 +73,6 @@ export const PERMISSIONS_RELATIONSHIP = [
   {
     parentPermissions: ["update:epm_setting"],
     childPermissions: ["read:epm_setting", "read:epm"],
-  },
-  {
-    parentPermissions: ["read:epm_setting"],
-    childPermissions: ["read:epm"],
   },
   {
     parentPermissions: ["create:mkt_post", "update:mkt_post"],

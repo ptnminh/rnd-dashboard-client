@@ -90,7 +90,7 @@ const Niche = ({
             }}
           >
             Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} - Size:{" "}
-            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
+            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.epm]}
             {selectedSKU?.priority === 2 ? " - Priority" : ""}
           </div>
         </Grid.Col>

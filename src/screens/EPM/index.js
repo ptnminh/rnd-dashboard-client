@@ -294,7 +294,7 @@ const EPMScreens = () => {
                   }}
                 >
                   Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} -{" "}
-                  Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
+                  Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.epm]}
                   {selectedSKU?.priority === 2 ? " - Priority" : ""}
                 </div>
               </Grid.Col>
@@ -392,9 +392,9 @@ const EPMScreens = () => {
                         href={
                           selectedSKU?.briefType === BRIEF_TYPES[5]
                             ? `https://${selectedSKU.designLinkRef.replace(
-                                /^(https?:\/\/)?/,
-                                ""
-                              )}`
+                              /^(https?:\/\/)?/,
+                              ""
+                            )}`
                             : selectedSKU?.designLinkRef
                         }
                         target="_blank"
@@ -506,7 +506,7 @@ const EPMScreens = () => {
                   }
                 >
                   {selectedSKU?.briefType === BRIEF_TYPES[4] ||
-                  selectedSKU?.briefType === BRIEF_TYPES[5] ? (
+                    selectedSKU?.briefType === BRIEF_TYPES[5] ? (
                     <List.Item>
                       Product Base: {""}
                       <span>
@@ -524,7 +524,7 @@ const EPMScreens = () => {
                         {
                           selectedSKU?.[
                             CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                              selectedSKU?.briefType
+                            selectedSKU?.briefType
                             ]
                           ]?.name
                         }

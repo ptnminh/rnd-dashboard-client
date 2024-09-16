@@ -622,7 +622,13 @@ const BriefsTable = ({
                 },
               }}
               value={batch}
-              onChange={(e) => setBatch(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setBatch(value);
+                if (!value) {
+                  setQuery({ ...query, batch: value });
+                }
+              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   setQuery({ ...query, batch });

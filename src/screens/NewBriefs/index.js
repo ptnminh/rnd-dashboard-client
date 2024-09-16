@@ -1137,6 +1137,7 @@ const NewCampaigns = () => {
             !isEmpty(selectedClipArts) && {
             clipartIds: x?.clipartIds,
           }),
+          productLineId: SKU?.productLineId || ""
         }),
         designLinkRef: SKU?.designLink || "",
         ...(briefType === BRIEF_TYPES[3] && {
