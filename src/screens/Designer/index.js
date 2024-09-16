@@ -304,7 +304,7 @@ const DesignerScreens = () => {
                   }}
                 >
                   Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} -{" "}
-                  Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
+                  Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.design]}
                   {selectedSKU?.priority === 2 ? " - Priority" : ""}
                 </div>
               </Grid.Col>
@@ -389,9 +389,9 @@ const DesignerScreens = () => {
                       </a>
                     </List.Item>
                   )}
-                  {selectedSKU?.designLinkRef && (
+                  {(selectedSKU?.designLinkRef?.designLink || selectedSKU?.designLinkRef) && (
                     <List.Item>
-                      Link Design:{" "}
+                      Link Design (NAS):{" "}
                       <a
                         style={{
                           display: "inline-block",
@@ -403,11 +403,11 @@ const DesignerScreens = () => {
                           color: "#228be6",
                           verticalAlign: "middle",
                         }}
-                        href={selectedSKU?.designLinkRef}
+                        href={selectedSKU?.designLinkRef || selectedSKU?.productLine?.designLink}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        {selectedSKU?.designLinkRef}
+                        {selectedSKU?.designLinkRef || selectedSKU?.productLine?.designLink}
                       </a>
                     </List.Item>
                   )}
@@ -436,16 +436,16 @@ const DesignerScreens = () => {
                   Scale
                 </div>
                 {selectedSKU?.briefType === BRIEF_TYPES[0] ||
-                selectedSKU?.briefType === BRIEF_TYPES[1] ||
-                (selectedSKU?.briefType === BRIEF_TYPES[2] &&
-                  selectedSKU?.clipart.name) ? (
+                  selectedSKU?.briefType === BRIEF_TYPES[1] ||
+                  (selectedSKU?.briefType === BRIEF_TYPES[2] &&
+                    selectedSKU?.clipart.name) ? (
                   <>
                     <Image
                       radius="md"
                       src={
                         selectedSKU[
                           CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                            selectedSKU?.briefType
+                          selectedSKU?.briefType
                           ]
                         ]?.image || "/images/content/not_found_2.jpg"
                       }
@@ -465,7 +465,7 @@ const DesignerScreens = () => {
                       {
                         selectedSKU[
                           CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                            selectedSKU?.briefType
+                          selectedSKU?.briefType
                           ]
                         ]?.name
                       }
@@ -487,38 +487,38 @@ const DesignerScreens = () => {
                   {selectedSKU[
                     CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
                   ]?.refLink && (
-                    <List.Item>
-                      Link Mockup:{" "}
-                      <a
-                        style={{
-                          display: "inline-block",
-                          width: "230px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textDecoration: "none",
-                          color: "#228be6",
-                          verticalAlign: "middle",
-                        }}
-                        href={
-                          selectedSKU[
-                            CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                      <List.Item>
+                        Link Mockup:{" "}
+                        <a
+                          style={{
+                            display: "inline-block",
+                            width: "230px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            textDecoration: "none",
+                            color: "#228be6",
+                            verticalAlign: "middle",
+                          }}
+                          href={
+                            selectedSKU[
+                              CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
                               selectedSKU?.briefType
-                            ]
-                          ]?.refLink
-                        }
-                        target="_blank"
-                      >
-                        {
-                          selectedSKU[
-                            CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                              ]
+                            ]?.refLink
+                          }
+                          target="_blank"
+                        >
+                          {
+                            selectedSKU[
+                              CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
                               selectedSKU?.briefType
-                            ]
-                          ]?.refLink
-                        }
-                      </a>
-                    </List.Item>
-                  )}
+                              ]
+                            ]?.refLink
+                          }
+                        </a>
+                      </List.Item>
+                    )}
                 </List>
                 {selectedSKU?.briefType === BRIEF_TYPES[2] && (
                   <MantineCard

@@ -9,9 +9,7 @@ import {
   Flex,
   TextInput,
   Button,
-  TagsInput,
   HoverCard,
-  Text,
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -20,7 +18,6 @@ import {
 import {
   IconCircleCheck,
   IconArrowBigRightLinesFilled,
-  IconCircleDashed
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
 import { isEmpty, map } from "lodash";
@@ -93,7 +90,7 @@ const Clipart = ({
             }}
           >
             Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} - Size:{" "}
-            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
+            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.epm]}
             {selectedSKU?.priority === 2 ? " - Priority" : ""}
           </div>
         </Grid.Col>

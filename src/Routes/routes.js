@@ -369,12 +369,12 @@ export const NAVIGATION = [
         permissions: ["read:design_feedback"],
         arrowDown: true,
       },
-      {
-        title: PATH_NAMES.DESIGNER.children.SETTING.title,
-        url: PATH_NAMES.DESIGNER.children.SETTING.url,
-        arrowDown: true,
-        permissions: ["read:design_setting"],
-      },
+      // {
+      //   title: PATH_NAMES.DESIGNER.children.SETTING.title,
+      //   url: PATH_NAMES.DESIGNER.children.SETTING.url,
+      //   arrowDown: true,
+      //   permissions: ["read:design_setting"],
+      // },
     ],
   },
   {
@@ -392,12 +392,12 @@ export const NAVIGATION = [
         arrowDown: true,
         permissions: ["read:epm"],
       },
-      {
-        title: PATH_NAMES.EPM.children.SETTING.title,
-        url: PATH_NAMES.EPM.children.SETTING.url,
-        arrowDown: true,
-        permissions: ["read:epm_setting"],
-      },
+      // {
+      //   title: PATH_NAMES.EPM.children.SETTING.title,
+      //   url: PATH_NAMES.EPM.children.SETTING.url,
+      //   arrowDown: true,
+      //   permissions: ["read:epm_setting"],
+      // },
     ],
   },
   {

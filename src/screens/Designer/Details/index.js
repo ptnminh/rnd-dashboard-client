@@ -199,7 +199,7 @@ const KeywordTable = ({
       {
         accessorKey: "value",
         header: "VALUE",
-        size: 100,
+        size: 150,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
@@ -215,7 +215,7 @@ const KeywordTable = ({
               data={["Small", "Medium", "Big", "Super Big"]}
               styles={{
                 input: {
-                  width: "100px",
+                  width: "100%",
                 },
               }}
               value={CONVERT_NUMBER_TO_STATUS[foundBrief.value?.rnd]}
@@ -401,7 +401,7 @@ const KeywordTable = ({
             }
           >
             {row.original.linkDesign ||
-            updateBrief[row.original.uid]?.linkDesign ? (
+              updateBrief[row.original.uid]?.linkDesign ? (
               <Badge color="blue" variant="filled">
                 {" "}
                 <u>Link</u>{" "}
@@ -601,7 +601,13 @@ const KeywordTable = ({
                 },
               }}
               value={searchSKU}
-              onChange={(e) => setSearchSKU(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchSKU(value)
+                if (!value) {
+                  setQuery({ ...query, sku: value });
+                }
+              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   setQuery({ ...query, sku: searchSKU });

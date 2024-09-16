@@ -94,7 +94,7 @@ const ScaleClipart = ({
             }}
           >
             Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} - Size:{" "}
-            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
+            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.design]}
             {selectedSKU?.priority === 2 ? " - Priority" : ""}
           </div>
         </Grid.Col>
@@ -153,6 +153,28 @@ const ScaleClipart = ({
               </ThemeIcon>
             }
           >
+            {selectedSKU?.linkProductRef && (
+              <List.Item>
+                Link Product:{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "230px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={selectedSKU?.linkProductRef}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {selectedSKU?.linkProductRef}
+                </a>
+              </List.Item>
+            )}
             {selectedSKU?.productLine?.refLink && (
               <List.Item>
                 Link Product Base (Library):{" "}
@@ -175,13 +197,13 @@ const ScaleClipart = ({
                 </a>
               </List.Item>
             )}
-            {selectedSKU?.productLine?.designLink && (
+            {(selectedSKU?.designLinkRef?.designLink || selectedSKU?.designLinkRef) && (
               <List.Item>
                 Link Design (NAS):{" "}
                 <a
                   style={{
                     display: "inline-block",
-                    width: "50px",
+                    width: "100px",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -189,11 +211,11 @@ const ScaleClipart = ({
                     color: "#228be6",
                     verticalAlign: "middle",
                   }}
-                  href={selectedSKU?.productLine?.designLink}
+                  href={selectedSKU?.designLinkRef || selectedSKU?.productLine?.designLink}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {selectedSKU?.productLine?.designLink}
+                  {selectedSKU?.designLinkRef || selectedSKU?.productLine?.designLink}
                 </a>
               </List.Item>
             )}

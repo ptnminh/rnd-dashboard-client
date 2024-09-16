@@ -57,7 +57,7 @@ const RndInfo = ({
     <>
       <Card
         className={cn(styles.card, className)}
-        title="Info của RnD"
+        title="Info của Batch"
         classTitle="title-red"
         classCardHead={styles.classCardHead}
         classSpanTitle={styles.classSpanTitle}
@@ -91,9 +91,9 @@ const RndInfo = ({
               options={
                 !isEmpty(filter(users, { position: "rnd", team: workGroup }))
                   ? map(
-                      filter(users, { position: "rnd", team: workGroup }),
-                      "name"
-                    )
+                    filter(users, { position: "rnd", team: workGroup }),
+                    "name"
+                  )
                   : []
               }
               classOutSideClick={styles.memberDropdown}
@@ -109,9 +109,9 @@ const RndInfo = ({
                   filter(users, { position: "designer", team: workGroup })
                 )
                   ? map(
-                      filter(users, { position: "designer", team: workGroup }),
-                      "name"
-                    )
+                    filter(users, { position: "designer", team: workGroup }),
+                    "name"
+                  )
                   : []
               }
               classOutSideClick={styles.memberDropdown}

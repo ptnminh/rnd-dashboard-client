@@ -21,7 +21,7 @@ import {
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
 import styles from "./NewDesign.module.sass";
-import { isEmpty, join, map } from "lodash";
+import { isEmpty, map } from "lodash";
 import { STATUS } from "../../../constant";
 
 const NewDesign = ({
@@ -91,7 +91,7 @@ const NewDesign = ({
             }}
           >
             Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} - Size:{" "}
-            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
+            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.epm]}
             {selectedSKU?.priority === 2 ? " - Priority" : ""}
           </div>
         </Grid.Col>

@@ -95,7 +95,7 @@ const ScaleMixMatch = ({
             }}
           >
             Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} - Size:{" "}
-            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.rnd]}
+            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.design]}
             {selectedSKU?.priority === 2 ? " - Priority" : ""}
           </div>
         </Grid.Col>
@@ -160,6 +160,28 @@ const ScaleMixMatch = ({
                 </ThemeIcon>
               }
             >
+              {(selectedSKU?.designLinkRef?.designLink || selectedSKU?.designLinkRef) && (
+                <List.Item>
+                  Link Design (NAS):{" "}
+                  <a
+                    style={{
+                      display: "inline-block",
+                      width: "120px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      textDecoration: "none",
+                      color: "#228be6",
+                      verticalAlign: "middle",
+                    }}
+                    href={selectedSKU?.designLinkRef || selectedSKU?.productLine?.designLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {selectedSKU?.designLinkRef || selectedSKU?.productLine?.designLink}
+                  </a>
+                </List.Item>
+              )}
               {selectedSKU?.productLine?.refLink && (
                 <List.Item>
                   Link Product Base (Library):{" "}
