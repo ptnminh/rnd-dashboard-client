@@ -331,7 +331,7 @@ export const NAVIGATION = [
         title: PATH_NAMES.RND.children.BRIEF_DESIGN.title,
         url: PATH_NAMES.RND.children.BRIEF_DESIGN.url,
         arrowDown: true,
-        permissions: ["create:brief"],
+        permissions: ["read:brief"],
       },
       {
         title: PATH_NAMES.RND.children.SETTING.title,
@@ -427,7 +427,7 @@ export const NAVIGATION = [
           {
             title: PATH_NAMES.MKT.children.POST.children.CREATE.title,
             pathname: PATH_NAMES.MKT.children.POST.children.CREATE.url,
-            permissions: ["create:mkt_post"],
+            permissions: ["read:mkt_post"],
           },
         ],
       },

@@ -83,6 +83,10 @@ export const PERMISSIONS_RELATIONSHIP = [
     childPermissions: ["read:mkt"],
   },
   {
+    parentPermissions: ["read:mkt_post"],
+    childPermissions: ["read:brief"],
+  },
+  {
     parentPermissions: ["read:mkt_account"],
     childPermissions: ["read:mkt"],
   },
