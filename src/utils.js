@@ -1,7 +1,7 @@
 import { ContentState, convertToRaw, EditorState } from "draft-js";
 import draftToHtml from "draftjs-to-html";
 import htmlToDraft from "html-to-draftjs";
-import { concat, findIndex, remove } from "lodash";
+import { concat, findIndex, isEqual, remove, sortBy } from "lodash";
 export const numberWithCommas = (x) => {
   var parts = x.toString().split(".");
   parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -51,7 +51,15 @@ export const CONVERT_STATUS_TO_NUMBER = {
   "Super Big": 4,
   "Small+": 1.5,
 };
-
+export const arraysMatchExact = (arr1, arr2) => {
+  if (arr1.length !== arr2.length) {
+    return false;
+  }
+  return arr1.every((element, index) => element === arr2[index]);
+};
+export const arraysMatchUnordered = (arr1, arr2) => {
+  return isEqual(sortBy(arr1), sortBy(arr2));
+};
 export const CONVERT_NUMBER_TO_STATUS = {
   1: "Small",
   2: "Medium",

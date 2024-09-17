@@ -1,4 +1,4 @@
-const PATH_NAMES = {
+export const PATH_NAMES = {
   DIRECTION: {
     title: "1. Direction",
     url: "/",

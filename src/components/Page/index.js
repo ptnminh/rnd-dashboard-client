@@ -39,7 +39,11 @@ const Page = ({ wide, children }) => {
     defaultValue: [],
     expiryInMinutes: 43200,
   });
-
+  let [userInfo, setUserInfo] = useLocalStorage({
+    key: LOCAL_STORAGE_KEY.USER_INFO,
+    defaultValue: {},
+    expiryInMinutes: 43200,
+  });
   let [auth0Token, setToken] = useLocalStorage({
     key: LOCAL_STORAGE_KEY.ACCESS_TOKEN,
     defaultValue: "",
@@ -53,6 +57,7 @@ const Page = ({ wide, children }) => {
           setToken(auth0Token);
         }
         const { data } = await authServices.verifyToken(auth0Token);
+        setUserInfo(data || {});
         setPermissions(data?.permissions || []);
         userPermissions = data?.permissions || [];
         if (isEmpty(userPermissions)) {

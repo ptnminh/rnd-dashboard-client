@@ -7,11 +7,13 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { amzServices } from "../../services";
 import Table from "./Table";
 import { isEmpty, omit, toLower, toNumber } from "lodash";
+import SurvivalModeTable from "./SurvivalMode";
 
 const TABS_VIEW = {
   Date: "Date",
   Week: "Week",
   Month: "Month",
+  SURVIVAL: "Survival",
 };
 
 const Sellerboard = () => {
@@ -21,6 +23,7 @@ const Sellerboard = () => {
   const initialSearch = queryParams.get("search") || "";
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
+  const [isConfirmedQuery, setIsConfirmedQuery] = useState(true);
   const [saleMetrics, setSaleMetrics] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
   const [pagination, setPagination] = useState({
@@ -31,7 +34,8 @@ const Sellerboard = () => {
     groupByKey: toLower(TABS_VIEW.Date),
     stores: "PFH,QZL,GGT",
     storeValues: ["PFH", "QZL", "GGT"],
-    fulfillmentChannel: ["FBA", "FBM"],
+    fulfillmentChannel: "FBA,FBM",
+    fulfillmentChannelValues: ["FBA", "FBM"],
   });
   const [sorting, setSorting] = useState([]);
   const [trigger, setTrigger] = useState(false);
@@ -41,7 +45,27 @@ const Sellerboard = () => {
     setLoadingFetchSaleMetrics(true);
     const response = await amzServices.fetchSaleMetrics({
       page,
-      query: omit(query, ["sortValue", "storeValues", "dateValue"]),
+      query: omit(
+        {
+          ...query,
+          // ignore ordersInRange if salesStartDate and salesEndDate are not provided and vice versa
+          ...(query?.ordersInRange &&
+            query?.startDate &&
+            query?.endDate && {
+              startDate: query.startDate,
+              endDate: query.endDate,
+              ordersInRange: toNumber(query.ordersInRange),
+            }),
+        },
+        [
+          "sortValue",
+          "storeValues",
+          "dateValue",
+          "isConfirmed",
+          "fulfillmentChannelValues",
+          "salesDateValue",
+        ]
+      ),
       limit: 10,
       sorting,
     });
@@ -55,12 +79,36 @@ const Sellerboard = () => {
     } else {
       setSaleMetrics([]);
     }
+    setIsConfirmedQuery(false);
     setLoadingFetchSaleMetrics(false);
     setTrigger(false);
   };
   useEffect(() => {
-    fetchSaleMetrics(pagination.currentPage);
-  }, [search, query, trigger, sorting, pagination.currentPage]);
+    if (isConfirmedQuery) {
+      fetchSaleMetrics(pagination.currentPage);
+    }
+  }, [
+    search,
+    query,
+    trigger,
+    sorting,
+    pagination.currentPage,
+    isConfirmedQuery,
+  ]);
+
+  // listen sorting change set isConfirmedQuery to true for refetch data
+  useEffect(() => {
+    if (!isEmpty(sorting)) {
+      setIsConfirmedQuery(true);
+    }
+  }, [sorting]);
+
+  // listen pagination change set isConfirmedQuery to true for refetch data
+  useEffect(() => {
+    if (pagination.currentPage > 1) {
+      setIsConfirmedQuery(true);
+    }
+  }, [pagination.currentPage]);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -74,16 +122,19 @@ const Sellerboard = () => {
 
   useEffect(() => {
     if (!isEmpty(saleMetrics)) {
+      // TODO: Implement the logic for survival mode
       setQuery({
-        groupByKey: toLower(activeTab),
+        groupByKey: activeTab === "Survival" ? "date" : toLower(activeTab),
         stores: "PFH,QZL,GGT",
         storeValues: ["PFH", "QZL", "GGT"],
-        fulfillmentChannel: ["FBA", "FBM"],
+        fulfillmentChannelValues: ["FBA", "FBM"],
+        fulfillmentChannel: "FBA,FBM",
       });
       setPagination({
         currentPage: 1,
         totalPages: 1,
       });
+      setIsConfirmedQuery(true);
     }
   }, [activeTab]);
 
@@ -117,7 +168,6 @@ const Sellerboard = () => {
                     alignItems: "center",
                     padding: "10px 0px",
                     gap: "10px",
-                    flexWrap: "wrap-reverse",
                     width: "100%",
                   }}
                 >
@@ -177,6 +227,30 @@ const Sellerboard = () => {
                       {TABS_VIEW.Month}
                     </Tabs.Tab>
                   </Flex>
+                  <Flex
+                    style={{
+                      gap: "8px",
+                      padding: "10px",
+                      borderRadius: "10px",
+                      backgroundColor: "#EFF0F1",
+                    }}
+                  >
+                    <Tabs.Tab
+                      value={TABS_VIEW.SURVIVAL}
+                      styles={{
+                        ...(activeTab === TABS_VIEW.SURVIVAL && {
+                          tab: {
+                            backgroundColor: "#7C4DFF",
+                            color: "#fff",
+                            borderRadius: "10px",
+                            borderColor: "transparent",
+                          },
+                        }),
+                      }}
+                    >
+                      {TABS_VIEW.SURVIVAL}
+                    </Tabs.Tab>
+                  </Flex>
                 </div>
               </Tabs.List>
               <Tabs.Panel value={TABS_VIEW.Date}>
@@ -190,6 +264,7 @@ const Sellerboard = () => {
                   setSorting={setSorting}
                   sorting={sorting}
                   activeTab={activeTab}
+                  setIsConfirmedQuery={setIsConfirmedQuery}
                 />
                 <Pagination
                   total={pagination.totalPages}
@@ -211,6 +286,7 @@ const Sellerboard = () => {
                   setSorting={setSorting}
                   sorting={sorting}
                   activeTab={activeTab}
+                  setIsConfirmedQuery={setIsConfirmedQuery}
                 />
                 <Pagination
                   total={pagination.totalPages}
@@ -223,6 +299,28 @@ const Sellerboard = () => {
               </Tabs.Panel>
               <Tabs.Panel value={TABS_VIEW.Month}>
                 <Table
+                  className={styles.Table}
+                  tableData={saleMetrics}
+                  query={query}
+                  setQuery={setQuery}
+                  loading={loadingFetchSaleMetrics}
+                  setTrigger={setTrigger}
+                  setSorting={setSorting}
+                  sorting={sorting}
+                  activeTab={activeTab}
+                  setIsConfirmedQuery={setIsConfirmedQuery}
+                />
+                <Pagination
+                  total={pagination.totalPages}
+                  page={pagination.currentPage}
+                  onChange={handlePageChange}
+                  color="pink"
+                  size="md"
+                  style={{ marginTop: "20px", marginRight: "auto" }}
+                />
+              </Tabs.Panel>
+              <Tabs.Panel value={TABS_VIEW.SURVIVAL}>
+                <SurvivalModeTable
                   className={styles.Table}
                   tableData={saleMetrics}
                   query={query}

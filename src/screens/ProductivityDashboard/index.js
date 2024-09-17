@@ -279,7 +279,7 @@ const ProductivityDashboard = () => {
                 />
                 <Button
                   onClick={() => {
-                    handleCreateNewWeek(currentWeek + 2);
+                    handleCreateNewWeek(currentWeek + 1);
                   }}
                   loading={loadingCreateNewWeek}
                 >

@@ -22,7 +22,7 @@ import {
 import { IconLogout, IconBrandSamsungpass } from "@tabler/icons-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useDisclosure } from "@mantine/hooks";
-import { NAVIGATION } from "../../Routes";
+import { NAVIGATION, PATH_NAMES } from "../../Routes";
 import { filter, isEmpty, map, omit, some } from "lodash";
 import { LOCAL_STORAGE_KEY } from "../../constant";
 import { userServices } from "../../services/users";
@@ -162,6 +162,10 @@ const Sidebar = ({ className, onClose }) => {
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
     defaultValue: [],
   });
+  const [userInfo, setUserInfo, removeUserInfo] = useLocalStorage({
+    key: LOCAL_STORAGE_KEY.USER_INFO,
+    defaultValue: {},
+  });
   const userPermissions = map(permissions, "name");
   const filteredNavigation = filterNavigation(NAVIGATION, userPermissions)?.map(
     (item) => {
@@ -195,31 +199,41 @@ const Sidebar = ({ className, onClose }) => {
           style={{ height: "80%" }}
         >
           <div className={styles.menu}>
-            {map(filteredNavigation, (x, index) =>
-              x.url ? (
-                <>
-                  <NavLink
-                    className={styles.item}
-                    activeClassName={styles.active}
-                    to={x.url}
+            {map(
+              filter(filteredNavigation, (x) => {
+                if (x.title === PATH_NAMES.DASHBOARD.title) {
+                  if (userInfo?.isAdmin) {
+                    return true;
+                  }
+                  return false;
+                }
+                return true;
+              }),
+              (x, index) =>
+                x.url ? (
+                  <>
+                    <NavLink
+                      className={styles.item}
+                      activeClassName={styles.active}
+                      to={x.url}
+                      key={index}
+                      exact
+                      onClick={onClose}
+                    >
+                      <Icon name={x.icon} size="24" />
+                      {x.title}
+                    </NavLink>
+                  </>
+                ) : (
+                  <Dropdown
+                    className={styles.dropdown}
+                    visibleSidebar={visible}
+                    setValue={setVisible}
                     key={index}
-                    exact
-                    onClick={onClose}
-                  >
-                    <Icon name={x.icon} size="24" />
-                    {x.title}
-                  </NavLink>
-                </>
-              ) : (
-                <Dropdown
-                  className={styles.dropdown}
-                  visibleSidebar={visible}
-                  setValue={setVisible}
-                  key={index}
-                  item={x}
-                  onClose={onClose}
-                />
-              )
+                    item={x}
+                    onClose={onClose}
+                  />
+                )
             )}
           </div>
         </ScrollArea>
