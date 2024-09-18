@@ -112,17 +112,7 @@ const Niche = ({
             borderRadius: "12px",
           }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              padding: "5px",
-              fontSize: "14px",
-            }}
-          >
-            • Batch: {selectedSKU?.batch}
-          </div>
+
           <div
             style={{
               display: "flex",

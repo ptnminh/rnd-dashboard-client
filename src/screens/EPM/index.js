@@ -315,17 +315,7 @@ const EPMScreens = () => {
                   borderRadius: "12px",
                 }}
               >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "flex-start",
-                    padding: "5px",
-                    fontSize: "14px",
-                  }}
-                >
-                  • Batch: {selectedSKU?.batch}
-                </div>
+
                 <div
                   style={{
                     display: "flex",
@@ -469,9 +459,9 @@ const EPMScreens = () => {
                         href={
                           selectedSKU?.briefType === BRIEF_TYPES[5]
                             ? `https://${selectedSKU.designLinkRef.replace(
-                                /^(https?:\/\/)?/,
-                                ""
-                              )}`
+                              /^(https?:\/\/)?/,
+                              ""
+                            )}`
                             : selectedSKU?.designLinkRef
                         }
                         target="_blank"
@@ -583,7 +573,7 @@ const EPMScreens = () => {
                   }
                 >
                   {selectedSKU?.briefType === BRIEF_TYPES[4] ||
-                  selectedSKU?.briefType === BRIEF_TYPES[5] ? (
+                    selectedSKU?.briefType === BRIEF_TYPES[5] ? (
                     <List.Item>
                       Product Base: {""}
                       <span>
@@ -601,7 +591,7 @@ const EPMScreens = () => {
                         {
                           selectedSKU?.[
                             CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                              selectedSKU?.briefType
+                            selectedSKU?.briefType
                             ]
                           ]?.name
                         }

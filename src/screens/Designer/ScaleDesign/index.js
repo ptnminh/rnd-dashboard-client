@@ -122,17 +122,6 @@ const ScaleDesign = ({
               fontSize: "14px",
             }}
           >
-            • Batch: {selectedSKU?.batch}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              padding: "5px",
-              fontSize: "14px",
-            }}
-          >
             • Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]}
           </div>
           <div

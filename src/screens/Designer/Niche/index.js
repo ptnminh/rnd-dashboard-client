@@ -128,17 +128,6 @@ const ScaleNiche = ({
               fontSize: "14px",
             }}
           >
-            • Batch: {selectedSKU?.batch}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              padding: "5px",
-              fontSize: "14px",
-            }}
-          >
             • Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]}
           </div>
           <div
@@ -259,31 +248,31 @@ const ScaleNiche = ({
             )}
             {(selectedSKU?.designLinkRef?.designLink ||
               selectedSKU?.designLinkRef) && (
-              <List.Item>
-                Link Design (NAS):{" "}
-                <a
-                  style={{
-                    display: "inline-block",
-                    width: "120px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    textDecoration: "none",
-                    color: "#228be6",
-                    verticalAlign: "middle",
-                  }}
-                  href={
-                    selectedSKU?.designLinkRef ||
-                    selectedSKU?.productLine?.designLink
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {selectedSKU?.designLinkRef ||
-                    selectedSKU?.productLine?.designLink}
-                </a>
-              </List.Item>
-            )}
+                <List.Item>
+                  Link Design (NAS):{" "}
+                  <a
+                    style={{
+                      display: "inline-block",
+                      width: "120px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      textDecoration: "none",
+                      color: "#228be6",
+                      verticalAlign: "middle",
+                    }}
+                    href={
+                      selectedSKU?.designLinkRef ||
+                      selectedSKU?.productLine?.designLink
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {selectedSKU?.designLinkRef ||
+                      selectedSKU?.productLine?.designLink}
+                  </a>
+                </List.Item>
+              )}
           </List>
         </Grid.Col>
         <Grid.Col
