@@ -296,7 +296,13 @@ const DesignerScreens = () => {
                     {selectedSKU?.priority === 2 ? (
                       <span>
                         <IconExclamationMark color="red" size={24} />
-                        <span>Priority</span>
+                        <span
+                          style={{
+                            color: "red",
+                          }}
+                        >
+                          Priority
+                        </span>
                       </span>
                     ) : (
                       ""

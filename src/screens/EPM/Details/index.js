@@ -383,7 +383,7 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <Select
-              placeholder="Size"
+              placeholder="EPM"
               allowDeselect={false}
               data={filter(users, { position: MEMBER_POSITIONS.EPM }).map(
                 (x) => x.name
@@ -393,7 +393,7 @@ const BriefsTable = ({
                   width: "100px",
                 },
               }}
-              value={foundBrief?.epm?.name}
+              value={foundBrief?.epm?.name || null}
               onChange={(value) => {
                 setPayloads((prev) => {
                   const newPayloads = map(prev, (x) => {
