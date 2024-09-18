@@ -183,7 +183,6 @@ const Table = ({
       {
         accessorKey: "rating",
         header: "RATING",
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         size: 100,
         enableSorting: false,
         enableEditing: false,
@@ -315,7 +314,7 @@ const Table = ({
         accessorKey: "remove",
         header: "ACTIONS",
         enableSorting: false,
-        mantineTableHeadCellProps: { className: classes["remove"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ cell, column, table }) => (
           <div

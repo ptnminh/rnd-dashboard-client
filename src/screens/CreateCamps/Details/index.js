@@ -161,6 +161,7 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         Cell: ({ row }) => {
           let color = null;
           switch (row?.original?.value?.rnd) {
@@ -195,7 +196,6 @@ const BriefsTable = ({
         enableSorting: false,
         size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
           const adsLinksLength = filter(
             row?.original?.adsLinks,
@@ -224,7 +224,6 @@ const BriefsTable = ({
         enableSorting: false,
         size: 130,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["ads-image"] },
         Cell: ({ row }) => {
           const adsLinksLength = filter(
             row?.original?.adsLinks,
@@ -251,7 +250,7 @@ const BriefsTable = ({
         header: "PRIORITY",
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         size: 100,
         Cell: ({ row }) => {
           return (
@@ -533,7 +532,7 @@ const BriefsTable = ({
         enableSorting: false,
         enableEditing: false,
         size: 300,
-        mantineTableHeadCellProps: { className: classes["remove"] },
+        mantineTableHeadCellProps: { className: classes["ads-image"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => {
           return (

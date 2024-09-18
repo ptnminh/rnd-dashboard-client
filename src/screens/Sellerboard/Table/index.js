@@ -162,8 +162,15 @@ const SellerboardTable = ({
           };
         },
         Cell: ({ row }) => {
-          const { ASIN, title, image, store, fulfillmentChannel, sku } =
-            row.original;
+          const {
+            ASIN,
+            title,
+            image,
+            store,
+            fulfillmentChannel,
+            sku,
+            totalOrders,
+          } = row.original;
           const url = `https://www.amazon.com/dp/${ASIN}`;
           return (
             <Flex direction="column">
@@ -199,7 +206,7 @@ const SellerboardTable = ({
                             fontWeight: "bold",
                           }}
                         >
-                          {sku}
+                          {sku} - {totalOrders}
                         </Text>
                       </Flex>
                     </Grid.Col>
@@ -721,11 +728,11 @@ const SellerboardTable = ({
                 let primarySortDir = "";
                 switch (value) {
                   case AMZ_SORTING.ordersAsc:
-                    primarySortBy = "revenue";
+                    primarySortBy = "totalOrders";
                     primarySortDir = "asc";
                     break;
                   case AMZ_SORTING.ordersDesc:
-                    primarySortBy = "revenue";
+                    primarySortBy = "totalOrders";
                     primarySortDir = "desc";
                     break;
                   case AMZ_SORTING.saleInRangeAsc:

@@ -1,5 +1,5 @@
-export const AMZ_URL = "https://4528-42-117-124-92.ngrok-free.app/api";
-// export const AMZ_URL = "https://amz-dashboard.uidevify.com/api";
+// export const AMZ_URL = "https://7ca6-42-116-223-233.ngrok-free.app/api";
+export const AMZ_URL = "https://amz-dashboard.uidevify.com/api";
 export const AMZ_STORES = ["PFH", "QZL", "GGT", "All"];
 export const FULFILLMENT_CHANNELS = ["FBM", "FBA", "All"];
 export const AMZ_SORTING = {

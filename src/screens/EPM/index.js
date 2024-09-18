@@ -6,7 +6,7 @@ import Table from "./Details";
 import { map } from "lodash";
 
 import { useDisclosure } from "@mantine/hooks";
-import { IconCircleCheck } from "@tabler/icons-react";
+import { IconCircleCheck, IconExclamationMark } from "@tabler/icons-react";
 import {
   Modal,
   Pagination,
@@ -169,7 +169,7 @@ const EPMScreens = () => {
     <>
       <Card
         className={styles.card}
-        title="LISTING TASK"
+        title="EPM TASK"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
         head={
@@ -247,6 +247,18 @@ const EPMScreens = () => {
             }}
             radius="md"
             size="1000px"
+            styles={{
+              title: {
+                fontSize: "21px",
+                fontWeight: "bold",
+                margin: "auto",
+              },
+              close: {
+                margin: "none",
+                marginInlineStart: "unset",
+              },
+            }}
+            title={selectedSKU?.sku}
           >
             <LoadingOverlay
               visible={loadingUpdateProductLink}
@@ -255,7 +267,7 @@ const EPMScreens = () => {
             />
             <Grid>
               <Grid.Col span={12}>
-                <div
+                <Grid
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -269,20 +281,44 @@ const EPMScreens = () => {
                     borderRadius: "12px",
                   }}
                 >
-                  {selectedSKU?.briefType}
-                </div>
+                  <Grid.Col span={4}>
+                    {selectedSKU?.priority === 2 ? (
+                      <span>
+                        <IconExclamationMark color="red" size={24} />
+                        <span>Priority</span>
+                      </span>
+                    ) : (
+                      ""
+                    )}
+                  </Grid.Col>
+                  <Grid.Col
+                    span={4}
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
+                    {selectedSKU?.briefType}
+                  </Grid.Col>
+                  <Grid.Col span={4}></Grid.Col>
+                </Grid>
               </Grid.Col>
-              <Grid.Col span={5}>
+              <Grid.Col
+                span={5}
+                style={{
+                  boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
+                  borderRadius: "12px",
+                }}
+              >
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "flex-start",
                     padding: "5px",
-                    fontSize: "18px",
+                    fontSize: "14px",
                   }}
                 >
-                  SKU: {selectedSKU?.sku} - Batch: {selectedSKU?.batch}
+                  • Batch: {selectedSKU?.batch}
                 </div>
                 <div
                   style={{
@@ -293,14 +329,28 @@ const EPMScreens = () => {
                     fontSize: "14px",
                   }}
                 >
-                  Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} -{" "}
-                  Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.epm]}
-                  {selectedSKU?.priority === 2 ? " - Priority" : ""}
+                  • Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    padding: "5px",
+                    fontSize: "14px",
+                  }}
+                >
+                  • Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.design]}
                 </div>
               </Grid.Col>
               <Grid.Col span={2}></Grid.Col>
-
-              <Grid.Col span={5}>
+              <Grid.Col
+                span={5}
+                style={{
+                  boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
+                  borderRadius: "12px",
+                }}
+              >
                 <div
                   style={{
                     display: "flex",
@@ -310,8 +360,7 @@ const EPMScreens = () => {
                     fontSize: "14px",
                   }}
                 >
-                  {selectedSKU?.rndTeam} - RnD {selectedSKU?.rnd.name} -
-                  Designer {selectedSKU?.designer.name}
+                  • Team: {selectedSKU?.rndTeam}
                 </div>
                 <div
                   style={{
@@ -322,7 +371,29 @@ const EPMScreens = () => {
                     fontSize: "14px",
                   }}
                 >
-                  EPM {selectedSKU?.epm.name}
+                  • RnD: {selectedSKU?.rnd.name}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    padding: "5px",
+                    fontSize: "14px",
+                  }}
+                >
+                  • Designer: {selectedSKU?.designer.name}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    padding: "5px",
+                    fontSize: "14px",
+                  }}
+                >
+                  • EPM: {selectedSKU?.epm.name}
                 </div>
               </Grid.Col>
               <Grid.Col span={5}>
@@ -392,9 +463,9 @@ const EPMScreens = () => {
                         href={
                           selectedSKU?.briefType === BRIEF_TYPES[5]
                             ? `https://${selectedSKU.designLinkRef.replace(
-                              /^(https?:\/\/)?/,
-                              ""
-                            )}`
+                                /^(https?:\/\/)?/,
+                                ""
+                              )}`
                             : selectedSKU?.designLinkRef
                         }
                         target="_blank"
@@ -506,7 +577,7 @@ const EPMScreens = () => {
                   }
                 >
                   {selectedSKU?.briefType === BRIEF_TYPES[4] ||
-                    selectedSKU?.briefType === BRIEF_TYPES[5] ? (
+                  selectedSKU?.briefType === BRIEF_TYPES[5] ? (
                     <List.Item>
                       Product Base: {""}
                       <span>
@@ -524,7 +595,7 @@ const EPMScreens = () => {
                         {
                           selectedSKU?.[
                             CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                            selectedSKU?.briefType
+                              selectedSKU?.briefType
                             ]
                           ]?.name
                         }

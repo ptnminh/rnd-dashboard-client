@@ -181,7 +181,7 @@ const KeywordTable = ({
         header: "PRIORITY",
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         size: 100,
         Cell: ({ row }) => {
           return (
@@ -203,7 +203,7 @@ const KeywordTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         Cell: ({ row }) => {
           const uid = row?.original?.uid;
           const foundBrief = find(payloads, { uid });
@@ -399,7 +399,11 @@ const KeywordTable = ({
                 const urlPattern =
                   /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
                 if (!urlPattern.test(value)) {
-                  showNotification("Thất bại", "Link Design không hợp lệ", "red");
+                  showNotification(
+                    "Thất bại",
+                    "Link Design không hợp lệ",
+                    "red"
+                  );
                   setPayloads((prev) => {
                     const newPayloads = map(prev, (x) => {
                       if (x.uid === uid) {
@@ -425,8 +429,6 @@ const KeywordTable = ({
                       table.setEditingCell(null);
                     });
                 }
-
-
               }}
               readOnly={row?.original?.status === 2}
             />
@@ -435,22 +437,22 @@ const KeywordTable = ({
         Cell: ({ row }) => {
           const uid = row?.original?.uid;
           const foundBrief = find(payloads, { uid });
-          return (<a
-            style={{
-              cursor: "pointer",
-            }}
-            target="_blank"
-            href={
-              foundBrief?.linkDesign
-            }
-          >
-            {foundBrief.linkDesign ? (
-              <Badge color="blue" variant="filled">
-                {" "}
-                <u>Link</u>{" "}
-              </Badge>
-            ) : null}
-          </a>)
+          return (
+            <a
+              style={{
+                cursor: "pointer",
+              }}
+              target="_blank"
+              href={foundBrief?.linkDesign}
+            >
+              {foundBrief.linkDesign ? (
+                <Badge color="blue" variant="filled">
+                  {" "}
+                  <u>Link</u>{" "}
+                </Badge>
+              ) : null}
+            </a>
+          );
         },
       },
       {
@@ -472,8 +474,7 @@ const KeywordTable = ({
                 row.original.status === 2 ? <IconBan /> : <IconCheck />
               }
               disabled={
-                (row?.original?.status === 1 &&
-                  !foundBrief?.linkDesign) ||
+                (row?.original?.status === 1 && !foundBrief?.linkDesign) ||
                 row?.original?.status === 2
               }
             >
@@ -496,7 +497,7 @@ const KeywordTable = ({
         accessorKey: "remove",
         header: "ACTIONS",
         enableSorting: false,
-        mantineTableHeadCellProps: { className: classes["remove"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ cell, column, table }) => (
           <div
@@ -653,7 +654,7 @@ const KeywordTable = ({
               value={searchSKU}
               onChange={(e) => {
                 const value = e.target.value;
-                setSearchSKU(value)
+                setSearchSKU(value);
                 if (!value) {
                   setQuery({ ...query, sku: value });
                 }

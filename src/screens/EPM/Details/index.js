@@ -185,7 +185,7 @@ const BriefsTable = ({
         header: "PRIORITY",
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         size: 100,
         Cell: ({ row }) => {
           return (
@@ -207,7 +207,7 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         Cell: ({ row }) => {
           const uid = row?.original?.uid;
           const foundBrief = find(payloads, { uid });
@@ -456,7 +456,7 @@ const BriefsTable = ({
             }
           >
             {row.original.linkProduct ||
-              updateBrief[row.original.uid]?.linkProduct ? (
+            updateBrief[row.original.uid]?.linkProduct ? (
               <Badge color="blue" variant="filled">
                 {" "}
                 <u>Link</u>{" "}
@@ -506,7 +506,7 @@ const BriefsTable = ({
         accessorKey: "remove",
         header: "ACTIONS",
         enableSorting: false,
-        mantineTableHeadCellProps: { className: classes["remove"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ cell, column, table }) => (
           <div
@@ -659,7 +659,7 @@ const BriefsTable = ({
               value={searchSKU}
               onChange={(e) => {
                 const value = e.target.value;
-                setSearchSKU(value)
+                setSearchSKU(value);
                 if (!value) {
                   setQuery({ ...query, sku: value });
                 }

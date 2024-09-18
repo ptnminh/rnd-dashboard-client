@@ -108,7 +108,7 @@ const ProductLineReadyToLaunch = () => {
     <>
       <Card
         className={styles.card}
-        title="New PL - Ready to Launch"
+        title="New PL - Brief"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
       >

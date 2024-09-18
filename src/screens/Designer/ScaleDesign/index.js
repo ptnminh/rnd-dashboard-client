@@ -17,6 +17,7 @@ import {
 import {
   IconCircleCheck,
   IconArrowBigRightLinesFilled,
+  IconExclamationMark,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
 import styles from "./NewDesign.module.sass";
@@ -43,6 +44,18 @@ const ScaleDesign = ({
       }}
       radius="md"
       size={!isEmpty(selectedSKU?.clipart) ? "80%" : "1000px"}
+      styles={{
+        title: {
+          fontSize: "21px",
+          fontWeight: "bold",
+          margin: "auto",
+        },
+        close: {
+          margin: "none",
+          marginInlineStart: "unset",
+        },
+      }}
+      title={selectedSKU?.sku}
     >
       <LoadingOverlay
         visible={loadingUpdateDesignLink}
@@ -51,7 +64,7 @@ const ScaleDesign = ({
       />
       <Grid>
         <Grid.Col span={12}>
-          <div
+          <Grid
             style={{
               display: "flex",
               alignItems: "center",
@@ -65,20 +78,45 @@ const ScaleDesign = ({
               borderRadius: "12px",
             }}
           >
-            Scale Design
-          </div>
+            <Grid.Col span={4}>
+              {selectedSKU?.priority === 2 ? (
+                <span>
+                  <IconExclamationMark color="red" size={24} />
+                  <span>Priority</span>
+                </span>
+              ) : (
+                ""
+              )}
+            </Grid.Col>
+            <Grid.Col
+              span={4}
+              style={{
+                textAlign: "center",
+              }}
+            >
+              Scale Design
+            </Grid.Col>
+            <Grid.Col span={4}></Grid.Col>
+          </Grid>
         </Grid.Col>
-        <Grid.Col span={5}>
+
+        <Grid.Col
+          span={5}
+          style={{
+            boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
+            borderRadius: "12px",
+          }}
+        >
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "flex-start",
               padding: "5px",
-              fontSize: "18px",
+              fontSize: "14px",
             }}
           >
-            SKU: {selectedSKU?.sku} - Batch: {selectedSKU?.batch}
+            • Batch: {selectedSKU?.batch}
           </div>
           <div
             style={{
@@ -89,13 +127,28 @@ const ScaleDesign = ({
               fontSize: "14px",
             }}
           >
-            Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} - Size:{" "}
-            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.design]}
-            {selectedSKU?.priority === 2 ? " - Priority" : ""}
+            • Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              padding: "5px",
+              fontSize: "14px",
+            }}
+          >
+            • Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.design]}
           </div>
         </Grid.Col>
         <Grid.Col span={2}></Grid.Col>
-        <Grid.Col span={5}>
+        <Grid.Col
+          span={5}
+          style={{
+            boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
+            borderRadius: "12px",
+          }}
+        >
           <div
             style={{
               display: "flex",
@@ -105,8 +158,29 @@ const ScaleDesign = ({
               fontSize: "14px",
             }}
           >
-            {selectedSKU?.rndTeam} - RnD {selectedSKU?.rnd.name} - Designer{" "}
-            {selectedSKU?.designer.name}
+            • Team: {selectedSKU?.rndTeam}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              padding: "5px",
+              fontSize: "14px",
+            }}
+          >
+            • RnD: {selectedSKU?.rnd.name}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              padding: "5px",
+              fontSize: "14px",
+            }}
+          >
+            • Designer:{selectedSKU?.designer.name}
           </div>
         </Grid.Col>
         <Grid.Col span={5}>

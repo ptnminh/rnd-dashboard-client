@@ -134,17 +134,6 @@ const RefDesign = ({
         classSpanTitle={styles.classScaleSpanTitle}
         title="3. Ref Design (Market)"
         classTitle={cn("title-green", styles.title)}
-        head={
-          <Dropdown
-            label={"Size"}
-            className={styles.dropdown}
-            classDropdownHead={styles.dropdownHead}
-            value={rndSize}
-            setValue={setRndSize}
-            options={RND_SIZES}
-            classOutSideClick={styles.memberDropdown}
-          />
-        }
       >
         <ScrollArea
           h={600}

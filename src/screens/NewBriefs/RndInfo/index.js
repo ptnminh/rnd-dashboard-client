@@ -11,7 +11,6 @@ import {
   BRIEF_TYPES,
   BRIEF_VALUES,
   CHOOSE_BRIEF_TYPES,
-  RND_SIZES,
 } from "../../../constant";
 import { Autocomplete } from "@mantine/core";
 import Icon from "../../../components/Icon";
@@ -65,6 +64,19 @@ const RndInfo = ({
         <div className={styles.description}>
           <div className={styles.campType}>
             <Dropdown
+              className={styles.dropdown}
+              label={"RND"}
+              classDropdownHead={styles.dropdownHead}
+              value={rndMember}
+              setValue={setRndMember}
+              options={
+                !isEmpty(filter(users, { position: "rnd" }))
+                  ? map(filter(users, { position: "rnd" }), "name")
+                  : []
+              }
+              classOutSideClick={styles.memberDropdown}
+            />{" "}
+            <Dropdown
               label={"Team"}
               className={styles.dropdown}
               classDropdownHead={styles.dropdownHead}
@@ -84,22 +96,6 @@ const RndInfo = ({
             />{" "}
             <Dropdown
               className={styles.dropdown}
-              label={"RND"}
-              classDropdownHead={styles.dropdownHead}
-              value={rndMember}
-              setValue={setRndMember}
-              options={
-                !isEmpty(filter(users, { position: "rnd", team: workGroup }))
-                  ? map(
-                    filter(users, { position: "rnd", team: workGroup }),
-                    "name"
-                  )
-                  : []
-              }
-              classOutSideClick={styles.memberDropdown}
-            />{" "}
-            <Dropdown
-              className={styles.dropdown}
               label={"Designer"}
               classDropdownHead={styles.dropdownHead}
               value={designerMember}
@@ -109,14 +105,14 @@ const RndInfo = ({
                   filter(users, { position: "designer", team: workGroup })
                 )
                   ? map(
-                    filter(users, { position: "designer", team: workGroup }),
-                    "name"
-                  )
+                      filter(users, { position: "designer", team: workGroup }),
+                      "name"
+                    )
                   : []
               }
               classOutSideClick={styles.memberDropdown}
             />{" "}
-            <Dropdown
+            {/* <Dropdown
               className={styles.dropdown}
               label={"EPM"}
               classDropdownHead={styles.dropdownHead}
@@ -124,12 +120,12 @@ const RndInfo = ({
               setValue={setEpmMember}
               options={map(filter(users, { position: "epm" }), "name") || []}
               classOutSideClick={styles.memberDropdown}
-            />{" "}
+            />{" "} */}
           </div>
         </div>
       </Card>
       <Card
-        className={cn(styles.card, className)}
+        className={cn(styles.cardBriefType, className)}
         title="1. Loại Brief"
         classTitle="title-green"
         classCardHead={styles.classCardHead}
@@ -152,7 +148,7 @@ const RndInfo = ({
         briefType !== BRIEF_TYPES[4] &&
         briefType !== BRIEF_TYPES[5] && (
           <Card
-            className={cn(styles.card, className)}
+            className={cn(styles.cardBriefType, className)}
             title="2. Input Ref"
             classTitle="title-green"
             classCardHead={styles.classCardHead}
@@ -189,13 +185,13 @@ const RndInfo = ({
           >
             {SKU && !loadingSearchSKU && (
               <Grid>
-                <Grid.Col span={6}>
+                <Grid.Col span={4}>
                   <Image
                     radius="md"
                     src={SKU.image || "/images/content/not_found_2.jpg"}
                   />
                 </Grid.Col>
-                <Grid.Col span={6}>
+                <Grid.Col span={8}>
                   <List
                     spacing="lg"
                     size="sm"

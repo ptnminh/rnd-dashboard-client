@@ -27,7 +27,7 @@ export const PATH_NAMES = {
         title: "2. Mockup",
         children: {
           READY_TO_LAUNCH: {
-            title: "2.1 - Ready",
+            title: "2.1 - Brief",
             url: "/product-base/mockup/ready-to-launch",
           },
           TASK: {
