@@ -8,9 +8,11 @@
   height: 70px;
   border-right: 1px solid #d1d6e3;
 }
-.head-cells > div {
+
+.head-cells>div {
   align-items: center !important;
   justify-content: center !important;
+  text-align: center;
 }
 
 .SKU {
@@ -28,15 +30,17 @@
   height: 70px;
   border-right: 1px solid #d1d6e3;
 }
-.ads-image > div {
+
+.ads-image>div {
   align-items: center !important;
   justify-content: center !important;
 }
 
-.SKU > div {
+.SKU>div {
   align-items: center !important;
   justify-content: center !important;
 }
+
 .body-cells {
   vertical-align: middle;
   text-align: center;
@@ -49,7 +53,8 @@
   height: 70px;
   border-right: 1px solid #d1d6e3;
 }
-.linkDesign > div {
+
+.linkDesign>div {
   align-items: center !important;
   justify-content: center !important;
 }
@@ -60,12 +65,15 @@
   height: 70px;
   border-right: 1px solid #d1d6e3;
 }
-.remove > div {
+
+.remove>div {
   align-items: center !important;
   justify-content: center !important;
 }
+
 /* Target an internal MRT class already defined */
 .toolbar {
+
   /* Use :global() to make sure this className does not get hashed */
   :global(.mrt-toolbar-internal-buttons) {
     gap: 0.5rem;
@@ -74,13 +82,16 @@
 
 /* Define MRT CSS variables in your CSS */
 .root {
+
   /* You can account for both light and dark mode with the Mantine mixins */
   @mixin dark {
     --mrt-base-background-color: rgb(33, 24, 44);
   }
+
   @mixin light {
     --mrt-base-background-color: rgb(244, 233, 255);
   }
+
   /* It's also best to redefine all of the other MRT CSS variables that derive from --mrt-base-background-color */
   /* ... */
 }

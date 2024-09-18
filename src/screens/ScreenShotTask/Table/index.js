@@ -154,6 +154,7 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         Cell: ({ row }) => {
           let color = null;
           switch (row?.original?.value?.rnd) {
@@ -186,6 +187,7 @@ const BriefsTable = ({
         header: "PRIORITY",
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         size: 100,
         Cell: ({ row }) => {
           const uid = row.original.uid;
@@ -218,7 +220,9 @@ const BriefsTable = ({
               value={foundBrief?.docLink || ""}
               readOnly
               onClick={() => {
-                window.open(foundBrief?.docLink, "_blank");
+                if (foundBrief?.docLink) {
+                  window.open(foundBrief?.docLink, "_blank");
+                }
               }}
             />
           );
@@ -231,7 +235,7 @@ const BriefsTable = ({
         enableSorting: false,
         size: 170,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
@@ -292,7 +296,8 @@ const BriefsTable = ({
         enableSorting: false,
         enableEditing: false,
         size: 150,
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });

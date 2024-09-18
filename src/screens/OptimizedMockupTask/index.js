@@ -105,7 +105,7 @@ const OptimizedMockupTask = () => {
     <>
       <Card
         className={styles.card}
-        title="Mockup - Task"
+        title="Mockup - Optimized Task"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
       >

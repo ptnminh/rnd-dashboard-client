@@ -152,6 +152,7 @@ const BriefsTable = ({
         size: 100,
         enableEditing: false,
         enableSorting: false,
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => {
           let color = null;
@@ -241,7 +242,7 @@ const BriefsTable = ({
         enableSorting: false,
         size: 170,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
@@ -305,6 +306,7 @@ const BriefsTable = ({
         enableEditing: false,
         size: 150,
         mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });

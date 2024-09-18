@@ -153,6 +153,7 @@ const BriefsTable = ({
         size: 100,
         enableEditing: false,
         enableSorting: false,
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Cell: ({ row }) => {
           let color = null;
@@ -183,9 +184,10 @@ const BriefsTable = ({
       },
       {
         accessorKey: "priority",
-        header: "PRIORITY",
+        header: "Priority",
         enableSorting: false,
         enableEditing: false,
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         size: 100,
         Cell: ({ row }) => {
@@ -223,7 +225,10 @@ const BriefsTable = ({
               value={foundBrief?.templateLink || ""}
               readOnly
               onClick={() => {
-                window.open(foundBrief?.templateLink, "_blank");
+                if(foundBrief?.templateLink) {
+                  window.open(foundBrief?.templateLink, "_blank");
+
+                }
               }}
             />
           );
@@ -249,7 +254,10 @@ const BriefsTable = ({
               value={foundBrief?.readyToLaunchInfo?.docLink || ""}
               readOnly
               onClick={() => {
-                window.open(foundBrief?.readyToLaunchInfo?.docLink, "_blank");
+                if(foundBrief?.readyToLaunchInfo?.docLink) {
+                  window.open(foundBrief?.readyToLaunchInfo?.docLink, "_blank");
+
+                }
               }}
             />
           );
@@ -262,7 +270,7 @@ const BriefsTable = ({
         enableSorting: false,
         size: 150,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
@@ -305,7 +313,7 @@ const BriefsTable = ({
         header: "Chụp SP",
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         size: 100,
         Cell: ({ row }) => {
           const uid = row.original.uid;
@@ -349,7 +357,9 @@ const BriefsTable = ({
               value={foundBrief?.photographyLink || ""}
               readOnly
               onClick={() => {
-                window.open(foundBrief?.photographyLink, "_blank");
+                if(foundBrief?.photographyLink) {
+                  window.open(foundBrief?.photographyLink, "_blank");
+                }
               }}
             />
           );
@@ -362,7 +372,7 @@ const BriefsTable = ({
         enableSorting: false,
         size: 170,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
@@ -423,6 +433,7 @@ const BriefsTable = ({
         enableEditing: false,
         size: 150,
         mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
