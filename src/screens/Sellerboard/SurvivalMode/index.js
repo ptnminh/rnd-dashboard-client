@@ -10,21 +10,9 @@ import {
   Badge,
   Tooltip,
   Select,
-  TextInput,
   Group,
 } from "@mantine/core";
-import {
-  find,
-  map,
-  flatten,
-  uniq,
-  join,
-  isEmpty,
-  split,
-  includes,
-  values,
-  filter,
-} from "lodash";
+import { find, map, flatten, uniq, join, split, values, filter } from "lodash";
 import { IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import {
@@ -34,6 +22,7 @@ import {
 } from "../../../constant";
 import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { IconCalendarWeek, IconTarget } from "@tabler/icons-react";
+import LazyLoad from "react-lazyload";
 
 const SurvivalModeTable = ({
   tableData,
@@ -62,7 +51,7 @@ const SurvivalModeTable = ({
     const columns = map(keyLevels, (keyLevel) => {
       return {
         accessorKey: keyLevel,
-        header: join(split(keyLevel, " ").slice(0, -1), " "),
+        header: keyLevel,
         size: 250,
         maxSize: 300,
         enableEditing: false,
@@ -123,7 +112,7 @@ const SurvivalModeTable = ({
                     fontWeight: "bold",
                   }}
                 >
-                  <IconCalendarWeek color="#89CCFF" /> {keyData.orders}
+                  {keyData?.orders}
                 </Text>
                 <span>-</span>
                 <Text
@@ -132,8 +121,7 @@ const SurvivalModeTable = ({
                     fontWeight: "bold",
                   }}
                 >
-                  <IconTarget color="#E74C3C" /> {keyData.orders} /{" "}
-                  {keyData.orders}
+                  {keyData?.orders} / {keyData?.orders}
                 </Text>
               </Group>
             </Flex>
@@ -172,26 +160,28 @@ const SurvivalModeTable = ({
           };
         },
         Cell: ({ row }) => {
-          const { ASIN, title, image, store, fulfillmentChannel, sku } =
+          const { asin, title, image, store, fulfillmentChannel, sku } =
             row.original;
-          const url = `https://www.amazon.com/dp/${ASIN}`;
+          const url = `https://www.amazon.com/dp/${asin}`;
           return (
             <Flex direction="column">
               <Grid>
                 <Grid.Col span={4}>
                   <Tooltip label={url}>
-                    <Image
-                      src={image || "/images/content/not_found_2.jpg"}
-                      width="100%"
-                      height="50px"
-                      fit="contain"
-                      style={{
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        window.open(url, "_blank");
-                      }}
-                    />
+                    <LazyLoad height={50} once={true}>
+                      <Image
+                        src={image || "/images/content/not_found_2.jpg"}
+                        width="100%"
+                        height="50px"
+                        style={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          window.open(url, "_blank");
+                        }}
+                        fit="contain"
+                      />
+                    </LazyLoad>
                   </Tooltip>
                 </Grid.Col>
                 <Grid.Col span={8}>
@@ -213,7 +203,6 @@ const SurvivalModeTable = ({
                         </Text>
                       </Flex>
                     </Grid.Col>
-
                     <Grid.Col
                       span={12}
                       style={{
@@ -232,7 +221,7 @@ const SurvivalModeTable = ({
                             window.open(url, "_blank");
                           }}
                         >
-                          {ASIN}
+                          {asin}
                         </Text>
                       </Tooltip>
                     </Grid.Col>
@@ -243,7 +232,6 @@ const SurvivalModeTable = ({
           );
         },
       },
-
       {
         accessorKey: "value",
         header: "Value",
@@ -289,7 +277,75 @@ const SurvivalModeTable = ({
           );
         },
       },
-      ...customColumns,
+      {
+        accessorKey: "deadlineDays",
+        header: "Deadline Days",
+        size: 150,
+        maxSize: 150,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: {
+          className: classes["body-cells"],
+        },
+        mantineTableHeadCellProps: {
+          className: classes["edit-header"],
+        },
+        Cell: ({ row }) => {
+          let color = null;
+          const value = row.original.value || 2;
+          switch (value) {
+            case 1:
+              color = "#cfcfcf";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "green";
+              break;
+            case 4:
+              color = "#38761C";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[value]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[value]}</span>
+          );
+        },
+      },
+      {
+        accessorKey: "deadlineOrders",
+        header: "Deadline Orders",
+        size: 150,
+        maxSize: 150,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: {
+          className: classes["body-cells"],
+        },
+        mantineTableHeadCellProps: {
+          className: classes["edit-header"],
+        },
+        Cell: ({ row }) => {
+          const { currentOrders, deadlineOrders } = row.original;
+
+          return (
+            <Text
+              style={{
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              {currentOrders} / {deadlineOrders}
+            </Text>
+          );
+        },
+      },
     ],
     [customColumns, data]
   );
@@ -334,154 +390,6 @@ const SurvivalModeTable = ({
               flexWrap: "wrap",
             }}
           >
-            <MultiSelect
-              placeholder="Store"
-              data={AMZ_STORES}
-              styles={{
-                input: {
-                  width: "130px",
-                  minHeight: "35px",
-                },
-                inputField: {
-                  display: "none",
-                },
-              }}
-              value={
-                arraysMatchUnordered(query?.storeValues, ["PFH", "QZL", "GGT"])
-                  ? ["All"]
-                  : query?.storeValues || []
-              }
-              onChange={(value) => {
-                if (value.length === 1 && value[0] === "All") {
-                  const newValues = ["PFH", "QZL", "GGT"];
-                  setQuery({
-                    ...query,
-                    stores: join(newValues, ","),
-                    storeValues: newValues,
-                  });
-                } else {
-                  const realValues = filter(value, (v) => v !== "All");
-                  setQuery({
-                    ...query,
-                    stores: join(realValues, ","),
-                    storeValues: realValues,
-                  });
-                }
-              }}
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  stores: null,
-                  storeValues: [],
-                });
-              }}
-            />
-            <MultiSelect
-              placeholder="Channel"
-              data={FULFILLMENT_CHANNELS}
-              styles={{
-                input: {
-                  width: "130px",
-                  minHeight: "35px",
-                },
-                inputField: {
-                  display: "none",
-                },
-              }}
-              value={
-                arraysMatchUnordered(query?.fulfillmentChannelValues, [
-                  "FBA",
-                  "FBM",
-                ])
-                  ? ["All"]
-                  : query?.fulfillmentChannelValues || []
-              }
-              onChange={(value) => {
-                if (value.length === 1 && value[0] === "All") {
-                  const newValues = ["FBA", "FBM"];
-                  setQuery({
-                    ...query,
-                    fulfillmentChannel: join(newValues, ","),
-                    fulfillmentChannelValues: newValues,
-                  });
-                } else {
-                  const realValues = filter(value, (v) => v !== "All");
-                  setQuery({
-                    ...query,
-                    fulfillmentChannel: join(realValues, ","),
-                    fulfillmentChannelValues: realValues,
-                  });
-                }
-              }}
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  fulfillmentChannel: null,
-                  fulfillmentChannelValues: [],
-                });
-              }}
-            />
-
-            <Select
-              placeholder="Sorting"
-              data={values(AMZ_SORTING)}
-              styles={{
-                input: {
-                  width: "150px",
-                },
-              }}
-              value={query?.sortValue || null}
-              onChange={(value) => {
-                let primarySortBy = "";
-                let primarySortDir = "";
-                switch (value) {
-                  case AMZ_SORTING.ordersAsc:
-                    primarySortBy = "revenue";
-                    primarySortDir = "asc";
-                    break;
-                  case AMZ_SORTING.ordersDesc:
-                    primarySortBy = "revenue";
-                    primarySortDir = "desc";
-                    break;
-                  case AMZ_SORTING.saleInRangeAsc:
-                    primarySortBy = "saleInRange";
-                    primarySortDir = "asc";
-                    break;
-                  case AMZ_SORTING.saleInRangeDesc:
-                    primarySortBy = "saleInRange";
-                    primarySortDir = "desc";
-                    break;
-                  case AMZ_SORTING.createdDateAsc:
-                    primarySortBy = "createdDate";
-                    primarySortDir = "asc";
-                    break;
-                  case AMZ_SORTING.createdDateDesc:
-                    primarySortBy = "createdDate";
-                    primarySortDir = "desc";
-                    break;
-                  default:
-                    value = null;
-                }
-                setQuery({
-                  ...query,
-                  sortValue: value,
-                  primarySortBy,
-                  primarySortDir,
-                });
-              }}
-              clearable
-              searchable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  sortValue: null,
-                  primarySortBy: null,
-                  primarySortDir: null,
-                });
-              }}
-            />
             <Button
               onClick={() => {
                 setQuery({
@@ -522,7 +430,18 @@ const SurvivalModeTable = ({
     manualSorting: true,
   });
 
-  return <MantineReactTable table={table} />;
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "start",
+        width: "100%",
+        overflowX: "auto",
+      }}
+    >
+      <MantineReactTable table={table} />
+    </div>
+  );
 };
 
 export default SurvivalModeTable;
