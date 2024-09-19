@@ -444,6 +444,11 @@ const SurvivalModeTable = ({
             <Button
               loading={loading}
               onClick={() => {
+                setIsLoadmore(false);
+                setPagination({
+                  ...pagination,
+                  currentPage: 1,
+                });
                 setIsConfirmedQuery(true);
               }}
             >
