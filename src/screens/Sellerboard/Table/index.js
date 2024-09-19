@@ -40,6 +40,7 @@ import {
 import moment from "moment-timezone";
 import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { DateRangePicker } from "rsuite";
+import Loader from "../../../components/Loader";
 
 const SellerboardTable = ({
   tableData,
@@ -476,7 +477,6 @@ const SellerboardTable = ({
     enableDensityToggle: false,
     state: {
       showProgressBars: loading,
-      isLoading: loading,
       sorting,
     },
     renderTopToolbar: () => {
@@ -871,7 +871,26 @@ const SellerboardTable = ({
     enableColumnResizing: false,
     enableSorting: true,
     enableMultiSort: false,
+    enableBottomToolbar: true,
     manualSorting: true,
+    mantineBottomToolbarProps: () => {
+      return {
+        className: classes["bottom-toolbar"],
+      };
+    },
+    renderBottomToolbarCustomActions: () => {
+      return loading ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            height: "100%",
+          }}
+        >
+          <Loader />
+        </div>
+      ) : null;
+    },
   });
 
   return <MantineReactTable table={table} />;
