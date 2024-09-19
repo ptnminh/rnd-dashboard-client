@@ -12,6 +12,7 @@ import {
   Group,
   Select,
   TextInput,
+  ActionIcon,
 } from "@mantine/core";
 import {
   find,
@@ -26,7 +27,12 @@ import {
   flatMap,
   merge,
 } from "lodash";
-import { IconFilterOff, IconLoader } from "@tabler/icons-react";
+import {
+  IconFilterOff,
+  IconSortDescending,
+  IconSortAscending,
+  IconArrowsSort,
+} from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import {
   AMZ_SORTING,
@@ -176,7 +182,7 @@ const SellerboardTable = ({
       setCustomColumns([...customColumns, ...virtualColumn]);
     }
   }, [data]);
-
+  console.log("query", query);
   // UseMemo to construct final columns array
   const columns = useMemo(
     () => [
@@ -292,8 +298,8 @@ const SellerboardTable = ({
       },
       {
         accessorKey: "createdDate",
-        size: 100,
-        maxSize: 100,
+        size: 150,
+        maxSize: 150,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -320,6 +326,82 @@ const SellerboardTable = ({
               >
                 Summary
               </Text>
+              {!query?.primarySortBy && (
+                <ActionIcon
+                  aria-label="Settings"
+                  variant="default"
+                  style={{
+                    background: "none",
+                    border: "none",
+                  }}
+                  onClick={() => {
+                    setIsConfirmedQuery(true);
+                    setPagination({
+                      ...pagination,
+                      currentPage: 1,
+                    });
+                    setQuery({
+                      ...query,
+                      primarySortBy: "totalOrders",
+                      primarySortDir: "desc",
+                    });
+                  }}
+                >
+                  <IconArrowsSort
+                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
+                    stroke={2}
+                  />
+                </ActionIcon>
+              )}
+
+              {query?.primarySortBy === "totalOrders" &&
+                query?.primarySortDir === "desc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setIsConfirmedQuery(true);
+                      setQuery({
+                        ...query,
+                        primarySortBy: "totalOrders",
+                        primarySortDir: "asc",
+                      });
+                    }}
+                  >
+                    <IconSortDescending
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+              {query?.primarySortBy === "totalOrders" &&
+                query?.primarySortDir === "asc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setIsConfirmedQuery(true);
+                      setQuery({
+                        ...query,
+                        primarySortBy: null,
+                        primarySortDir: null,
+                      });
+                    }}
+                  >
+                    <IconSortAscending
+                      style={{
+                        width: "70%",
+                        height: "70%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
             </Group>
           );
         },
@@ -343,7 +425,7 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                {totalOrders.toLocaleString()}
+                {totalOrders?.toLocaleString()}
               </Text>
               <Text
                 style={{

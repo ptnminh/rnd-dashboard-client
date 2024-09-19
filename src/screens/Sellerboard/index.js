@@ -8,13 +8,14 @@ import {
   Flex,
   Grid,
   rem,
+  Switch,
   Tabs,
   Transition,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { amzServices } from "../../services";
 import Table from "./Table";
-import { debounce, isEmpty, omit, set, toLower, toNumber } from "lodash";
+import { isEmpty, omit, toLower, toNumber } from "lodash";
 import SurvivalModeTable from "./SurvivalMode";
 import moment from "moment-timezone";
 import { useWindowScroll } from "@mantine/hooks";
@@ -72,8 +73,8 @@ const Sellerboard = () => {
     createdDateValue: [new Date(oneMonthAgo), new Date(endDate)],
     startDate: oneMonthAgo,
     endDate,
-    values: [1, 2, 3, 4],
-    value: ["Small", "Medium", "Big", "Super Big"],
+    values: 1,
+    value: ["Small"],
   });
   const [sorting, setSorting] = useState([
     {
@@ -211,15 +212,16 @@ const Sellerboard = () => {
         totalPages: 1,
       });
       if (activeTab === TABS_VIEW.SURVIVAL) {
+        setSorting([{ id: "value", desc: true }]);
         setSurvivalModeQuery({
           groupByKey: "date",
           stores: "PFH,QZL,GGT",
           storeValues: ["PFH", "QZL", "GGT"],
           createdDateValue: [new Date(oneMonthAgo), new Date(endDate)],
-          startDate,
+          startDate: oneMonthAgo,
           endDate,
-          values: [1, 2, 3, 4],
-          value: ["Small", "Medium", "Big", "Super Big"],
+          values: 1,
+          value: ["Small"],
         });
       } else {
         let customSorting = [];
@@ -361,23 +363,24 @@ const Sellerboard = () => {
                         padding: "10px",
                         borderRadius: "10px",
                         backgroundColor: "#EFF0F1",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
                       }}
                     >
-                      <Tabs.Tab
-                        value={TABS_VIEW.SURVIVAL}
-                        styles={{
-                          ...(activeTab === TABS_VIEW.SURVIVAL && {
-                            tab: {
-                              backgroundColor: "#7C4DFF",
-                              color: "#fff",
-                              borderRadius: "10px",
-                              borderColor: "transparent",
-                            },
-                          }),
+                      <Switch
+                        checked={activeTab === TABS_VIEW.SURVIVAL}
+                        label={TABS_VIEW.SURVIVAL}
+                        onChange={(event) => {
+                          const value = event.currentTarget.checked;
+                          setActiveTab(
+                            value ? TABS_VIEW.SURVIVAL : TABS_VIEW.Date
+                          );
                         }}
-                      >
-                        {TABS_VIEW.SURVIVAL}
-                      </Tabs.Tab>
+                        style={{
+                          cursor: "pointer",
+                        }}
+                      />
                     </Flex>
                   </div>
                 </Tabs.List>

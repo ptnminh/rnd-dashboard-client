@@ -10,6 +10,7 @@ import {
   Tooltip,
   Group,
   MultiSelect,
+  Select,
 } from "@mantine/core";
 import { find, map, flatten, uniq } from "lodash";
 import { IconFilterOff } from "@tabler/icons-react";
@@ -420,14 +421,14 @@ const SurvivalModeTable = ({
                 });
               }}
             />
-            <MultiSelect
+            <Select
               data={["Small", "Medium", "Big", "Super Big"]}
-              value={query.value}
+              value={CONVERT_NUMBER_TO_STATUS[query.value]}
               onChange={(value) => {
                 setQuery({
                   ...query,
                   value,
-                  values: map(value, (item) => CONVERT_STATUS_TO_NUMBER[item]),
+                  values: [CONVERT_STATUS_TO_NUMBER[value]],
                 });
               }}
               clearable
