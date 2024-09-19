@@ -10,7 +10,6 @@ import {
   Badge,
   Tooltip,
   Group,
-  ActionIcon,
   Select,
   TextInput,
 } from "@mantine/core";
@@ -27,6 +26,9 @@ import {
   every,
   filter,
   difference,
+  sumBy,
+  flatMap,
+  merge,
 } from "lodash";
 import { IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
@@ -38,11 +40,6 @@ import {
 import moment from "moment-timezone";
 import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { DateRangePicker } from "rsuite";
-import {
-  IconArrowsSort,
-  IconSortDescending,
-  IconSortAscending,
-} from "@tabler/icons-react";
 
 const SellerboardTable = ({
   tableData,
@@ -70,20 +67,31 @@ const SellerboardTable = ({
   const generateCustomColumn = (data) => {
     const keyLevels = extractUniqueKeys(data);
     const columns = map(keyLevels, (keyLevel) => {
+      const header = join(split(keyLevel, " ")?.slice(0, -1), " ");
       return {
         accessorKey: keyLevel,
-        header: join(split(keyLevel, " ").slice(0, -1), " "),
+        header,
         size: 100,
         maxSize: 150,
         enableEditing: false,
         enableSorting: true,
-        mantineTableBodyCellProps: {
-          className: classes["body-cells"],
-        },
+        mantineTableBodyCellProps: ({ row }) => ({
+          className:
+            row.id === `Total theo ${activeTab}`
+              ? classes["summary-row"]
+              : classes["body-cells-op-team"],
+        }),
         mantineTableHeadCellProps: {
           className: classes["edit-header"],
         },
         Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return (
+              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                {row.original[header]}
+              </Text>
+            );
+          }
           const { data } = row.original;
           const keyData = find(data, { key: keyLevel });
           return (
@@ -94,7 +102,7 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                {keyData.orders}
+                {keyData?.orders}
               </Text>
             </Flex>
           );
@@ -109,6 +117,35 @@ const SellerboardTable = ({
     setData(tableData);
     setCustomColumns(generateCustomColumn(tableData));
   }, [tableData]);
+
+  // Compute the Total theo ${activeTab} row data
+  const summaryRow = useMemo(() => {
+    const columns = merge(
+      {},
+      ...customColumns.map((col) => {
+        const key = col.accessorKey;
+        const keyLevels = flatMap(data, "data");
+        const keyData = filter(keyLevels, (keyLevel) => keyLevel.key === key);
+        const header = join(split(key, " ")?.slice(0, -1), " ");
+        const totalOrders = sumBy(keyData, "orders");
+        return {
+          [header]: totalOrders,
+        };
+      })
+    );
+    return {
+      id: `Total theo ${activeTab}`, // Unique ID for the Total theo ${activeTab} row
+      product: `Summary`,
+      totalInRanges: sumBy(data, (row) => sumBy(row.data, "orders")), // Example: sum of orders
+      ...columns,
+    };
+  }, [data, customColumns]);
+
+  // Combine table data with the Total theo ${activeTab} row
+  const tableDataWithSummary = useMemo(
+    () => [...data, summaryRow],
+    [data, summaryRow]
+  );
 
   useEffect(() => {
     if (
@@ -153,15 +190,26 @@ const SellerboardTable = ({
         enableMultiSort: true,
         mantineTableBodyCellProps: ({ row }) => {
           return {
-            className: classes["body-cells-op-team"],
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+            rowSpan: row.id === `Total theo ${activeTab}` ? 3 : 1, // Row span for Total theo ${activeTab} row
           };
         },
-        mantineTableHeadCellProps: () => {
+        mantineTableHeadCellProps: ({ row }) => {
           return {
             className: classes["head-cells-op-team"],
           };
         },
         Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return (
+              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                Total theo {activeTab}
+              </Text>
+            );
+          }
           const {
             ASIN,
             title,
@@ -242,13 +290,16 @@ const SellerboardTable = ({
       },
       {
         accessorKey: "createdDate",
-        size: 150,
-        maxSize: 150,
+        size: 100,
+        maxSize: 100,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
           return {
-            className: classes["body-cells-op-team"],
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
           };
         },
         mantineTableHeadCellProps: () => {
@@ -265,109 +316,66 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                Created time
+                Summary
               </Text>
-              {!query?.primarySortBy && (
-                <ActionIcon
-                  aria-label="Settings"
-                  variant="default"
-                  style={{
-                    background: "none",
-                    border: "none",
-                  }}
-                  onClick={() => {
-                    setIsConfirmedQuery(true);
-                    setQuery({
-                      ...query,
-                      primarySortBy: "createdDate",
-                      primarySortDir: "desc",
-                    });
-                  }}
-                >
-                  <IconArrowsSort
-                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
-                    stroke={2}
-                  />
-                </ActionIcon>
-              )}
-
-              {query?.primarySortBy === "createdDate" &&
-                query?.primarySortDir === "desc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    onClick={() => {
-                      setIsConfirmedQuery(true);
-                      setQuery({
-                        ...query,
-                        primarySortBy: "createdDate",
-                        primarySortDir: "asc",
-                      });
-                    }}
-                  >
-                    <IconSortDescending
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
-              {query?.primarySortBy === "createdDate" &&
-                query?.primarySortDir === "asc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    onClick={() => {
-                      setIsConfirmedQuery(true);
-                      setQuery({
-                        ...query,
-                        primarySortBy: null,
-                        primarySortDir: null,
-                      });
-                    }}
-                  >
-                    <IconSortAscending
-                      style={{
-                        width: "70%",
-                        height: "70%",
-                        fontWeight: "bold",
-                      }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
             </Group>
           );
         },
         Cell: ({ row }) => {
-          const { createdDate } = row.original;
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          const { createdDate, totalOrders } = row.original;
           return (
-            <Text
+            <Group
               style={{
-                fontSize: 14,
-                fontWeight: "bold",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              {moment(createdDate)
-                .tz("America/Los_Angeles")
-                .format("YYYY-MM-DD")}
-            </Text>
+              <Text
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                }}
+              >
+                {totalOrders}
+              </Text>
+              <Text
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "thin",
+                  color: "gray",
+                }}
+              >
+                {moment(createdDate)
+                  .tz("America/Los_Angeles")
+                  .format("DD MMM YYYY")}
+              </Text>
+            </Group>
           );
         },
       },
       {
         accessorKey: "value",
         header: "Value",
-        size: 150,
-        maxSize: 150,
+        size: 50,
+        maxSize: 50,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
           return {
-            className: classes["body-cells-op-team"],
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+            // ...(row.id === `Total theo ${activeTab}` && {
+            //   style: {
+            //     display: "none",
+            //   },
+            // }),
           };
         },
         mantineTableHeadCellProps: () => {
@@ -376,6 +384,9 @@ const SellerboardTable = ({
           };
         },
         Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
           let color = null;
           const value = row.original.value || 2;
           switch (value) {
@@ -403,14 +414,55 @@ const SellerboardTable = ({
           );
         },
       },
+      {
+        accessorKey: "totalInRanges",
+        header: "Total In Ranges",
+        size: 50,
+        maxSize: 50,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return (
+              <Text style={{ fontSize: "14px", fontWeight: "bold" }}>
+                {summaryRow.totalInRanges}
+              </Text>
+            );
+          }
+          const totalOrders = sumBy(row.original.data, "orders");
+          return (
+            <Text
+              style={{
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              {totalOrders}
+            </Text>
+          );
+        },
+      },
       ...customColumns,
     ],
-    [customColumns, data]
+    [customColumns, data, summaryRow]
   );
 
   const table = useMantineReactTable({
     columns,
-    data,
+    data: tableDataWithSummary,
     editDisplayMode: "cell",
     enablePagination: false,
     getRowId: (row) => row.id,
@@ -668,15 +720,15 @@ const SellerboardTable = ({
                     width: "100px",
                   }}
                   value={query.salesDateValue}
-                  onOk={(value) =>
+                  onOk={(value) => {
                     setQuery({
                       ...query,
                       salesDateValue: value,
                       startDate: moment(value[0]).format("YYYY-MM-DD"),
                       endDate: moment(value[1]).format("YYYY-MM-DD"),
                       ordersInRange: 1,
-                    })
-                  }
+                    });
+                  }}
                   onOpen={() => {
                     console.log("open");
                   }}
@@ -736,11 +788,11 @@ const SellerboardTable = ({
                     primarySortDir = "desc";
                     break;
                   case AMZ_SORTING.saleInRangeAsc:
-                    primarySortBy = "saleInRange";
+                    primarySortBy = "ordersInRange";
                     primarySortDir = "asc";
                     break;
                   case AMZ_SORTING.saleInRangeDesc:
-                    primarySortBy = "saleInRange";
+                    primarySortBy = "ordersInRange";
                     primarySortDir = "desc";
                     break;
                   case AMZ_SORTING.createdDateAsc:

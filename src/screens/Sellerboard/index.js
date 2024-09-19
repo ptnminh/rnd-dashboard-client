@@ -8,6 +8,7 @@ import { amzServices } from "../../services";
 import Table from "./Table";
 import { isEmpty, omit, toLower, toNumber } from "lodash";
 import SurvivalModeTable from "./SurvivalMode";
+import moment from "moment-timezone";
 
 const TABS_VIEW = {
   Date: "Date",
@@ -30,12 +31,21 @@ const Sellerboard = () => {
     currentPage: initialPage,
     totalPages: 1,
   });
+  const startDate = moment()
+    .tz("America/Los_Angeles")
+    .subtract(7, "days")
+    .format("YYYY-MM-DD");
+  const endDate = moment().tz("America/Los_Angeles").format("YYYY-MM-DD");
   const [query, setQuery] = useState({
     groupByKey: toLower(TABS_VIEW.Date),
     stores: "PFH,QZL,GGT",
     storeValues: ["PFH", "QZL", "GGT"],
     fulfillmentChannel: "FBA,FBM",
     fulfillmentChannelValues: ["FBA", "FBM"],
+    ordersInRange: 1,
+    salesDateValue: [new Date(startDate), new Date(endDate)],
+    startDate,
+    endDate,
   });
   const [sorting, setSorting] = useState([]);
   const [trigger, setTrigger] = useState(false);
@@ -66,7 +76,7 @@ const Sellerboard = () => {
           "salesDateValue",
         ]
       ),
-      limit: 10,
+      limit: 2,
       sorting,
     });
     const { data, metaData } = response;
@@ -129,6 +139,12 @@ const Sellerboard = () => {
         storeValues: ["PFH", "QZL", "GGT"],
         fulfillmentChannelValues: ["FBA", "FBM"],
         fulfillmentChannel: "FBA,FBM",
+        ...(activeTab === TABS_VIEW.Date && {
+          ordersInRange: 1,
+          salesDateValue: [new Date(startDate), new Date(endDate)],
+          startDate,
+          endDate,
+        }),
       });
       setPagination({
         currentPage: 1,
