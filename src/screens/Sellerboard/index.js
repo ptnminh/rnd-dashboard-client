@@ -224,7 +224,7 @@ const Sellerboard = () => {
       if (
         listInnerRef.current &&
         listInnerRef.current.getBoundingClientRect().bottom <=
-          window.innerHeight + 200
+          window.innerHeight + 50
       ) {
         // Check if scrolled near the bottom
         if (
@@ -366,59 +366,67 @@ const Sellerboard = () => {
                   </div>
                 </Tabs.List>
                 <Tabs.Panel value={TABS_VIEW.Date}>
-                  <Table
-                    className={styles.Table}
-                    tableData={saleMetrics}
-                    query={query}
-                    setQuery={setQuery}
-                    loading={loadingFetchSaleMetrics}
-                    setTrigger={setTrigger}
-                    setSorting={setSorting}
-                    sorting={sorting}
-                    activeTab={activeTab}
-                    setIsConfirmedQuery={setIsConfirmedQuery}
-                  />
+                  {activeTab === TABS_VIEW.Date && (
+                    <Table
+                      className={styles.Table}
+                      tableData={saleMetrics}
+                      query={query}
+                      setQuery={setQuery}
+                      loading={loadingFetchSaleMetrics}
+                      setTrigger={setTrigger}
+                      setSorting={setSorting}
+                      sorting={sorting}
+                      activeTab={activeTab}
+                      setIsConfirmedQuery={setIsConfirmedQuery}
+                    />
+                  )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Week}>
-                  <Table
-                    className={styles.Table}
-                    tableData={saleMetrics}
-                    query={query}
-                    setQuery={setQuery}
-                    loading={loadingFetchSaleMetrics}
-                    setTrigger={setTrigger}
-                    setSorting={setSorting}
-                    sorting={sorting}
-                    activeTab={activeTab}
-                    setIsConfirmedQuery={setIsConfirmedQuery}
-                  />
+                  {activeTab === TABS_VIEW.Week && (
+                    <Table
+                      className={styles.Table}
+                      tableData={saleMetrics}
+                      query={query}
+                      setQuery={setQuery}
+                      loading={loadingFetchSaleMetrics}
+                      setTrigger={setTrigger}
+                      setSorting={setSorting}
+                      sorting={sorting}
+                      activeTab={activeTab}
+                      setIsConfirmedQuery={setIsConfirmedQuery}
+                    />
+                  )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Month}>
-                  <Table
-                    className={styles.Table}
-                    tableData={saleMetrics}
-                    query={query}
-                    setQuery={setQuery}
-                    loading={loadingFetchSaleMetrics}
-                    setTrigger={setTrigger}
-                    setSorting={setSorting}
-                    sorting={sorting}
-                    activeTab={activeTab}
-                    setIsConfirmedQuery={setIsConfirmedQuery}
-                  />
+                  {activeTab === TABS_VIEW.Month && (
+                    <Table
+                      className={styles.Table}
+                      tableData={saleMetrics}
+                      query={query}
+                      setQuery={setQuery}
+                      loading={loadingFetchSaleMetrics}
+                      setTrigger={setTrigger}
+                      setSorting={setSorting}
+                      sorting={sorting}
+                      activeTab={activeTab}
+                      setIsConfirmedQuery={setIsConfirmedQuery}
+                    />
+                  )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.SURVIVAL}>
-                  <SurvivalModeTable
-                    className={styles.Table}
-                    tableData={saleMetrics}
-                    query={survivalModeQuery}
-                    setQuery={setSurvivalModeQuery}
-                    loading={loadingFetchSaleMetrics}
-                    setTrigger={setTrigger}
-                    setSorting={setSorting}
-                    sorting={sorting}
-                    activeTab={activeTab}
-                  />
+                  {activeTab === TABS_VIEW.SURVIVAL && (
+                    <SurvivalModeTable
+                      className={styles.Table}
+                      tableData={saleMetrics}
+                      query={survivalModeQuery}
+                      setQuery={setSurvivalModeQuery}
+                      loading={loadingFetchSaleMetrics}
+                      setTrigger={setTrigger}
+                      setSorting={setSorting}
+                      sorting={sorting}
+                      activeTab={activeTab}
+                    />
+                  )}
                 </Tabs.Panel>
               </Tabs>
             </Grid.Col>
