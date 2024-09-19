@@ -421,14 +421,14 @@ const SurvivalModeTable = ({
                 });
               }}
             />
-            <Select
+            {/* <MultiSelect
               data={["Small", "Medium", "Big", "Super Big"]}
-              value={CONVERT_NUMBER_TO_STATUS[query.value]}
+              value={query?.textValue || []}
               onChange={(value) => {
                 setQuery({
                   ...query,
-                  value,
-                  values: [CONVERT_STATUS_TO_NUMBER[value]],
+                  textValue: value,
+                  values: map(value, (item) => CONVERT_STATUS_TO_NUMBER[item]),
                 });
               }}
               clearable
@@ -436,11 +436,11 @@ const SurvivalModeTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  value: [],
-                  values: [],
+                  textValue: null,
+                  values: null,
                 });
               }}
-            />
+            /> */}
             <Button
               loading={loading}
               onClick={() => {

@@ -73,8 +73,8 @@ const Sellerboard = () => {
     createdDateValue: [new Date(oneMonthAgo), new Date(endDate)],
     startDate: oneMonthAgo,
     endDate,
-    values: 1,
-    value: ["Small"],
+    values: [1, 2, 3, 4],
+    textValue: ["Small", "Medium", "Big", "Super Big"],
   });
   const [sorting, setSorting] = useState([
     {
@@ -119,8 +119,8 @@ const Sellerboard = () => {
         setSaleMetrics(data);
       }
       setPagination({
-        currentPage: toNumber(metaData.currentPage),
-        totalPages: toNumber(metaData.totalPages),
+        currentPage: toNumber(metaData.currentPage) || 1,
+        totalPages: toNumber(metaData.totalPages) || 1,
       });
     } else {
       setSaleMetrics([]);
@@ -160,8 +160,8 @@ const Sellerboard = () => {
         setSaleMetrics(data);
       }
       setPagination({
-        currentPage: toNumber(metaData.currentPage),
-        totalPages: toNumber(metaData.totalPages),
+        currentPage: toNumber(metaData.currentPage) || 1,
+        totalPages: toNumber(metaData.totalPages) || 1,
       });
     } else {
       setSaleMetrics([]);
@@ -192,6 +192,10 @@ const Sellerboard = () => {
   // listen sorting change set isConfirmedQuery to true for refetch data
   useEffect(() => {
     if (!isEmpty(sorting)) {
+      setPagination({
+        ...pagination,
+        currentPage: 1,
+      });
       setIsConfirmedQuery(true);
     }
   }, [sorting]);
@@ -220,8 +224,8 @@ const Sellerboard = () => {
           createdDateValue: [new Date(oneMonthAgo), new Date(endDate)],
           startDate: oneMonthAgo,
           endDate,
-          values: 1,
-          value: ["Small"],
+          values: [1, 2, 3, 4],
+          textValue: ["Small", "Medium", "Big", "Super Big"],
         });
       } else {
         let customSorting = [];

@@ -135,14 +135,16 @@ const SellerboardTable = ({
         const header = join(split(key, " ")?.slice(0, -1), " ");
         const totalOrders = sumBy(keyData, "orders");
         return {
-          [header]: totalOrders,
+          [header]: totalOrders?.toLocaleString(),
         };
       })
     );
     return {
       id: `Total theo ${activeTab}`, // Unique ID for the Total theo ${activeTab} row
       product: `Summary`,
-      totalInRanges: sumBy(data, (row) => sumBy(row.data, "orders")), // Example: sum of orders
+      totalInRanges: sumBy(data, (row) =>
+        sumBy(row.data, "orders")
+      )?.toLocaleString(), // Example: sum of orders
       ...columns,
     };
   }, [data, customColumns]);
@@ -556,6 +558,7 @@ const SellerboardTable = ({
     state: {
       showProgressBars: loading,
       sorting,
+      isLoading: loading,
     },
     renderTopToolbar: () => {
       return (
