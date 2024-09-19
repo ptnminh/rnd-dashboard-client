@@ -7,6 +7,7 @@ import {
   Button,
   Flex,
   Grid,
+  Loader,
   rem,
   Switch,
   Tabs,
@@ -94,10 +95,10 @@ const Sellerboard = () => {
           ...(query?.ordersInRange &&
             query?.startDate &&
             query?.endDate && {
-              startDate: query.startDate,
-              endDate: query.endDate,
-              ordersInRange: toNumber(query.ordersInRange),
-            }),
+            startDate: query.startDate,
+            endDate: query.endDate,
+            ordersInRange: toNumber(query.ordersInRange),
+          }),
         },
         [
           "sortValue",
@@ -389,7 +390,7 @@ const Sellerboard = () => {
                   </div>
                 </Tabs.List>
                 <Tabs.Panel value={TABS_VIEW.Date}>
-                  {activeTab === TABS_VIEW.Date && (
+                  {activeTab === TABS_VIEW.Date && !isEmpty(saleMetrics) ? (
                     <Table
                       className={styles.Table}
                       tableData={saleMetrics}
@@ -405,10 +406,19 @@ const Sellerboard = () => {
                       pagination={pagination}
                       setIsLoadmore={setIsLoadmore}
                     />
-                  )}
+                  ) : <div style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                    marginTop: "20px",
+                  }}>
+                    <Loader size={30} />
+                  </div>}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Week}>
-                  {activeTab === TABS_VIEW.Week && (
+                  {activeTab === TABS_VIEW.Week && !isEmpty(saleMetrics) ? (
                     <Table
                       className={styles.Table}
                       tableData={saleMetrics}
@@ -424,10 +434,19 @@ const Sellerboard = () => {
                       pagination={pagination}
                       setIsLoadmore={setIsLoadmore}
                     />
-                  )}
+                  ) : <div style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                    marginTop: "20px",
+                  }}>
+                    <Loader size={30} />
+                  </div>}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Month}>
-                  {activeTab === TABS_VIEW.Month && (
+                  {activeTab === TABS_VIEW.Month && !isEmpty(saleMetrics) ? (
                     <Table
                       className={styles.Table}
                       tableData={saleMetrics}
@@ -443,10 +462,19 @@ const Sellerboard = () => {
                       pagination={pagination}
                       setIsLoadmore={setIsLoadmore}
                     />
-                  )}
+                  ) : <div style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                    marginTop: "20px",
+                  }}>
+                    <Loader size={30} />
+                  </div>}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.SURVIVAL}>
-                  {activeTab === TABS_VIEW.SURVIVAL && (
+                  {activeTab === TABS_VIEW.SURVIVAL && !isEmpty(saleMetrics) ? (
                     <SurvivalModeTable
                       className={styles.Table}
                       tableData={saleMetrics}
@@ -462,7 +490,16 @@ const Sellerboard = () => {
                       setIsConfirmedQuery={setIsConfirmedQuery}
                       setIsLoadmore={setIsLoadmore}
                     />
-                  )}
+                  ) : <div style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                    marginTop: "20px",
+                  }}>
+                    <Loader size={30} />
+                  </div>}
                 </Tabs.Panel>
               </Tabs>
             </Grid.Col>

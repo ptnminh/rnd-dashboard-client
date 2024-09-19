@@ -26,6 +26,7 @@ import {
   sumBy,
   flatMap,
   merge,
+  isEmpty,
 } from "lodash";
 import {
   IconFilterOff,
@@ -184,7 +185,6 @@ const SellerboardTable = ({
       setCustomColumns([...customColumns, ...virtualColumn]);
     }
   }, [data]);
-  console.log("query", query);
   // UseMemo to construct final columns array
   const columns = useMemo(
     () => [
@@ -988,7 +988,7 @@ const SellerboardTable = ({
     },
   });
 
-  return <MantineReactTable table={table} />;
+  return !isEmpty(tableData) ? <MantineReactTable table={table} /> : null;
 };
 
 export default SellerboardTable;
