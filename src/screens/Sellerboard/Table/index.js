@@ -19,18 +19,14 @@ import {
   flatten,
   uniq,
   join,
-  isEmpty,
   split,
-  includes,
   values,
-  every,
   filter,
-  difference,
   sumBy,
   flatMap,
   merge,
 } from "lodash";
-import { IconFilterOff } from "@tabler/icons-react";
+import { IconFilterOff, IconLoader } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import {
   AMZ_SORTING,
@@ -40,7 +36,6 @@ import {
 import moment from "moment-timezone";
 import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { DateRangePicker } from "rsuite";
-import Loader from "../../../components/Loader";
 import LazyLoad from "react-lazyload";
 
 const SellerboardTable = ({
@@ -52,6 +47,9 @@ const SellerboardTable = ({
   setQuery,
   activeTab,
   setIsConfirmedQuery,
+  setPagination,
+  pagination,
+  setIsLoadmore,
 }) => {
   // Function to extract unique keys from the data array
   const extractUniqueKeys = (dataset) => {
@@ -258,7 +256,7 @@ const SellerboardTable = ({
                             fontWeight: "bold",
                           }}
                         >
-                          {sku} - {totalOrders}
+                          {sku}
                         </Text>
                       </Flex>
                     </Grid.Col>
@@ -345,7 +343,7 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                {totalOrders}
+                {totalOrders.toLocaleString()}
               </Text>
               <Text
                 style={{
@@ -833,6 +831,10 @@ const SellerboardTable = ({
             <Button
               onClick={() => {
                 setIsConfirmedQuery(true);
+                setPagination({
+                  ...pagination,
+                  currentPage: 1,
+                });
                 setQuery({
                   stores: null,
                   fulfillmentChannel: null,
@@ -877,17 +879,22 @@ const SellerboardTable = ({
       };
     },
     renderBottomToolbarCustomActions: () => {
-      return loading ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            height: "100%",
+      return (
+        <Button
+          loading={loading}
+          disabled={pagination.currentPage >= pagination.totalPages}
+          onClick={() => {
+            setPagination((prev) => ({
+              ...prev,
+              currentPage: prev.currentPage + 1,
+            }));
+            setIsLoadmore(true);
+            setIsConfirmedQuery(true);
           }}
         >
-          <Loader />
-        </div>
-      ) : null;
+          Load More
+        </Button>
+      );
     },
   });
 
