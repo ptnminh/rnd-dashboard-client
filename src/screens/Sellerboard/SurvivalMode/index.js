@@ -23,6 +23,7 @@ import {
 import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { IconCalendarWeek, IconTarget } from "@tabler/icons-react";
 import LazyLoad from "react-lazyload";
+import moment from "moment-timezone";
 
 const SurvivalModeTable = ({
   tableData,
@@ -291,30 +292,22 @@ const SurvivalModeTable = ({
           className: classes["edit-header"],
         },
         Cell: ({ row }) => {
-          let color = null;
-          const value = row.original.value || 2;
-          switch (value) {
-            case 1:
-              color = "#cfcfcf";
-              break;
-            case 2:
-              color = "yellow";
-              break;
-            case 3:
-              color = "green";
-              break;
-            case 4:
-              color = "#38761C";
-              break;
-            default:
-              break;
-          }
-          return color ? (
-            <Badge color={color} variant="filled">
-              {CONVERT_NUMBER_TO_STATUS[value]}
-            </Badge>
-          ) : (
-            <span>{CONVERT_NUMBER_TO_STATUS[value]}</span>
+          const { endDate } = row.original;
+          const currentDate = moment().format("YYYY-MM-DD");
+          const remainingDays =
+            moment(endDate).diff(currentDate, "days") > 0
+              ? moment(endDate).diff(currentDate, "days")
+              : 0;
+
+          return (
+            <Text
+              style={{
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              {remainingDays}
+            </Text>
           );
         },
       },
