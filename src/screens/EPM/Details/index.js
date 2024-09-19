@@ -185,7 +185,7 @@ const BriefsTable = ({
         header: "PRIORITY",
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         size: 100,
         Cell: ({ row }) => {
           return (
@@ -207,7 +207,7 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         Cell: ({ row }) => {
           const uid = row?.original?.uid;
           const foundBrief = find(payloads, { uid });
@@ -383,7 +383,7 @@ const BriefsTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <Select
-              placeholder="Size"
+              placeholder="EPM"
               allowDeselect={false}
               data={filter(users, { position: MEMBER_POSITIONS.EPM }).map(
                 (x) => x.name
@@ -393,7 +393,7 @@ const BriefsTable = ({
                   width: "100px",
                 },
               }}
-              value={foundBrief?.epm?.name}
+              value={foundBrief?.epm?.name || null}
               onChange={(value) => {
                 setPayloads((prev) => {
                   const newPayloads = map(prev, (x) => {
@@ -456,7 +456,7 @@ const BriefsTable = ({
             }
           >
             {row.original.linkProduct ||
-              updateBrief[row.original.uid]?.linkProduct ? (
+            updateBrief[row.original.uid]?.linkProduct ? (
               <Badge color="blue" variant="filled">
                 {" "}
                 <u>Link</u>{" "}
@@ -506,7 +506,7 @@ const BriefsTable = ({
         accessorKey: "remove",
         header: "ACTIONS",
         enableSorting: false,
-        mantineTableHeadCellProps: { className: classes["remove"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ cell, column, table }) => (
           <div
@@ -622,7 +622,13 @@ const BriefsTable = ({
                 },
               }}
               value={batch}
-              onChange={(e) => setBatch(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setBatch(value);
+                if (!value) {
+                  setQuery({ ...query, batch: value });
+                }
+              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   setQuery({ ...query, batch });
@@ -653,7 +659,7 @@ const BriefsTable = ({
               value={searchSKU}
               onChange={(e) => {
                 const value = e.target.value;
-                setSearchSKU(value)
+                setSearchSKU(value);
                 if (!value) {
                   setQuery({ ...query, sku: value });
                 }

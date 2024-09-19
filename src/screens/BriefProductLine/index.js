@@ -5,7 +5,7 @@ import cn from "classnames";
 import Card from "../../components/Card";
 import Editor from "../../components/Editor";
 import { useDisclosure } from "@mantine/hooks";
-import { Modal, Grid, Flex, Button, TextInput } from "@mantine/core";
+import { Modal, Grid, Flex, Button, TextInput, Text } from "@mantine/core";
 import { showNotification } from "../../utils/index";
 
 import { filter, find, includes, map, orderBy, uniq } from "lodash";
@@ -27,15 +27,24 @@ const BriefProductLineScreen = () => {
   const [artistDesignRefLink, setArtistDesignRefLink] = useState("");
 
   useEffect(() => {
-    const rnds = filter(users, { position: "rnd", team: workGroup });
-    if (!includes(map(rnds, "name"), rndMember)) {
-      setRndMember(null);
-    }
-  }, [workGroup]);
+    const rndMemberTeam = find(users, {
+      position: "rnd",
+      name: rndMember,
+    })?.team;
+    setWorkGroup(rndMemberTeam);
+  }, [rndMember]);
 
   const [opened, { open, close }] = useDisclosure(false);
   const handleSubmitBrief = async () => {
-    if (!workGroup || !rndMember || !rndSize || !briefValue || !artistDesignRefLink || !productLineNote || !productName) {
+    if (
+      !workGroup ||
+      !rndMember ||
+      !rndSize ||
+      !briefValue ||
+      !artistDesignRefLink ||
+      !productLineNote ||
+      !productName
+    ) {
       if (!workGroup) {
         showNotification("Thất bại", "Vui lòng chọn Team", "red");
         return;
@@ -79,15 +88,18 @@ const BriefProductLineScreen = () => {
       rndId: find(users, { name: rndMember })?.uid,
       ...(productLineNote
         ? {
-          note: {
-            ...(productLineNote && { newProductLine: getEditorStateAsString(productLineNote) }),
-          },
-        }
+            note: {
+              ...(productLineNote && {
+                newProductLine: getEditorStateAsString(productLineNote),
+              }),
+            },
+          }
         : {}),
     };
-    const createBriefResponse = await productlineService.createBatchProductlines({
-      payloads: [payload],
-    });
+    const createBriefResponse =
+      await productlineService.createBatchProductlines({
+        payloads: [payload],
+      });
     if (createBriefResponse) {
       showNotification("Thành công", "Tạo brief thành công", "green");
       close();
@@ -112,8 +124,33 @@ const BriefProductLineScreen = () => {
   return (
     <>
       <div style={{ position: "relative" }}>
+        <div
+          className={styles.row}
+          style={{
+            height: "100px",
+            display: "flex",
+            alignItems: "center",
+            padding: "12px",
+          }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              verticalAlign: "center",
+              fontWeight: "bold",
+              fontSize: "28px",
+            }}
+          >
+            New PL - Brief
+          </Text>
+        </div>
         <div className={styles.row}>
-          <div className={styles.col}>
+          <div
+            className={styles.col}
+            style={{
+              flex: "0 0 100%",
+            }}
+          >
             <RndInfo
               className={styles.card}
               workGroup={workGroup}
@@ -157,7 +194,7 @@ const BriefProductLineScreen = () => {
                       fontWeight: 600,
                       lineHeight: 1.7,
                       fontSize: "14px",
-                    }
+                    },
                   }}
                   required
                 />
@@ -312,7 +349,7 @@ const BriefProductLineScreen = () => {
                   fontWeight: 600,
                   lineHeight: 1.7,
                   fontSize: "14px",
-                }
+                },
               }}
               required
             />

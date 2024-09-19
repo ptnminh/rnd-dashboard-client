@@ -5,7 +5,7 @@ import cn from "classnames";
 import Card from "../../components/Card";
 import Editor from "../../components/Editor";
 import { useDisclosure } from "@mantine/hooks";
-import { Modal, Grid, Flex, Button } from "@mantine/core";
+import { Modal, Grid, Flex, Button, Text } from "@mantine/core";
 import { showNotification } from "../../utils/index";
 
 import { filter, find, includes, map, orderBy, uniq } from "lodash";
@@ -26,11 +26,12 @@ const ArtistScreen = () => {
   const [artistDesignRefLink, setArtistDesignRefLink] = useState("");
 
   useEffect(() => {
-    const rnds = filter(users, { position: "rnd", team: workGroup });
-    if (!includes(map(rnds, "name"), rndMember)) {
-      setRndMember(null);
-    }
-  }, [workGroup]);
+    const rndMemberTeam = find(users, {
+      position: "rnd",
+      name: rndMember,
+    })?.team;
+    setWorkGroup(rndMemberTeam);
+  }, [rndMember]);
 
   const [opened, { open, close }] = useDisclosure(false);
 
@@ -99,8 +100,33 @@ const ArtistScreen = () => {
   return (
     <>
       <div style={{ position: "relative" }}>
+        <div
+          className={styles.row}
+          style={{
+            height: "100px",
+            display: "flex",
+            alignItems: "center",
+            padding: "12px",
+          }}
+        >
+          <Text
+            style={{
+              textAlign: "center",
+              verticalAlign: "center",
+              fontWeight: "bold",
+              fontSize: "28px",
+            }}
+          >
+            New Clipart - Brief
+          </Text>
+        </div>
         <div className={styles.row}>
-          <div className={styles.col}>
+          <div
+            className={styles.col}
+            style={{
+              flex: "0 0 100%",
+            }}
+          >
             <RndInfo
               className={styles.card}
               workGroup={workGroup}

@@ -10,6 +10,7 @@ import {
   IconCircleCheck,
   IconCopy,
   IconCopyCheckFilled,
+  IconExclamationMark,
 } from "@tabler/icons-react";
 import {
   Modal,
@@ -257,6 +258,18 @@ const DesignerScreens = () => {
             }}
             radius="md"
             size="1000px"
+            styles={{
+              title: {
+                fontSize: "21px",
+                fontWeight: "bold",
+                margin: "auto",
+              },
+              close: {
+                margin: "none",
+                marginInlineStart: "unset",
+              },
+            }}
+            title={selectedSKU?.sku}
           >
             <LoadingOverlay
               visible={loadingUpdateDesignLink}
@@ -265,7 +278,7 @@ const DesignerScreens = () => {
             />
             <Grid>
               <Grid.Col span={12}>
-                <div
+                <Grid
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -279,20 +292,51 @@ const DesignerScreens = () => {
                     borderRadius: "12px",
                   }}
                 >
-                  {selectedSKU?.briefType} - từ {selectedSKU?.skuRef}
-                </div>
+                  <Grid.Col span={4}>
+                    {selectedSKU?.priority === 2 ? (
+                      <span>
+                        <IconExclamationMark color="red" size={24} />
+                        <span
+                          style={{
+                            color: "red",
+                          }}
+                        >
+                          Priority
+                        </span>
+                      </span>
+                    ) : (
+                      ""
+                    )}
+                  </Grid.Col>
+                  <Grid.Col
+                    span={4}
+                    style={{
+                      textAlign: "center",
+                    }}
+                  >
+                    {selectedSKU?.briefType}
+                  </Grid.Col>
+                  <Grid.Col span={4}></Grid.Col>
+                </Grid>
               </Grid.Col>
-              <Grid.Col span={5}>
+
+              <Grid.Col
+                span={5}
+                style={{
+                  boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
+                  borderRadius: "12px",
+                }}
+              >
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "flex-start",
                     padding: "5px",
-                    fontSize: "18px",
+                    fontSize: "14px",
                   }}
                 >
-                  SKU: {selectedSKU?.sku} - Batch: {selectedSKU?.batch}
+                  • Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]}
                 </div>
                 <div
                   style={{
@@ -303,13 +347,17 @@ const DesignerScreens = () => {
                     fontSize: "14px",
                   }}
                 >
-                  Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} -{" "}
-                  Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.design]}
-                  {selectedSKU?.priority === 2 ? " - Priority" : ""}
+                  • Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.design]}
                 </div>
               </Grid.Col>
               <Grid.Col span={2}></Grid.Col>
-              <Grid.Col span={5}>
+              <Grid.Col
+                span={5}
+                style={{
+                  boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
+                  borderRadius: "12px",
+                }}
+              >
                 <div
                   style={{
                     display: "flex",
@@ -319,8 +367,29 @@ const DesignerScreens = () => {
                     fontSize: "14px",
                   }}
                 >
-                  {selectedSKU?.rndTeam} - RnD {selectedSKU?.rnd.name} -
-                  Designer {selectedSKU?.designer.name}
+                  • Team: {selectedSKU?.rndTeam}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    padding: "5px",
+                    fontSize: "14px",
+                  }}
+                >
+                  • RnD: {selectedSKU?.rnd.name}
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "flex-start",
+                    padding: "5px",
+                    fontSize: "14px",
+                  }}
+                >
+                  • Designer:{selectedSKU?.designer.name}
                 </div>
               </Grid.Col>
               <Grid.Col span={5}>
@@ -389,28 +458,33 @@ const DesignerScreens = () => {
                       </a>
                     </List.Item>
                   )}
-                  {(selectedSKU?.designLinkRef?.designLink || selectedSKU?.designLinkRef) && (
-                    <List.Item>
-                      Link Design (NAS):{" "}
-                      <a
-                        style={{
-                          display: "inline-block",
-                          width: "230px",
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          textDecoration: "none",
-                          color: "#228be6",
-                          verticalAlign: "middle",
-                        }}
-                        href={selectedSKU?.designLinkRef || selectedSKU?.productLine?.designLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {selectedSKU?.designLinkRef || selectedSKU?.productLine?.designLink}
-                      </a>
-                    </List.Item>
-                  )}
+                  {(selectedSKU?.designLinkRef?.designLink ||
+                    selectedSKU?.designLinkRef) && (
+                      <List.Item>
+                        Link Design (NAS):{" "}
+                        <a
+                          style={{
+                            display: "inline-block",
+                            width: "230px",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            textDecoration: "none",
+                            color: "#228be6",
+                            verticalAlign: "middle",
+                          }}
+                          href={
+                            selectedSKU?.designLinkRef ||
+                            selectedSKU?.productLine?.designLink
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          {selectedSKU?.designLinkRef ||
+                            selectedSKU?.productLine?.designLink}
+                        </a>
+                      </List.Item>
+                    )}
                 </List>
               </Grid.Col>
               <Grid.Col

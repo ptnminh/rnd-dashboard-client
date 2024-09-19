@@ -10,8 +10,8 @@ import {
   Badge,
   Tooltip,
   Group,
-  ActionIcon,
   Select,
+  TextInput,
 } from "@mantine/core";
 import {
   find,
@@ -23,6 +23,12 @@ import {
   split,
   includes,
   values,
+  every,
+  filter,
+  difference,
+  sumBy,
+  flatMap,
+  merge,
 } from "lodash";
 import { IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
@@ -32,13 +38,9 @@ import {
   FULFILLMENT_CHANNELS,
 } from "../../../constant";
 import moment from "moment-timezone";
-import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
+import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { DateRangePicker } from "rsuite";
-import {
-  IconArrowsSort,
-  IconSortDescending,
-  IconSortAscending,
-} from "@tabler/icons-react";
+import Loader from "../../../components/Loader";
 
 const SellerboardTable = ({
   tableData,
@@ -48,6 +50,7 @@ const SellerboardTable = ({
   setSorting,
   setQuery,
   activeTab,
+  setIsConfirmedQuery,
 }) => {
   // Function to extract unique keys from the data array
   const extractUniqueKeys = (dataset) => {
@@ -65,20 +68,31 @@ const SellerboardTable = ({
   const generateCustomColumn = (data) => {
     const keyLevels = extractUniqueKeys(data);
     const columns = map(keyLevels, (keyLevel) => {
+      const header = join(split(keyLevel, " ")?.slice(0, -1), " ");
       return {
         accessorKey: keyLevel,
-        header: join(split(keyLevel, " ").slice(0, -1), " "),
+        header,
         size: 100,
         maxSize: 150,
         enableEditing: false,
         enableSorting: true,
-        mantineTableBodyCellProps: {
-          className: classes["body-cells"],
-        },
+        mantineTableBodyCellProps: ({ row }) => ({
+          className:
+            row.id === `Total theo ${activeTab}`
+              ? classes["summary-row"]
+              : classes["body-cells-op-team"],
+        }),
         mantineTableHeadCellProps: {
           className: classes["edit-header"],
         },
         Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return (
+              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                {row.original[header]}
+              </Text>
+            );
+          }
           const { data } = row.original;
           const keyData = find(data, { key: keyLevel });
           return (
@@ -89,7 +103,7 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                {keyData.orders}
+                {keyData?.orders}
               </Text>
             </Flex>
           );
@@ -104,6 +118,35 @@ const SellerboardTable = ({
     setData(tableData);
     setCustomColumns(generateCustomColumn(tableData));
   }, [tableData]);
+
+  // Compute the Total theo ${activeTab} row data
+  const summaryRow = useMemo(() => {
+    const columns = merge(
+      {},
+      ...customColumns.map((col) => {
+        const key = col.accessorKey;
+        const keyLevels = flatMap(data, "data");
+        const keyData = filter(keyLevels, (keyLevel) => keyLevel.key === key);
+        const header = join(split(key, " ")?.slice(0, -1), " ");
+        const totalOrders = sumBy(keyData, "orders");
+        return {
+          [header]: totalOrders,
+        };
+      })
+    );
+    return {
+      id: `Total theo ${activeTab}`, // Unique ID for the Total theo ${activeTab} row
+      product: `Summary`,
+      totalInRanges: sumBy(data, (row) => sumBy(row.data, "orders")), // Example: sum of orders
+      ...columns,
+    };
+  }, [data, customColumns]);
+
+  // Combine table data with the Total theo ${activeTab} row
+  const tableDataWithSummary = useMemo(
+    () => [...data, summaryRow],
+    [data, summaryRow]
+  );
 
   useEffect(() => {
     if (
@@ -148,17 +191,35 @@ const SellerboardTable = ({
         enableMultiSort: true,
         mantineTableBodyCellProps: ({ row }) => {
           return {
-            className: classes["body-cells-op-team"],
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+            rowSpan: row.id === `Total theo ${activeTab}` ? 3 : 1, // Row span for Total theo ${activeTab} row
           };
         },
-        mantineTableHeadCellProps: () => {
+        mantineTableHeadCellProps: ({ row }) => {
           return {
             className: classes["head-cells-op-team"],
           };
         },
         Cell: ({ row }) => {
-          const { ASIN, title, image, store, fulfillmentChannel, sku } =
-            row.original;
+          if (row.id === `Total theo ${activeTab}`) {
+            return (
+              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                Total theo {activeTab}
+              </Text>
+            );
+          }
+          const {
+            ASIN,
+            title,
+            image,
+            store,
+            fulfillmentChannel,
+            sku,
+            totalOrders,
+          } = row.original;
           const url = `https://www.amazon.com/dp/${ASIN}`;
           return (
             <Flex direction="column">
@@ -175,6 +236,7 @@ const SellerboardTable = ({
                       onClick={() => {
                         window.open(url, "_blank");
                       }}
+                      fit="contain"
                     />
                   </Tooltip>
                 </Grid.Col>
@@ -193,7 +255,7 @@ const SellerboardTable = ({
                             fontWeight: "bold",
                           }}
                         >
-                          {sku}
+                          {sku} - {totalOrders}
                         </Text>
                       </Flex>
                     </Grid.Col>
@@ -216,7 +278,7 @@ const SellerboardTable = ({
                             window.open(url, "_blank");
                           }}
                         >
-                          {ASIN}
+                          {ASIN} - {fulfillmentChannel}
                         </Text>
                       </Tooltip>
                     </Grid.Col>
@@ -227,131 +289,94 @@ const SellerboardTable = ({
           );
         },
       },
-      // {
-      //   accessorKey: "createdDate",
-      //   size: 150,
-      //   maxSize: 150,
-      //   enableEditing: false,
-      //   enableSorting: false,
-      //   mantineTableBodyCellProps: ({ row }) => {
-      //     return {
-      //       className: classes["body-cells-op-team"],
-      //     };
-      //   },
-      //   mantineTableHeadCellProps: () => {
-      //     return {
-      //       className: classes["head-cells-op-team"],
-      //     };
-      //   },
-      //   Header: () => {
-      //     return (
-      //       <Group gap={5}>
-      //         <Text
-      //           style={{
-      //             fontSize: 14,
-      //             fontWeight: "bold",
-      //           }}
-      //         >
-      //           Created time
-      //         </Text>
-      //         {!query?.primarySortBy && (
-      //           <ActionIcon
-      //             aria-label="Settings"
-      //             variant="default"
-      //             style={{
-      //               background: "none",
-      //               border: "none",
-      //             }}
-      //             onClick={() => {
-      //               setQuery({
-      //                 ...query,
-      //                 primarySortBy: "createdDate",
-      //                 primarySortDir: "desc",
-      //               });
-      //             }}
-      //           >
-      //             <IconArrowsSort
-      //               style={{ width: "60%", height: "60%", fontWeight: "bold" }}
-      //               stroke={2}
-      //             />
-      //           </ActionIcon>
-      //         )}
-
-      //         {query?.primarySortBy === "createdDate" &&
-      //           query?.primarySortDir === "desc" && (
-      //             <ActionIcon
-      //               variant="filled"
-      //               aria-label="Settings"
-      //               color="transparent"
-      //               onClick={() => {
-      //                 setQuery({
-      //                   ...query,
-      //                   primarySortBy: "createdDate",
-      //                   primarySortDir: "asc",
-      //                 });
-      //               }}
-      //             >
-      //               <IconSortDescending
-      //                 style={{ width: "70%", height: "70%" }}
-      //                 stroke={2}
-      //                 color="#70B1ED"
-      //               />
-      //             </ActionIcon>
-      //           )}
-      //         {query?.primarySortBy === "createdDate" &&
-      //           query?.primarySortDir === "asc" && (
-      //             <ActionIcon
-      //               variant="filled"
-      //               aria-label="Settings"
-      //               color="transparent"
-      //               onClick={() => {
-      //                 setQuery({
-      //                   ...query,
-      //                   primarySortBy: null,
-      //                   primarySortDir: null,
-      //                 });
-      //               }}
-      //             >
-      //               <IconSortAscending
-      //                 style={{
-      //                   width: "70%",
-      //                   height: "70%",
-      //                   fontWeight: "bold",
-      //                 }}
-      //                 stroke={2}
-      //                 color="#70B1ED"
-      //               />
-      //             </ActionIcon>
-      //           )}
-      //       </Group>
-      //     );
-      //   },
-      //   Cell: ({ row }) => {
-      //     const { createdDate } = row.original;
-      //     return (
-      //       <Text
-      //         style={{
-      //           fontSize: 14,
-      //           fontWeight: "bold",
-      //         }}
-      //       >
-      //         {moment(createdDate)
-      //           .tz("America/Los_Angeles")
-      //           .format("YYYY-MM-DD")}
-      //       </Text>
-      //     );
-      //   },
-      // },
       {
-        accessorKey: "value",
-        header: "Value",
-        size: 150,
-        maxSize: 150,
+        accessorKey: "createdDate",
+        size: 100,
+        maxSize: 100,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
           return {
-            className: classes["body-cells-op-team"],
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Header: () => {
+          return (
+            <Group gap={5}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "bold",
+                }}
+              >
+                Summary
+              </Text>
+            </Group>
+          );
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          const { createdDate, totalOrders } = row.original;
+          return (
+            <Group
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                }}
+              >
+                {totalOrders}
+              </Text>
+              <Text
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "thin",
+                  color: "gray",
+                }}
+              >
+                {moment(createdDate)
+                  .tz("America/Los_Angeles")
+                  .format("DD MMM YYYY")}
+              </Text>
+            </Group>
+          );
+        },
+      },
+      {
+        accessorKey: "value",
+        header: "Value",
+        size: 50,
+        maxSize: 50,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+            // ...(row.id === `Total theo ${activeTab}` && {
+            //   style: {
+            //     display: "none",
+            //   },
+            // }),
           };
         },
         mantineTableHeadCellProps: () => {
@@ -360,6 +385,9 @@ const SellerboardTable = ({
           };
         },
         Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
           let color = null;
           const value = row.original.value || 2;
           switch (value) {
@@ -387,14 +415,55 @@ const SellerboardTable = ({
           );
         },
       },
+      {
+        accessorKey: "totalInRanges",
+        header: "Total In Ranges",
+        size: 50,
+        maxSize: 50,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return (
+              <Text style={{ fontSize: "14px", fontWeight: "bold" }}>
+                {summaryRow.totalInRanges}
+              </Text>
+            );
+          }
+          const totalOrders = sumBy(row.original.data, "orders");
+          return (
+            <Text
+              style={{
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              {totalOrders}
+            </Text>
+          );
+        },
+      },
       ...customColumns,
     ],
-    [customColumns, data]
+    [customColumns, data, summaryRow]
   );
 
   const table = useMantineReactTable({
     columns,
-    data,
+    data: tableDataWithSummary,
     editDisplayMode: "cell",
     enablePagination: false,
     getRowId: (row) => row.id,
@@ -408,7 +477,6 @@ const SellerboardTable = ({
     enableDensityToggle: false,
     state: {
       showProgressBars: loading,
-      isLoading: loading,
       sorting,
     },
     renderTopToolbar: () => {
@@ -421,6 +489,7 @@ const SellerboardTable = ({
             padding: "10px 5px",
             gap: "10px",
             flexWrap: "wrap-reverse",
+            width: "100%",
           }}
         >
           <Flex
@@ -430,6 +499,7 @@ const SellerboardTable = ({
               borderRadius: "10px",
               backgroundColor: "#EFF0F1",
               flexWrap: "wrap",
+              width: "100%",
             }}
           >
             <MultiSelect
@@ -437,32 +507,41 @@ const SellerboardTable = ({
               data={AMZ_STORES}
               styles={{
                 input: {
-                  width: "350px",
+                  width: "130px",
+                  minHeight: "35px",
+                },
+                inputField: {
+                  display: "none",
                 },
               }}
-              value={!isEmpty(query?.storeValues) ? query.storeValues : []}
+              value={
+                arraysMatchUnordered(query?.storeValues, ["PFH", "QZL", "GGT"])
+                  ? ["All"]
+                  : query?.storeValues || []
+              }
               onChange={(value) => {
-                if (includes(value, "All")) {
-                  const realValues = ["PFH", "QZL", "GGT"];
+                if (value.length === 1 && value[0] === "All") {
+                  const newValues = ["PFH", "QZL", "GGT"];
+                  setQuery({
+                    ...query,
+                    stores: join(newValues, ","),
+                    storeValues: newValues,
+                  });
+                } else {
+                  const realValues = filter(value, (v) => v !== "All");
                   setQuery({
                     ...query,
                     stores: join(realValues, ","),
                     storeValues: realValues,
                   });
-                } else {
-                  setQuery({
-                    ...query,
-                    stores: join(value, ","),
-                    storeValues: value,
-                  });
                 }
               }}
               clearable
-              searchable
               onClear={() => {
                 setQuery({
                   ...query,
                   stores: null,
+                  storeValues: [],
                 });
               }}
             />
@@ -471,74 +550,81 @@ const SellerboardTable = ({
               data={FULFILLMENT_CHANNELS}
               styles={{
                 input: {
-                  width: "300px",
+                  width: "130px",
+                  minHeight: "35px",
+                },
+                inputField: {
+                  display: "none",
                 },
               }}
-              value={query?.fulfillmentChannel || null}
+              value={
+                arraysMatchUnordered(query?.fulfillmentChannelValues, [
+                  "FBA",
+                  "FBM",
+                ])
+                  ? ["All"]
+                  : query?.fulfillmentChannelValues || []
+              }
               onChange={(value) => {
-                if (includes(value, "All")) {
-                  const realValues = ["FBA", "FBM"];
+                if (value.length === 1 && value[0] === "All") {
+                  const newValues = ["FBA", "FBM"];
                   setQuery({
                     ...query,
-                    fulfillmentChannel: realValues,
+                    fulfillmentChannel: join(newValues, ","),
+                    fulfillmentChannelValues: newValues,
                   });
                 } else {
-                  setQuery({ ...query, fulfillmentChannel: value });
+                  const realValues = filter(value, (v) => v !== "All");
+                  setQuery({
+                    ...query,
+                    fulfillmentChannel: join(realValues, ","),
+                    fulfillmentChannelValues: realValues,
+                  });
                 }
               }}
               clearable
-              searchable
               onClear={() => {
                 setQuery({
                   ...query,
                   fulfillmentChannel: null,
+                  fulfillmentChannelValues: [],
                 });
               }}
-            />
-            <Select
-              placeholder="Value"
-              data={["Small", "Medium", "Big"]}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={query?.sortValue || null}
-              onChange={(value) => {}}
-              clearable
-              searchable
-              onClear={() => {}}
             />
             {activeTab === "Date" && (
               <DateRangePicker
                 size="sx"
                 placeholder="Date"
                 style={{
-                  width: "200px",
+                  width: "100px",
                 }}
                 value={query.dateValue}
                 onOk={(value) =>
                   setQuery({
                     ...query,
                     dateValue: value,
-                    startDate: moment(value[0]).format("YYYY-MM-DD"),
-                    endDate: moment(value[1]).format("YYYY-MM-DD"),
+                    startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
+                    endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
                   })
                 }
                 onClean={() => {
                   setQuery({
                     ...query,
                     dateValue: null,
-                    startDate: null,
-                    endDate: null,
+                    startCreatedDate: null,
+                    endCreatedDate: null,
                   });
                 }}
                 onShortcutClick={(shortcut) => {
                   setQuery({
                     ...query,
                     dateValue: shortcut.value,
-                    startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
-                    endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
+                    startCreatedDate: moment(shortcut.value[0]).format(
+                      "YYYY-MM-DD"
+                    ),
+                    endCreatedDate: moment(shortcut.value[1]).format(
+                      "YYYY-MM-DD"
+                    ),
                   });
                 }}
               />
@@ -558,24 +644,28 @@ const SellerboardTable = ({
                   setQuery({
                     ...query,
                     dateValue: value,
-                    startDate: moment(value[0]).format("YYYY-MM-DD"),
-                    endDate: moment(value[1]).format("YYYY-MM-DD"),
+                    startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
+                    endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
                   })
                 }
                 onClean={() => {
                   setQuery({
                     ...query,
                     dateValue: null,
-                    startDate: null,
-                    endDate: null,
+                    startCreatedDate: null,
+                    endCreatedDate: null,
                   });
                 }}
                 onShortcutClick={(shortcut, event) => {
                   setQuery({
                     ...query,
                     dateValue: shortcut.value,
-                    startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
-                    endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
+                    startCreatedDate: moment(shortcut.value[0]).format(
+                      "YYYY-MM-DD"
+                    ),
+                    endCreatedDate: moment(shortcut.value[1]).format(
+                      "YYYY-MM-DD"
+                    ),
                   });
                 }}
               />
@@ -588,42 +678,100 @@ const SellerboardTable = ({
                 isoWeek
                 placeholder="Month"
                 style={{
-                  width: "150px",
+                  width: "100px",
                 }}
                 value={query.dateValue}
                 onOk={(value) =>
                   setQuery({
                     ...query,
                     dateValue: value,
-                    startDate: moment(value[0]).format("YYYY-MM-DD"),
-                    endDate: moment(value[1]).format("YYYY-MM-DD"),
+                    startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
+                    endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
                   })
                 }
                 onClean={() => {
                   setQuery({
                     ...query,
                     dateValue: null,
-                    startDate: null,
-                    endDate: null,
+                    startCreatedDate: null,
+                    endCreatedDate: null,
                   });
                 }}
                 onShortcutClick={(shortcut, event) => {
                   setQuery({
                     ...query,
                     dateValue: shortcut.value,
-                    startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
-                    endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
+                    startCreatedDate: moment(shortcut.value[0]).format(
+                      "YYYY-MM-DD"
+                    ),
+                    endCreatedDate: moment(shortcut.value[1]).format(
+                      "YYYY-MM-DD"
+                    ),
                   });
                 }}
               />
             )}
-
+            {activeTab === "Date" && (
+              <>
+                <DateRangePicker
+                  size="sx"
+                  placeholder="Sales Date"
+                  style={{
+                    width: "100px",
+                  }}
+                  value={query.salesDateValue}
+                  onOk={(value) => {
+                    setQuery({
+                      ...query,
+                      salesDateValue: value,
+                      startDate: moment(value[0]).format("YYYY-MM-DD"),
+                      endDate: moment(value[1]).format("YYYY-MM-DD"),
+                      ordersInRange: 1,
+                    });
+                  }}
+                  onOpen={() => {
+                    console.log("open");
+                  }}
+                  onClean={() => {
+                    setQuery({
+                      ...query,
+                      salesDateValue: null,
+                      startDate: null,
+                      endDate: null,
+                      ordersInRange: "",
+                    });
+                  }}
+                  onShortcutClick={(shortcut) => {
+                    setQuery({
+                      ...query,
+                      salesDateValue: shortcut.value,
+                      startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
+                      endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
+                      ordersInRange: 1,
+                    });
+                  }}
+                />
+                <TextInput
+                  placeholder="Min Orders"
+                  style={{
+                    width: "90px",
+                  }}
+                  value={query?.ordersInRange}
+                  onChange={(event) => {
+                    setQuery({
+                      ...query,
+                      ordersInRange: event.target.value,
+                    });
+                  }}
+                />
+              </>
+            )}
             <Select
               placeholder="Sorting"
               data={values(AMZ_SORTING)}
               styles={{
                 input: {
-                  width: "250px",
+                  width: "150px",
                 },
               }}
               value={query?.sortValue || null}
@@ -632,19 +780,19 @@ const SellerboardTable = ({
                 let primarySortDir = "";
                 switch (value) {
                   case AMZ_SORTING.ordersAsc:
-                    primarySortBy = "revenue";
+                    primarySortBy = "totalOrders";
                     primarySortDir = "asc";
                     break;
                   case AMZ_SORTING.ordersDesc:
-                    primarySortBy = "revenue";
+                    primarySortBy = "totalOrders";
                     primarySortDir = "desc";
                     break;
                   case AMZ_SORTING.saleInRangeAsc:
-                    primarySortBy = "saleInRange";
+                    primarySortBy = "ordersInRange";
                     primarySortDir = "asc";
                     break;
                   case AMZ_SORTING.saleInRangeDesc:
-                    primarySortBy = "saleInRange";
+                    primarySortBy = "ordersInRange";
                     primarySortDir = "desc";
                     break;
                   case AMZ_SORTING.createdDateAsc:
@@ -677,10 +825,20 @@ const SellerboardTable = ({
               }}
             />
             <Button
+              loading={loading}
               onClick={() => {
+                setIsConfirmedQuery(true);
+              }}
+            >
+              Confirm
+            </Button>
+            <Button
+              onClick={() => {
+                setIsConfirmedQuery(true);
                 setQuery({
                   stores: null,
-                  fulfillmentChannel: [],
+                  fulfillmentChannel: null,
+                  fulfillmentChannelValues: [],
                   sortValue: null,
                   sortBy: null,
                   sortDir: null,
@@ -690,6 +848,10 @@ const SellerboardTable = ({
                   endDate: null,
                   primarySortBy: null,
                   primarySortDir: null,
+                  salesDateValue: null,
+                  startCreatedDate: null,
+                  endCreatedDate: null,
+                  ordersInRange: "",
                 });
               }}
             >
@@ -709,7 +871,26 @@ const SellerboardTable = ({
     enableColumnResizing: false,
     enableSorting: true,
     enableMultiSort: false,
+    enableBottomToolbar: true,
     manualSorting: true,
+    mantineBottomToolbarProps: () => {
+      return {
+        className: classes["bottom-toolbar"],
+      };
+    },
+    renderBottomToolbarCustomActions: () => {
+      return loading ? (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            height: "100%",
+          }}
+        >
+          <Loader />
+        </div>
+      ) : null;
+    },
   });
 
   return <MantineReactTable table={table} />;

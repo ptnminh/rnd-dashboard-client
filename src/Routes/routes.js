@@ -1,4 +1,4 @@
-const PATH_NAMES = {
+export const PATH_NAMES = {
   DIRECTION: {
     title: "1. Direction",
     url: "/",
@@ -27,7 +27,7 @@ const PATH_NAMES = {
         title: "2. Mockup",
         children: {
           READY_TO_LAUNCH: {
-            title: "2.1 - Ready",
+            title: "2.1 - Brief",
             url: "/product-base/mockup/ready-to-launch",
           },
           TASK: {
@@ -331,7 +331,7 @@ export const NAVIGATION = [
         title: PATH_NAMES.RND.children.BRIEF_DESIGN.title,
         url: PATH_NAMES.RND.children.BRIEF_DESIGN.url,
         arrowDown: true,
-        permissions: ["create:brief"],
+        permissions: ["read:brief"],
       },
       {
         title: PATH_NAMES.RND.children.SETTING.title,
@@ -427,7 +427,7 @@ export const NAVIGATION = [
           {
             title: PATH_NAMES.MKT.children.POST.children.CREATE.title,
             pathname: PATH_NAMES.MKT.children.POST.children.CREATE.url,
-            permissions: ["create:mkt_post"],
+            permissions: ["read:mkt_post"],
           },
         ],
       },

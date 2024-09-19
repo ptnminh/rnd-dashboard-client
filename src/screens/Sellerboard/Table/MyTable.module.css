@@ -108,6 +108,24 @@
   background-color: transparent !important;
 }
 
+.summary-row {
+  text-align: center;
+  background-color: #f5f5f5;
+  color: #000000;
+  width: 100%;
+ 
+}
+.bottom-toolbar {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+.bottom-toolbar > div {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
 
 /* Define MRT CSS variables in your CSS */
 .root {

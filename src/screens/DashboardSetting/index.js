@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./DashboardSetting.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
-import { filter, orderBy, toLower } from "lodash";
+import { filter, map, orderBy, toLower } from "lodash";
 import { Flex, Grid, Tabs, Text } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { dashboardServices } from "../../services";
@@ -10,12 +10,16 @@ import DesignerTable from "./DesignerTable";
 import EpmTable from "./EpmTable";
 import QuotaOP from "./QuotaOP";
 import QuotaBD from "./QuotaBD";
+import AMZTable from "./AMZTable";
+import { settingServices } from "../../services/settings";
+import { CONVERT_NUMBER_TO_STATUS } from "../../utils";
 
 const TABS_VIEW = {
   DESIGNER: "Designer",
   EPM: "EPM",
   MOCKUP: "Mockup",
   ARTIST: "Artist",
+  AMZ: "AMZ",
 };
 
 const DashboardSetting = () => {
@@ -28,6 +32,7 @@ const DashboardSetting = () => {
   const [defaultQuota, setDefaultQuota] = useState([]);
   const [defaultQuotaDemand, setDefaultQuotaDemand] = useState([]);
   const [dashboardSettings, setDashboardSettings] = useState([]);
+  const [amzSettings, setAMZSettings] = useState({});
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
   const [pagination, setPagination] = useState({
     currentPage: initialPage,
@@ -73,6 +78,28 @@ const DashboardSetting = () => {
     }
     setTriggerQuota(false);
   };
+  const fetchAMZSetting = async () => {
+    setLoadingFetchDashboardSettings(true);
+    const response = await settingServices.fetchSetting({
+      identifier: "amz-setting",
+    });
+    const { data } = response;
+    if (data) {
+      setAMZSettings({
+        ...data,
+        settings: map(data?.attribute?.survivalMode, (x, index) => ({
+          ...x,
+          no: 1,
+          scaleType: "survivalMode",
+          textValue: CONVERT_NUMBER_TO_STATUS[x.value],
+          index,
+        })),
+      });
+    } else {
+      setAMZSettings({});
+    }
+    setLoadingFetchDashboardSettings(false);
+  };
   const fetchDefaultQuotaDemand = async () => {
     const response = await dashboardServices.fetchDefaultQuotaDemand({
       page: 1,
@@ -116,8 +143,14 @@ const DashboardSetting = () => {
       setCurrentTeam(toLower(TABS_VIEW.MOCKUP));
     } else if (activeTab === TABS_VIEW.EPM) {
       setCurrentTeam(toLower(TABS_VIEW.EPM));
+    } else if (activeTab === TABS_VIEW.AMZ) {
+      fetchAMZSetting();
     }
-    fetchDashboardSettings();
+
+    // if not AMZ, fetch dashboard settings
+    if (activeTab !== TABS_VIEW.AMZ) {
+      fetchDashboardSettings();
+    }
   }, [activeTab]);
 
   return (
@@ -195,6 +228,21 @@ const DashboardSetting = () => {
                       {TABS_VIEW.EPM}
                     </Tabs.Tab>
                     <Tabs.Tab
+                      value={TABS_VIEW.AMZ}
+                      styles={{
+                        ...(activeTab === TABS_VIEW.AMZ && {
+                          tab: {
+                            backgroundColor: "#7C4DFF",
+                            color: "#fff",
+                            borderRadius: "10px",
+                            borderColor: "transparent",
+                          },
+                        }),
+                      }}
+                    >
+                      {TABS_VIEW.AMZ}
+                    </Tabs.Tab>
+                    <Tabs.Tab
                       value={TABS_VIEW.ARTIST}
                       styles={{
                         ...(activeTab === TABS_VIEW.ARTIST && {
@@ -259,6 +307,18 @@ const DashboardSetting = () => {
                     ["no", "position"],
                     ["asc", "asc"]
                   )}
+                  query={query}
+                  setQuery={setQuery}
+                  loadingFetchDashboardSettings={loadingFetchDashboardSettings}
+                  setTrigger={setTrigger}
+                  setSorting={setSorting}
+                  sorting={sorting}
+                />
+              </Tabs.Panel>
+              <Tabs.Panel value={TABS_VIEW.AMZ}>
+                <AMZTable
+                  className={styles.Table}
+                  tableData={amzSettings}
                   query={query}
                   setQuery={setQuery}
                   loadingFetchDashboardSettings={loadingFetchDashboardSettings}

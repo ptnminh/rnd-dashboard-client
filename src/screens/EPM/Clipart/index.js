@@ -18,6 +18,7 @@ import {
 import {
   IconCircleCheck,
   IconArrowBigRightLinesFilled,
+  IconExclamationMark,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
 import { isEmpty, map } from "lodash";
@@ -43,6 +44,18 @@ const Clipart = ({
       }}
       radius="md"
       size="1000px"
+      styles={{
+        title: {
+          fontSize: "21px",
+          fontWeight: "bold",
+          margin: "auto",
+        },
+        close: {
+          margin: "none",
+          marginInlineStart: "unset",
+        },
+      }}
+      title={selectedSKU?.sku}
     >
       <LoadingOverlay
         visible={loadingUpdateProductLink}
@@ -51,7 +64,7 @@ const Clipart = ({
       />
       <Grid>
         <Grid.Col span={12}>
-          <div
+          <Grid
             style={{
               display: "flex",
               alignItems: "center",
@@ -65,20 +78,50 @@ const Clipart = ({
               borderRadius: "12px",
             }}
           >
-            {selectedSKU?.briefType}
-          </div>
+            <Grid.Col span={4}>
+              {selectedSKU?.priority === 2 ? (
+                <span>
+                  <IconExclamationMark color="red" size={24} />
+                  <span
+                    style={{
+                      color: "red",
+                    }}
+                  >
+                    Priority
+                  </span>
+                </span>
+              ) : (
+                ""
+              )}
+            </Grid.Col>
+            <Grid.Col
+              span={4}
+              style={{
+                textAlign: "center",
+              }}
+            >
+              {selectedSKU?.briefType}
+            </Grid.Col>
+            <Grid.Col span={4}></Grid.Col>
+          </Grid>
         </Grid.Col>
-        <Grid.Col span={5}>
+        <Grid.Col
+          span={5}
+          style={{
+            boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
+            borderRadius: "12px",
+          }}
+        >
           <div
             style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "flex-start",
               padding: "5px",
-              fontSize: "18px",
+              fontSize: "14px",
             }}
           >
-            SKU: {selectedSKU?.sku} - Batch: {selectedSKU?.batch}
+            • Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]}
           </div>
           <div
             style={{
@@ -89,14 +132,17 @@ const Clipart = ({
               fontSize: "14px",
             }}
           >
-            Value: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.value?.rnd]} - Size:{" "}
-            {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.epm]}
-            {selectedSKU?.priority === 2 ? " - Priority" : ""}
+            • Size: {CONVERT_NUMBER_TO_STATUS[selectedSKU?.size?.design]}
           </div>
         </Grid.Col>
         <Grid.Col span={2}></Grid.Col>
-
-        <Grid.Col span={5}>
+        <Grid.Col
+          span={5}
+          style={{
+            boxShadow: "rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px",
+            borderRadius: "12px",
+          }}
+        >
           <div
             style={{
               display: "flex",
@@ -106,8 +152,7 @@ const Clipart = ({
               fontSize: "14px",
             }}
           >
-            {selectedSKU?.rndTeam} - RnD {selectedSKU?.rnd.name} - Designer{" "}
-            {selectedSKU?.designer.name}
+            • Team: {selectedSKU?.rndTeam}
           </div>
           <div
             style={{
@@ -118,7 +163,29 @@ const Clipart = ({
               fontSize: "14px",
             }}
           >
-            EPM {selectedSKU?.epm.name}
+            • RnD: {selectedSKU?.rnd.name}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              padding: "5px",
+              fontSize: "14px",
+            }}
+          >
+            • Designer: {selectedSKU?.designer.name}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              padding: "5px",
+              fontSize: "14px",
+            }}
+          >
+            • EPM: {selectedSKU?.epm.name}
           </div>
         </Grid.Col>
         <Grid.Col span={5}>
@@ -283,10 +350,11 @@ const Clipart = ({
             {!isEmpty(selectedSKU?.cliparts) && (
               <List.Item>
                 Clipart:{" "}
-                <List listStyleType="disc"
+                <List
+                  listStyleType="disc"
                   withPadding
                   style={{
-                    marginTop: "10px"
+                    marginTop: "10px",
                   }}
                 >
                   {map(selectedSKU?.cliparts, (clipart) => {
@@ -303,10 +371,12 @@ const Clipart = ({
                             </a>
                           </HoverCard.Target>
                           <HoverCard.Dropdown>
-                            <iframe src={clipart?.refLink} title={clipart.name}></iframe>
+                            <iframe
+                              src={clipart?.refLink}
+                              title={clipart.name}
+                            ></iframe>
                           </HoverCard.Dropdown>
                         </HoverCard>
-
                       </List.Item>
                     );
                   })}

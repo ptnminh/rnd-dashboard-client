@@ -30,6 +30,19 @@ const RndInfo = ({
         <div className={styles.description}>
           <div className={styles.campType}>
             <Dropdown
+              className={styles.dropdown}
+              label={"RND"}
+              classDropdownHead={styles.dropdownHead}
+              value={rndMember}
+              setValue={setRndMember}
+              options={
+                !isEmpty(filter(users, { position: "rnd" }))
+                  ? map(filter(users, { position: "rnd" }), "name")
+                  : []
+              }
+              classOutSideClick={styles.memberDropdown}
+            />
+            <Dropdown
               label={"Team"}
               className={styles.dropdown}
               classDropdownHead={styles.dropdownHead}
@@ -56,22 +69,6 @@ const RndInfo = ({
               options={RND_SIZES}
               classOutSideClick={styles.memberDropdown}
             />{" "}
-            <Dropdown
-              className={styles.dropdown}
-              label={"RND"}
-              classDropdownHead={styles.dropdownHead}
-              value={rndMember}
-              setValue={setRndMember}
-              options={
-                !isEmpty(filter(users, { position: "rnd", team: workGroup }))
-                  ? map(
-                      filter(users, { position: "rnd", team: workGroup }),
-                      "name"
-                    )
-                  : []
-              }
-              classOutSideClick={styles.memberDropdown}
-            />
           </div>
         </div>
       </Card>

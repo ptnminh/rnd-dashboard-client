@@ -134,7 +134,7 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
@@ -184,7 +184,7 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const { uid, isDraft } = row?.original;
           const generateTempUID = () => `temp-${Date.now()}`;
@@ -286,7 +286,7 @@ const BriefsTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
@@ -327,7 +327,7 @@ const BriefsTable = ({
         enableSorting: false,
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         size: 100,
         Cell: ({ row }) => {
           const uid = row.original.uid;
@@ -358,7 +358,7 @@ const BriefsTable = ({
         enableSorting: false,
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         size: 100,
         Cell: ({ row }) => {
           const uid = row.original.uid;
@@ -390,7 +390,7 @@ const BriefsTable = ({
         enableSorting: false,
         size: 150,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row?.original?.uid;
           const foundBrief = find(payloads, { uid });
@@ -437,7 +437,7 @@ const BriefsTable = ({
         enableSorting: false,
         size: 170,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
@@ -523,7 +523,7 @@ const BriefsTable = ({
         enableSorting: false,
         enableEditing: false,
         size: 150,
-        mantineTableHeadCellProps: { className: classes["edit-header"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row.original.uid;
           const foundBrief = find(payloads, { uid });
@@ -538,7 +538,7 @@ const BriefsTable = ({
                   loading={loadingUpdateBriefUID === uid}
                   disabled={
                     foundBrief?.status ===
-                      NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE ||
+                    NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE ||
                     foundBrief?.mockupLink === "" ||
                     isEmpty(foundBrief?.mockup?.name) ||
                     isEmpty(foundBrief?.imageRef) ||
@@ -586,7 +586,7 @@ const BriefsTable = ({
                     loading={loadingUpdateBriefUID === uid}
                     disabled={
                       foundBrief?.status ===
-                        NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE ||
+                      NewProductLineBriefStatus.OPTIMIZED_MOCKUP_DONE ||
                       foundBrief?.mockupLink === "" ||
                       isEmpty(foundBrief?.mockup?.name) ||
                       isEmpty(foundBrief?.imageRef) ||

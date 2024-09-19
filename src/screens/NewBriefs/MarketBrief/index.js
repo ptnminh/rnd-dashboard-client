@@ -1,10 +1,4 @@
-import {
-  Grid,
-  ScrollArea,
-  Card as MantineCard,
-  Image,
-  TextInput,
-} from "@mantine/core";
+import { Grid, Card as MantineCard, Image, TextInput } from "@mantine/core";
 import Card from "../../../components/Card";
 import styles from "./MarketBrief.module.sass";
 import cn from "classnames";
@@ -17,8 +11,6 @@ import { showNotification } from "../../../utils/index";
 import Loader from "../../../components/Loader";
 import { isEmpty } from "lodash";
 import Editor from "../../../components/Editor";
-import Dropdown from "../../../components/Dropdown";
-import { RND_SIZES } from "../../../constant";
 
 function generateRandomString(length) {
   const characters =
@@ -30,13 +22,7 @@ function generateRandomString(length) {
   }
   return result;
 }
-const MarketBriefDesign = ({
-  marketBrief,
-  setMarketBrief,
-  title,
-  rndSize,
-  setRndSize,
-}) => {
+const MarketBriefDesign = ({ marketBrief, setMarketBrief, title }) => {
   const [showingSelectFile, setShowingSelectFile] = useState(false);
   const [loadingUploadFile, setLoadingUploadFile] = useState(false);
   const [briefNote, setBriefNote] = useState("");
@@ -100,186 +86,168 @@ const MarketBriefDesign = ({
         classSpanTitle={styles.classScaleSpanTitle}
         title={title || "3. Ref Design (Market)"}
         classTitle={cn("title-green", styles.title)}
-        head={
-          <Dropdown
-            label={"Size"}
-            className={styles.dropdown}
-            classDropdownHead={styles.dropdownHead}
-            value={rndSize}
-            setValue={setRndSize}
-            options={RND_SIZES}
-            classOutSideClick={styles.memberDropdown}
-          />
-        }
       >
-        <ScrollArea
-          h={550}
-          scrollbars="y"
-          scrollbarSize={4}
-          scrollHideDelay={1000}
+        <Grid
+          style={{
+            marginTop: "10px",
+          }}
+          columns={12}
         >
-          <Grid
-            style={{
-              marginTop: "10px",
-            }}
-            columns={12}
-          >
-            {isEmpty(marketBrief) && (
+          {isEmpty(marketBrief) && (
+            <Grid.Col
+              span={3}
+              style={{
+                position: "relative",
+                height: "100%",
+              }}
+            >
+              <MantineCard
+                shadow="sm"
+                padding="sm"
+                style={{
+                  height: "364px",
+                  backgroundColor: "#EFF0F1",
+                }}
+              >
+                <MantineCard.Section
+                  style={{
+                    height: "100%",
+                  }}
+                >
+                  <div
+                    style={{
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexDirection: "row",
+                    }}
+                  >
+                    <span
+                      style={{
+                        border: "1px solid #4E83FD",
+                        borderRadius: "50%",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setShowingSelectFile(!showingSelectFile);
+                        if (pasteContainerRef.current) {
+                          pasteContainerRef.current.click();
+                        }
+                      }}
+                    >
+                      {loadingUploadFile ? (
+                        <Loader />
+                      ) : (
+                        <IconPlus size={48} color="#4E83FD" />
+                      )}
+                    </span>
+                  </div>
+                </MantineCard.Section>
+                {showingSelectFile && (
+                  <>
+                    <FileUploader
+                      handleChange={handleChange}
+                      name="file"
+                      classes={styles.fileUploader}
+                      label="Drag Or Upload"
+                      types={["JPG", "PNG", "GIF", "JPEG"]}
+                    />
+                    <div
+                      ref={pasteContainerRef}
+                      onPaste={handlePaste}
+                      style={{
+                        width: "100%",
+                        border: "2px dashed rgb(6, 88, 194)",
+                        padding: "20px",
+                        textAlign: "center",
+                        margin: "0 auto",
+                        color: "rgb(102, 102, 102)",
+                        fontSize: "12px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <p>Click me first then paste an image here</p>
+                    </div>
+                  </>
+                )}
+              </MantineCard>
+            </Grid.Col>
+          )}
+          {!isEmpty(marketBrief) && (
+            <>
               <Grid.Col
                 span={3}
                 style={{
                   position: "relative",
-                  height: "100%",
                 }}
               >
                 <MantineCard
                   shadow="sm"
                   padding="sm"
                   style={{
-                    height: "364px",
-                    backgroundColor: "#EFF0F1",
+                    cursor: "pointer",
                   }}
                 >
                   <MantineCard.Section
                     style={{
-                      height: "100%",
+                      position: "relative",
                     }}
                   >
                     <div
                       style={{
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexDirection: "row",
+                        position: "absolute",
+                        top: "5px",
+                        right: "5px",
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setMarketBrief({});
                       }}
                     >
-                      <span
-                        style={{
-                          border: "1px solid #4E83FD",
-                          borderRadius: "50%",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          setShowingSelectFile(!showingSelectFile);
-                          if (pasteContainerRef.current) {
-                            pasteContainerRef.current.click();
-                          }
-                        }}
-                      >
-                        {loadingUploadFile ? (
-                          <Loader />
-                        ) : (
-                          <IconPlus size={48} color="#4E83FD" />
-                        )}
-                      </span>
+                      <IconX color="rgb(102, 102, 102)" />
                     </div>
                   </MantineCard.Section>
-                  {showingSelectFile && (
-                    <>
-                      <FileUploader
-                        handleChange={handleChange}
-                        name="file"
-                        classes={styles.fileUploader}
-                        label="Drag Or Upload"
-                        types={["JPG", "PNG", "GIF", "JPEG"]}
+                  <MantineCard.Section>
+                    <LazyLoad height={250} once={true}>
+                      <Image
+                        src={
+                          marketBrief.imageRef ||
+                          marketBrief?.image ||
+                          "/images/content/not_found_2.jpg"
+                        }
+                        h={250}
+                        alt="No way!"
+                        fit="contain"
                       />
-                      <div
-                        ref={pasteContainerRef}
-                        onPaste={handlePaste}
-                        style={{
-                          width: "100%",
-                          border: "2px dashed rgb(6, 88, 194)",
-                          padding: "20px",
-                          textAlign: "center",
-                          margin: "0 auto",
-                          color: "rgb(102, 102, 102)",
-                          fontSize: "12px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <p>Click me first then paste an image here</p>
-                      </div>
-                    </>
-                  )}
+                    </LazyLoad>
+                  </MantineCard.Section>
+                  <TextInput
+                    mt="md"
+                    rightSectionPointerEvents="none"
+                    placeholder="Link sản phẩm (market)"
+                    value={marketBrief?.designLinkRef || ""}
+                    onChange={(event) =>
+                      setMarketBrief({
+                        ...marketBrief,
+                        designLinkRef: event.target.value,
+                      })
+                    }
+                  />
                 </MantineCard>
               </Grid.Col>
-            )}
-            {!isEmpty(marketBrief) && (
-              <>
-                <Grid.Col
-                  span={3}
-                  style={{
-                    position: "relative",
-                  }}
-                >
-                  <MantineCard
-                    shadow="sm"
-                    padding="sm"
-                    style={{
-                      cursor: "pointer",
-                    }}
-                  >
-                    <MantineCard.Section
-                      style={{
-                        position: "relative",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "5px",
-                          right: "5px",
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          setMarketBrief({});
-                        }}
-                      >
-                        <IconX color="rgb(102, 102, 102)" />
-                      </div>
-                    </MantineCard.Section>
-                    <MantineCard.Section>
-                      <LazyLoad height={250} once={true}>
-                        <Image
-                          src={
-                            marketBrief.imageRef ||
-                            marketBrief?.image ||
-                            "/images/content/not_found_2.jpg"
-                          }
-                          h={250}
-                          alt="No way!"
-                          fit="contain"
-                        />
-                      </LazyLoad>
-                    </MantineCard.Section>
-                    <TextInput
-                      mt="md"
-                      rightSectionPointerEvents="none"
-                      placeholder="Link sản phẩm (market)"
-                      value={marketBrief?.designLinkRef || ""}
-                      onChange={(event) =>
-                        setMarketBrief({
-                          ...marketBrief,
-                          designLinkRef: event.target.value,
-                        })
-                      }
-                    />
-                  </MantineCard>
-                </Grid.Col>
-                <Grid.Col span={6}>
-                  <Editor
-                    state={briefNote}
-                    onChange={setBriefNote}
-                    classEditorWrapper={styles.editorWrapper}
-                    classEditor={styles.editor}
-                    label="Details Brief"
-                  />
-                </Grid.Col>
-              </>
-            )}
-          </Grid>
-        </ScrollArea>
+              <Grid.Col span={6}>
+                <Editor
+                  state={briefNote}
+                  onChange={setBriefNote}
+                  classEditorWrapper={styles.editorWrapper}
+                  classEditor={styles.editor}
+                  label="Details Brief"
+                />
+              </Grid.Col>
+            </>
+          )}
+        </Grid>
       </Card>
     </>
   );

@@ -233,7 +233,7 @@ const ProductivityDashboard = () => {
     <>
       <Card
         className={styles.card}
-        title="DASHBOARD - Setting"
+        title="DASHBOARD"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
       >
@@ -279,7 +279,7 @@ const ProductivityDashboard = () => {
                 />
                 <Button
                   onClick={() => {
-                    handleCreateNewWeek(currentWeek + 2);
+                    handleCreateNewWeek(currentWeek + 1);
                   }}
                   loading={loadingCreateNewWeek}
                 >

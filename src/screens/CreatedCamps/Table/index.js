@@ -178,7 +178,6 @@ const CampaignsTable = ({
       {
         accessorKey: "linkCamp",
         header: "LINK CAMP",
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         size: 100,
         enableSorting: false,
@@ -205,7 +204,6 @@ const CampaignsTable = ({
         enableEditing: false,
         enableSorting: true,
         size: 100,
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
     ],

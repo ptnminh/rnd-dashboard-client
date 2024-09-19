@@ -181,7 +181,7 @@ const KeywordTable = ({
         header: "PRIORITY",
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         size: 100,
         Cell: ({ row }) => {
           return (
@@ -203,7 +203,7 @@ const KeywordTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableHeadCellProps: { className: classes["SKU"] },
         Cell: ({ row }) => {
           const uid = row?.original?.uid;
           const foundBrief = find(payloads, { uid });
@@ -372,43 +372,88 @@ const KeywordTable = ({
         size: 100,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
-        Edit: ({ row }) => {
+        Edit: ({ row, table }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+
           return (
             <TextInput
-              value={updateBrief[row.original.uid]?.linkDesign}
+              value={foundBrief.linkDesign}
               onChange={(e) => {
-                setUpdateBrief({
-                  ...updateBrief,
-                  [row.original.uid]: {
-                    ...updateBrief[row.original.uid],
-                    linkDesign: e.target.value,
-                  },
+                const value = e.target.value;
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        linkDesign: value,
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
                 });
+              }}
+              onBlur={(e) => {
+                const value = e.target.value;
+                const urlPattern =
+                  /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
+                if (!urlPattern.test(value)) {
+                  showNotification(
+                    "Thất bại",
+                    "Link Design không hợp lệ",
+                    "red"
+                  );
+                  setPayloads((prev) => {
+                    const newPayloads = map(prev, (x) => {
+                      if (x.uid === uid) {
+                        return {
+                          ...x,
+                          linkDesign: "",
+                        };
+                      }
+                      return x;
+                    });
+                    return newPayloads;
+                  });
+                  return;
+                } else {
+                  rndServices
+                    .updateBriefDesign({
+                      uid,
+                      data: {
+                        linkDesign: value,
+                      },
+                    })
+                    .then((response) => {
+                      table.setEditingCell(null);
+                    });
+                }
               }}
               readOnly={row?.original?.status === 2}
             />
           );
         },
-        Cell: ({ row }) => (
-          <a
-            style={{
-              cursor: "pointer",
-            }}
-            target="_blank"
-            href={
-              row.original.linkDesign ||
-              updateBrief[row.original.uid]?.linkDesign
-            }
-          >
-            {row.original.linkDesign ||
-              updateBrief[row.original.uid]?.linkDesign ? (
-              <Badge color="blue" variant="filled">
-                {" "}
-                <u>Link</u>{" "}
-              </Badge>
-            ) : null}
-          </a>
-        ),
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <a
+              style={{
+                cursor: "pointer",
+              }}
+              target="_blank"
+              href={foundBrief?.linkDesign}
+            >
+              {foundBrief.linkDesign ? (
+                <Badge color="blue" variant="filled">
+                  {" "}
+                  <u>Link</u>{" "}
+                </Badge>
+              ) : null}
+            </a>
+          );
+        },
       },
       {
         accessorKey: "status",
@@ -419,6 +464,8 @@ const KeywordTable = ({
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: (props) => {
           const { row } = props;
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
           return (
             <Button
               variant="filled"
@@ -427,9 +474,7 @@ const KeywordTable = ({
                 row.original.status === 2 ? <IconBan /> : <IconCheck />
               }
               disabled={
-                (row?.original?.status === 1 &&
-                  !row?.original?.linkDesign &&
-                  !updateBrief[row.original.uid]?.linkDesign) ||
+                (row?.original?.status === 1 && !foundBrief?.linkDesign) ||
                 row?.original?.status === 2
               }
             >
@@ -452,7 +497,7 @@ const KeywordTable = ({
         accessorKey: "remove",
         header: "ACTIONS",
         enableSorting: false,
-        mantineTableHeadCellProps: { className: classes["remove"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ cell, column, table }) => (
           <div
@@ -572,7 +617,13 @@ const KeywordTable = ({
                 },
               }}
               value={batch}
-              onChange={(e) => setBatch(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                setBatch(value);
+                if (!value) {
+                  setQuery({ ...query, batch: value });
+                }
+              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
                   setQuery({ ...query, batch });
@@ -603,7 +654,7 @@ const KeywordTable = ({
               value={searchSKU}
               onChange={(e) => {
                 const value = e.target.value;
-                setSearchSKU(value)
+                setSearchSKU(value);
                 if (!value) {
                   setQuery({ ...query, sku: value });
                 }
@@ -838,17 +889,6 @@ const KeywordTable = ({
               Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
             </div>
           </Flex>
-          {editingCell && !isEmpty(updateBrief.linkDesigns) && (
-            <Flex>
-              <Button
-                variant="filled"
-                color="blue"
-                leftSection={<IconDeviceFloppy />}
-              >
-                Save
-              </Button>
-            </Flex>
-          )}
         </div>
       );
     },
@@ -905,58 +945,7 @@ const KeywordTable = ({
       },
       // when leaving the cell, we want to reset the editing cell
       onBlur: () => {
-        if (isEmpty(updateBrief.linkDesigns)) {
-          setEditingCell(false);
-        }
-        const uidKeys = keys(updateBrief);
-        const newData = map(data, (x) => {
-          if (includes(uidKeys, x.uid)) {
-            return {
-              ...x,
-              ...updateBrief[x.uid],
-            };
-          }
-          return x;
-        });
-        const uid = uidKeys[0];
-        if (uid && updateBrief[uid] && updateBrief[uid].linkDesign) {
-          const urlPattern =
-            /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
-
-          if (!urlPattern.test(updateBrief[uid].linkDesign)) {
-            showNotification("Thất bại", "Link Design không hợp lệ", "red");
-            setUpdateBrief({
-              ...updateBrief,
-              [uid]: {
-                ...updateBrief[uid],
-                linkDesign: "",
-              },
-            });
-            table.setEditingCell(null);
-            return;
-          }
-          rndServices
-            .updateBriefDesign({
-              uid,
-              data: updateBrief[uid],
-            })
-            .then((response) => {
-              if (!response) {
-                setUpdateBrief({
-                  ...updateBrief,
-                  [uid]: {
-                    ...updateBrief[uid],
-                    linkDesign: "",
-                  },
-                });
-              } else {
-                setData(newData);
-              }
-            });
-          table.setEditingCell(null);
-        } else {
-          table.setEditingCell(null);
-        }
+        table.setEditingCell(null);
       },
       sx: {
         cursor: "pointer", //you might want to change the cursor too when adding an onClick
