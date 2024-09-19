@@ -93,6 +93,17 @@
   align-items: center !important;
   justify-content: center !important;
 }
+.bottom-toolbar {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+.bottom-toolbar > div {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
 
 /* Target an internal MRT class already defined */
 .toolbar {

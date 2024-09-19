@@ -12,6 +12,7 @@ import {
   Group,
   Select,
   TextInput,
+  ActionIcon,
 } from "@mantine/core";
 import {
   find,
@@ -19,18 +20,19 @@ import {
   flatten,
   uniq,
   join,
-  isEmpty,
   split,
-  includes,
   values,
-  every,
   filter,
-  difference,
   sumBy,
   flatMap,
   merge,
 } from "lodash";
-import { IconFilterOff } from "@tabler/icons-react";
+import {
+  IconFilterOff,
+  IconSortDescending,
+  IconSortAscending,
+  IconArrowsSort,
+} from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import {
   AMZ_SORTING,
@@ -40,7 +42,6 @@ import {
 import moment from "moment-timezone";
 import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { DateRangePicker } from "rsuite";
-import Loader from "../../../components/Loader";
 import LazyLoad from "react-lazyload";
 
 const SellerboardTable = ({
@@ -52,6 +53,9 @@ const SellerboardTable = ({
   setQuery,
   activeTab,
   setIsConfirmedQuery,
+  setPagination,
+  pagination,
+  setIsLoadmore,
 }) => {
   // Function to extract unique keys from the data array
   const extractUniqueKeys = (dataset) => {
@@ -131,14 +135,16 @@ const SellerboardTable = ({
         const header = join(split(key, " ")?.slice(0, -1), " ");
         const totalOrders = sumBy(keyData, "orders");
         return {
-          [header]: totalOrders,
+          [header]: totalOrders?.toLocaleString(),
         };
       })
     );
     return {
       id: `Total theo ${activeTab}`, // Unique ID for the Total theo ${activeTab} row
       product: `Summary`,
-      totalInRanges: sumBy(data, (row) => sumBy(row.data, "orders")), // Example: sum of orders
+      totalInRanges: sumBy(data, (row) =>
+        sumBy(row.data, "orders")
+      )?.toLocaleString(), // Example: sum of orders
       ...columns,
     };
   }, [data, customColumns]);
@@ -178,7 +184,7 @@ const SellerboardTable = ({
       setCustomColumns([...customColumns, ...virtualColumn]);
     }
   }, [data]);
-
+  console.log("query", query);
   // UseMemo to construct final columns array
   const columns = useMemo(
     () => [
@@ -258,7 +264,7 @@ const SellerboardTable = ({
                             fontWeight: "bold",
                           }}
                         >
-                          {sku} - {totalOrders}
+                          {sku}
                         </Text>
                       </Flex>
                     </Grid.Col>
@@ -294,8 +300,8 @@ const SellerboardTable = ({
       },
       {
         accessorKey: "createdDate",
-        size: 100,
-        maxSize: 100,
+        size: 150,
+        maxSize: 150,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -322,6 +328,82 @@ const SellerboardTable = ({
               >
                 Summary
               </Text>
+              {!query?.primarySortBy && (
+                <ActionIcon
+                  aria-label="Settings"
+                  variant="default"
+                  style={{
+                    background: "none",
+                    border: "none",
+                  }}
+                  onClick={() => {
+                    setIsConfirmedQuery(true);
+                    setPagination({
+                      ...pagination,
+                      currentPage: 1,
+                    });
+                    setQuery({
+                      ...query,
+                      primarySortBy: "totalOrders",
+                      primarySortDir: "desc",
+                    });
+                  }}
+                >
+                  <IconArrowsSort
+                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
+                    stroke={2}
+                  />
+                </ActionIcon>
+              )}
+
+              {query?.primarySortBy === "totalOrders" &&
+                query?.primarySortDir === "desc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setIsConfirmedQuery(true);
+                      setQuery({
+                        ...query,
+                        primarySortBy: "totalOrders",
+                        primarySortDir: "asc",
+                      });
+                    }}
+                  >
+                    <IconSortDescending
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+              {query?.primarySortBy === "totalOrders" &&
+                query?.primarySortDir === "asc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setIsConfirmedQuery(true);
+                      setQuery({
+                        ...query,
+                        primarySortBy: null,
+                        primarySortDir: null,
+                      });
+                    }}
+                  >
+                    <IconSortAscending
+                      style={{
+                        width: "70%",
+                        height: "70%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
             </Group>
           );
         },
@@ -345,7 +427,7 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                {totalOrders}
+                {totalOrders?.toLocaleString()}
               </Text>
               <Text
                 style={{
@@ -476,6 +558,7 @@ const SellerboardTable = ({
     state: {
       showProgressBars: loading,
       sorting,
+      isLoading: loading,
     },
     renderTopToolbar: () => {
       return (
@@ -833,6 +916,10 @@ const SellerboardTable = ({
             <Button
               onClick={() => {
                 setIsConfirmedQuery(true);
+                setPagination({
+                  ...pagination,
+                  currentPage: 1,
+                });
                 setQuery({
                   stores: null,
                   fulfillmentChannel: null,
@@ -877,17 +964,22 @@ const SellerboardTable = ({
       };
     },
     renderBottomToolbarCustomActions: () => {
-      return loading ? (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            height: "100%",
+      return (
+        <Button
+          loading={loading}
+          disabled={pagination.currentPage >= pagination.totalPages}
+          onClick={() => {
+            setPagination((prev) => ({
+              ...prev,
+              currentPage: prev.currentPage + 1,
+            }));
+            setIsLoadmore(true);
+            setIsConfirmedQuery(true);
           }}
         >
-          <Loader />
-        </div>
-      ) : null;
+          Load More
+        </Button>
+      );
     },
   });
 

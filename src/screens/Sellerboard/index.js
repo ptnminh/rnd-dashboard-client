@@ -8,13 +8,14 @@ import {
   Flex,
   Grid,
   rem,
+  Switch,
   Tabs,
   Transition,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { amzServices } from "../../services";
 import Table from "./Table";
-import { debounce, isEmpty, omit, set, toLower, toNumber } from "lodash";
+import { isEmpty, omit, toLower, toNumber } from "lodash";
 import SurvivalModeTable from "./SurvivalMode";
 import moment from "moment-timezone";
 import { useWindowScroll } from "@mantine/hooks";
@@ -35,6 +36,7 @@ const Sellerboard = () => {
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
   const [isConfirmedQuery, setIsConfirmedQuery] = useState(true);
+  const [isLoadmore, setIsLoadmore] = useState(false);
   const [saleMetrics, setSaleMetrics] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
   const [pagination, setPagination] = useState({
@@ -49,6 +51,9 @@ const Sellerboard = () => {
     .tz("America/Los_Angeles")
     .subtract(1, "month")
     .format("YYYY-MM-DD");
+  const currentWeek = moment().tz("America/Los_Angeles").week();
+  const currentMonth = moment().tz("America/Los_Angeles").month();
+  const currentYear = moment().tz("America/Los_Angeles").year();
   const endDate = moment().tz("America/Los_Angeles").format("YYYY-MM-DD");
   const [query, setQuery] = useState({
     groupByKey: toLower(TABS_VIEW.Date),
@@ -65,14 +70,20 @@ const Sellerboard = () => {
     groupByKey: "date",
     stores: "PFH,QZL,GGT",
     storeValues: ["PFH", "QZL", "GGT"],
-    salesDateValue: [new Date(oneMonthAgo), new Date(endDate)],
-    startDate,
+    createdDateValue: [new Date(oneMonthAgo), new Date(endDate)],
+    startDate: oneMonthAgo,
     endDate,
+    values: [1, 2, 3, 4],
+    textValue: ["Small", "Medium", "Big", "Super Big"],
   });
-  const [sorting, setSorting] = useState([]);
+  const [sorting, setSorting] = useState([
+    {
+      id: moment(endDate).format("DD MMM YY"),
+      desc: true,
+    },
+  ]);
   const [trigger, setTrigger] = useState(false);
   const [loadingFetchSaleMetrics, setLoadingFetchSaleMetrics] = useState(true);
-  const [isFetching, setIsFetching] = useState(false);
   const fetchSaleMetrics = async (page) => {
     setLoadingFetchSaleMetrics(true);
     const response = await amzServices.fetchSaleMetrics({
@@ -80,7 +91,6 @@ const Sellerboard = () => {
       query: omit(
         {
           ...query,
-          // ignore ordersInRange if salesStartDate and salesEndDate are not provided and vice versa
           ...(query?.ordersInRange &&
             query?.startDate &&
             query?.endDate && {
@@ -103,15 +113,20 @@ const Sellerboard = () => {
     });
     const { data, metaData } = response;
     if (data) {
-      setSaleMetrics((prev) => [...prev, ...data]);
+      if (isLoadmore) {
+        setSaleMetrics((prev) => [...prev, ...data]);
+      } else {
+        setSaleMetrics(data);
+      }
       setPagination({
-        currentPage: toNumber(metaData.currentPage),
-        totalPages: toNumber(metaData.totalPages),
+        currentPage: toNumber(metaData.currentPage) || 1,
+        totalPages: toNumber(metaData.totalPages) || 1,
       });
     } else {
       setSaleMetrics([]);
     }
     setIsConfirmedQuery(false);
+    setIsLoadmore(false);
     setLoadingFetchSaleMetrics(false);
     setTrigger(false);
   };
@@ -121,14 +136,7 @@ const Sellerboard = () => {
       page,
       query: omit(
         {
-          ...query,
-          ...(query?.ordersInRange &&
-            query?.startDate &&
-            query?.endDate && {
-              startDate: query.startDate,
-              endDate: query.endDate,
-              ordersInRange: toNumber(query.ordersInRange),
-            }),
+          ...survivalModeQuery,
           groupByKey: "date",
         },
         [
@@ -138,6 +146,7 @@ const Sellerboard = () => {
           "isConfirmed",
           "fulfillmentChannelValues",
           "salesDateValue",
+          "value",
         ]
       ),
       limit: 50,
@@ -145,10 +154,14 @@ const Sellerboard = () => {
     });
     const { data, metaData } = response;
     if (data) {
-      setSaleMetrics((prev) => [...prev, ...data]);
+      if (isLoadmore) {
+        setSaleMetrics((prev) => [...prev, ...data]);
+      } else {
+        setSaleMetrics(data);
+      }
       setPagination({
-        currentPage: toNumber(metaData.currentPage),
-        totalPages: toNumber(metaData.totalPages),
+        currentPage: toNumber(metaData.currentPage) || 1,
+        totalPages: toNumber(metaData.totalPages) || 1,
       });
     } else {
       setSaleMetrics([]);
@@ -156,16 +169,33 @@ const Sellerboard = () => {
     setIsConfirmedQuery(false);
     setLoadingFetchSaleMetrics(false);
     setTrigger(false);
+    setIsLoadmore(false);
   };
   useEffect(() => {
     if (isConfirmedQuery && activeTab !== TABS_VIEW.SURVIVAL) {
       fetchSaleMetrics(pagination.currentPage);
     }
-  }, [search, query, trigger, sorting, isConfirmedQuery]);
+  }, [
+    search,
+    query,
+    trigger,
+    sorting,
+    isConfirmedQuery,
+    pagination.currentPage,
+  ]);
+  useEffect(() => {
+    if (isConfirmedQuery && activeTab === TABS_VIEW.SURVIVAL) {
+      fetchSaleMetricsForSurvivalMode(pagination.currentPage);
+    }
+  }, [survivalModeQuery, isConfirmedQuery, pagination.currentPage]);
 
   // listen sorting change set isConfirmedQuery to true for refetch data
   useEffect(() => {
     if (!isEmpty(sorting)) {
+      setPagination({
+        ...pagination,
+        currentPage: 1,
+      });
       setIsConfirmedQuery(true);
     }
   }, [sorting]);
@@ -186,16 +216,47 @@ const Sellerboard = () => {
         totalPages: 1,
       });
       if (activeTab === TABS_VIEW.SURVIVAL) {
+        setSorting([{ id: "value", desc: true }]);
         setSurvivalModeQuery({
           groupByKey: "date",
           stores: "PFH,QZL,GGT",
           storeValues: ["PFH", "QZL", "GGT"],
-          salesDateValue: [new Date(oneMonthAgo), new Date(endDate)],
-          startDate,
+          createdDateValue: [new Date(oneMonthAgo), new Date(endDate)],
+          startDate: oneMonthAgo,
           endDate,
+          values: [1, 2, 3, 4],
+          textValue: ["Small", "Medium", "Big", "Super Big"],
         });
-        fetchSaleMetricsForSurvivalMode(pagination.currentPage);
       } else {
+        let customSorting = [];
+        switch (activeTab) {
+          case TABS_VIEW.Date:
+            customSorting = [
+              {
+                id: moment(endDate).format("DD MMM YY"),
+                desc: true,
+              },
+            ];
+            break;
+          case TABS_VIEW.Week:
+            customSorting = [
+              {
+                id: `W${currentWeek} ${currentYear}`,
+                desc: true,
+              },
+            ];
+            break;
+          case TABS_VIEW.Month:
+            customSorting = [
+              {
+                id: `${moment(endDate).format("MMM")} ${currentYear}`,
+                desc: true,
+              },
+            ];
+            break;
+          default:
+        }
+        setSorting(customSorting);
         setQuery({
           groupByKey: toLower(activeTab),
           stores: "PFH,QZL,GGT",
@@ -214,49 +275,10 @@ const Sellerboard = () => {
     }
   }, [activeTab]);
 
-  // Inside Sellerboard Component
-  const listInnerRef = useRef(null); // Create a reference to the scrollable element
-
-  // Update useEffect to handle scrolling and load more data
-  useEffect(() => {
-    // Debounced scroll handler
-    const handleScroll = debounce(() => {
-      if (
-        listInnerRef.current &&
-        listInnerRef.current.getBoundingClientRect().bottom <=
-          window.innerHeight + 50
-      ) {
-        // Check if scrolled near the bottom
-        if (
-          !loadingFetchSaleMetrics &&
-          !isFetching &&
-          pagination.currentPage < pagination.totalPages
-        ) {
-          setIsFetching(true);
-          setPagination((prev) => ({
-            ...prev,
-            currentPage: prev.currentPage + 1,
-          }));
-          setIsConfirmedQuery(true);
-        }
-      }
-    }, 200); // Adjust the debounce delay as needed
-
-    window.addEventListener("scroll", handleScroll); // Attach scroll event listener
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll); // Clean up listener on component unmount
-    };
-  }, [loadingFetchSaleMetrics, pagination.currentPage]);
-  useEffect(() => {
-    if (!loadingFetchSaleMetrics) {
-      setIsFetching(false); // Reset fetching flag when API call is complete
-    }
-  }, [loadingFetchSaleMetrics]);
   const [scroll, scrollTo] = useWindowScroll();
   return (
     <>
-      <div ref={listInnerRef}>
+      <div>
         <Card
           className={styles.card}
           title="AMZ Sellerboard"
@@ -345,23 +367,24 @@ const Sellerboard = () => {
                         padding: "10px",
                         borderRadius: "10px",
                         backgroundColor: "#EFF0F1",
+                        height: "100%",
+                        display: "flex",
+                        alignItems: "center",
                       }}
                     >
-                      <Tabs.Tab
-                        value={TABS_VIEW.SURVIVAL}
-                        styles={{
-                          ...(activeTab === TABS_VIEW.SURVIVAL && {
-                            tab: {
-                              backgroundColor: "#7C4DFF",
-                              color: "#fff",
-                              borderRadius: "10px",
-                              borderColor: "transparent",
-                            },
-                          }),
+                      <Switch
+                        checked={activeTab === TABS_VIEW.SURVIVAL}
+                        label={TABS_VIEW.SURVIVAL}
+                        onChange={(event) => {
+                          const value = event.currentTarget.checked;
+                          setActiveTab(
+                            value ? TABS_VIEW.SURVIVAL : TABS_VIEW.Date
+                          );
                         }}
-                      >
-                        {TABS_VIEW.SURVIVAL}
-                      </Tabs.Tab>
+                        style={{
+                          cursor: "pointer",
+                        }}
+                      />
                     </Flex>
                   </div>
                 </Tabs.List>
@@ -378,6 +401,9 @@ const Sellerboard = () => {
                       sorting={sorting}
                       activeTab={activeTab}
                       setIsConfirmedQuery={setIsConfirmedQuery}
+                      setPagination={setPagination}
+                      pagination={pagination}
+                      setIsLoadmore={setIsLoadmore}
                     />
                   )}
                 </Tabs.Panel>
@@ -394,6 +420,9 @@ const Sellerboard = () => {
                       sorting={sorting}
                       activeTab={activeTab}
                       setIsConfirmedQuery={setIsConfirmedQuery}
+                      setPagination={setPagination}
+                      pagination={pagination}
+                      setIsLoadmore={setIsLoadmore}
                     />
                   )}
                 </Tabs.Panel>
@@ -410,6 +439,9 @@ const Sellerboard = () => {
                       sorting={sorting}
                       activeTab={activeTab}
                       setIsConfirmedQuery={setIsConfirmedQuery}
+                      setPagination={setPagination}
+                      pagination={pagination}
+                      setIsLoadmore={setIsLoadmore}
                     />
                   )}
                 </Tabs.Panel>
@@ -425,6 +457,10 @@ const Sellerboard = () => {
                       setSorting={setSorting}
                       sorting={sorting}
                       activeTab={activeTab}
+                      setPagination={setPagination}
+                      pagination={pagination}
+                      setIsConfirmedQuery={setIsConfirmedQuery}
+                      setIsLoadmore={setIsLoadmore}
                     />
                   )}
                 </Tabs.Panel>

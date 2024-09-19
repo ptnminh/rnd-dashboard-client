@@ -6,24 +6,24 @@ import {
   Grid,
   Image,
   Button,
-  MultiSelect,
   Badge,
   Tooltip,
-  Select,
   Group,
+  MultiSelect,
+  Select,
 } from "@mantine/core";
-import { find, map, flatten, uniq, join, split, values, filter } from "lodash";
+import { find, map, flatten, uniq } from "lodash";
 import { IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
+
 import {
-  AMZ_SORTING,
-  AMZ_STORES,
-  FULFILLMENT_CHANNELS,
-} from "../../../constant";
-import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
+  CONVERT_NUMBER_TO_STATUS,
+  CONVERT_STATUS_TO_NUMBER,
+} from "../../../utils";
 import { IconCalendarWeek, IconTarget } from "@tabler/icons-react";
 import LazyLoad from "react-lazyload";
 import moment from "moment-timezone";
+import { DateRangePicker } from "rsuite";
 
 const SurvivalModeTable = ({
   tableData,
@@ -33,6 +33,10 @@ const SurvivalModeTable = ({
   setSorting,
   setQuery,
   activeTab,
+  setPagination,
+  pagination,
+  setIsConfirmedQuery,
+  setIsLoadmore,
 }) => {
   // Function to extract unique keys from the data array
   const extractUniqueKeys = (dataset) => {
@@ -145,8 +149,8 @@ const SurvivalModeTable = ({
       {
         accessorKey: "product",
         header: "Product",
-        size: 250,
-        maxSize: 250,
+        size: 300,
+        maxSize: 300,
         enableEditing: false,
         enableSorting: false,
         enableMultiSort: true,
@@ -161,8 +165,7 @@ const SurvivalModeTable = ({
           };
         },
         Cell: ({ row }) => {
-          const { asin, title, image, store, fulfillmentChannel, sku } =
-            row.original;
+          const { asin, image, sku } = row.original;
           const url = `https://www.amazon.com/dp/${asin}`;
           return (
             <Flex direction="column">
@@ -236,10 +239,10 @@ const SurvivalModeTable = ({
       {
         accessorKey: "value",
         header: "Value",
-        size: 150,
-        maxSize: 150,
+        size: 50,
+        maxSize: 50,
         enableEditing: false,
-        enableSorting: false,
+        enableSorting: true,
         mantineTableBodyCellProps: ({ row }) => {
           return {
             className: classes["body-cells-op-team"],
@@ -334,7 +337,7 @@ const SurvivalModeTable = ({
                 fontWeight: "bold",
               }}
             >
-              {currentOrders} / {deadlineOrders}
+              {currentOrders} / {deadlineOrders || 0}
             </Text>
           );
         },
@@ -383,8 +386,76 @@ const SurvivalModeTable = ({
               flexWrap: "wrap",
             }}
           >
+            <DateRangePicker
+              size="sx"
+              placeholder="Created Date"
+              style={{
+                width: "200px",
+              }}
+              value={query.createdDateValue}
+              onOk={(value) => {
+                setQuery({
+                  ...query,
+                  createdDateValue: value,
+                  startDate: moment(value[0]).format("YYYY-MM-DD"),
+                  endDate: moment(value[1]).format("YYYY-MM-DD"),
+                });
+              }}
+              onOpen={() => {
+                console.log("open");
+              }}
+              onClean={() => {
+                setQuery({
+                  ...query,
+                  createdDateValue: null,
+                  startDate: null,
+                  endDate: null,
+                });
+              }}
+              onShortcutClick={(shortcut) => {
+                setQuery({
+                  ...query,
+                  createdDateValue: shortcut.value,
+                  startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
+                  endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
+                });
+              }}
+            />
+            {/* <MultiSelect
+              data={["Small", "Medium", "Big", "Super Big"]}
+              value={query?.textValue || []}
+              onChange={(value) => {
+                setQuery({
+                  ...query,
+                  textValue: value,
+                  values: map(value, (item) => CONVERT_STATUS_TO_NUMBER[item]),
+                });
+              }}
+              clearable
+              placeholder="Value"
+              onClear={() => {
+                setQuery({
+                  ...query,
+                  textValue: null,
+                  values: null,
+                });
+              }}
+            /> */}
+            <Button
+              loading={loading}
+              onClick={() => {
+                setIsConfirmedQuery(true);
+              }}
+            >
+              Confirm
+            </Button>
             <Button
               onClick={() => {
+                setIsConfirmedQuery(true);
+                setPagination({
+                  ...pagination,
+                  currentPage: 1,
+                });
                 setQuery({
                   stores: null,
                   fulfillmentChannel: [],
@@ -397,7 +468,7 @@ const SurvivalModeTable = ({
                   endDate: null,
                   primarySortBy: null,
                   primarySortDir: null,
-                  salesDateValue: null,
+                  createdDateValue: null,
                   salesStartDate: null,
                   salesEndDate: null,
                   ordersInRange: "",
@@ -420,7 +491,26 @@ const SurvivalModeTable = ({
     enableColumnResizing: false,
     enableSorting: true,
     enableMultiSort: false,
+    enableBottomToolbar: true,
     manualSorting: true,
+    renderBottomToolbarCustomActions: () => {
+      return (
+        <Button
+          loading={loading}
+          disabled={pagination.currentPage >= pagination.totalPages}
+          onClick={() => {
+            setPagination((prev) => ({
+              ...prev,
+              currentPage: prev.currentPage + 1,
+            }));
+            setIsLoadmore(true);
+            setIsConfirmedQuery(true);
+          }}
+        >
+          Load More
+        </Button>
+      );
+    },
   });
 
   return (
@@ -429,7 +519,6 @@ const SurvivalModeTable = ({
         display: "flex",
         justifyContent: "start",
         width: "100%",
-        overflowX: "auto",
       }}
     >
       <MantineReactTable table={table} />
