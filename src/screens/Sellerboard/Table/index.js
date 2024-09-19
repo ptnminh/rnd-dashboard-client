@@ -41,6 +41,7 @@ import moment from "moment-timezone";
 import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import { DateRangePicker } from "rsuite";
 import Loader from "../../../components/Loader";
+import LazyLoad from "react-lazyload";
 
 const SellerboardTable = ({
   tableData,
@@ -226,18 +227,20 @@ const SellerboardTable = ({
               <Grid>
                 <Grid.Col span={4}>
                   <Tooltip label={url}>
-                    <Image
-                      src={image || "/images/content/not_found_2.jpg"}
-                      width="100%"
-                      height="50px"
-                      style={{
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        window.open(url, "_blank");
-                      }}
-                      fit="contain"
-                    />
+                    <LazyLoad height={50} once={true}>
+                      <Image
+                        src={image || "/images/content/not_found_2.jpg"}
+                        width="100%"
+                        height="50px"
+                        style={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          window.open(url, "_blank");
+                        }}
+                        fit="contain"
+                      />
+                    </LazyLoad>
                   </Tooltip>
                 </Grid.Col>
                 <Grid.Col span={8}>
@@ -372,11 +375,6 @@ const SellerboardTable = ({
               row.id === `Total theo ${activeTab}`
                 ? classes["summary-row"]
                 : classes["body-cells-op-team"],
-            // ...(row.id === `Total theo ${activeTab}` && {
-            //   style: {
-            //     display: "none",
-            //   },
-            // }),
           };
         },
         mantineTableHeadCellProps: () => {

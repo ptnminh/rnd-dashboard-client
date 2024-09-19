@@ -14,7 +14,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { amzServices } from "../../services";
 import Table from "./Table";
-import { debounce, isEmpty, omit, toLower, toNumber } from "lodash";
+import { debounce, isEmpty, omit, set, toLower, toNumber } from "lodash";
 import SurvivalModeTable from "./SurvivalMode";
 import moment from "moment-timezone";
 import { useWindowScroll } from "@mantine/hooks";
@@ -122,7 +122,6 @@ const Sellerboard = () => {
       query: omit(
         {
           ...query,
-          // ignore ordersInRange if salesStartDate and salesEndDate are not provided and vice versa
           ...(query?.ordersInRange &&
             query?.startDate &&
             query?.endDate && {
@@ -159,7 +158,7 @@ const Sellerboard = () => {
     setTrigger(false);
   };
   useEffect(() => {
-    if (isConfirmedQuery) {
+    if (isConfirmedQuery && activeTab !== TABS_VIEW.SURVIVAL) {
       fetchSaleMetrics(pagination.currentPage);
     }
   }, [search, query, trigger, sorting, isConfirmedQuery]);
@@ -178,22 +177,27 @@ const Sellerboard = () => {
       params.set("page", pagination.currentPage);
     navigate(`?${params.toString()}`, { replace: true });
   }, [search, navigate]);
-
   const [activeTab, setActiveTab] = useState(TABS_VIEW.Date);
-
   useEffect(() => {
     if (!isEmpty(saleMetrics)) {
+      setSaleMetrics([]);
       setPagination({
         currentPage: 1,
         totalPages: 1,
       });
       if (activeTab === TABS_VIEW.SURVIVAL) {
+        setSurvivalModeQuery({
+          groupByKey: "date",
+          stores: "PFH,QZL,GGT",
+          storeValues: ["PFH", "QZL", "GGT"],
+          salesDateValue: [new Date(oneMonthAgo), new Date(endDate)],
+          startDate,
+          endDate,
+        });
         fetchSaleMetricsForSurvivalMode(pagination.currentPage);
       } else {
-        // TODO: Implement the logic for survival mode
-        setSaleMetrics([]);
         setQuery({
-          groupByKey: activeTab === "Survival" ? "date" : toLower(activeTab),
+          groupByKey: toLower(activeTab),
           stores: "PFH,QZL,GGT",
           storeValues: ["PFH", "QZL", "GGT"],
           fulfillmentChannelValues: ["FBA", "FBM"],
@@ -220,7 +224,7 @@ const Sellerboard = () => {
       if (
         listInnerRef.current &&
         listInnerRef.current.getBoundingClientRect().bottom <=
-          window.innerHeight + 200
+          window.innerHeight + 50
       ) {
         // Check if scrolled near the bottom
         if (
@@ -362,98 +366,73 @@ const Sellerboard = () => {
                   </div>
                 </Tabs.List>
                 <Tabs.Panel value={TABS_VIEW.Date}>
-                  <Table
-                    className={styles.Table}
-                    tableData={saleMetrics}
-                    query={query}
-                    setQuery={setQuery}
-                    loading={loadingFetchSaleMetrics}
-                    setTrigger={setTrigger}
-                    setSorting={setSorting}
-                    sorting={sorting}
-                    activeTab={activeTab}
-                    setIsConfirmedQuery={setIsConfirmedQuery}
-                  />
-                  {/* <Pagination
-                  total={pagination.totalPages}
-                  page={pagination.currentPage}
-                  onChange={handlePageChange}
-                  color="pink"
-                  size="md"
-                  style={{ marginTop: "20px", marginRight: "auto" }}
-                /> */}
+                  {activeTab === TABS_VIEW.Date && (
+                    <Table
+                      className={styles.Table}
+                      tableData={saleMetrics}
+                      query={query}
+                      setQuery={setQuery}
+                      loading={loadingFetchSaleMetrics}
+                      setTrigger={setTrigger}
+                      setSorting={setSorting}
+                      sorting={sorting}
+                      activeTab={activeTab}
+                      setIsConfirmedQuery={setIsConfirmedQuery}
+                    />
+                  )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Week}>
-                  <Table
-                    className={styles.Table}
-                    tableData={saleMetrics}
-                    query={query}
-                    setQuery={setQuery}
-                    loading={loadingFetchSaleMetrics}
-                    setTrigger={setTrigger}
-                    setSorting={setSorting}
-                    sorting={sorting}
-                    activeTab={activeTab}
-                    setIsConfirmedQuery={setIsConfirmedQuery}
-                  />
-                  {/* <Pagination
-                  total={pagination.totalPages}
-                  page={pagination.currentPage}
-                  onChange={handlePageChange}
-                  color="pink"
-                  size="md"
-                  style={{ marginTop: "20px", marginRight: "auto" }}
-                /> */}
+                  {activeTab === TABS_VIEW.Week && (
+                    <Table
+                      className={styles.Table}
+                      tableData={saleMetrics}
+                      query={query}
+                      setQuery={setQuery}
+                      loading={loadingFetchSaleMetrics}
+                      setTrigger={setTrigger}
+                      setSorting={setSorting}
+                      sorting={sorting}
+                      activeTab={activeTab}
+                      setIsConfirmedQuery={setIsConfirmedQuery}
+                    />
+                  )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Month}>
-                  <Table
-                    className={styles.Table}
-                    tableData={saleMetrics}
-                    query={query}
-                    setQuery={setQuery}
-                    loading={loadingFetchSaleMetrics}
-                    setTrigger={setTrigger}
-                    setSorting={setSorting}
-                    sorting={sorting}
-                    activeTab={activeTab}
-                    setIsConfirmedQuery={setIsConfirmedQuery}
-                  />
-                  {/* <Pagination
-                  total={pagination.totalPages}
-                  page={pagination.currentPage}
-                  onChange={handlePageChange}
-                  color="pink"
-                  size="md"
-                  style={{ marginTop: "20px", marginRight: "auto" }}
-                /> */}
+                  {activeTab === TABS_VIEW.Month && (
+                    <Table
+                      className={styles.Table}
+                      tableData={saleMetrics}
+                      query={query}
+                      setQuery={setQuery}
+                      loading={loadingFetchSaleMetrics}
+                      setTrigger={setTrigger}
+                      setSorting={setSorting}
+                      sorting={sorting}
+                      activeTab={activeTab}
+                      setIsConfirmedQuery={setIsConfirmedQuery}
+                    />
+                  )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.SURVIVAL}>
-                  <SurvivalModeTable
-                    className={styles.Table}
-                    tableData={saleMetrics}
-                    query={query}
-                    setQuery={setQuery}
-                    loading={loadingFetchSaleMetrics}
-                    setTrigger={setTrigger}
-                    setSorting={setSorting}
-                    sorting={sorting}
-                    activeTab={activeTab}
-                  />
-                  {/* <Pagination
-                  total={pagination.totalPages}
-                  page={pagination.currentPage}
-                  onChange={handlePageChange}
-                  color="pink"
-                  size="md"
-                  style={{ marginTop: "20px", marginRight: "auto" }}
-                /> */}
+                  {activeTab === TABS_VIEW.SURVIVAL && (
+                    <SurvivalModeTable
+                      className={styles.Table}
+                      tableData={saleMetrics}
+                      query={survivalModeQuery}
+                      setQuery={setSurvivalModeQuery}
+                      loading={loadingFetchSaleMetrics}
+                      setTrigger={setTrigger}
+                      setSorting={setSorting}
+                      sorting={sorting}
+                      activeTab={activeTab}
+                    />
+                  )}
                 </Tabs.Panel>
               </Tabs>
             </Grid.Col>
           </Grid>
         </Card>
       </div>
-
       <Affix position={{ bottom: 20, right: 20 }}>
         <Transition transition="slide-up" mounted={scroll.y > 0}>
           {(transitionStyles) => (

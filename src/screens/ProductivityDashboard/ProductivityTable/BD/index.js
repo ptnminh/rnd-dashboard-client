@@ -51,7 +51,7 @@ const ProductivityBDTable = ({
           return (
             <TextInput
               placeholder="Quota"
-              value={ceil(round(actualQuota / quota, 0))}
+              value={ceil(round(actualQuota / quota, 0)) || "0"}
               readOnly={true}
               styles={{
                 input: {

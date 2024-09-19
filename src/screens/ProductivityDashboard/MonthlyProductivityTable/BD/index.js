@@ -61,7 +61,7 @@ const ProductivityOPTable = ({
           return (
             <TextInput
               placeholder="Quota"
-              value={ceil(round(actualRevenue / actualQuota, 0))}
+              value={ceil(round(actualRevenue / actualQuota, 0)) || 0}
               readOnly={true}
               styles={{
                 input: {
