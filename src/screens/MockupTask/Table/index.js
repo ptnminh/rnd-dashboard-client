@@ -225,9 +225,8 @@ const BriefsTable = ({
               value={foundBrief?.templateLink || ""}
               readOnly
               onClick={() => {
-                if(foundBrief?.templateLink) {
+                if (foundBrief?.templateLink) {
                   window.open(foundBrief?.templateLink, "_blank");
-
                 }
               }}
             />
@@ -254,9 +253,8 @@ const BriefsTable = ({
               value={foundBrief?.readyToLaunchInfo?.docLink || ""}
               readOnly
               onClick={() => {
-                if(foundBrief?.readyToLaunchInfo?.docLink) {
+                if (foundBrief?.readyToLaunchInfo?.docLink) {
                   window.open(foundBrief?.readyToLaunchInfo?.docLink, "_blank");
-
                 }
               }}
             />
@@ -357,7 +355,7 @@ const BriefsTable = ({
               value={foundBrief?.photographyLink || ""}
               readOnly
               onClick={() => {
-                if(foundBrief?.photographyLink) {
+                if (foundBrief?.photographyLink) {
                   window.open(foundBrief?.photographyLink, "_blank");
                 }
               }}
@@ -618,7 +616,7 @@ const BriefsTable = ({
             />
             <Select
               placeholder="Team"
-              data={["BD1", "BD2", "BD3", "POD-Biz"]}
+              data={["BD1", "BD2", "BD3", "AMZ"]}
               styles={{
                 input: {
                   width: "100px",

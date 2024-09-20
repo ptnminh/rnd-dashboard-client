@@ -641,7 +641,7 @@ const NewCampaigns = () => {
       query: {
         actives: [0, 1],
       },
-      limit: 30,
+      limit: -1,
     });
     const { data } = response;
     if (data) {
