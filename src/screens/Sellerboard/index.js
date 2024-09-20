@@ -52,6 +52,7 @@ const Sellerboard = () => {
     .tz("America/Los_Angeles")
     .subtract(1, "month")
     .format("YYYY-MM-DD");
+  const isMounted = useRef(false);
   const currentWeek = moment().tz("America/Los_Angeles").week();
   const currentMonth = moment().tz("America/Los_Angeles").month();
   const currentYear = moment().tz("America/Los_Angeles").year();
@@ -62,7 +63,7 @@ const Sellerboard = () => {
     storeValues: ["PFH", "QZL", "GGT"],
     fulfillmentChannel: "FBA,FBM",
     fulfillmentChannelValues: ["FBA", "FBM"],
-    ordersInRange: 1,
+    minOrders: 1,
     salesDateValue: [new Date(startDate), new Date(endDate)],
     startDate,
     endDate,
@@ -95,9 +96,12 @@ const Sellerboard = () => {
           ...(query?.ordersInRange &&
             query?.startDate &&
             query?.endDate && {
-            startDate: query.startDate,
-            endDate: query.endDate,
-            ordersInRange: toNumber(query.ordersInRange),
+              startDate: query.startDate,
+              endDate: query.endDate,
+              ordersInRange: toNumber(query.ordersInRange),
+            }),
+          ...(query?.minOrders && {
+            minOrders: toNumber(query.minOrders),
           }),
         },
         [
@@ -210,7 +214,7 @@ const Sellerboard = () => {
   }, [search, navigate]);
   const [activeTab, setActiveTab] = useState(TABS_VIEW.Date);
   useEffect(() => {
-    if (!isEmpty(saleMetrics)) {
+    if (isMounted.current) {
       setSaleMetrics([]);
       setPagination({
         currentPage: 1,
@@ -265,7 +269,7 @@ const Sellerboard = () => {
           fulfillmentChannelValues: ["FBA", "FBM"],
           fulfillmentChannel: "FBA,FBM",
           ...(activeTab === TABS_VIEW.Date && {
-            ordersInRange: 1,
+            minOrders: 1,
             salesDateValue: [new Date(startDate), new Date(endDate)],
             startDate,
             endDate,
@@ -273,6 +277,8 @@ const Sellerboard = () => {
         });
       }
       setIsConfirmedQuery(true);
+    } else {
+      isMounted.current = true;
     }
   }, [activeTab]);
 
@@ -406,16 +412,22 @@ const Sellerboard = () => {
                       pagination={pagination}
                       setIsLoadmore={setIsLoadmore}
                     />
-                  ) : <div style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: "100%",
-                    height: "100%",
-                    marginTop: "20px",
-                  }}>
-                    <Loader size={30} />
-                  </div>}
+                  ) : (
+                    loadingFetchSaleMetrics && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          width: "100%",
+                          height: "100%",
+                          marginTop: "20px",
+                        }}
+                      >
+                        <Loader size={30} />
+                      </div>
+                    )
+                  )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Week}>
                   {activeTab === TABS_VIEW.Week && !isEmpty(saleMetrics) ? (
@@ -434,16 +446,22 @@ const Sellerboard = () => {
                       pagination={pagination}
                       setIsLoadmore={setIsLoadmore}
                     />
-                  ) : <div style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: "100%",
-                    height: "100%",
-                    marginTop: "20px",
-                  }}>
-                    <Loader size={30} />
-                  </div>}
+                  ) : (
+                    loadingFetchSaleMetrics && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          width: "100%",
+                          height: "100%",
+                          marginTop: "20px",
+                        }}
+                      >
+                        <Loader size={30} />
+                      </div>
+                    )
+                  )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Month}>
                   {activeTab === TABS_VIEW.Month && !isEmpty(saleMetrics) ? (
@@ -462,16 +480,22 @@ const Sellerboard = () => {
                       pagination={pagination}
                       setIsLoadmore={setIsLoadmore}
                     />
-                  ) : <div style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: "100%",
-                    height: "100%",
-                    marginTop: "20px",
-                  }}>
-                    <Loader size={30} />
-                  </div>}
+                  ) : (
+                    loadingFetchSaleMetrics && (
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          width: "100%",
+                          height: "100%",
+                          marginTop: "20px",
+                        }}
+                      >
+                        <Loader size={30} />
+                      </div>
+                    )
+                  )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.SURVIVAL}>
                   {activeTab === TABS_VIEW.SURVIVAL && !isEmpty(saleMetrics) ? (
@@ -490,16 +514,20 @@ const Sellerboard = () => {
                       setIsConfirmedQuery={setIsConfirmedQuery}
                       setIsLoadmore={setIsLoadmore}
                     />
-                  ) : <div style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    width: "100%",
-                    height: "100%",
-                    marginTop: "20px",
-                  }}>
-                    <Loader size={30} />
-                  </div>}
+                  ) : (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        width: "100%",
+                        height: "100%",
+                        marginTop: "20px",
+                      }}
+                    >
+                      <Loader size={30} />
+                    </div>
+                  )}
                 </Tabs.Panel>
               </Tabs>
             </Grid.Col>

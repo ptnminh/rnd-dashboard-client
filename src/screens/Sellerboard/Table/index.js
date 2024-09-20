@@ -27,6 +27,7 @@ import {
   flatMap,
   merge,
   isEmpty,
+  toNumber,
 } from "lodash";
 import {
   IconFilterOff,
@@ -675,6 +676,7 @@ const SellerboardTable = ({
             {activeTab === "Date" && (
               <DateRangePicker
                 size="sx"
+                // label="Created Date"
                 placeholder="Date"
                 style={{
                   width: "100px",
@@ -713,6 +715,7 @@ const SellerboardTable = ({
             {activeTab === "Week" && (
               <DateRangePicker
                 size="sx"
+                // label="Created Date"
                 showWeekNumbers
                 hoverRange="week"
                 isoWeek
@@ -754,6 +757,7 @@ const SellerboardTable = ({
             {activeTab === "Month" && (
               <DateRangePicker
                 size="sx"
+                // label="Created Date"
                 showMonthNumbers
                 hoverRange="month"
                 isoWeek
@@ -796,6 +800,7 @@ const SellerboardTable = ({
               <>
                 <DateRangePicker
                   size="sx"
+                  // label="Sales Date"
                   placeholder="Sales Date"
                   style={{
                     width: "100px",
@@ -807,7 +812,7 @@ const SellerboardTable = ({
                       salesDateValue: value,
                       startDate: moment(value[0]).format("YYYY-MM-DD"),
                       endDate: moment(value[1]).format("YYYY-MM-DD"),
-                      ordersInRange: 1,
+                      minOrders: 1,
                     });
                   }}
                   onOpen={() => {
@@ -819,7 +824,7 @@ const SellerboardTable = ({
                       salesDateValue: null,
                       startDate: null,
                       endDate: null,
-                      ordersInRange: "",
+                      minOrders: "",
                     });
                   }}
                   onShortcutClick={(shortcut) => {
@@ -828,7 +833,7 @@ const SellerboardTable = ({
                       salesDateValue: shortcut.value,
                       startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
                       endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
-                      ordersInRange: 1,
+                      minOrders: 1,
                     });
                   }}
                 />
@@ -837,11 +842,11 @@ const SellerboardTable = ({
                   style={{
                     width: "90px",
                   }}
-                  value={query?.ordersInRange}
+                  value={query?.minOrders}
                   onChange={(event) => {
                     setQuery({
                       ...query,
-                      ordersInRange: event.target.value,
+                      minOrders: event.target.value,
                     });
                   }}
                 />
@@ -941,7 +946,7 @@ const SellerboardTable = ({
                   salesDateValue: null,
                   startCreatedDate: null,
                   endCreatedDate: null,
-                  ordersInRange: "",
+                  minOrders: "",
                 });
               }}
             >
