@@ -195,6 +195,10 @@ export const PATH_NAMES = {
         title: "3. AMZ Seller Board",
         url: "/dashboard/amz-seller-board",
       },
+      POD_RANKING: {
+        title: "4. Ranking",
+        url: "/dashboard/pod-ranking",
+      }
     },
   },
 };
@@ -508,6 +512,11 @@ export const NAVIGATION = [
       {
         title: PATH_NAMES.DASHBOARD.children.AMZ_SELLER_BOARD.title,
         url: PATH_NAMES.DASHBOARD.children.AMZ_SELLER_BOARD.url,
+        permissions: ["read:user"],
+      },
+      {
+        title: PATH_NAMES.DASHBOARD.children.POD_RANKING.title,
+        url: PATH_NAMES.DASHBOARD.children.POD_RANKING.url,
         permissions: ["read:user"],
       },
     ],

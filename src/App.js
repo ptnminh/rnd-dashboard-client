@@ -34,6 +34,7 @@ import DashboardChartJS from "./screens/Dashboards/chart";
 import DashboardSetting from "./screens/DashboardSetting";
 import ProductivityDashboard from "./screens/ProductivityDashboard";
 import Sellerboard from "./screens/Sellerboard";
+import RankingPODShopifyProducts from "./screens/Ranking";
 
 function App() {
   return (
@@ -350,6 +351,14 @@ function App() {
         element={
           <Page title="MKT">
             <Sellerboard />
+          </Page>
+        }
+      />
+      <Route
+        path="/dashboard/pod-ranking"
+        element={
+          <Page title="MKT">
+            <RankingPODShopifyProducts />
           </Page>
         }
       />
