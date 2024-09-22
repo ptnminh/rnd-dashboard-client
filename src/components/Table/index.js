@@ -9,6 +9,8 @@ const Table = ({
   isShowCheckbox = false,
   onRemove,
   headerRemove,
+  editSKUs,
+  setEditSKUs,
 }) => {
   const [selectedFilters, setSelectedFilters] = useState([]);
 
@@ -44,6 +46,8 @@ const Table = ({
             isShowCheckbox={isShowCheckbox}
             onRemove={onRemove}
             headerRemove={headerRemove}
+            editSKUs={editSKUs}
+            setEditSKUs={setEditSKUs}
           />
         ))}
       </div>
