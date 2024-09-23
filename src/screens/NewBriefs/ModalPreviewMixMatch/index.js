@@ -13,6 +13,12 @@ const ModalPreviewMixMatch = ({
   handleSubmitBrief,
   editSKUs,
   setEditSKUs,
+  SKU,
+  setSKU,
+  setProductBases,
+  productBases,
+  selectedProductBases,
+  setSelectedProductBases,
 }) => {
   return (
     <Modal
@@ -81,6 +87,12 @@ const ModalPreviewMixMatch = ({
               }
               editSKUs={editSKUs}
               setEditSKUs={setEditSKUs}
+              setProductBases={setProductBases}
+              productBases={productBases}
+              SKU={SKU}
+              setSKU={setSKU}
+              selectedProductBases={selectedProductBases}
+              setSelectedProductBases={setSelectedProductBases}
             />
           </ScrollArea>
         </Grid.Col>

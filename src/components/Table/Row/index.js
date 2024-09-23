@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./Row.module.sass";
-import { filter, map, split, toUpper } from "lodash";
+import { filter, isEmpty, map, split } from "lodash";
 import { ActionIcon, Grid, Group, Image, ScrollArea, Text, TextInput, Tooltip } from "@mantine/core";
 import cn from "classnames";
 import { IconCheck } from "@tabler/icons-react";
@@ -8,7 +8,9 @@ import { rndServices } from "../../../services";
 import { modals } from '@mantine/modals';
 
 
-const Row = ({ item, headers, onRemove, headerRemove, setEditSKUs }) => {
+const Row = ({ item, headers, onRemove, headerRemove, setEditSKUs, setProductBases, productBases,
+  SKU,
+  setSKU, selectedProductBases, setSelectedProductBases }) => {
   const [loading, setLoading] = useState(false)
   const openUpdateModal = ({
     skuPrefix,
@@ -42,6 +44,46 @@ const Row = ({ item, headers, onRemove, headerRemove, setEditSKUs }) => {
           return x;
         });
       })
+      if (!isEmpty(productBases)) {
+        setProductBases((prev) => {
+          return prev.map((x) => {
+            if (x.uid === productLineId) {
+              return { ...x, skuPrefix };
+            }
+            return x;
+          });
+        });
+      }
+      if (!isEmpty(selectedProductBases)) {
+        setSelectedProductBases((prev) => {
+          return prev.map((x) => {
+            if (x.uid === productLineId) {
+              return { ...x, skuPrefix };
+            }
+            return x;
+          });
+        });
+      }
+
+      if (SKU) {
+        setSKU({
+          ...SKU,
+          ...(SKU?.productLineId === productLineId && { skuPrefix }),
+          sameLayouts: map(SKU?.sameLayouts, (x) => {
+            if (x.uid === productLineId) {
+              return { ...x, skuPrefix };
+            }
+            return x;
+          }),
+          diffLayouts: map(SKU?.diffLayouts, (x) => {
+            if (x.uid === productLineId) {
+              return { ...x, skuPrefix };
+            }
+            return x;
+          })
+
+        });
+      }
     }
     setLoading(false)
   }
@@ -62,7 +104,7 @@ const Row = ({ item, headers, onRemove, headerRemove, setEditSKUs }) => {
                 header === "Clipart" ||
                 header === "Hình Product Base" ||
                 header === "Ref" || header === "Hình Clipart" ? (
-                <ScrollArea offsetScrollbars="x" w={200}>
+                <ScrollArea offsetScrollbars="x" w={150}>
                   {Array.isArray(item[header]) ? (
                     <Grid>
                       {map(item[header], (image) => (
@@ -118,7 +160,7 @@ const Row = ({ item, headers, onRemove, headerRemove, setEditSKUs }) => {
                               </Tooltip>
                             ) : null
                           }
-                          style={{ width: "150px" }}
+                          style={{ width: "100%" }}
                           onChange={(event) => {
                             setEditSKUs((prev) =>
                               prev.map((x) => {

@@ -622,6 +622,7 @@ const NewCampaigns = () => {
   const [isKeepClipArt, setKeepClipArt] = useState(KEEP_CLIPARTS[0]);
   const [loadingQuotes, setLoadingQuotes] = useState(false);
   const [loaderIcon, setLoaderIcon] = useState(false);
+  const [isDeletingRow, setIsDeletingRow] = useState(false);
   const [usingInlineProductBaseData, setUsingProductBaseData] = useState(false);
   const handleSearchSKU = async () => {
     if (isEmpty(search)) {
@@ -720,7 +721,31 @@ const NewCampaigns = () => {
       default:
         break;
     }
+    setIsDeletingRow(true);
+
   };
+  useEffect(() => {
+    if (isDeletingRow) {
+      const skus = generateScaleProductBaseOnBriefType({
+        type: briefType,
+        SKU,
+        collections: validCollections,
+        rndSortName: find(users, { name: rndMember })?.shortName,
+        selectedClipArts,
+        selectedQuotes,
+        designs,
+        selectedProductBases,
+        rndId: find(users, { name: rndMember })?.uid,
+        selectedSKUs,
+        marketBrief,
+        grouppedCliparts,
+      })
+      setEditSKUs(skus);
+      setIsDeletingRow(false);
+    }
+  }, [
+    isDeletingRow
+  ])
 
   const {
     register,
@@ -2262,7 +2287,6 @@ const NewCampaigns = () => {
                       selectedSKUs,
                       marketBrief,
                       grouppedCliparts,
-                      setEditSKUs,
                     })
                     setEditSKUs(skus);
                   }}
@@ -2432,6 +2456,12 @@ const NewCampaigns = () => {
                 }
                 setEditSKUs={setEditSKUs}
                 editSKUs={editSKUs}
+                productBases={productBases}
+                setProductBases={setProductBases}
+                SKU={SKU}
+                setSKU={setSKU}
+                selectedProductBases={selectedProductBases}
+                setSelectedProductBases={setSelectedProductBases}
               />
             </ScrollArea>
           </Grid.Col>
@@ -2482,6 +2512,11 @@ const NewCampaigns = () => {
           marketBrief={marketBrief}
           handleRemoveRow={handleRemoveRow}
           grouppedCliparts={grouppedCliparts}
+          setProductBases={setProductBases}
+          productBases={productBases}
+          SKU={SKU}
+          setSKU={setSKU}
+          setSelectedProductBases={setSelectedProductBases}
         />
       )}
 

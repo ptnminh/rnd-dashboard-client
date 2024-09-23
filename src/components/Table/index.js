@@ -11,6 +11,12 @@ const Table = ({
   headerRemove,
   editSKUs,
   setEditSKUs,
+  setProductBases,
+  productBases,
+  SKU,
+  setSKU,
+  selectedProductBases,
+  setSelectedProductBases,
 }) => {
   const [selectedFilters, setSelectedFilters] = useState([]);
 
@@ -48,6 +54,12 @@ const Table = ({
             headerRemove={headerRemove}
             editSKUs={editSKUs}
             setEditSKUs={setEditSKUs}
+            setProductBases={setProductBases}
+            productBases={productBases}
+            SKU={SKU}
+            setSKU={setSKU}
+            selectedProductBases={selectedProductBases}
+            setSelectedProductBases={setSelectedProductBases}
           />
         ))}
       </div>
