@@ -4,10 +4,9 @@ import { filter, map, split, toUpper } from "lodash";
 import { ActionIcon, Grid, Group, Image, ScrollArea, Text, TextInput, Tooltip } from "@mantine/core";
 import cn from "classnames";
 import { IconCheck } from "@tabler/icons-react";
-import { modals } from '@mantine/modals';
 import { rndServices } from "../../../services";
 
-const Row = ({ item, headers, onRemove, headerRemove, editSKUs, setEditSKUs }) => {
+const Row = ({ item, headers, onRemove, headerRemove, setEditSKUs }) => {
   const handleUpdateProductLine = async ({ productLineId, skuPrefix }) => {
     console.log(productLineId, skuPrefix);
     const updateProductLineResponse = await rndServices.updateProductLine(productLineId, { skuPrefix });
