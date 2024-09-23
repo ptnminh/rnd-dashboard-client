@@ -1,14 +1,35 @@
-import React from "react";
+import React, { useState } from "react";
 import styles from "./Row.module.sass";
 import { filter, map, split, toUpper } from "lodash";
 import { ActionIcon, Grid, Group, Image, ScrollArea, Text, TextInput, Tooltip } from "@mantine/core";
 import cn from "classnames";
 import { IconCheck } from "@tabler/icons-react";
 import { rndServices } from "../../../services";
+import { modals } from '@mantine/modals';
+
 
 const Row = ({ item, headers, onRemove, headerRemove, setEditSKUs }) => {
+  const [loading, setLoading] = useState(false)
+  const openUpdateModal = ({
+    skuPrefix,
+    productLineId
+  }) =>
+    modals.openConfirmModal({
+      title: 'Update Product Line',
+      centered: true,
+      children: (
+        <Text size="sm">
+          Bạn đang thực hiện thay đổi SKU Prefix từ <b>XX</b> sang <b>{skuPrefix}</b>
+        </Text>
+      ),
+      labels: { confirm: 'Confirm', cancel: "Cancel" },
+      confirmProps: { color: 'green' },
+      onCancel: () => console.log('Cancel'),
+      onConfirm: () => handleUpdateProductLine({ productLineId, skuPrefix }),
+    });
   const handleUpdateProductLine = async ({ productLineId, skuPrefix }) => {
     console.log(productLineId, skuPrefix);
+    setLoading(true)
     const updateProductLineResponse = await rndServices.updateProductLine(productLineId, { skuPrefix });
     if (updateProductLineResponse) {
       setEditSKUs((prev) => {
@@ -22,7 +43,7 @@ const Row = ({ item, headers, onRemove, headerRemove, setEditSKUs }) => {
         });
       })
     }
-
+    setLoading(false)
   }
   return (
     <>
@@ -81,7 +102,21 @@ const Row = ({ item, headers, onRemove, headerRemove, setEditSKUs }) => {
                         <TextInput
                           value={item.newSku || item[header]}
                           rightSection={
-                            item.newSku !== item.sku ? <IconCheck color={"#4E83FD"} /> : null
+                            item.newSku !== item.sku ? (
+                              <Tooltip label="Update SKU Prefix">
+                                <ActionIcon
+                                  size="sm"
+                                  onClick={() => {
+                                    const skuPrefix = split(item.newSku, "-")[0];
+
+                                    openUpdateModal({ skuPrefix, productLineId: item.productLineId });
+                                  }}
+                                  loading={loading}
+                                >
+                                  <IconCheck color="#ffffff" />
+                                </ActionIcon>
+                              </Tooltip>
+                            ) : null
                           }
                           style={{ width: "150px" }}
                           onChange={(event) => {
@@ -93,13 +128,6 @@ const Row = ({ item, headers, onRemove, headerRemove, setEditSKUs }) => {
                                 return x;
                               })
                             );
-                          }}
-                          onBlur={() => {
-                            const skuPrefix = split(item.newSku, "-")[0];
-                            if (toUpper(skuPrefix) === "XX" || skuPrefix === "" || toUpper(skuPrefix) === "X") {
-                              return;
-                            }
-                            handleUpdateProductLine({ productLineId: item.productLineId, skuPrefix });
                           }}
                         />
 
