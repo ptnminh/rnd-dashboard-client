@@ -47,8 +47,8 @@ const SellerboardTable = ({
   openPreviewImage,
   setSelectedProduct,
 }) => {
-  const handleUpdateRanking = async (uid, data) => {
-    await rankingServices.updateRanking(uid, data);
+  const handleUpdateRanking = async (id, data) => {
+    await rankingServices.updateRanking({ id, data });
   }
   // Function to extract unique keys from the data array
   const extractUniqueKeys = (dataset) => {
@@ -279,8 +279,8 @@ const SellerboardTable = ({
           if (row.id === `Total theo ${activeTab}`) {
             return null;
           }
-          const uid = row.original.uid;
-          const payload = find(data, { uid });
+          const id = row.original.id;
+          const payload = find(data, { id });
           const value = payload?.value || 2;
           let color = null;
           switch (value) {
@@ -304,7 +304,7 @@ const SellerboardTable = ({
             value={CONVERT_NUMBER_TO_STATUS[value]}
             onChange={(value) => {
               const newData = data.map((item) => {
-                if (item.uid === uid) {
+                if (item.id === id) {
                   return {
                     ...item,
                     value: CONVERT_STATUS_TO_NUMBER[value],
@@ -313,7 +313,7 @@ const SellerboardTable = ({
                 return item;
               });
               setData(newData);
-              handleUpdateRanking(uid, { value: CONVERT_STATUS_TO_NUMBER[value] });
+              handleUpdateRanking(id, { value: CONVERT_STATUS_TO_NUMBER[value] });
             }}
           />
         },
@@ -343,8 +343,8 @@ const SellerboardTable = ({
             return null;
           }
           let color = null;
-          const uid = row.original.uid;
-          const payload = find(data, { uid });
+          const id = row.original.id;
+          const payload = find(data, { id });
           const size = payload?.size || 2;
           switch (size) {
             case 1:
@@ -368,7 +368,7 @@ const SellerboardTable = ({
               value={CONVERT_NUMBER_TO_STATUS[size]}
               onChange={(value) => {
                 const newData = data.map((item) => {
-                  if (item.uid === uid) {
+                  if (item.id === id) {
                     return {
                       ...item,
                       size: CONVERT_STATUS_TO_NUMBER[value],
@@ -377,7 +377,7 @@ const SellerboardTable = ({
                   return item;
                 });
                 setData(newData);
-                handleUpdateRanking(uid, { size: CONVERT_STATUS_TO_NUMBER[value] });
+                handleUpdateRanking(id, { size: CONVERT_STATUS_TO_NUMBER[value] });
               }}
             />
           )

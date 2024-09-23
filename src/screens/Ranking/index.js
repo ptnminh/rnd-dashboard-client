@@ -17,7 +17,7 @@ import {
   Transition,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
-import { amzServices, rankingServices } from "../../services";
+import { rankingServices } from "../../services";
 import Table from "./Table";
 import { isEmpty, join, omit, toNumber, values } from "lodash";
 import moment from "moment-timezone";
