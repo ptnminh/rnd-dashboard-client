@@ -236,13 +236,13 @@ export const rndServices = {
         } else {
           showNotification(
             "Thất bại",
-            result?.message || "Cập nhật thất bại",
+            result?.message || "Cập nhật SKU Prefix thất bại",
             "red"
           );
         }
         return false;
       }
-      showNotification("Thành công", "Cập nhật thành công", "green");
+      showNotification("Thành công", "Cập nhật SKU Prefix thành công", "green");
       return true;
     } catch (error) {
       const code = error?.response?.data?.code;

@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./Row.module.sass";
-import { filter, map, split } from "lodash";
+import { filter, map, split, toUpper } from "lodash";
 import { ActionIcon, Grid, Group, Image, ScrollArea, Text, TextInput, Tooltip } from "@mantine/core";
 import cn from "classnames";
 import { IconCheck } from "@tabler/icons-react";
@@ -8,23 +8,6 @@ import { modals } from '@mantine/modals';
 import { rndServices } from "../../../services";
 
 const Row = ({ item, headers, onRemove, headerRemove, editSKUs, setEditSKUs }) => {
-  const openUpdateModal = ({
-    skuPrefix,
-    productLineId
-  }) =>
-    modals.openConfirmModal({
-      title: 'Update Product Line',
-      centered: true,
-      children: (
-        <Text size="sm">
-          Bạn đang thực hiện thay đổi SKU Prefix từ <b>XX</b> sang <b>{skuPrefix}</b>
-        </Text>
-      ),
-      labels: { confirm: 'Confirm', cancel: "Cancel" },
-      confirmProps: { color: 'green' },
-      onCancel: () => console.log('Cancel'),
-      onConfirm: () => handleUpdateProductLine({ productLineId, skuPrefix }),
-    });
   const handleUpdateProductLine = async ({ productLineId, skuPrefix }) => {
     console.log(productLineId, skuPrefix);
     const updateProductLineResponse = await rndServices.updateProductLine(productLineId, { skuPrefix });
@@ -47,7 +30,7 @@ const Row = ({ item, headers, onRemove, headerRemove, editSKUs, setEditSKUs }) =
       <div
         className={cn({
           [styles.row]: true,
-          [styles.active]: item && item?.SKU?.startsWith("XX"),
+          [styles.active]: item && (item?.SKU?.startsWith("XX") && !item?.newSku),
         })}
       >
         {map(
@@ -96,22 +79,12 @@ const Row = ({ item, headers, onRemove, headerRemove, editSKUs, setEditSKUs }) =
                         justifyContent: "space-between",
                         width: "150px",
                       }}>
-                        {item.productLineId && (
-                          <Tooltip label="Update SKU Prefix">
-                            <ActionIcon
-                              size="sm"
-                              onClick={() => {
-                                const skuPrefix = split(item.newSku, "-")[0];
-                                openUpdateModal({ skuPrefix, productLineId: item.productLineId });
-                              }}
-                            >
-                              <IconCheck />
-                            </ActionIcon>
-                          </Tooltip>
-                        )}
                         <TextInput
                           value={item.newSku || item[header]}
-                          style={{ width: "100px" }}
+                          rightSection={
+                            item.newSku !== item.sku ? <IconCheck color={"#4E83FD"} /> : null
+                          }
+                          style={{ width: "150px" }}
                           onChange={(event) => {
                             setEditSKUs((prev) =>
                               prev.map((x) => {
@@ -121,6 +94,13 @@ const Row = ({ item, headers, onRemove, headerRemove, editSKUs, setEditSKUs }) =
                                 return x;
                               })
                             );
+                          }}
+                          onBlur={() => {
+                            const skuPrefix = split(item.newSku, "-")[0];
+                            if (toUpper(skuPrefix) === "XX" || skuPrefix === "" || toUpper(skuPrefix) === "X") {
+                              return;
+                            }
+                            handleUpdateProductLine({ productLineId: item.productLineId, skuPrefix });
                           }}
                         />
 
