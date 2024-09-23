@@ -1,23 +1,24 @@
 import { Grid, Modal, ScrollArea } from "@mantine/core";
 import CustomTable from "../../../components/Table";
-import { find } from "lodash";
 const ModalPreviewMixMatch = ({
   opened,
   close,
   batch,
   workGroup,
   rndMember,
-  generateScaleProductBaseOnBriefType,
   briefType,
-  users,
-  selectedClipArts,
-  selectedProductBases,
   generateHeaderTable,
   handleRemoveRow,
   isKeepClipArt,
   handleSubmitBrief,
-  marketBrief,
-  grouppedCliparts,
+  editSKUs,
+  setEditSKUs,
+  SKU,
+  setSKU,
+  setProductBases,
+  productBases,
+  selectedProductBases,
+  setSelectedProductBases,
 }) => {
   return (
     <Modal
@@ -78,20 +79,20 @@ const ModalPreviewMixMatch = ({
         <Grid.Col span={12}>
           <ScrollArea h={300} scrollbars="y" scrollbarSize={2}>
             <CustomTable
-              items={generateScaleProductBaseOnBriefType({
-                type: briefType,
-                rndSortName: find(users, { name: rndMember })?.shortName,
-                selectedClipArts,
-                selectedProductBases,
-                rndId: find(users, { name: rndMember })?.uid,
-                marketBrief,
-                grouppedCliparts,
-              })}
+              items={editSKUs}
               headers={generateHeaderTable(briefType, isKeepClipArt)?.headers}
               onRemove={handleRemoveRow}
               headerRemove={
                 generateHeaderTable(briefType, isKeepClipArt)?.removeHeader
               }
+              editSKUs={editSKUs}
+              setEditSKUs={setEditSKUs}
+              setProductBases={setProductBases}
+              productBases={productBases}
+              SKU={SKU}
+              setSKU={setSKU}
+              selectedProductBases={selectedProductBases}
+              setSelectedProductBases={setSelectedProductBases}
             />
           </ScrollArea>
         </Grid.Col>
