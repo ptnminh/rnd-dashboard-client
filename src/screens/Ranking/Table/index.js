@@ -6,13 +6,8 @@ import {
   Grid,
   Image,
   Button,
-  MultiSelect,
   Badge,
-  Tooltip,
-  Group,
   Select,
-  TextInput,
-  ActionIcon,
 } from "@mantine/core";
 import {
   find,
@@ -21,31 +16,23 @@ import {
   uniq,
   join,
   split,
-  values,
   filter,
   sumBy,
   flatMap,
   merge,
+  keys,
   isEmpty,
-  toNumber,
 } from "lodash";
-import {
-  IconFilterOff,
-  IconSortDescending,
-  IconSortAscending,
-  IconArrowsSort,
-} from "@tabler/icons-react";
-import classes from "./MyTable.module.css";
-import {
-  AMZ_SORTING,
-  AMZ_STORES,
-  FULFILLMENT_CHANNELS,
-} from "../../../constant";
-import moment from "moment-timezone";
-import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
-import { DateRangePicker } from "rsuite";
-import LazyLoad from "react-lazyload";
 
+import classes from "./MyTable.module.css";
+import { CONVERT_NUMBER_TO_STATUS, CONVERT_STATUS_TO_NUMBER, SIZES, VALUES } from "../../../utils";
+import LazyLoad from "react-lazyload";
+import { rankingServices } from "../../../services";
+
+const TARGET_MODES = {
+  ORDERS: "Orders",
+  RANKING: "Ranking",
+}
 const SellerboardTable = ({
   tableData,
   query,
@@ -53,11 +40,16 @@ const SellerboardTable = ({
   sorting,
   setSorting,
   setQuery,
-  activeTab,
+  activeTab = "date",
   setPagination,
   pagination,
   setIsLoadmore,
+  openPreviewImage,
+  setSelectedProduct,
 }) => {
+  const handleUpdateRanking = async (uid, data) => {
+    await rankingServices.updateRanking(uid, data);
+  }
   // Function to extract unique keys from the data array
   const extractUniqueKeys = (dataset) => {
     // Flatten the 'data' arrays from each item and map to the 'key' property
@@ -74,10 +66,9 @@ const SellerboardTable = ({
   const generateCustomColumn = (data) => {
     const keyLevels = extractUniqueKeys(data);
     const columns = map(keyLevels, (keyLevel) => {
-      const header = join(split(keyLevel, " ")?.slice(0, -1), " ");
       return {
         accessorKey: keyLevel,
-        header,
+        header: keyLevel,
         size: 100,
         maxSize: 150,
         enableEditing: false,
@@ -95,7 +86,7 @@ const SellerboardTable = ({
           if (row.id === `Total theo ${activeTab}`) {
             return (
               <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                {row.original[header]}
+                {row.original[keyLevel]}
               </Text>
             );
           }
@@ -109,7 +100,7 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                {keyData?.orders}
+                {query?.mode[0] === TARGET_MODES.ORDERS ? keyData?.ordersChange || 0 : keyData?.rankChange || 0}
               </Text>
             </Flex>
           );
@@ -134,7 +125,8 @@ const SellerboardTable = ({
         const keyLevels = flatMap(data, "data");
         const keyData = filter(keyLevels, (keyLevel) => keyLevel.key === key);
         const header = join(split(key, " ")?.slice(0, -1), " ");
-        const totalOrders = sumBy(keyData, "orders");
+        const view = query?.mode[0] === TARGET_MODES.ORDERS ? "ordersChange" : "rankChange"
+        const totalOrders = sumBy(keyData, view) || 0;
         return {
           [header]: totalOrders?.toLocaleString(),
         };
@@ -144,8 +136,8 @@ const SellerboardTable = ({
       id: `Total theo ${activeTab}`, // Unique ID for the Total theo ${activeTab} row
       product: `Summary`,
       totalInRanges: sumBy(data, (row) =>
-        sumBy(row.data, "orders")
-      )?.toLocaleString(), // Example: sum of orders
+        sumBy(row.data, query?.mode[0] === TARGET_MODES.ORDERS ? "ordersChange" : "rankChange")
+      )?.toLocaleString() || 0, // Example: sum of orders
       ...columns,
     };
   }, [data, customColumns]);
@@ -156,35 +148,6 @@ const SellerboardTable = ({
     [data, summaryRow]
   );
 
-  useEffect(() => {
-    if (
-      customColumns.length < 8 &&
-      customColumns.length > 0 &&
-      activeTab === "Month"
-    ) {
-      let virtualColumn = [];
-      virtualColumn = Array(10 - customColumns.length)
-        .fill(0)
-        .map((_, i) => ({
-          accessorKey: `virtualColumn${i}`,
-          header: "",
-          size: 100, // Set default size
-          maxSize: 150, // Maximum size
-          enableEditing: false,
-          enableSorting: false,
-          mantineTableBodyCellProps: {
-            className: classes["body-cells"],
-          },
-          mantineTableHeadCellProps: {
-            className: classes["edit-header"],
-          },
-          Cell: () => {
-            return <Text style={{ fontSize: 16, fontWeight: "bold" }}></Text>;
-          },
-        }));
-      setCustomColumns([...customColumns, ...virtualColumn]);
-    }
-  }, [data]);
   // UseMemo to construct final columns array
   const columns = useMemo(
     () => [
@@ -219,35 +182,29 @@ const SellerboardTable = ({
             );
           }
           const {
-            ASIN,
-            title,
             image,
-            store,
-            fulfillmentChannel,
-            sku,
-            totalOrders,
+            createdDate,
+            link,
           } = row.original;
-          const url = `https://www.amazon.com/dp/${ASIN}`;
           return (
             <Flex direction="column">
               <Grid>
                 <Grid.Col span={4}>
-                  <Tooltip label={url}>
-                    <LazyLoad height={50} once={true}>
-                      <Image
-                        src={image || "/images/content/not_found_2.jpg"}
-                        width="100%"
-                        height="50px"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          window.open(url, "_blank");
-                        }}
-                        fit="contain"
-                      />
-                    </LazyLoad>
-                  </Tooltip>
+                  <LazyLoad height={50} once={true}>
+                    <Image
+                      src={image || "/images/content/not_found_2.jpg"}
+                      width="100%"
+                      height="50px"
+                      style={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        setSelectedProduct(row.original);
+                        openPreviewImage();
+                      }}
+                      fit="contain"
+                    />
+                  </LazyLoad>
                 </Grid.Col>
                 <Grid.Col span={8}>
                   <Grid>
@@ -262,13 +219,18 @@ const SellerboardTable = ({
                           style={{
                             fontSize: 14,
                             fontWeight: "bold",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            window.open(link, "_blank");
                           }}
                         >
-                          {sku}
+                          <Badge color="blue" style={{ marginRight: 5 }}>
+                            link
+                          </Badge>
                         </Text>
                       </Flex>
                     </Grid.Col>
-
                     <Grid.Col
                       span={12}
                       style={{
@@ -276,20 +238,15 @@ const SellerboardTable = ({
                         justifyContent: "start",
                       }}
                     >
-                      <Tooltip label={url}>
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: "gray",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => {
-                            window.open(url, "_blank");
-                          }}
-                        >
-                          {ASIN} - {fulfillmentChannel}
-                        </Text>
-                      </Tooltip>
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          color: "gray",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {createdDate}
+                      </Text>
                     </Grid.Col>
                   </Grid>
                 </Grid.Col>
@@ -299,7 +256,8 @@ const SellerboardTable = ({
         },
       },
       {
-        accessorKey: "createdDate",
+        accessorKey: "value",
+        header: "Value",
         size: 150,
         maxSize: 150,
         enableEditing: false,
@@ -317,135 +275,54 @@ const SellerboardTable = ({
             className: classes["head-cells-op-team"],
           };
         },
-        Header: () => {
-          return (
-            <Group gap={5}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "bold",
-                }}
-              >
-                Summary
-              </Text>
-              {!query?.primarySortBy && (
-                <ActionIcon
-                  aria-label="Settings"
-                  variant="default"
-                  style={{
-                    background: "none",
-                    border: "none",
-                  }}
-                  onClick={() => {
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                    setQuery({
-                      ...query,
-                      primarySortBy: "totalOrders",
-                      primarySortDir: "desc",
-                    });
-                  }}
-                >
-                  <IconArrowsSort
-                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
-                    stroke={2}
-                  />
-                </ActionIcon>
-              )}
-
-              {query?.primarySortBy === "totalOrders" &&
-                query?.primarySortDir === "desc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    onClick={() => {
-                      setQuery({
-                        ...query,
-                        primarySortBy: "totalOrders",
-                        primarySortDir: "asc",
-                      });
-                    }}
-                  >
-                    <IconSortDescending
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
-              {query?.primarySortBy === "totalOrders" &&
-                query?.primarySortDir === "asc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    onClick={() => {
-                      setQuery({
-                        ...query,
-                        primarySortBy: null,
-                        primarySortDir: null,
-                      });
-                    }}
-                  >
-                    <IconSortAscending
-                      style={{
-                        width: "70%",
-                        height: "70%",
-                        fontWeight: "bold",
-                      }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
-            </Group>
-          );
-        },
         Cell: ({ row }) => {
           if (row.id === `Total theo ${activeTab}`) {
             return null;
           }
-          const { createdDate, totalOrders } = row.original;
-          return (
-            <Group
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: "12px",
-                  fontWeight: "bold",
-                }}
-              >
-                {totalOrders?.toLocaleString()}
-              </Text>
-              <Text
-                style={{
-                  fontSize: "12px",
-                  fontWeight: "thin",
-                  color: "gray",
-                }}
-              >
-                {moment(createdDate)
-                  .tz("America/Los_Angeles")
-                  .format("DD MMM YYYY")}
-              </Text>
-            </Group>
-          );
+          const uid = row.original.uid;
+          const payload = find(data, { uid });
+          const value = payload?.value || 2;
+          let color = null;
+          switch (value) {
+            case 1:
+              color = "#cfcfcf";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "green";
+              break;
+            case 4:
+              color = "#38761C";
+              break;
+            default:
+              break;
+          }
+          return <Select
+            data={keys(VALUES)}
+            value={CONVERT_NUMBER_TO_STATUS[value]}
+            onChange={(value) => {
+              const newData = data.map((item) => {
+                if (item.uid === uid) {
+                  return {
+                    ...item,
+                    value: CONVERT_STATUS_TO_NUMBER[value],
+                  };
+                }
+                return item;
+              });
+              setData(newData);
+              handleUpdateRanking(uid, { value: CONVERT_STATUS_TO_NUMBER[value] });
+            }}
+          />
         },
       },
       {
-        accessorKey: "value",
-        header: "Value",
-        size: 50,
-        maxSize: 50,
+        accessorKey: "size",
+        header: "Size",
+        size: 150,
+        maxSize: 150,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -466,8 +343,10 @@ const SellerboardTable = ({
             return null;
           }
           let color = null;
-          const value = row.original.value || 2;
-          switch (value) {
+          const uid = row.original.uid;
+          const payload = find(data, { uid });
+          const size = payload?.size || 2;
+          switch (size) {
             case 1:
               color = "#cfcfcf";
               break;
@@ -483,18 +362,30 @@ const SellerboardTable = ({
             default:
               break;
           }
-          return color ? (
-            <Badge color={color} variant="filled">
-              {CONVERT_NUMBER_TO_STATUS[value]}
-            </Badge>
-          ) : (
-            <span>{CONVERT_NUMBER_TO_STATUS[value]}</span>
-          );
+          return (
+            <Select
+              data={keys(SIZES)}
+              value={CONVERT_NUMBER_TO_STATUS[size]}
+              onChange={(value) => {
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
+                      size: CONVERT_STATUS_TO_NUMBER[value],
+                    };
+                  }
+                  return item;
+                });
+                setData(newData);
+                handleUpdateRanking(uid, { size: CONVERT_STATUS_TO_NUMBER[value] });
+              }}
+            />
+          )
         },
       },
       {
         accessorKey: "totalInRanges",
-        header: "Total In Ranges",
+        header: "Total Changes",
         size: 50,
         maxSize: 50,
         enableEditing: false,
@@ -520,7 +411,8 @@ const SellerboardTable = ({
               </Text>
             );
           }
-          const totalOrders = sumBy(row.original.data, "orders");
+          const view = query?.mode[0] === TARGET_MODES.ORDERS ? "ordersChange" : "rankChange"
+          const totalOrders = sumBy(row.original.data, view);
           return (
             <Text
               style={{
@@ -570,383 +462,7 @@ const SellerboardTable = ({
             width: "100%",
           }}
         >
-          <Flex
-            style={{
-              gap: "8px",
-              padding: "10px",
-              borderRadius: "10px",
-              backgroundColor: "#EFF0F1",
-              flexWrap: "wrap",
-              width: "100%",
-            }}
-          >
-            <MultiSelect
-              placeholder="Store"
-              data={AMZ_STORES}
-              styles={{
-                input: {
-                  width: "130px",
-                  minHeight: "35px",
-                },
-                inputField: {
-                  display: "none",
-                },
-              }}
-              value={
-                arraysMatchUnordered(query?.storeValues, ["PFH", "QZL", "GGT"])
-                  ? ["All"]
-                  : query?.storeValues || []
-              }
-              onChange={(value) => {
-                if (value.length === 1 && value[0] === "All") {
-                  const newValues = ["PFH", "QZL", "GGT"];
-                  setQuery({
-                    ...query,
-                    stores: join(newValues, ","),
-                    storeValues: newValues,
-                  });
-                } else {
-                  const realValues = filter(value, (v) => v !== "All");
-                  setQuery({
-                    ...query,
-                    stores: join(realValues, ","),
-                    storeValues: realValues,
-                  });
-                }
-              }}
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  stores: null,
-                  storeValues: [],
-                });
-              }}
-            />
-            <MultiSelect
-              placeholder="Channel"
-              data={FULFILLMENT_CHANNELS}
-              styles={{
-                input: {
-                  width: "130px",
-                  minHeight: "35px",
-                },
-                inputField: {
-                  display: "none",
-                },
-              }}
-              value={
-                arraysMatchUnordered(query?.fulfillmentChannelValues, [
-                  "FBA",
-                  "FBM",
-                ])
-                  ? ["All"]
-                  : query?.fulfillmentChannelValues || []
-              }
-              onChange={(value) => {
-                if (value.length === 1 && value[0] === "All") {
-                  const newValues = ["FBA", "FBM"];
-                  setQuery({
-                    ...query,
-                    fulfillmentChannel: join(newValues, ","),
-                    fulfillmentChannelValues: newValues,
-                  });
-                } else {
-                  const realValues = filter(value, (v) => v !== "All");
-                  setQuery({
-                    ...query,
-                    fulfillmentChannel: join(realValues, ","),
-                    fulfillmentChannelValues: realValues,
-                  });
-                }
-              }}
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  fulfillmentChannel: null,
-                  fulfillmentChannelValues: [],
-                });
-              }}
-            />
-            {activeTab === "Date" && (
-              <DateRangePicker
-                size="sx"
-                // label="Created Date"
-                placeholder="Date"
-                style={{
-                  width: "100px",
-                }}
-                value={query.dateValue}
-                onOk={(value) =>
-                  setQuery({
-                    ...query,
-                    dateValue: value,
-                    startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
-                    endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
-                  })
-                }
-                onClean={() => {
-                  setQuery({
-                    ...query,
-                    dateValue: null,
-                    startCreatedDate: null,
-                    endCreatedDate: null,
-                  });
-                }}
-                onShortcutClick={(shortcut) => {
-                  setQuery({
-                    ...query,
-                    dateValue: shortcut.value,
-                    startCreatedDate: moment(shortcut.value[0]).format(
-                      "YYYY-MM-DD"
-                    ),
-                    endCreatedDate: moment(shortcut.value[1]).format(
-                      "YYYY-MM-DD"
-                    ),
-                  });
-                }}
-              />
-            )}
-            {activeTab === "Week" && (
-              <DateRangePicker
-                size="sx"
-                // label="Created Date"
-                showWeekNumbers
-                hoverRange="week"
-                isoWeek
-                placeholder="Week"
-                style={{
-                  width: "100px",
-                }}
-                value={query.dateValue}
-                onOk={(value) =>
-                  setQuery({
-                    ...query,
-                    dateValue: value,
-                    startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
-                    endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
-                  })
-                }
-                onClean={() => {
-                  setQuery({
-                    ...query,
-                    dateValue: null,
-                    startCreatedDate: null,
-                    endCreatedDate: null,
-                  });
-                }}
-                onShortcutClick={(shortcut, event) => {
-                  setQuery({
-                    ...query,
-                    dateValue: shortcut.value,
-                    startCreatedDate: moment(shortcut.value[0]).format(
-                      "YYYY-MM-DD"
-                    ),
-                    endCreatedDate: moment(shortcut.value[1]).format(
-                      "YYYY-MM-DD"
-                    ),
-                  });
-                }}
-              />
-            )}
-            {activeTab === "Month" && (
-              <DateRangePicker
-                size="sx"
-                // label="Created Date"
-                showMonthNumbers
-                hoverRange="month"
-                isoWeek
-                placeholder="Month"
-                style={{
-                  width: "100px",
-                }}
-                value={query.dateValue}
-                onOk={(value) =>
-                  setQuery({
-                    ...query,
-                    dateValue: value,
-                    startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
-                    endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
-                  })
-                }
-                onClean={() => {
-                  setQuery({
-                    ...query,
-                    dateValue: null,
-                    startCreatedDate: null,
-                    endCreatedDate: null,
-                  });
-                }}
-                onShortcutClick={(shortcut, event) => {
-                  setQuery({
-                    ...query,
-                    dateValue: shortcut.value,
-                    startCreatedDate: moment(shortcut.value[0]).format(
-                      "YYYY-MM-DD"
-                    ),
-                    endCreatedDate: moment(shortcut.value[1]).format(
-                      "YYYY-MM-DD"
-                    ),
-                  });
-                }}
-              />
-            )}
-            {activeTab === "Date" && (
-              <>
-                <DateRangePicker
-                  size="sx"
-                  // label="Sales Date"
-                  placeholder="Sales Date"
-                  style={{
-                    width: "100px",
-                  }}
-                  value={query.salesDateValue}
-                  onOk={(value) => {
-                    setQuery({
-                      ...query,
-                      salesDateValue: value,
-                      startDate: moment(value[0]).format("YYYY-MM-DD"),
-                      endDate: moment(value[1]).format("YYYY-MM-DD"),
-                      minOrders: 1,
-                    });
-                  }}
-                  onOpen={() => {
-                    console.log("open");
-                  }}
-                  onClean={() => {
-                    setQuery({
-                      ...query,
-                      salesDateValue: null,
-                      startDate: null,
-                      endDate: null,
-                      minOrders: "",
-                    });
-                  }}
-                  onShortcutClick={(shortcut) => {
-                    setQuery({
-                      ...query,
-                      salesDateValue: shortcut.value,
-                      startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
-                      endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
-                      minOrders: 1,
-                    });
-                  }}
-                />
-                <TextInput
-                  placeholder="Min Orders"
-                  style={{
-                    width: "90px",
-                  }}
-                  value={query?.minOrders}
-                  onChange={(event) => {
-                    setQuery({
-                      ...query,
-                      minOrders: event.target.value,
-                    });
-                  }}
-                />
-              </>
-            )}
-            <Select
-              placeholder="Sorting"
-              data={values(AMZ_SORTING)}
-              styles={{
-                input: {
-                  width: "150px",
-                },
-              }}
-              value={query?.sortValue || null}
-              onChange={(value) => {
-                let primarySortBy = "";
-                let primarySortDir = "";
-                switch (value) {
-                  case AMZ_SORTING.ordersAsc:
-                    primarySortBy = "totalOrders";
-                    primarySortDir = "asc";
-                    break;
-                  case AMZ_SORTING.ordersDesc:
-                    primarySortBy = "totalOrders";
-                    primarySortDir = "desc";
-                    break;
-                  case AMZ_SORTING.saleInRangeAsc:
-                    primarySortBy = "ordersInRange";
-                    primarySortDir = "asc";
-                    break;
-                  case AMZ_SORTING.saleInRangeDesc:
-                    primarySortBy = "ordersInRange";
-                    primarySortDir = "desc";
-                    break;
-                  case AMZ_SORTING.createdDateAsc:
-                    primarySortBy = "createdDate";
-                    primarySortDir = "asc";
-                    break;
-                  case AMZ_SORTING.createdDateDesc:
-                    primarySortBy = "createdDate";
-                    primarySortDir = "desc";
-                    break;
-                  default:
-                    value = null;
-                }
-                setQuery({
-                  ...query,
-                  sortValue: value,
-                  primarySortBy,
-                  primarySortDir,
-                });
-              }}
-              clearable
-              searchable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  sortValue: null,
-                  primarySortBy: null,
-                  primarySortDir: null,
-                });
-              }}
-            />
-            <Button
-              loading={loading}
-              onClick={() => {
-                setIsLoadmore(false);
-                setPagination({
-                  ...pagination,
-                  currentPage: 1,
-                });
-              }}
-            >
-              Confirm
-            </Button>
-            <Button
-              onClick={() => {
-                setPagination({
-                  ...pagination,
-                  currentPage: 1,
-                });
-                setQuery({
-                  stores: null,
-                  fulfillmentChannel: null,
-                  fulfillmentChannelValues: [],
-                  sortValue: null,
-                  sortBy: null,
-                  sortDir: null,
-                  storeValues: [],
-                  dateValue: null,
-                  startDate: null,
-                  endDate: null,
-                  primarySortBy: null,
-                  primarySortDir: null,
-                  salesDateValue: null,
-                  startCreatedDate: null,
-                  endCreatedDate: null,
-                  minOrders: "",
-                });
-              }}
-            >
-              <IconFilterOff />
-            </Button>
-          </Flex>
+
         </div>
       );
     },
@@ -986,7 +502,9 @@ const SellerboardTable = ({
     },
   });
 
-  return !isEmpty(tableData) ? <MantineReactTable table={table} /> : null;
+  return !isEmpty(tableData) && !isEmpty(customColumns) ? (
+    <MantineReactTable table={table} />
+  ) : null;
 };
 
 export default SellerboardTable;

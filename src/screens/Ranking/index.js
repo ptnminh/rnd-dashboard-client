@@ -9,22 +9,19 @@ import {
   Flex,
   Grid,
   Group,
+  Image,
   Loader,
-  MultiSelect,
-  Radio,
+  Modal,
   rem,
-  Select,
-  Switch,
-  Tabs,
-  TextInput,
+  Text,
   Transition,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
-import { amzServices } from "../../services";
+import { amzServices, rankingServices } from "../../services";
 import Table from "./Table";
-import { filter, isEmpty, join, omit, toLower, toNumber, values } from "lodash";
+import { isEmpty, join, omit, toNumber, values } from "lodash";
 import moment from "moment-timezone";
-import { useWindowScroll } from "@mantine/hooks";
+import { useDisclosure, useWindowScroll } from "@mantine/hooks";
 import { IconArrowUp } from "@tabler/icons-react";
 
 
@@ -49,11 +46,16 @@ const RankingPODShopifyProducts = () => {
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const initialSearch = queryParams.get("search") || "";
+  const [selectedProduct, setSelectedProduct] = useState({});
+  const [openedPreviewImage, {
+    close: closePreviewImage,
+    open: openPreviewImage,
+  }] = useDisclosure(false);
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
-  const [isConfirmedQuery, setIsConfirmedQuery] = useState(true);
+  // const [isConfirmedQuery, setIsConfirmedQuery] = useState(true);
   const [isLoadmore, setIsLoadmore] = useState(false);
-  const [saleMetrics, setSaleMetrics] = useState([]);
+  const [productRankings, setProductRankings] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
   const [pagination, setPagination] = useState({
     currentPage: initialPage,
@@ -61,9 +63,6 @@ const RankingPODShopifyProducts = () => {
   });
   const threeDayAgo = moment().subtract(3, "days").format("YYYY-MM-DD");
   const sevenDayAgo = moment().subtract(7, "days").format("YYYY-MM-DD");
-  const isMounted = useRef(false);
-  const currentWeek = moment().week();
-  const currentYear = moment().year();
   const endDate = moment().format("YYYY-MM-DD");
   const [query, setQuery] = useState({
     competitors: values(TARGET_COMPETITORS),
@@ -72,17 +71,25 @@ const RankingPODShopifyProducts = () => {
     mode: [TARGET_MODES.ORDERS],
     targetDate: [TARGET_DATES.TODAY],
   });
-  const [sorting, setSorting] = useState();
+  const [sorting, setSorting] = useState([
+    {
+      id: moment(endDate).format("MMM DD"),
+      desc: true,
+    },
+  ]);
+  const isMounted = useRef(false);
+
   const [trigger, setTrigger] = useState(false);
   const [loadingFetchRankings, setLoadingFetchRankings] = useState(true);
   const fetchRankings = async (page) => {
     setLoadingFetchRankings(true);
-    const response = await amzServices.fetchSaleMetrics({
+    const response = await rankingServices.fetchRankingMetrics({
       page,
       query: omit(
         {
           ...query,
-          mode: query.mode[0],
+          view: query.mode[0] === TARGET_MODES.ORDERS ? "order" : "rank",
+          competitors: join(query.competitors, ","),
         },
         [
           "sortValue",
@@ -91,26 +98,28 @@ const RankingPODShopifyProducts = () => {
           "isConfirmed",
           "fulfillmentChannelValues",
           "salesDateValue",
+          "mode",
+          "targetDate",
         ]
       ),
       limit: 50,
       sorting,
     });
-    const { data, metaData } = response;
+    const { data, metadata } = response;
     if (data) {
       if (isLoadmore) {
-        setSaleMetrics((prev) => [...prev, ...data]);
+        setProductRankings((prev) => [...prev, ...data]);
       } else {
-        setSaleMetrics(data);
+        setProductRankings(data);
       }
       setPagination({
-        currentPage: toNumber(metaData.currentPage) || 1,
-        totalPages: toNumber(metaData.totalPages) || 1,
+        currentPage: toNumber(metadata.currentPage) || 1,
+        totalPages: toNumber(metadata.totalPages) || 1,
       });
     } else {
-      setSaleMetrics([]);
+      setProductRankings([]);
     }
-    setIsConfirmedQuery(false);
+    // setIsConfirmedQuery(false);
     setIsLoadmore(false);
     setLoadingFetchRankings(false);
     setTrigger(false);
@@ -127,14 +136,18 @@ const RankingPODShopifyProducts = () => {
 
   // listen sorting change set isConfirmedQuery to true for refetch data
   useEffect(() => {
-    if (!isEmpty(sorting)) {
-      setPagination({
-        ...pagination,
-        currentPage: 1,
-      });
+    if (isMounted.current) {
+      if (!isEmpty(sorting)) {
+        setPagination({
+          ...pagination,
+          currentPage: 1,
+        });
+      }
+    } else {
+      isMounted.current = true;
     }
-  }, [sorting]);
 
+  }, [sorting]);
   useEffect(() => {
     const params = new URLSearchParams();
     if (search) params.set("search", search);
@@ -197,7 +210,12 @@ const RankingPODShopifyProducts = () => {
                       } else {
                         realValue = value[1] ? [value[1]] : value
                       }
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      })
                       switch (realValue[0]) {
+
                         case TARGET_DATES.TODAY:
                           setQuery({
                             ...query,
@@ -288,7 +306,13 @@ const RankingPODShopifyProducts = () => {
                 }}>
                   <Checkbox.Group
                     value={query?.competitors}
-                    onChange={(value) => setQuery({ ...query, competitors: value })}
+                    onChange={(value) => {
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      })
+                      setQuery({ ...query, competitors: value })
+                    }}
                   >
                     <Group styles={{
                       root: {
@@ -326,6 +350,10 @@ const RankingPODShopifyProducts = () => {
                       } else {
                         realValue = value[1] ? [value[1]] : value
                       }
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      })
                       setQuery({ ...query, mode: realValue })
                     }}
                     styles={{
@@ -366,19 +394,50 @@ const RankingPODShopifyProducts = () => {
               </Flex>
             </div>
             <Grid.Col span={12}>
-              <Table
-                saleMetrics={saleMetrics}
-                loading={loadingFetchRankings}
-                pagination={pagination}
-                setPagination={setPagination}
-                setSorting={setSorting}
-                setTrigger={setTrigger}
-                setIsLoadmore={setIsLoadmore}
-                sorting={sorting}
-              />
+              {!isEmpty(productRankings) && (
+                <Table
+                  tableData={productRankings}
+                  loading={loadingFetchRankings}
+                  pagination={pagination}
+                  setPagination={setPagination}
+                  setSorting={setSorting}
+                  setTrigger={setTrigger}
+                  setIsLoadmore={setIsLoadmore}
+                  sorting={sorting}
+                  openPreviewImage={openPreviewImage}
+                  setSelectedProduct={setSelectedProduct}
+                  query={query}
+                  setQuery={setQuery}
+                />
+              )}
+              {loadingFetchRankings && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                    marginTop: "20px",
+                  }}
+                >
+                  <Loader size={30} />
+                </div>
+              )}
+              {
+                isEmpty(productRankings) && !loadingFetchRankings && (
+                  <div style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}><Text style={{
+                    fontSize: "20px",
+                    fontWeight: "bold",
+                  }}>Không tìm thấy Data</Text></div>
+                )
+              }
             </Grid.Col>
           </Grid>
-
         </Card>
       </div>
       <Affix position={{ bottom: 20, right: 20 }}>
@@ -396,6 +455,33 @@ const RankingPODShopifyProducts = () => {
           )}
         </Transition>
       </Affix>
+      <Modal
+        opened={openedPreviewImage}
+        onClose={closePreviewImage}
+        fullScreen
+        radius={0}
+        transitionProps={{ transition: "fade", duration: 200 }}
+        zIndex={9999}
+        styles={{
+          body: {
+            width: "90%",
+            height: "90%",
+          },
+        }}
+      >
+        <Image
+          radius="md"
+          src={
+            selectedProduct?.image ||
+            "/images/content/not_found_2.jpg"
+          }
+          height="100%"
+          fit="contain"
+          style={{
+            cursor: "pointer",
+          }}
+        />
+      </Modal>
     </>
   );
 };
