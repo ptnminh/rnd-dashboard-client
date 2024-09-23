@@ -1,5 +1,4 @@
 import React from "react";
-import cn from "classnames";
 import styles from "./Earning.module.sass";
 import TooltipGlodal from "../../components/TooltipGlodal";
 import Overview from "./Overview";
