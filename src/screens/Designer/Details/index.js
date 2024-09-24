@@ -473,10 +473,7 @@ const KeywordTable = ({
               leftSection={
                 row.original.status === 2 ? <IconBan /> : <IconCheck />
               }
-              disabled={
-                (row?.original?.status === 1 && !foundBrief?.linkDesign) ||
-                row?.original?.status === 2
-              }
+              disabled={row?.original?.status === 1 && !foundBrief?.linkDesign}
             >
               {row.original.status === 2 ? "Undone" : "Done"}
             </Button>

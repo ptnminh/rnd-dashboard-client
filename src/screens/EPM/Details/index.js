@@ -482,10 +482,9 @@ const BriefsTable = ({
                 row.original.status === 3 ? <IconBan /> : <IconCheck />
               }
               disabled={
-                (row?.original?.status === 2 &&
-                  !row?.original?.linkProduct &&
-                  !updateBrief[row.original.uid]?.linkProduct) ||
-                row.original.status === 3
+                row?.original?.status === 2 &&
+                !row?.original?.linkProduct &&
+                !updateBrief[row.original.uid]?.linkProduct
               }
             >
               {row.original.status === 3 ? "Undone" : "Done"}
