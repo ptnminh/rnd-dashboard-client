@@ -35,7 +35,7 @@ import DashboardSetting from "./screens/DashboardSetting";
 import ProductivityDashboard from "./screens/ProductivityDashboard";
 import Sellerboard from "./screens/Sellerboard";
 import RankingPODShopifyProducts from "./screens/Ranking";
-import SummaryDashboard from "./screens/SummaryDashboard";
+import PODDashboard from "./screens/PODDashboard";
 
 function App() {
   return (
@@ -367,7 +367,7 @@ function App() {
         path="/dashboard/pod"
         element={
           <Page title="MKT">
-            <SummaryDashboard />
+            <PODDashboard />
           </Page>
         }
       />

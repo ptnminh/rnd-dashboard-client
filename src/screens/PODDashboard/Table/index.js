@@ -1,0 +1,628 @@
+import React, { useState, useMemo, useEffect } from "react";
+import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
+import {
+  Text,
+  Flex,
+  Grid,
+  Image,
+  Button,
+  MultiSelect,
+  Badge,
+  Tooltip,
+  Group,
+  Select,
+  TextInput,
+  ActionIcon,
+} from "@mantine/core";
+import {
+  find,
+  map,
+  flatten,
+  uniq,
+  join,
+  split,
+  values,
+  filter,
+  sumBy,
+  flatMap,
+  merge,
+  isEmpty,
+  toNumber,
+} from "lodash";
+import {
+  IconFilterOff,
+  IconSortDescending,
+  IconSortAscending,
+  IconArrowsSort,
+} from "@tabler/icons-react";
+import classes from "./MyTable.module.css";
+import {
+  AMZ_SORTING,
+  AMZ_STORES,
+  FULFILLMENT_CHANNELS,
+} from "../../../constant";
+import moment from "moment-timezone";
+import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
+import { DateRangePicker } from "rsuite";
+import LazyLoad from "react-lazyload";
+
+const SellerboardTable = ({
+  tableData,
+  query,
+  loading,
+  sorting,
+  setSorting,
+  setQuery,
+  activeTab,
+  setIsConfirmedQuery,
+  setPagination,
+  pagination,
+  setIsLoadmore,
+}) => {
+  // Function to extract unique keys from the data array
+  const extractUniqueKeys = (dataset) => {
+    // Flatten the 'data' arrays from each item and map to the 'key' property
+    const allKeys = flatten(map(dataset, (item) => map(item.data, "key")));
+
+    // Remove duplicates using uniq
+    const uniqueKeys = uniq(allKeys);
+
+    return uniqueKeys;
+  };
+  const [data, setData] = useState(tableData || []);
+  const [customColumns, setCustomColumns] = useState([]);
+  // Function to generate columns based on the data
+  const generateCustomColumn = (data) => {
+    const keyLevels = extractUniqueKeys(data);
+    const columns = map(keyLevels, (keyLevel) => {
+      const header = join(split(keyLevel, " ")?.slice(0, -1), " ");
+      return {
+        accessorKey: keyLevel,
+        header,
+        size: 100,
+        maxSize: 150,
+        enableEditing: false,
+        enableSorting: true,
+        mantineTableBodyCellProps: ({ row }) => {
+          const rankChange = find(row.original.data, {
+            key: keyLevel,
+          })?.rankChange;
+          const { latestRank } = row?.original;
+          let color = null;
+          if (latestRank > 1 && latestRank <= 50) {
+            if (rankChange > 1) {
+              color = "#A2E09C";
+            }
+          } else if (latestRank > 50 && latestRank <= 100) {
+            if (rankChange > 3) {
+              color = "#A2E09C";
+            }
+          } else if (latestRank > 100) {
+            if (rankChange > 5) {
+              color = "#A2E09C";
+            }
+          }
+          let classnames = null;
+          if (color && query?.primarySortBy === keyLevel) {
+            classnames = classes["highlight"];
+          }
+          if (row.id === `Total theo ${activeTab}`) {
+            classnames = classes["summary-row"];
+          }
+          return {
+            className: classnames || classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: {
+          className: classes["edit-header"],
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return (
+              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                {row.original[header]}
+              </Text>
+            );
+          }
+          const { data } = row.original;
+          const keyData = find(data, { key: keyLevel });
+          return (
+            <Flex direction="column">
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "bold",
+                }}
+              >
+                {keyData?.orders}
+              </Text>
+            </Flex>
+          );
+        },
+      };
+    });
+    return columns;
+  };
+
+  // UseEffect to generate and sort columns based on tableData
+  useEffect(() => {
+    setData(tableData);
+    setCustomColumns(generateCustomColumn(tableData));
+  }, [tableData]);
+
+  // Compute the Total theo ${activeTab} row data
+  const summaryRow = useMemo(() => {
+    const columns = merge(
+      {},
+      ...customColumns.map((col) => {
+        const key = col.accessorKey;
+        const keyLevels = flatMap(data, "data");
+        const keyData = filter(keyLevels, (keyLevel) => keyLevel.key === key);
+        const header = join(split(key, " ")?.slice(0, -1), " ");
+        const totalOrders = sumBy(keyData, "orders");
+        return {
+          [header]: totalOrders?.toLocaleString(),
+        };
+      })
+    );
+    return {
+      id: `Total theo ${activeTab}`, // Unique ID for the Total theo ${activeTab} row
+      product: `Summary`,
+      totalInRanges: sumBy(data, (row) =>
+        sumBy(row.data, "orders")
+      )?.toLocaleString(), // Example: sum of orders
+      ...columns,
+    };
+  }, [data, customColumns]);
+
+  // Combine table data with the Total theo ${activeTab} row
+  const tableDataWithSummary = useMemo(
+    () => [...data, summaryRow],
+    [data, summaryRow]
+  );
+
+  useEffect(() => {
+    if (
+      customColumns.length < 8 &&
+      customColumns.length > 0 &&
+      activeTab === "Month"
+    ) {
+      let virtualColumn = [];
+      virtualColumn = Array(10 - customColumns.length)
+        .fill(0)
+        .map((_, i) => ({
+          accessorKey: `virtualColumn${i}`,
+          header: "",
+          size: 100, // Set default size
+          maxSize: 150, // Maximum size
+          enableEditing: false,
+          enableSorting: false,
+          mantineTableBodyCellProps: {
+            className: classes["body-cells"],
+          },
+          mantineTableHeadCellProps: {
+            className: classes["edit-header"],
+          },
+          Cell: () => {
+            return <Text style={{ fontSize: 16, fontWeight: "bold" }}></Text>;
+          },
+        }));
+      setCustomColumns([...customColumns, ...virtualColumn]);
+    }
+  }, [data]);
+  // UseMemo to construct final columns array
+  const columns = useMemo(
+    () => [
+      {
+        accessorKey: "product",
+        header: "Product",
+        size: 200,
+        maxSize: 200,
+        enableEditing: false,
+        enableSorting: false,
+        enableMultiSort: true,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+            rowSpan: row.id === `Total theo ${activeTab}` ? 3 : 1, // Row span for Total theo ${activeTab} row
+          };
+        },
+        mantineTableHeadCellProps: ({ row }) => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return (
+              <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                Total theo {activeTab}
+              </Text>
+            );
+          }
+          const {
+            ASIN,
+            title,
+            image,
+            store,
+            fulfillmentChannel,
+            sku,
+            totalOrders,
+          } = row.original;
+          const url = `https://www.amazon.com/dp/${ASIN}`;
+          return (
+            <Flex direction="column">
+              <Grid>
+                <Grid.Col span={4}>
+                  <Tooltip label={url}>
+                    <LazyLoad height={50} once={true}>
+                      <Image
+                        src={image || "/images/content/not_found_2.jpg"}
+                        width="100%"
+                        height="50px"
+                        style={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          window.open(url, "_blank");
+                        }}
+                        fit="contain"
+                      />
+                    </LazyLoad>
+                  </Tooltip>
+                </Grid.Col>
+                <Grid.Col span={8}>
+                  <Grid>
+                    <Grid.Col
+                      span={12}
+                      style={{
+                        padding: "0 5px",
+                      }}
+                    >
+                      <Flex>
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            fontWeight: "bold",
+                          }}
+                        >
+                          {sku}
+                        </Text>
+                      </Flex>
+                    </Grid.Col>
+
+                    <Grid.Col
+                      span={12}
+                      style={{
+                        display: "flex",
+                        justifyContent: "start",
+                      }}
+                    >
+                      <Tooltip label={url}>
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: "gray",
+                            cursor: "pointer",
+                          }}
+                          onClick={() => {
+                            window.open(url, "_blank");
+                          }}
+                        >
+                          {ASIN} - {fulfillmentChannel}
+                        </Text>
+                      </Tooltip>
+                    </Grid.Col>
+                  </Grid>
+                </Grid.Col>
+              </Grid>
+            </Flex>
+          );
+        },
+      },
+      {
+        accessorKey: "createdDate",
+        size: 150,
+        maxSize: 150,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Header: () => {
+          return (
+            <Group gap={5}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "bold",
+                }}
+              >
+                Summary
+              </Text>
+              {!query?.primarySortBy && (
+                <ActionIcon
+                  aria-label="Settings"
+                  variant="default"
+                  style={{
+                    background: "none",
+                    border: "none",
+                  }}
+                  onClick={() => {
+                    setIsConfirmedQuery(true);
+                    setPagination({
+                      ...pagination,
+                      currentPage: 1,
+                    });
+                    setQuery({
+                      ...query,
+                      primarySortBy: "totalOrders",
+                      primarySortDir: "desc",
+                    });
+                  }}
+                >
+                  <IconArrowsSort
+                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
+                    stroke={2}
+                  />
+                </ActionIcon>
+              )}
+
+              {query?.primarySortBy === "totalOrders" &&
+                query?.primarySortDir === "desc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setIsConfirmedQuery(true);
+                      setQuery({
+                        ...query,
+                        primarySortBy: "totalOrders",
+                        primarySortDir: "asc",
+                      });
+                    }}
+                  >
+                    <IconSortDescending
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+              {query?.primarySortBy === "totalOrders" &&
+                query?.primarySortDir === "asc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setIsConfirmedQuery(true);
+                      setQuery({
+                        ...query,
+                        primarySortBy: null,
+                        primarySortDir: null,
+                      });
+                    }}
+                  >
+                    <IconSortAscending
+                      style={{
+                        width: "70%",
+                        height: "70%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+            </Group>
+          );
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          const { createdDate, totalOrders } = row.original;
+          return (
+            <Group
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                }}
+              >
+                {totalOrders?.toLocaleString()}
+              </Text>
+              <Text
+                style={{
+                  fontSize: "12px",
+                  fontWeight: "thin",
+                  color: "gray",
+                }}
+              >
+                {moment(createdDate)
+                  .tz("America/Los_Angeles")
+                  .format("DD MMM YYYY")}
+              </Text>
+            </Group>
+          );
+        },
+      },
+      {
+        accessorKey: "value",
+        header: "Value",
+        size: 50,
+        maxSize: 50,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          let color = null;
+          const value = row.original.value || 2;
+          switch (value) {
+            case 1:
+              color = "#cfcfcf";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "green";
+              break;
+            case 4:
+              color = "#38761C";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[value]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[value]}</span>
+          );
+        },
+      },
+      {
+        accessorKey: "totalInRanges",
+        header: "Total In Ranges",
+        size: 50,
+        maxSize: 50,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return (
+              <Text style={{ fontSize: "14px", fontWeight: "bold" }}>
+                {summaryRow.totalInRanges}
+              </Text>
+            );
+          }
+          const totalOrders = sumBy(row.original.data, "orders");
+          return (
+            <Text
+              style={{
+                fontSize: "14px",
+                fontWeight: "bold",
+              }}
+            >
+              {totalOrders}
+            </Text>
+          );
+        },
+      },
+      ...customColumns,
+    ],
+    [customColumns, data, summaryRow]
+  );
+
+  const table = useMantineReactTable({
+    columns,
+    data: tableDataWithSummary,
+    editDisplayMode: "cell",
+    enablePagination: false,
+    getRowId: (row) => row.id,
+    enableRowSelection: false,
+    enableFilters: false,
+    enableColumnActions: false,
+    mantineTableHeadCellProps: { className: classes["head-cells"] },
+    mantineTableProps: {
+      className: classes["disable-hover"],
+    },
+    enableDensityToggle: false,
+    state: {
+      showProgressBars: loading,
+      sorting,
+      isLoading: loading,
+    },
+    mantineTableBodyCellProps: () => ({
+      className: classes["body-cells"],
+      sx: {
+        cursor: "pointer",
+      },
+    }),
+    onSortingChange: setSorting,
+    enableColumnResizing: false,
+    enableSorting: true,
+    enableMultiSort: false,
+    enableBottomToolbar: true,
+    manualSorting: true,
+    mantineBottomToolbarProps: () => {
+      return {
+        className: classes["bottom-toolbar"],
+      };
+    },
+    renderBottomToolbarCustomActions: () => {
+      return (
+        <Button
+          loading={loading}
+          disabled={pagination.currentPage >= pagination.totalPages}
+          onClick={() => {
+            setPagination((prev) => ({
+              ...prev,
+              currentPage: prev.currentPage + 1,
+            }));
+            setIsLoadmore(true);
+            setIsConfirmedQuery(true);
+          }}
+        >
+          Load More
+        </Button>
+      );
+    },
+  });
+
+  return !isEmpty(tableData) ? <MantineReactTable table={table} /> : null;
+};
+
+export default SellerboardTable;
