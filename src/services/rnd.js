@@ -222,6 +222,43 @@ export const rndServices = {
       return false;
     }
   },
+  updateProductLine: async (id, data) => {
+    try {
+      const response = await apiClient.put(`/product-lines/${id}`, data);
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        } else {
+          showNotification(
+            "Thất bại",
+            result?.message || "Cập nhật SKU Prefix thất bại",
+            "red"
+          );
+        }
+        return false;
+      }
+      showNotification("Thành công", "Cập nhật SKU Prefix thành công", "green");
+      return true;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at updateProductLine:", error);
+        showNotification("Thất bại", "Cập nhật thất bại", "red");
+      }
+      return false;
+    }
+  },
   fetchBriefs: async ({
     page,
     limit,
@@ -263,15 +300,15 @@ export const rndServices = {
       };
       const sort = !isEmpty(sorting)
         ? {
-            [sorting[0].id === "date" || "time" ? "createdAt" : sorting.id]:
-              sorting[0].id === "time"
-                ? sorting[0].desc
-                  ? "asc"
-                  : "desc"
-                : sorting[0].desc
+          [sorting[0].id === "date" || "time" ? "createdAt" : sorting.id]:
+            sorting[0].id === "time"
+              ? sorting[0].desc
+                ? "asc"
+                : "desc"
+              : sorting[0].desc
                 ? "desc"
                 : "asc",
-          }
+        }
         : {};
       let url = `/briefs/${view}?page=${page}&pageSize=${limit}`;
       if (Object.keys(filter).length !== 0) {

@@ -6,3 +6,4 @@ export * from "./artist";
 export * from "./productlines";
 export * from "./dashboards";
 export * from "./amz";
+export * from "./rankings"
