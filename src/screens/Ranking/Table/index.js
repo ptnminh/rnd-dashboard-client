@@ -266,8 +266,21 @@ const SellerboardTable = ({
           const { image, createdDate, link, latestRank, originalData } =
             row.original;
           let changesData = slice(originalData, 0, 3)
-            ?.map((x) => x.rank)
-            .join(" <- ");
+            ?.map((x) => x.rank)?.map((x, index) => {
+              return <Text style={{
+                ...(index === 0 ? {
+                  fontSize: 11,
+                } : {
+                  fontSize: 12,
+                  color: "gray"
+                }),
+                fontWeight: "bold",
+                textAlign: "left",
+              }}>
+                {index !== 0 ? " <- " : ""} {x}
+              </Text>
+            })
+
           return (
             <Flex direction="column">
               <Grid
@@ -323,15 +336,15 @@ const SellerboardTable = ({
                       </Flex>
                     </Grid.Col>
                     <Grid.Col span={12}>
-                      <Text
+                      <div
                         style={{
-                          fontSize: 11,
-                          fontWeight: "bold",
-                          textAlign: "left",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "2px"
                         }}
                       >
                         {changesData}
-                      </Text>
+                      </div>
                     </Grid.Col>
                     <Grid.Col span={12}>
                       <Text

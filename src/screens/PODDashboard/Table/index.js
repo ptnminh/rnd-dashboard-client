@@ -6,13 +6,9 @@ import {
   Grid,
   Image,
   Button,
-  MultiSelect,
   Badge,
   Tooltip,
   Group,
-  Select,
-  TextInput,
-  ActionIcon,
 } from "@mantine/core";
 import {
   find,
@@ -29,11 +25,7 @@ import {
   isEmpty,
   toNumber,
 } from "lodash";
-import {
-  IconSortDescending,
-  IconSortAscending,
-  IconArrowsSort,
-} from "@tabler/icons-react";
+
 import classes from "./MyTable.module.css";
 
 import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
@@ -202,7 +194,7 @@ const SellerboardTable = ({
               </Text>
             );
           }
-          const { imageLink, sku, productLink, designLink } = row.original;
+          const { imageLink, sku, productLink, designLink, testDate } = row.original;
           return (
             <Flex direction="column">
               <Grid
@@ -234,7 +226,10 @@ const SellerboardTable = ({
                   </Tooltip>
                 </Grid.Col>
                 <Grid.Col span={8}>
-                  <Grid>
+                  <Grid style={{
+                    width: "100%",
+                    height: "100%",
+                  }}>
                     <Grid.Col
                       span={12}
                       style={{
@@ -262,8 +257,29 @@ const SellerboardTable = ({
                         </Text>
                       </Flex>
                     </Grid.Col>
+                    {testDate && (
+                      <Grid.Col
+                        span={12}
+                        style={{
+
+                          padding: 0,
+                          marginTop: "5px",
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 11,
+                            color: "gray",
+                          }}
+                        >
+                          Test Date: {testDate}
+                        </Text>
+                      </Grid.Col>
+                    )}
+
                   </Grid>
                 </Grid.Col>
+
               </Grid>
             </Flex>
           );

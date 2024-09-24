@@ -391,9 +391,6 @@ const PODDashboard = () => {
                             height: "100%",
                             marginRight: "2px",
                             padding: "10px",
-                            backgroundColor: "#e2eaff",
-                            border: "1px solid #4f80ff",
-                            borderColor: "#4f80ff",
                             display: "flex",
                             justifyContent: "end",
                           }}
@@ -493,7 +490,7 @@ const PODDashboard = () => {
                                 <Select
                                   data={keys(VALUES)}
                                   placeholder="VALUE"
-                                  value={CONVERT_NUMBER_TO_STATUS[query.value]}
+                                  value={CONVERT_NUMBER_TO_STATUS[query.value] || null}
                                   onChange={(value) => {
                                     setPagination({
                                       ...pagination,
@@ -602,17 +599,11 @@ const PODDashboard = () => {
                               value={query.view}
                               label="SHOW DATA"
                               onChange={(value) => {
-                                let realValue = value;
-                                if (isEmpty(value)) {
-                                  realValue = query.mode;
-                                } else {
-                                  realValue = value[1] ? [value[1]] : value;
-                                }
                                 setPagination({
                                   ...pagination,
                                   currentPage: 1,
                                 });
-                                setQuery({ ...query, view: realValue });
+                                setQuery({ ...query, view: value });
                               }}
                               styles={{
                                 root: {
