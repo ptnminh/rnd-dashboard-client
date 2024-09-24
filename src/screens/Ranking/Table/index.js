@@ -24,9 +24,8 @@ import {
   merge,
   keys,
   isEmpty,
-  first,
-  last,
   orderBy,
+  slice,
 } from "lodash";
 
 import classes from "./MyTable.module.css";
@@ -214,27 +213,11 @@ const SellerboardTable = ({
       product: `Summary`,
       totalInRanges:
         sumBy(data, (row) => {
-          let keyData = row?.data;
-          switch (query?.targetDate) {
-            case TARGET_DATES.TODAY:
-              keyData = keyData.slice(0, 1);
-              break;
-            case TARGET_DATES.THREE_DAYS:
-              keyData = keyData.slice(0, 4);
-              break;
-            case TARGET_DATES.SEVEN_DAYS:
-              keyData = keyData.slice(0, 8);
-              break;
-            default:
-              break;
-          }
           const view =
             query?.mode[0] === TARGET_MODES.ORDERS
-              ? "ordersChange"
-              : "rankChange";
-          const lastItem = last(keyData)?.[view];
-          const firstItem = first(keyData)?.[view];
-          const totalOrders = lastItem - firstItem || 0;
+              ? "totalOrdersChanges"
+              : "totalRankChanges";
+          const totalOrders = row?.[view] || 0;
           return totalOrders;
         })?.toLocaleString() || 0, // Example: sum of orders
       ...columns,
@@ -253,8 +236,8 @@ const SellerboardTable = ({
       {
         accessorKey: "product",
         header: "Product",
-        size: 200,
-        maxSize: 200,
+        size: 250,
+        maxSize: 250,
         enableEditing: false,
         enableSorting: false,
         enableMultiSort: true,
@@ -280,11 +263,24 @@ const SellerboardTable = ({
               </Text>
             );
           }
-          const { image, createdDate, link, latestRank } = row.original;
+          const { image, createdDate, link, latestRank, originalData } =
+            row.original;
+          let changesData = slice(originalData, 0, 3)
+            ?.map((x) => x.rank)
+            .join(" <- ");
           return (
             <Flex direction="column">
-              <Grid>
-                <Grid.Col span={6}>
+              <Grid
+                style={{
+                  padding: "0",
+                }}
+              >
+                <Grid.Col
+                  span={6}
+                  style={{
+                    padding: "0",
+                  }}
+                >
                   <LazyLoad height={50} once={true}>
                     <Image
                       src={image || "/images/content/not_found_2.jpg"}
@@ -334,7 +330,7 @@ const SellerboardTable = ({
                           textAlign: "left",
                         }}
                       >
-                        Rank: {latestRank}
+                        {changesData}
                       </Text>
                     </Grid.Col>
                     <Grid.Col span={12}>
@@ -497,7 +493,11 @@ const SellerboardTable = ({
         maxSize: 150,
         enableEditing: false,
         enableSorting: false,
-        Header: () => {
+        Header: ({ row }) => {
+          const view =
+            query?.mode[0] === TARGET_MODES.ORDERS
+              ? "totalOrdersChanges"
+              : "totalRankChanges";
           return (
             <Group gap={5}>
               <Text
@@ -521,9 +521,10 @@ const SellerboardTable = ({
                       ...pagination,
                       currentPage: 1,
                     });
+                    setSorting([]);
                     setQuery({
                       ...query,
-                      sortBy: "totalOrders",
+                      sortBy: view,
                       sortDir: "desc",
                     });
                   }}
@@ -534,15 +535,20 @@ const SellerboardTable = ({
                   />
                 </ActionIcon>
               )}
-              {query?.sortBy === "totalOrders" && query?.sortDir === "desc" && (
+              {query?.sortBy === view && query?.sortDir === "desc" && (
                 <ActionIcon
                   variant="filled"
                   aria-label="Settings"
                   color="transparent"
                   onClick={() => {
+                    setSorting([]);
+                    setPagination({
+                      ...pagination,
+                      currentPage: 1,
+                    });
                     setQuery({
                       ...query,
-                      sortBy: "totalOrders",
+                      sortBy: view,
                       sortDir: "asc",
                     });
                   }}
@@ -554,12 +560,17 @@ const SellerboardTable = ({
                   />
                 </ActionIcon>
               )}
-              {query?.sortBy === "totalOrders" && query?.sortDir === "asc" && (
+              {query?.sortBy === view && query?.sortDir === "asc" && (
                 <ActionIcon
                   variant="filled"
                   aria-label="Settings"
                   color="transparent"
                   onClick={() => {
+                    setSorting([]);
+                    setPagination({
+                      ...pagination,
+                      currentPage: 1,
+                    });
                     setQuery({
                       ...query,
                       sortBy: null,
@@ -602,27 +613,11 @@ const SellerboardTable = ({
               </Text>
             );
           }
-          let keyData = row.original.data;
-          switch (query?.targetDate) {
-            case TARGET_DATES.TODAY:
-              keyData = keyData.slice(0, 1);
-              break;
-            case TARGET_DATES.THREE_DAYS:
-              keyData = keyData.slice(0, 4);
-              break;
-            case TARGET_DATES.SEVEN_DAYS:
-              keyData = keyData.slice(0, 8);
-              break;
-            default:
-              break;
-          }
           const view =
             query?.mode[0] === TARGET_MODES.ORDERS
-              ? "ordersChange"
-              : "rankChange";
-          const lastItem = last(keyData)?.[view];
-          const firstItem = first(keyData)?.[view];
-          const totalOrders = lastItem - firstItem || 0;
+              ? "totalOrdersChanges"
+              : "totalRankChanges";
+          const totalChanges = row?.original[view] || 0;
           return (
             <Text
               style={{
@@ -630,7 +625,7 @@ const SellerboardTable = ({
                 fontWeight: "bold",
               }}
             >
-              {totalOrders}
+              {totalChanges}
             </Text>
           );
         },

@@ -67,6 +67,7 @@ const RankingPODShopifyProducts = () => {
     competitor: TARGET_COMPETITORS.WANDERPRINTS,
     mode: [TARGET_MODES.ORDERS],
     targetDate: TARGET_DATES.THREE_DAYS,
+    dateChange: 3,
   });
   const [sorting, setSorting] = useState([
     {
@@ -104,7 +105,7 @@ const RankingPODShopifyProducts = () => {
       sorting,
     });
     const { data, metadata } = response;
-    if (data) {
+    if (!isEmpty(data)) {
       if (isLoadmore) {
         setProductRankings((prev) => [...prev, ...data]);
       } else {
@@ -201,24 +202,21 @@ const RankingPODShopifyProducts = () => {
                         case TARGET_DATES.TODAY:
                           setQuery({
                             ...query,
-                            startDate: endDate,
-                            endDate: endDate,
+                            dateChange: 1,
                             targetDate: value,
                           });
                           break;
                         case TARGET_DATES.THREE_DAYS:
                           setQuery({
                             ...query,
-                            startDate: threeDayAgo,
-                            endDate: endDate,
+                            dateChange: 3,
                             targetDate: value,
                           });
                           break;
                         case TARGET_DATES.SEVEN_DAYS:
                           setQuery({
                             ...query,
-                            startDate: sevenDayAgo,
-                            endDate: endDate,
+                            dateChange: 7,
                             targetDate: value,
                           });
                           break;
@@ -320,7 +318,7 @@ const RankingPODShopifyProducts = () => {
                 <Grid.Col span={4}>
                   <Checkbox.Group
                     value={query.mode}
-                    label="SHOW ORDERS"
+                    label="SHOW DATA"
                     onChange={(value) => {
                       let realValue = value;
                       if (isEmpty(value)) {

@@ -30,20 +30,13 @@ import {
   toNumber,
 } from "lodash";
 import {
-  IconFilterOff,
   IconSortDescending,
   IconSortAscending,
   IconArrowsSort,
 } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
-import {
-  AMZ_SORTING,
-  AMZ_STORES,
-  FULFILLMENT_CHANNELS,
-} from "../../../constant";
-import moment from "moment-timezone";
-import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
-import { DateRangePicker } from "rsuite";
+
+import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import LazyLoad from "react-lazyload";
 
 const SellerboardTable = ({
@@ -54,7 +47,6 @@ const SellerboardTable = ({
   setSorting,
   setQuery,
   activeTab,
-  setIsConfirmedQuery,
   setPagination,
   pagination,
   setIsLoadmore,
@@ -75,10 +67,9 @@ const SellerboardTable = ({
   const generateCustomColumn = (data) => {
     const keyLevels = extractUniqueKeys(data);
     const columns = map(keyLevels, (keyLevel) => {
-      const header = join(split(keyLevel, " ")?.slice(0, -1), " ");
       return {
         accessorKey: keyLevel,
-        header,
+        header: keyLevel,
         size: 100,
         maxSize: 150,
         enableEditing: false,
@@ -120,7 +111,7 @@ const SellerboardTable = ({
           if (row.id === `Total theo ${activeTab}`) {
             return (
               <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                {row.original[header]}
+                {row.original[keyLevel]}
               </Text>
             );
           }
@@ -134,7 +125,7 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                {keyData?.orders}
+                {keyData?.totalOrders || 0}
               </Text>
             </Flex>
           );
@@ -158,19 +149,16 @@ const SellerboardTable = ({
         const key = col.accessorKey;
         const keyLevels = flatMap(data, "data");
         const keyData = filter(keyLevels, (keyLevel) => keyLevel.key === key);
-        const header = join(split(key, " ")?.slice(0, -1), " ");
         const totalOrders = sumBy(keyData, "orders");
         return {
-          [header]: totalOrders?.toLocaleString(),
+          [key]: totalOrders?.toLocaleString(),
         };
       })
     );
     return {
       id: `Total theo ${activeTab}`, // Unique ID for the Total theo ${activeTab} row
       product: `Summary`,
-      totalInRanges: sumBy(data, (row) =>
-        sumBy(row.data, "orders")
-      )?.toLocaleString(), // Example: sum of orders
+      totalInRanges: sumBy(data, "totalOrdersInRange")?.toLocaleString(), // Example: sum of orders
       ...columns,
     };
   }, [data, customColumns]);
@@ -181,35 +169,6 @@ const SellerboardTable = ({
     [data, summaryRow]
   );
 
-  useEffect(() => {
-    if (
-      customColumns.length < 8 &&
-      customColumns.length > 0 &&
-      activeTab === "Month"
-    ) {
-      let virtualColumn = [];
-      virtualColumn = Array(10 - customColumns.length)
-        .fill(0)
-        .map((_, i) => ({
-          accessorKey: `virtualColumn${i}`,
-          header: "",
-          size: 100, // Set default size
-          maxSize: 150, // Maximum size
-          enableEditing: false,
-          enableSorting: false,
-          mantineTableBodyCellProps: {
-            className: classes["body-cells"],
-          },
-          mantineTableHeadCellProps: {
-            className: classes["edit-header"],
-          },
-          Cell: () => {
-            return <Text style={{ fontSize: 16, fontWeight: "bold" }}></Text>;
-          },
-        }));
-      setCustomColumns([...customColumns, ...virtualColumn]);
-    }
-  }, [data]);
   // UseMemo to construct final columns array
   const columns = useMemo(
     () => [
@@ -243,31 +202,31 @@ const SellerboardTable = ({
               </Text>
             );
           }
-          const {
-            ASIN,
-            title,
-            image,
-            store,
-            fulfillmentChannel,
-            sku,
-            totalOrders,
-          } = row.original;
-          const url = `https://www.amazon.com/dp/${ASIN}`;
+          const { imageLink, sku, productLink, designLink } = row.original;
           return (
             <Flex direction="column">
-              <Grid>
-                <Grid.Col span={4}>
-                  <Tooltip label={url}>
+              <Grid
+                style={{
+                  padding: 0,
+                }}
+              >
+                <Grid.Col
+                  span={4}
+                  style={{
+                    padding: 0,
+                  }}
+                >
+                  <Tooltip label={productLink}>
                     <LazyLoad height={50} once={true}>
                       <Image
-                        src={image || "/images/content/not_found_2.jpg"}
+                        src={imageLink || "/images/content/not_found_2.jpg"}
                         width="100%"
-                        height="50px"
+                        height="100%"
                         style={{
                           cursor: "pointer",
                         }}
                         onClick={() => {
-                          window.open(url, "_blank");
+                          window.open(productLink, "_blank");
                         }}
                         fit="contain"
                       />
@@ -282,39 +241,26 @@ const SellerboardTable = ({
                         padding: "0 5px",
                       }}
                     >
-                      <Flex>
+                      <Flex
+                        style={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => {
+                          if (designLink) {
+                            window.open(designLink, "_blank");
+                          }
+                        }}
+                      >
                         <Text
                           style={{
                             fontSize: 14,
                             fontWeight: "bold",
+                            textDecoration: "underline",
                           }}
                         >
                           {sku}
                         </Text>
                       </Flex>
-                    </Grid.Col>
-
-                    <Grid.Col
-                      span={12}
-                      style={{
-                        display: "flex",
-                        justifyContent: "start",
-                      }}
-                    >
-                      <Tooltip label={url}>
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: "gray",
-                            cursor: "pointer",
-                          }}
-                          onClick={() => {
-                            window.open(url, "_blank");
-                          }}
-                        >
-                          {ASIN} - {fulfillmentChannel}
-                        </Text>
-                      </Tooltip>
                     </Grid.Col>
                   </Grid>
                 </Grid.Col>
@@ -325,8 +271,8 @@ const SellerboardTable = ({
       },
       {
         accessorKey: "createdDate",
-        size: 150,
-        maxSize: 150,
+        size: 100,
+        maxSize: 100,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -353,16 +299,16 @@ const SellerboardTable = ({
               >
                 Summary
               </Text>
-              {!query?.primarySortBy && (
+              {/* {!query?.primarySortBy && (
                 <ActionIcon
                   aria-label="Settings"
                   variant="default"
+                  size="sm"
                   style={{
                     background: "none",
                     border: "none",
                   }}
                   onClick={() => {
-                    setIsConfirmedQuery(true);
                     setPagination({
                       ...pagination,
                       currentPage: 1,
@@ -387,8 +333,8 @@ const SellerboardTable = ({
                     variant="filled"
                     aria-label="Settings"
                     color="transparent"
+                    size="sm"
                     onClick={() => {
-                      setIsConfirmedQuery(true);
                       setQuery({
                         ...query,
                         primarySortBy: "totalOrders",
@@ -408,9 +354,9 @@ const SellerboardTable = ({
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
+                    size="sm"
                     color="transparent"
                     onClick={() => {
-                      setIsConfirmedQuery(true);
                       setQuery({
                         ...query,
                         primarySortBy: null,
@@ -428,7 +374,7 @@ const SellerboardTable = ({
                       color="#70B1ED"
                     />
                   </ActionIcon>
-                )}
+                )} */}
             </Group>
           );
         },
@@ -436,7 +382,7 @@ const SellerboardTable = ({
           if (row.id === `Total theo ${activeTab}`) {
             return null;
           }
-          const { createdDate, totalOrders } = row.original;
+          const { totalOrdersLifetime } = row.original;
           return (
             <Group
               style={{
@@ -452,18 +398,7 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                {totalOrders?.toLocaleString()}
-              </Text>
-              <Text
-                style={{
-                  fontSize: "12px",
-                  fontWeight: "thin",
-                  color: "gray",
-                }}
-              >
-                {moment(createdDate)
-                  .tz("America/Los_Angeles")
-                  .format("DD MMM YYYY")}
+                {totalOrdersLifetime?.toLocaleString()}
               </Text>
             </Group>
           );
@@ -521,10 +456,61 @@ const SellerboardTable = ({
         },
       },
       {
-        accessorKey: "totalInRanges",
-        header: "Total In Ranges",
+        accessorKey: "size",
+        header: "Size",
         size: 50,
         maxSize: 50,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          let color = null;
+          const size = row.original.size || 2;
+          switch (size) {
+            case 1:
+              color = "green";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "red";
+              break;
+            case 1.5:
+              color = "#006400";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[size]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[size]}</span>
+          );
+        },
+      },
+      {
+        accessorKey: "totalInRanges",
+        header: "Total Orders/Profit",
+        size: 70,
+        maxSize: 70,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -548,7 +534,7 @@ const SellerboardTable = ({
               </Text>
             );
           }
-          const totalOrders = sumBy(row.original.data, "orders");
+          const totalOrders = row.original.totalOrdersInRange || 0;
           return (
             <Text
               style={{
@@ -613,7 +599,6 @@ const SellerboardTable = ({
               currentPage: prev.currentPage + 1,
             }));
             setIsLoadmore(true);
-            setIsConfirmedQuery(true);
           }}
         >
           Load More
