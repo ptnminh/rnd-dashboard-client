@@ -316,7 +316,7 @@ const SellerboardTable = ({
                           textAlign: "left",
                         }}
                       >
-                        Current rank: {latestRank}
+                        Rank: {latestRank}
                       </Text>
                     </Grid.Col>
                     <Grid.Col span={12}>
