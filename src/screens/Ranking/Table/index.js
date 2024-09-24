@@ -8,8 +8,8 @@ import {
   Button,
   Badge,
   Select,
-  ActionIcon,
   Group,
+  ActionIcon,
 } from "@mantine/core";
 import {
   find,
@@ -24,6 +24,8 @@ import {
   merge,
   keys,
   isEmpty,
+  first,
+  last,
   orderBy,
 } from "lodash";
 
@@ -89,7 +91,7 @@ const SellerboardTable = ({
         keyLevels = keyLevels.slice(0, 1);
         break;
       case TARGET_DATES.THREE_DAYS:
-        keyLevels = keyLevels.slice(0, 3);
+        keyLevels = keyLevels.slice(0, 34);
         break;
       case TARGET_DATES.SEVEN_DAYS:
         keyLevels = keyLevels.slice(0, 7);
@@ -187,10 +189,10 @@ const SellerboardTable = ({
             keyLevels = keyLevels.slice(0, 1);
             break;
           case TARGET_DATES.THREE_DAYS:
-            keyLevels = keyLevels.slice(0, 3);
+            keyLevels = keyLevels.slice(0, 4);
             break;
           case TARGET_DATES.SEVEN_DAYS:
-            keyLevels = keyLevels.slice(0, 7);
+            keyLevels = keyLevels.slice(0, 8);
             break;
           default:
             break;
@@ -211,14 +213,30 @@ const SellerboardTable = ({
       id: `Total theo ${activeTab}`, // Unique ID for the Total theo ${activeTab} row
       product: `Summary`,
       totalInRanges:
-        sumBy(data, (row) =>
-          sumBy(
-            row.data,
+        sumBy(data, (row) => {
+          let keyData = row?.data;
+          switch (query?.targetDate) {
+            case TARGET_DATES.TODAY:
+              keyData = keyData.slice(0, 1);
+              break;
+            case TARGET_DATES.THREE_DAYS:
+              keyData = keyData.slice(0, 4);
+              break;
+            case TARGET_DATES.SEVEN_DAYS:
+              keyData = keyData.slice(0, 8);
+              break;
+            default:
+              break;
+          }
+          const view =
             query?.mode[0] === TARGET_MODES.ORDERS
               ? "ordersChange"
-              : "rankChange"
-          )
-        )?.toLocaleString() || 0, // Example: sum of orders
+              : "rankChange";
+          const lastItem = last(keyData)?.[view];
+          const firstItem = first(keyData)?.[view];
+          const totalOrders = lastItem - firstItem || 0;
+          return totalOrders;
+        })?.toLocaleString() || 0, // Example: sum of orders
       ...columns,
     };
   }, [data, customColumns]);
@@ -584,11 +602,27 @@ const SellerboardTable = ({
               </Text>
             );
           }
+          let keyData = row.original.data;
+          switch (query?.targetDate) {
+            case TARGET_DATES.TODAY:
+              keyData = keyData.slice(0, 1);
+              break;
+            case TARGET_DATES.THREE_DAYS:
+              keyData = keyData.slice(0, 4);
+              break;
+            case TARGET_DATES.SEVEN_DAYS:
+              keyData = keyData.slice(0, 8);
+              break;
+            default:
+              break;
+          }
           const view =
             query?.mode[0] === TARGET_MODES.ORDERS
               ? "ordersChange"
               : "rankChange";
-          const totalOrders = sumBy(row.original.data, view);
+          const lastItem = last(keyData)?.[view];
+          const firstItem = first(keyData)?.[view];
+          const totalOrders = lastItem - firstItem || 0;
           return (
             <Text
               style={{
