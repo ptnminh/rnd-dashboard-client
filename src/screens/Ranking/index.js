@@ -12,6 +12,7 @@ import {
   Image,
   Loader,
   Modal,
+  Radio,
   rem,
   Text,
   Transition,
@@ -19,27 +20,25 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { rankingServices } from "../../services";
 import Table from "./Table";
-import { isEmpty, join, omit, toNumber, values } from "lodash";
+import { isEmpty, omit, toNumber } from "lodash";
 import moment from "moment-timezone";
 import { useDisclosure, useWindowScroll } from "@mantine/hooks";
 import { IconArrowUp } from "@tabler/icons-react";
-
-
 
 const TARGET_COMPETITORS = {
   PAWFECTHOUSE: "Pawfecthouse",
   MACORNER: "Macorner",
   WANDERPRINTS: "Wanderprints",
-}
+};
 const TARGET_DATES = {
   TODAY: "Today",
   THREE_DAYS: "3 Day",
   SEVEN_DAYS: "7 Day",
-}
+};
 const TARGET_MODES = {
   ORDERS: "Orders",
   RANKING: "Ranking",
-}
+};
 
 const RankingPODShopifyProducts = () => {
   const navigate = useNavigate();
@@ -47,10 +46,10 @@ const RankingPODShopifyProducts = () => {
   const queryParams = new URLSearchParams(location.search);
   const initialSearch = queryParams.get("search") || "";
   const [selectedProduct, setSelectedProduct] = useState({});
-  const [openedPreviewImage, {
-    close: closePreviewImage,
-    open: openPreviewImage,
-  }] = useDisclosure(false);
+  const [
+    openedPreviewImage,
+    { close: closePreviewImage, open: openPreviewImage },
+  ] = useDisclosure(false);
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
   // const [isConfirmedQuery, setIsConfirmedQuery] = useState(true);
@@ -65,11 +64,10 @@ const RankingPODShopifyProducts = () => {
   const sevenDayAgo = moment().subtract(7, "days").format("YYYY-MM-DD");
   const endDate = moment().format("YYYY-MM-DD");
   const [query, setQuery] = useState({
-    competitors: values(TARGET_COMPETITORS),
-    startDate: endDate,
-    endDate: endDate,
+    competitor: TARGET_COMPETITORS.WANDERPRINTS,
     mode: [TARGET_MODES.ORDERS],
-    targetDate: [TARGET_DATES.TODAY],
+    targetDate: TARGET_DATES.THREE_DAYS,
+    dateChange: 3,
   });
   const [sorting, setSorting] = useState([
     {
@@ -89,7 +87,6 @@ const RankingPODShopifyProducts = () => {
         {
           ...query,
           view: query.mode[0] === TARGET_MODES.ORDERS ? "order" : "rank",
-          competitors: join(query.competitors, ","),
         },
         [
           "sortValue",
@@ -99,6 +96,8 @@ const RankingPODShopifyProducts = () => {
           "fulfillmentChannelValues",
           "salesDateValue",
           "mode",
+          "startDate",
+          "endDate",
           "targetDate",
         ]
       ),
@@ -106,7 +105,7 @@ const RankingPODShopifyProducts = () => {
       sorting,
     });
     const { data, metadata } = response;
-    if (data) {
+    if (!isEmpty(data)) {
       if (isLoadmore) {
         setProductRankings((prev) => [...prev, ...data]);
       } else {
@@ -126,13 +125,7 @@ const RankingPODShopifyProducts = () => {
   };
   useEffect(() => {
     fetchRankings(pagination.currentPage);
-  }, [
-    search,
-    query,
-    trigger,
-    sorting,
-    pagination.currentPage,
-  ]);
+  }, [search, query, trigger, sorting, pagination.currentPage]);
 
   // listen sorting change set isConfirmedQuery to true for refetch data
   useEffect(() => {
@@ -146,7 +139,6 @@ const RankingPODShopifyProducts = () => {
     } else {
       isMounted.current = true;
     }
-
   }, [sorting]);
   useEffect(() => {
     const params = new URLSearchParams();
@@ -170,191 +162,175 @@ const RankingPODShopifyProducts = () => {
             <div
               style={{
                 display: "flex",
-                justifyContent: "space-between",
+                justifyContent: "start",
                 alignItems: "center",
                 padding: "10px 0px",
-                gap: "10px",
+                gap: "5px",
                 width: "100%",
               }}
             >
               <Flex
                 style={{
-                  gap: "8px",
                   padding: "10px",
                   borderRadius: "10px",
                   backgroundColor: "#EFF0F1",
-                  flexWrap: "wrap",
                   width: "100%",
                 }}
               >
-                <Grid.Col span={4} style={{
-                  gap: "30px",
-                  padding: "10px",
-                  borderRadius: "10px",
-                  backgroundColor: "#e2eaff",
-                  flexWrap: "wrap",
-                  width: "100%",
-                  height: "50px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "start",
-                  border: "1px solid #4f80ff",
-                  borderColor: "#4f80ff",
-                }}>
-                  <Checkbox.Group
+                <Grid.Col
+                  span={3.5}
+                  style={{
+                    gap: "5px",
+                    padding: "10px",
+                    borderRadius: "10px",
+                    backgroundColor: "#e2eaff",
+                    flexWrap: "wrap",
+                    width: "100%",
+                    height: "50px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "start",
+                    border: "1px solid #4f80ff",
+                    borderColor: "#4f80ff",
+                    marginRight: "2px",
+                  }}
+                >
+                  <Radio.Group
                     value={query?.targetDate}
                     onChange={(value) => {
-                      let realValue = value
-                      if (isEmpty(value)) {
-                        realValue = query?.targetDate
-                      } else {
-                        realValue = value[1] ? [value[1]] : value
-                      }
-                      setPagination({
-                        ...pagination,
-                        currentPage: 1,
-                      })
-                      switch (realValue[0]) {
-
+                      switch (value) {
                         case TARGET_DATES.TODAY:
                           setQuery({
                             ...query,
-                            startDate: endDate,
-                            endDate: endDate,
-                            targetDate: realValue,
-                          })
+                            dateChange: 1,
+                            targetDate: value,
+                          });
                           break;
                         case TARGET_DATES.THREE_DAYS:
                           setQuery({
                             ...query,
-                            startDate: threeDayAgo,
-                            endDate: endDate,
-                            targetDate: realValue,
-                          })
+                            dateChange: 3,
+                            targetDate: value,
+                          });
                           break;
                         case TARGET_DATES.SEVEN_DAYS:
                           setQuery({
                             ...query,
-                            startDate: sevenDayAgo,
-                            endDate: endDate,
-                            targetDate: realValue,
-                          })
+                            dateChange: 7,
+                            targetDate: value,
+                          });
                           break;
                         default:
                           break;
                       }
                     }}
                   >
-                    <Group styles={{
-                      root: {
-                        height: "100%",
-                        display: "flex",
-                        justifyContent: "start"
-                      }
-                    }}>
-                      <Checkbox styles={{
-                        input: {
-                          borderRadius: "50%",
-                        }
-                      }} value={TARGET_DATES.TODAY} label={TARGET_DATES.TODAY} />
-                      <Checkbox styles={{
-                        input: {
-                          borderRadius: "50%",
-                        }
-                      }} value={TARGET_DATES.THREE_DAYS} label={TARGET_DATES.THREE_DAYS} />
-                      <Checkbox styles={{
-                        input: {
-                          borderRadius: "50%",
-                        }
-                      }} value={TARGET_DATES.SEVEN_DAYS} label={TARGET_DATES.SEVEN_DAYS} />
+                    <Group
+                      styles={{
+                        root: {
+                          height: "100%",
+                          display: "flex",
+                          justifyContent: "center",
+                        },
+                      }}
+                    >
+                      <Radio
+                        styles={{
+                          input: {
+                            borderRadius: "50%",
+                          },
+                        }}
+                        value={TARGET_DATES.TODAY}
+                        label={TARGET_DATES.TODAY}
+                      />
+                      <Radio
+                        styles={{
+                          input: {
+                            borderRadius: "50%",
+                          },
+                        }}
+                        value={TARGET_DATES.THREE_DAYS}
+                        label={TARGET_DATES.THREE_DAYS}
+                      />
+                      <Radio
+                        styles={{
+                          input: {
+                            borderRadius: "50%",
+                          },
+                        }}
+                        value={TARGET_DATES.SEVEN_DAYS}
+                        label={TARGET_DATES.SEVEN_DAYS}
+                      />
                     </Group>
-                  </Checkbox.Group>
+                  </Radio.Group>
                 </Grid.Col>
-              </Flex>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "start",
-                alignItems: "center",
-                padding: "10px 0px",
-                gap: "10px",
-                width: "100%",
-              }}
-            >
-              <Flex
-                style={{
-                  padding: "10px",
-                  borderRadius: "10px",
-                  backgroundColor: "#EFF0F1",
-                  width: "100%",
-                }}
-              >
-                <Grid.Col span={6} style={{
-                  gap: "30px",
-                  padding: "10px",
-                  borderRadius: "10px",
-                  backgroundColor: "#e2eaff",
-                  flexWrap: "wrap",
-                  width: "100%",
-                  height: "50px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "start",
-                  border: "1px solid #4f80ff",
-                  borderColor: "#4f80ff",
-                }}>
-                  <Checkbox.Group
-                    value={query?.competitors}
+                <Grid.Col
+                  span={5}
+                  style={{
+                    gap: "10px",
+                    padding: "10px",
+                    borderRadius: "10px",
+                    backgroundColor: "#e2eaff",
+                    flexWrap: "wrap",
+                    width: "100%",
+                    height: "50px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    border: "1px solid #4f80ff",
+                    borderColor: "#4f80ff",
+                  }}
+                >
+                  <Radio.Group
+                    value={query?.competitor}
                     onChange={(value) => {
                       setPagination({
                         ...pagination,
                         currentPage: 1,
-                      })
-                      setQuery({ ...query, competitors: value })
+                      });
+                      setQuery({ ...query, competitor: value });
                     }}
                   >
-                    <Group styles={{
-                      root: {
-                        height: "100%",
-                        display: "flex",
-                        justifyContent: "space-between"
-                      }
-                    }}>
-                      <Checkbox styles={{
-                        input: {
-                          borderRadius: "50%",
-                        }
-                      }} value={TARGET_COMPETITORS.WANDERPRINTS} label={TARGET_COMPETITORS.WANDERPRINTS} />
-                      <Checkbox styles={{
-                        input: {
-                          borderRadius: "50%",
-                        }
-                      }} value={TARGET_COMPETITORS.MACORNER} label={TARGET_COMPETITORS.MACORNER} />
-                      <Checkbox styles={{
-                        input: {
-                          borderRadius: "50%",
-                        }
-                      }} value={TARGET_COMPETITORS.PAWFECTHOUSE} label={TARGET_COMPETITORS.PAWFECTHOUSE} />
+                    <Group
+                      styles={{
+                        root: {
+                          height: "100%",
+                          display: "flex",
+                          justifyContent: "space-between",
+                        },
+                      }}
+                    >
+                      <Radio
+                        value={TARGET_COMPETITORS.WANDERPRINTS}
+                        label={TARGET_COMPETITORS.WANDERPRINTS}
+                      />
+                      <Radio
+                        value={TARGET_COMPETITORS.MACORNER}
+                        label={TARGET_COMPETITORS.MACORNER}
+                      />
+                      <Radio
+                        value={TARGET_COMPETITORS.PAWFECTHOUSE}
+                        label={TARGET_COMPETITORS.PAWFECTHOUSE}
+                      />
                     </Group>
-                  </Checkbox.Group>
+                  </Radio.Group>
                 </Grid.Col>
-                <Grid.Col span={6}>
+                <Grid.Col span={3.5}>
                   <Checkbox.Group
                     value={query.mode}
-                    label="SHOW ORDERS"
+                    label="SHOW DATA"
                     onChange={(value) => {
-                      let realValue = value
+                      let realValue = value;
                       if (isEmpty(value)) {
-                        realValue = query.mode
+                        realValue = query.mode;
                       } else {
-                        realValue = value[1] ? [value[1]] : value
+                        realValue = value[1] ? [value[1]] : value;
                       }
                       setPagination({
                         ...pagination,
                         currentPage: 1,
-                      })
-                      setQuery({ ...query, mode: realValue })
+                      });
+                      setQuery({ ...query, mode: realValue });
                     }}
                     styles={{
                       root: {
@@ -367,27 +343,36 @@ const RankingPODShopifyProducts = () => {
                         fontSize: "14px",
                         fontWeight: "bold",
                         marginRight: "10px",
-                      }
+                      },
                     }}
                   >
-                    <Group styles={{
-                      root: {
-                        height: "100%",
-                        display: "flex",
-                        justifyContent: "start"
-                      },
-
-                    }}>
-                      <Checkbox styles={{
-                        input: {
-                          borderRadius: "50%",
-                        }
-                      }} value={TARGET_MODES.ORDERS} label={TARGET_MODES.ORDERS} />
-                      <Checkbox styles={{
-                        input: {
-                          borderRadius: "50%",
-                        }
-                      }} value={TARGET_MODES.RANKING} label={TARGET_MODES.RANKING} />
+                    <Group
+                      styles={{
+                        root: {
+                          height: "100%",
+                          display: "flex",
+                          justifyContent: "start",
+                        },
+                      }}
+                    >
+                      <Checkbox
+                        styles={{
+                          input: {
+                            borderRadius: "50%",
+                          },
+                        }}
+                        value={TARGET_MODES.ORDERS}
+                        label={TARGET_MODES.ORDERS}
+                      />
+                      <Checkbox
+                        styles={{
+                          input: {
+                            borderRadius: "50%",
+                          },
+                        }}
+                        value={TARGET_MODES.RANKING}
+                        label={TARGET_MODES.RANKING}
+                      />
                     </Group>
                   </Checkbox.Group>
                 </Grid.Col>
@@ -424,18 +409,24 @@ const RankingPODShopifyProducts = () => {
                   <Loader size={30} />
                 </div>
               )}
-              {
-                isEmpty(productRankings) && !loadingFetchRankings && (
-                  <div style={{
+              {isEmpty(productRankings) && !loadingFetchRankings && (
+                <div
+                  style={{
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                  }}><Text style={{
-                    fontSize: "20px",
-                    fontWeight: "bold",
-                  }}>Không tìm thấy Data</Text></div>
-                )
-              }
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: "20px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Không tìm thấy Data
+                  </Text>
+                </div>
+              )}
             </Grid.Col>
           </Grid>
         </Card>
@@ -471,10 +462,7 @@ const RankingPODShopifyProducts = () => {
       >
         <Image
           radius="md"
-          src={
-            selectedProduct?.image ||
-            "/images/content/not_found_2.jpg"
-          }
+          src={selectedProduct?.image || "/images/content/not_found_2.jpg"}
           height="100%"
           fit="contain"
           style={{
