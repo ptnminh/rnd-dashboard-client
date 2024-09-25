@@ -490,7 +490,10 @@ const PODDashboard = () => {
                                 <Select
                                   data={keys(VALUES)}
                                   placeholder="VALUE"
-                                  value={CONVERT_NUMBER_TO_STATUS[query.value] || null}
+                                  value={
+                                    CONVERT_NUMBER_TO_STATUS[query.value] ||
+                                    null
+                                  }
                                   onChange={(value) => {
                                     setPagination({
                                       ...pagination,
