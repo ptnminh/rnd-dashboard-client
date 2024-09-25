@@ -183,7 +183,15 @@ const RankingTable = ({
 
   useEffect(() => {
     if (!isEmpty(overrideProductRankings)) {
-      const orderedData = moveOverrideColorToStart(data);
+      const orderedData = moveOverrideColorToStart(map(data, (item) => {
+        if (overrideProductRankings.includes(item.id)) {
+          return {
+            ...item,
+            overrideColor: true,
+          };
+        }
+        return item;
+      }));
       setData(orderedData);
       setCustomColumns(generateCustomColumn(orderedData));
     }
