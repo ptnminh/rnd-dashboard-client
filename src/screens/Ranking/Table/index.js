@@ -181,6 +181,14 @@ const RankingTable = ({
     setCustomColumns(generateCustomColumn(tableData));
   }, [tableData]);
 
+  useEffect(() => {
+    if (!isEmpty(overrideProductRankings)) {
+      const orderedData = moveOverrideColorToStart(data);
+      setData(orderedData);
+      setCustomColumns(generateCustomColumn(orderedData));
+    }
+  }, [overrideProductRankings]);
+
   // Compute the Total theo ${activeTab} row data
   const summaryRow = useMemo(() => {
     const columns = merge(
@@ -366,12 +374,12 @@ const RankingTable = ({
                   style={{
                     ...(index === 0
                       ? {
-                          fontSize: 10,
-                        }
+                        fontSize: 10,
+                      }
                       : {
-                          fontSize: 10,
-                          color: "gray",
-                        }),
+                        fontSize: 10,
+                        color: "gray",
+                      }),
                     fontWeight: "bold",
                     textAlign: "left",
                   }}
@@ -654,11 +662,11 @@ const RankingTable = ({
                       follow: value,
                       ...(value === 1
                         ? {
-                            overrideColor: true,
-                          }
+                          overrideColor: true,
+                        }
                         : {
-                            overrideColor: false,
-                          }),
+                          overrideColor: false,
+                        }),
                     };
                   }
                   return item;
