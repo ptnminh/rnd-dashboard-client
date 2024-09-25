@@ -16,6 +16,7 @@ import {
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
+  getEditorStateAsString,
   getStringAsEditorState,
 } from "../../../utils";
 import {
@@ -27,6 +28,9 @@ import Editor from "../../../components/Editor";
 import styles from "./ScaleCliparts.module.sass";
 import { map } from "lodash";
 import { STATUS } from "../../../constant";
+import { useState } from "react";
+import { rndServices } from "../../../services";
+import { showNotification } from "../../../utils/index";
 
 const ScaleClipart = ({
   close,
@@ -36,7 +40,27 @@ const ScaleClipart = ({
   setLinkDesign,
   handleUpdateLinkDesign,
   opened,
+  setTrigger,
+  setDesignerNote,
+  designerNote,
 }) => {
+  const [loading, setLoading] = useState(false);
+  const handleUpdateNote = async () => {
+    setLoading(true);
+    const updateNoteResponse = await rndServices.updateBriefDesign({
+      uid: selectedSKU.uid,
+      data: {
+        note: {
+          designer: getEditorStateAsString(designerNote),
+        },
+      },
+    });
+    if (updateNoteResponse) {
+      setTrigger(true);
+      showNotification("Thành công", "Cập nhật Note thành công", "green");
+    }
+    setLoading(false);
+  };
   return (
     <Modal
       opened={opened}
@@ -268,31 +292,31 @@ const ScaleClipart = ({
             )}
             {(selectedSKU?.designLinkRef?.designLink ||
               selectedSKU?.designLinkRef) && (
-                <List.Item>
-                  Link Design (NAS):{" "}
-                  <a
-                    style={{
-                      display: "inline-block",
-                      width: "100px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      textDecoration: "none",
-                      color: "#228be6",
-                      verticalAlign: "middle",
-                    }}
-                    href={
-                      selectedSKU?.designLinkRef ||
-                      selectedSKU?.productLine?.designLink
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedSKU?.designLinkRef ||
-                      selectedSKU?.productLine?.designLink}
-                  </a>
-                </List.Item>
-              )}
+              <List.Item>
+                Link Design (NAS):{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "100px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={
+                    selectedSKU?.designLinkRef ||
+                    selectedSKU?.productLine?.designLink
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {selectedSKU?.designLinkRef ||
+                    selectedSKU?.productLine?.designLink}
+                </a>
+              </List.Item>
+            )}
           </List>
         </Grid.Col>
         <Grid.Col
@@ -394,10 +418,14 @@ const ScaleClipart = ({
 
         <Grid.Col span={12}>
           <Editor
-            state={getStringAsEditorState(selectedSKU?.note?.designer)}
+            state={designerNote}
+            onChange={setDesignerNote}
             classEditor={styles.editor}
             label="Designer Note"
-            readOnly={true}
+            readOnly={selectedSKU?.status !== STATUS.DESIGNED}
+            button={true}
+            onClick={handleUpdateNote}
+            loading={loading}
           />
         </Grid.Col>
         <Grid.Col span={12}>

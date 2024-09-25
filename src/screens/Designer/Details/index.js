@@ -200,7 +200,7 @@ const KeywordTable = ({
       {
         accessorKey: "value",
         header: "VALUE",
-        size: 150,
+        size: 130,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
@@ -344,10 +344,11 @@ const KeywordTable = ({
       {
         accessorKey: "rndTeam",
         header: "TEAM",
-        size: 130,
+        size: 100,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row?.original?.uid;
           const foundBrief = find(payloads, { uid });
@@ -358,18 +359,6 @@ const KeywordTable = ({
               size="xs"
               value={foundBrief.rndTeam}
               onChange={(value) => {
-                const foundRnDTeam = find(users, {
-                  position: "rnd",
-                  team: value,
-                })?.team;
-                if (!foundRnDTeam) {
-                  showNotification(
-                    "Thất bại",
-                    `RnD không thuộc team ${value}`,
-                    "red"
-                  );
-                  return;
-                }
                 setPayloads((prev) => {
                   const newPayloads = map(prev, (x) => {
                     if (x.uid === uid) {
@@ -401,10 +390,10 @@ const KeywordTable = ({
         enableSorting: false,
         size: 150,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: ({ row }) => {
           const uid = row?.original?.uid;
           const foundBrief = find(payloads, { uid });
-          const team = foundBrief?.rndTeam;
           return (
             <Select
               size="xs"
@@ -417,8 +406,11 @@ const KeywordTable = ({
                     if (x.uid === uid) {
                       return {
                         ...x,
-                        rndName: value,
-                        rnd: find(users, { name: value })?.uid,
+                        rnd: {
+                          ...x.rnd,
+                          name: value,
+                        },
+                        rndId: find(users, { name: value })?.uid,
                       };
                     }
                     return x;
@@ -428,7 +420,7 @@ const KeywordTable = ({
                 rndServices.updateBriefDesign({
                   uid,
                   data: {
-                    rnd: find(users, { name: value })?.uid,
+                    rndId: find(users, { name: value })?.uid,
                   },
                 });
               }}
@@ -442,8 +434,45 @@ const KeywordTable = ({
         header: "DESIGNER",
         enableEditing: false,
         enableSorting: false,
-        size: 130,
+        size: 150,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <Select
+              size="xs"
+              data={map(filter(users, { position: "designer" }), "name") || []}
+              allowDeselect={false}
+              value={foundBrief?.designer?.name}
+              onChange={(value) => {
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        designer: {
+                          ...x.designer,
+                          name: value,
+                        },
+                        designerId: find(users, { name: value })?.uid,
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
+                });
+                rndServices.updateBriefDesign({
+                  uid,
+                  data: {
+                    designerId: find(users, { name: value })?.uid,
+                  },
+                });
+              }}
+            />
+          );
+        },
       },
       {
         accessorKey: "noteForEPM",

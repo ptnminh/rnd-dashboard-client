@@ -121,7 +121,9 @@ const RankingPODShopifyProducts = () => {
               follow: 1,
             };
           }
-          return x;
+          return {
+            ...x,
+          };
         });
         const newProductRankings = [...oldProductRankings, ...data];
         const sortedProductRankings = moveIdsToStart(

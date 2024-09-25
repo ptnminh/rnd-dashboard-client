@@ -33,6 +33,7 @@ import Editor from "../../components/Editor";
 import {
   CONVERT_BRIEF_TYPE_TO_OBJECT_NAME,
   CONVERT_NUMBER_TO_STATUS,
+  getEditorStateAsString,
   getStringAsEditorState,
 } from "../../utils";
 import { rndServices } from "../../services";
@@ -122,6 +123,24 @@ const DesignerScreens = () => {
     });
     setUsers(data);
   };
+  const [designerNote, setDesignerNote] = useState("");
+  const [loadingUpdateNote, setLoadingUpdateNote] = useState(false);
+  const handleUpdateNote = async () => {
+    setLoadingUpdateNote(true);
+    const updateNoteResponse = await rndServices.updateBriefDesign({
+      uid: selectedSKU.uid,
+      data: {
+        note: {
+          designer: getEditorStateAsString(designerNote),
+        },
+      },
+    });
+    if (updateNoteResponse) {
+      setTrigger(true);
+      showNotification("Thành công", "Cập nhật Note thành công", "green");
+    }
+    setLoadingUpdateNote(false);
+  };
   const handlePageChange = (page) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -129,6 +148,14 @@ const DesignerScreens = () => {
   useEffect(() => {
     fetchBriefs(pagination.currentPage);
   }, [search, pagination.currentPage, query, trigger, sorting]);
+
+  useEffect(() => {
+    if (selectedSKU) {
+      setDesignerNote(
+        getStringAsEditorState(selectedSKU?.note?.designer || "")
+      );
+    }
+  }, [selectedSKU]);
 
   useEffect(() => {
     // Update the URL when search or page changes
@@ -668,10 +695,14 @@ const DesignerScreens = () => {
               </Grid.Col>
               <Grid.Col span={12}>
                 <Editor
-                  state={getStringAsEditorState(selectedSKU?.note?.designer)}
+                  state={designerNote}
+                  onChange={setDesignerNote}
                   classEditor={styles.editor}
                   label="Designer Note"
-                  readOnly={true}
+                  readOnly={selectedSKU?.status === STATUS.DESIGNED}
+                  button={selectedSKU?.status !== STATUS.DESIGNED}
+                  onClick={handleUpdateNote}
+                  loading={loadingUpdateNote}
                 />
               </Grid.Col>
               <Grid.Col span={12}>
@@ -711,6 +742,9 @@ const DesignerScreens = () => {
           loadingUpdateDesignLink={loadingUpdateDesignLink}
           setLinkDesign={setLinkDesign}
           handleUpdateLinkDesign={handleUpdateLinkDesign}
+          setTrigger={setTrigger}
+          designerNote={designerNote}
+          setDesignerNote={setDesignerNote}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[2] && (
@@ -722,6 +756,9 @@ const DesignerScreens = () => {
           loadingUpdateDesignLink={loadingUpdateDesignLink}
           setLinkDesign={setLinkDesign}
           handleUpdateLinkDesign={handleUpdateLinkDesign}
+          setTrigger={setTrigger}
+          designerNote={designerNote}
+          setDesignerNote={setDesignerNote}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[3] && (
@@ -733,6 +770,9 @@ const DesignerScreens = () => {
           loadingUpdateDesignLink={loadingUpdateDesignLink}
           setLinkDesign={setLinkDesign}
           handleUpdateLinkDesign={handleUpdateLinkDesign}
+          setTrigger={setTrigger}
+          designerNote={designerNote}
+          setDesignerNote={setDesignerNote}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[4] && (
@@ -744,6 +784,9 @@ const DesignerScreens = () => {
           loadingUpdateDesignLink={loadingUpdateDesignLink}
           setLinkDesign={setLinkDesign}
           handleUpdateLinkDesign={handleUpdateLinkDesign}
+          setTrigger={setTrigger}
+          designerNote={designerNote}
+          setDesignerNote={setDesignerNote}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[5] && (
@@ -755,6 +798,9 @@ const DesignerScreens = () => {
           loadingUpdateDesignLink={loadingUpdateDesignLink}
           setLinkDesign={setLinkDesign}
           handleUpdateLinkDesign={handleUpdateLinkDesign}
+          setTrigger={setTrigger}
+          designerNote={designerNote}
+          setDesignerNote={setDesignerNote}
         />
       )}
       {selectedSKU && openedNoteForEPM && (

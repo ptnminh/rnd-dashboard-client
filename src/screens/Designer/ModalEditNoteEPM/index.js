@@ -61,7 +61,7 @@ const ModalEditNoteEPM = ({ opened, close, selectedSKU, setTrigger }) => {
           span={12}
           style={{
             display: "flex",
-            justifyContent: "center",
+            justifyContent: "end",
           }}
         >
           <Button

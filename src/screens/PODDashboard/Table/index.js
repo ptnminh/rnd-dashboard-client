@@ -36,6 +36,7 @@ import {
   CONVERT_STATUS_TO_POD_DASHBOARD_NUMBER,
   POD_DASHBOARD_STATUS,
 } from "../../../constant/common";
+import { dashboardServices } from "../../../services";
 
 const SellerboardTable = ({
   tableData,
@@ -49,6 +50,9 @@ const SellerboardTable = ({
   pagination,
   setIsLoadmore,
 }) => {
+  const handleUpdatePODDashboard = async (id, data) => {
+    await dashboardServices.handleUpdatePODDashboard({ id, data });
+  };
   // Function to extract unique keys from the data array
   const extractUniqueKeys = (dataset) => {
     // Flatten the 'data' arrays from each item and map to the 'key' property
@@ -575,6 +579,7 @@ const SellerboardTable = ({
                   return item;
                 });
                 setData(newData);
+                handleUpdatePODDashboard(uid, { optimized: newFollow });
               }}
             />
           );
