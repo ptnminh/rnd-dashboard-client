@@ -44,6 +44,7 @@ import ScaleDesign from "./ScaleDesign";
 import ScaleMixMatch from "./ScaleMixMatch";
 import ScaleClipart from "./ScaleCliparts";
 import ScaleNiche from "./Niche";
+import ModalEditNoteEPM from "./ModalEditNoteEPM";
 
 const DesignerScreens = () => {
   const navigate = useNavigate();
@@ -67,6 +68,8 @@ const DesignerScreens = () => {
   const [sorting, setSorting] = useState([]);
 
   const [opened, { open, close }] = useDisclosure(false);
+  const [openedNoteForEPM, { open: openNoteForEPM, close: closeNoteForEPM }] =
+    useDisclosure(false);
   const [selectedSKU, setSelectedSKU] = useState();
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
@@ -232,6 +235,7 @@ const DesignerScreens = () => {
           setSorting={setSorting}
           sorting={sorting}
           metadata={metadata}
+          openNoteForEPM={openNoteForEPM}
         />
       </Card>
       <Pagination
@@ -460,31 +464,31 @@ const DesignerScreens = () => {
                   )}
                   {(selectedSKU?.designLinkRef?.designLink ||
                     selectedSKU?.designLinkRef) && (
-                      <List.Item>
-                        Link Design (NAS):{" "}
-                        <a
-                          style={{
-                            display: "inline-block",
-                            width: "230px",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            textDecoration: "none",
-                            color: "#228be6",
-                            verticalAlign: "middle",
-                          }}
-                          href={
-                            selectedSKU?.designLinkRef ||
-                            selectedSKU?.productLine?.designLink
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {selectedSKU?.designLinkRef ||
-                            selectedSKU?.productLine?.designLink}
-                        </a>
-                      </List.Item>
-                    )}
+                    <List.Item>
+                      Link Design (NAS):{" "}
+                      <a
+                        style={{
+                          display: "inline-block",
+                          width: "230px",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          textDecoration: "none",
+                          color: "#228be6",
+                          verticalAlign: "middle",
+                        }}
+                        href={
+                          selectedSKU?.designLinkRef ||
+                          selectedSKU?.productLine?.designLink
+                        }
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {selectedSKU?.designLinkRef ||
+                          selectedSKU?.productLine?.designLink}
+                      </a>
+                    </List.Item>
+                  )}
                 </List>
               </Grid.Col>
               <Grid.Col
@@ -510,16 +514,16 @@ const DesignerScreens = () => {
                   Scale
                 </div>
                 {selectedSKU?.briefType === BRIEF_TYPES[0] ||
-                  selectedSKU?.briefType === BRIEF_TYPES[1] ||
-                  (selectedSKU?.briefType === BRIEF_TYPES[2] &&
-                    selectedSKU?.clipart.name) ? (
+                selectedSKU?.briefType === BRIEF_TYPES[1] ||
+                (selectedSKU?.briefType === BRIEF_TYPES[2] &&
+                  selectedSKU?.clipart.name) ? (
                   <>
                     <Image
                       radius="md"
                       src={
                         selectedSKU[
                           CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                          selectedSKU?.briefType
+                            selectedSKU?.briefType
                           ]
                         ]?.image || "/images/content/not_found_2.jpg"
                       }
@@ -539,7 +543,7 @@ const DesignerScreens = () => {
                       {
                         selectedSKU[
                           CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                          selectedSKU?.briefType
+                            selectedSKU?.briefType
                           ]
                         ]?.name
                       }
@@ -561,38 +565,38 @@ const DesignerScreens = () => {
                   {selectedSKU[
                     CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
                   ]?.refLink && (
-                      <List.Item>
-                        Link Mockup:{" "}
-                        <a
-                          style={{
-                            display: "inline-block",
-                            width: "230px",
-                            whiteSpace: "nowrap",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            textDecoration: "none",
-                            color: "#228be6",
-                            verticalAlign: "middle",
-                          }}
-                          href={
-                            selectedSKU[
-                              CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                    <List.Item>
+                      Link Mockup:{" "}
+                      <a
+                        style={{
+                          display: "inline-block",
+                          width: "230px",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          textDecoration: "none",
+                          color: "#228be6",
+                          verticalAlign: "middle",
+                        }}
+                        href={
+                          selectedSKU[
+                            CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
                               selectedSKU?.briefType
-                              ]
-                            ]?.refLink
-                          }
-                          target="_blank"
-                        >
-                          {
-                            selectedSKU[
-                              CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                            ]
+                          ]?.refLink
+                        }
+                        target="_blank"
+                      >
+                        {
+                          selectedSKU[
+                            CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
                               selectedSKU?.briefType
-                              ]
-                            ]?.refLink
-                          }
-                        </a>
-                      </List.Item>
-                    )}
+                            ]
+                          ]?.refLink
+                        }
+                      </a>
+                    </List.Item>
+                  )}
                 </List>
                 {selectedSKU?.briefType === BRIEF_TYPES[2] && (
                   <MantineCard
@@ -751,6 +755,14 @@ const DesignerScreens = () => {
           loadingUpdateDesignLink={loadingUpdateDesignLink}
           setLinkDesign={setLinkDesign}
           handleUpdateLinkDesign={handleUpdateLinkDesign}
+        />
+      )}
+      {selectedSKU && openedNoteForEPM && (
+        <ModalEditNoteEPM
+          opened={openedNoteForEPM}
+          close={closeNoteForEPM}
+          selectedSKU={selectedSKU}
+          setTrigger={setTrigger}
         />
       )}
     </>

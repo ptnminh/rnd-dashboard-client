@@ -5,7 +5,6 @@ import Card from "../../components/Card";
 import {
   Affix,
   Button,
-  Checkbox,
   Flex,
   Grid,
   Group,
@@ -21,7 +20,16 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { dashboardServices } from "../../services";
 import Table from "./Table";
-import { isEmpty, keys, map, omit, toLower, toNumber, values } from "lodash";
+import {
+  isEmpty,
+  keys,
+  map,
+  omit,
+  orderBy,
+  toLower,
+  toNumber,
+  values,
+} from "lodash";
 import moment from "moment-timezone";
 import { useWindowScroll } from "@mantine/hooks";
 import { IconArrowUp } from "@tabler/icons-react";
@@ -664,7 +672,7 @@ const PODDashboard = () => {
                       tableData={map(saleMetrics, (row) => {
                         return {
                           ...row,
-                          data: row?.sales || [],
+                          data: orderBy(row?.sales, ["key"], ["desc"]) || [],
                         };
                       })}
                       query={query}

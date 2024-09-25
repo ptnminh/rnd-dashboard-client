@@ -14,22 +14,18 @@ import {
   Modal,
   Radio,
   rem,
+  Select,
   Text,
   Transition,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { rankingServices } from "../../services";
 import Table from "./Table";
-import { isEmpty, omit, toNumber } from "lodash";
+import { isEmpty, map, omit, toNumber } from "lodash";
 import moment from "moment-timezone";
 import { useDisclosure, useWindowScroll } from "@mantine/hooks";
 import { IconArrowUp } from "@tabler/icons-react";
 
-const TARGET_COMPETITORS = {
-  PAWFECTHOUSE: "Pawfecthouse",
-  MACORNER: "Macorner",
-  WANDERPRINTS: "Wanderprints",
-};
 const TARGET_DATES = {
   TODAY: "Today",
   THREE_DAYS: "3 Day",
@@ -56,15 +52,14 @@ const RankingPODShopifyProducts = () => {
   const [isLoadmore, setIsLoadmore] = useState(false);
   const [productRankings, setProductRankings] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
+  const [competitors, setCompetitors] = useState([]);
   const [pagination, setPagination] = useState({
     currentPage: initialPage,
     totalPages: 1,
   });
-  const threeDayAgo = moment().subtract(3, "days").format("YYYY-MM-DD");
-  const sevenDayAgo = moment().subtract(7, "days").format("YYYY-MM-DD");
   const endDate = moment().format("YYYY-MM-DD");
   const [query, setQuery] = useState({
-    competitor: TARGET_COMPETITORS.WANDERPRINTS,
+    competitor: "Wanderprints",
     mode: [TARGET_MODES.ORDERS],
     targetDate: TARGET_DATES.THREE_DAYS,
     dateChange: 3,
@@ -76,7 +71,6 @@ const RankingPODShopifyProducts = () => {
     },
   ]);
   const isMounted = useRef(false);
-
   const [trigger, setTrigger] = useState(false);
   const [loadingFetchRankings, setLoadingFetchRankings] = useState(true);
   const fetchRankings = async (page) => {
@@ -123,9 +117,17 @@ const RankingPODShopifyProducts = () => {
     setLoadingFetchRankings(false);
     setTrigger(false);
   };
+  const fetchCompetitors = async () => {
+    const competitors = await rankingServices.fetchCompetitors();
+    setCompetitors(map(competitors, "name"));
+  };
   useEffect(() => {
     fetchRankings(pagination.currentPage);
   }, [search, query, trigger, sorting, pagination.currentPage]);
+
+  useEffect(() => {
+    fetchCompetitors();
+  }, []);
 
   // listen sorting change set isConfirmedQuery to true for refetch data
   useEffect(() => {
@@ -265,24 +267,27 @@ const RankingPODShopifyProducts = () => {
                   </Radio.Group>
                 </Grid.Col>
                 <Grid.Col
-                  span={5}
+                  span={2}
                   style={{
-                    gap: "10px",
-                    padding: "10px",
                     borderRadius: "10px",
-                    backgroundColor: "#e2eaff",
                     flexWrap: "wrap",
                     width: "100%",
-                    height: "50px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    border: "1px solid #4f80ff",
-                    borderColor: "#4f80ff",
                   }}
                 >
-                  <Radio.Group
-                    value={query?.competitor}
+                  <Select
+                    styles={{
+                      input: {
+                        height: "100%",
+                      },
+                      root: {
+                        height: "100%",
+                      },
+                    }}
+                    data={competitors || []}
+                    value={query.competitor}
                     onChange={(value) => {
                       setPagination({
                         ...pagination,
@@ -290,32 +295,9 @@ const RankingPODShopifyProducts = () => {
                       });
                       setQuery({ ...query, competitor: value });
                     }}
-                  >
-                    <Group
-                      styles={{
-                        root: {
-                          height: "100%",
-                          display: "flex",
-                          justifyContent: "space-between",
-                        },
-                      }}
-                    >
-                      <Radio
-                        value={TARGET_COMPETITORS.WANDERPRINTS}
-                        label={TARGET_COMPETITORS.WANDERPRINTS}
-                      />
-                      <Radio
-                        value={TARGET_COMPETITORS.MACORNER}
-                        label={TARGET_COMPETITORS.MACORNER}
-                      />
-                      <Radio
-                        value={TARGET_COMPETITORS.PAWFECTHOUSE}
-                        label={TARGET_COMPETITORS.PAWFECTHOUSE}
-                      />
-                    </Group>
-                  </Radio.Group>
+                  />
                 </Grid.Col>
-                <Grid.Col span={3.5}>
+                <Grid.Col span={6.5}>
                   <Checkbox.Group
                     value={query.mode}
                     label="SHOW DATA"
@@ -330,7 +312,7 @@ const RankingPODShopifyProducts = () => {
                         ...pagination,
                         currentPage: 1,
                       });
-                      setQuery({ ...query, mode: realValue });
+                      setQuery({ ...query, mode: realValue, sortBy: "" });
                     }}
                     styles={{
                       root: {
