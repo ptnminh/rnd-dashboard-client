@@ -504,8 +504,8 @@ const RankingTable = ({
       {
         accessorKey: "status",
         header: "Status",
-        size: 130,
-        maxSize: 130,
+        size: 30,
+        maxSize: 30,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
