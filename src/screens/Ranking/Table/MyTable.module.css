@@ -32,6 +32,21 @@
   align-items: center !important;
   justify-content: center !important;
 }
+.highlight {
+  font-weight: bold;
+  color: #000000;
+  width: 100%;
+  padding: 0;
+  background-color: #A2E09C;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.highlight>div {
+  height: 100%;
+  align-items: center !important;
+  justify-content: center !important;
+}
 
 
 .SKU {
@@ -104,8 +119,8 @@
 }
 
 /* Disable hover effect for rows in the table with the 'disable-hover' class */
-.disable-hover tbody tr:hover {
-  background-color: transparent !important;
+.disable-hover tbody tr[data-hover]:hover td {
+  background-color: none !important;
 }
 
 .summary-row {

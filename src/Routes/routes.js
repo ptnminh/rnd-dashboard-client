@@ -200,9 +200,9 @@ export const PATH_NAMES = {
         url: "/dashboard/pod-ranking",
       },
       POD_AMZ: {
-        title: "5. POD-AMZ",
+        title: "5. POD",
         url: "/dashboard/pod",
-      }
+      },
     },
   },
 };
@@ -527,7 +527,7 @@ export const NAVIGATION = [
         title: PATH_NAMES.DASHBOARD.children.POD_AMZ.title,
         url: PATH_NAMES.DASHBOARD.children.POD_AMZ.url,
         permissions: ["read:user"],
-      }
+      },
     ],
   },
 ];
