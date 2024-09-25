@@ -21,7 +21,7 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { rankingServices } from "../../services";
 import Table from "./Table";
-import { isEmpty, map, omit, toNumber } from "lodash";
+import { filter, includes, isEmpty, map, omit, toNumber, uniq } from "lodash";
 import moment from "moment-timezone";
 import { useDisclosure, useWindowScroll } from "@mantine/hooks";
 import { IconArrowUp } from "@tabler/icons-react";
@@ -36,6 +36,18 @@ const TARGET_MODES = {
   RANKING: "Ranking",
 };
 
+const moveIdsToStart = (array, ids) => {
+  return array.sort((a, b) => {
+    if (ids.includes(a.id) && !ids.includes(b.id)) {
+      return -1;
+    }
+    if (!ids.includes(a.id) && ids.includes(b.id)) {
+      return 1;
+    }
+    return 0;
+  });
+};
+
 const RankingPODShopifyProducts = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,6 +60,7 @@ const RankingPODShopifyProducts = () => {
   ] = useDisclosure(false);
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
+  const [overrideProductRankings, setOverrideProductRankings] = useState([]);
   // const [isConfirmedQuery, setIsConfirmedQuery] = useState(true);
   const [isLoadmore, setIsLoadmore] = useState(false);
   const [productRankings, setProductRankings] = useState([]);
@@ -101,7 +114,21 @@ const RankingPODShopifyProducts = () => {
     const { data, metadata } = response;
     if (!isEmpty(data)) {
       if (isLoadmore) {
-        setProductRankings((prev) => [...prev, ...data]);
+        const oldProductRankings = map(productRankings, (x) => {
+          if (includes(overrideProductRankings, x.id)) {
+            return {
+              ...x,
+              follow: 1,
+            };
+          }
+          return x;
+        });
+        const newProductRankings = [...oldProductRankings, ...data];
+        const sortedProductRankings = moveIdsToStart(
+          newProductRankings,
+          uniq(overrideProductRankings)
+        );
+        setProductRankings(sortedProductRankings);
       } else {
         setProductRankings(data);
       }
@@ -119,7 +146,7 @@ const RankingPODShopifyProducts = () => {
   };
   const fetchCompetitors = async () => {
     const competitors = await rankingServices.fetchCompetitors();
-    setCompetitors(map(competitors, "name"));
+    setCompetitors(map(filter(competitors, { alive: true }), "name"));
   };
   useEffect(() => {
     fetchRankings(pagination.currentPage);
@@ -375,6 +402,8 @@ const RankingPODShopifyProducts = () => {
                   setSelectedProduct={setSelectedProduct}
                   query={query}
                   setQuery={setQuery}
+                  setOverrideProductRankings={setOverrideProductRankings}
+                  overrideProductRankings={overrideProductRankings}
                 />
               )}
               {loadingFetchRankings && (

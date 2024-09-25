@@ -75,6 +75,8 @@ const RankingTable = ({
   setIsLoadmore,
   openPreviewImage,
   setSelectedProduct,
+  setOverrideProductRankings,
+  overrideProductRankings,
 }) => {
   const handleUpdateRanking = async (id, data) => {
     await rankingServices.updateRanking({ id, data });
@@ -127,7 +129,10 @@ const RankingTable = ({
           if (color && query?.mode[0] === TARGET_MODES.RANKING) {
             classnames = classes["highlight"];
           }
-          if (foundData?.overrideColor) {
+          if (
+            foundData?.overrideColor ||
+            overrideProductRankings.includes(id)
+          ) {
             classnames = classes["highlight-follow-row"];
           }
           if (row.id === `Total theo ${activeTab}`) {
@@ -634,6 +639,16 @@ const RankingTable = ({
                 const value = follow ? 0 : 1;
                 const newData = data.map((item) => {
                   if (item.id === id) {
+                    if (value === 1) {
+                      setOverrideProductRankings([
+                        ...overrideProductRankings,
+                        id,
+                      ]);
+                    } else {
+                      setOverrideProductRankings(
+                        overrideProductRankings.filter((x) => x !== id)
+                      );
+                    }
                     return {
                       ...item,
                       follow: value,
