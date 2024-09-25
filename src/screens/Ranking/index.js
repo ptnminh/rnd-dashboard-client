@@ -130,7 +130,11 @@ const RankingPODShopifyProducts = () => {
         );
         setProductRankings(sortedProductRankings);
       } else {
-        setProductRankings(data);
+        const sortedProductRankings = moveIdsToStart(
+          data,
+          uniq(overrideProductRankings)
+        );
+        setProductRankings(sortedProductRankings);
       }
       setPagination({
         currentPage: toNumber(metadata.currentPage) || 1,
