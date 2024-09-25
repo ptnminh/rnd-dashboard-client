@@ -554,8 +554,8 @@ const SellerboardTable = ({
           if (row.id === `Total theo ${activeTab}`) {
             return null;
           }
-          const id = row.original.id;
-          const payload = find(data, { id });
+          const uid = row.original.uid;
+          const payload = find(data, { uid });
           const optimized = payload?.optimized;
           return (
             <Select
@@ -566,7 +566,7 @@ const SellerboardTable = ({
               onChange={(value) => {
                 const newFollow = CONVERT_STATUS_TO_POD_DASHBOARD_NUMBER[value];
                 const newData = data.map((item) => {
-                  if (item.id === id) {
+                  if (item.uid === uid) {
                     return {
                       ...item,
                       optimized: newFollow,
