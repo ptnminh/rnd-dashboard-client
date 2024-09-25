@@ -851,13 +851,21 @@ const BriefsTable = ({
                 },
               }}
               value={query?.statusValue}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  status: value === "Done" ? [3] : [2],
-                  statusValue: value,
-                })
-              }
+              onChange={(value) => {
+                if (!value) {
+                  setQuery({
+                    ...query,
+                    status: [2, 3],
+                    statusValue: null,
+                  });
+                } else {
+                  setQuery({
+                    ...query,
+                    status: value === "Done" ? [3] : [2],
+                    statusValue: value,
+                  });
+                }
+              }}
               clearable
               onClear={() => {
                 setQuery({
