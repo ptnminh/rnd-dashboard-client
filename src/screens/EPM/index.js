@@ -3,7 +3,7 @@ import styles from "./TemplateKW.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Table from "./Details";
-import { map } from "lodash";
+import { isEmpty, map } from "lodash";
 
 import { useDisclosure } from "@mantine/hooks";
 import { IconCircleCheck, IconExclamationMark } from "@tabler/icons-react";
@@ -19,6 +19,7 @@ import {
   TextInput,
   Button,
   LoadingOverlay,
+  HoverCard,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
@@ -315,7 +316,6 @@ const EPMScreens = () => {
                   borderRadius: "12px",
                 }}
               >
-
                 <div
                   style={{
                     display: "flex",
@@ -459,9 +459,9 @@ const EPMScreens = () => {
                         href={
                           selectedSKU?.briefType === BRIEF_TYPES[5]
                             ? `https://${selectedSKU.designLinkRef.replace(
-                              /^(https?:\/\/)?/,
-                              ""
-                            )}`
+                                /^(https?:\/\/)?/,
+                                ""
+                              )}`
                             : selectedSKU?.designLinkRef
                         }
                         target="_blank"
@@ -572,8 +572,44 @@ const EPMScreens = () => {
                     </ThemeIcon>
                   }
                 >
+                  {!isEmpty(selectedSKU?.cliparts) && (
+                    <List.Item>
+                      Clipart:{" "}
+                      <List
+                        listStyleType="disc"
+                        withPadding
+                        style={{
+                          marginTop: "10px",
+                        }}
+                      >
+                        {map(selectedSKU?.cliparts, (clipart) => {
+                          return (
+                            <List.Item
+                              style={{
+                                fontSize: "12px",
+                              }}
+                            >
+                              <HoverCard width={280} shadow="md">
+                                <HoverCard.Target>
+                                  <a href={clipart?.refLink} target="_blank">
+                                    {clipart.name}
+                                  </a>
+                                </HoverCard.Target>
+                                <HoverCard.Dropdown>
+                                  <iframe
+                                    src={clipart?.refLink}
+                                    title={clipart.name}
+                                  ></iframe>
+                                </HoverCard.Dropdown>
+                              </HoverCard>
+                            </List.Item>
+                          );
+                        })}
+                      </List>
+                    </List.Item>
+                  )}
                   {selectedSKU?.briefType === BRIEF_TYPES[4] ||
-                    selectedSKU?.briefType === BRIEF_TYPES[5] ? (
+                  selectedSKU?.briefType === BRIEF_TYPES[5] ? (
                     <List.Item>
                       Product Base: {""}
                       <span>
@@ -591,7 +627,7 @@ const EPMScreens = () => {
                         {
                           selectedSKU?.[
                             CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                            selectedSKU?.briefType
+                              selectedSKU?.briefType
                             ]
                           ]?.name
                         }
