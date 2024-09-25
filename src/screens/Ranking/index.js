@@ -178,9 +178,9 @@ const RankingPODShopifyProducts = () => {
                 }}
               >
                 <Grid.Col
-                  span={3}
+                  span={3.5}
                   style={{
-                    gap: "10px",
+                    gap: "5px",
                     padding: "10px",
                     borderRadius: "10px",
                     backgroundColor: "#e2eaff",
@@ -315,7 +315,7 @@ const RankingPODShopifyProducts = () => {
                     </Group>
                   </Radio.Group>
                 </Grid.Col>
-                <Grid.Col span={4}>
+                <Grid.Col span={3.5}>
                   <Checkbox.Group
                     value={query.mode}
                     label="SHOW DATA"
