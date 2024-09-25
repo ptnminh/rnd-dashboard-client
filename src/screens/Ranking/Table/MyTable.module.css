@@ -119,8 +119,8 @@
 }
 
 /* Disable hover effect for rows in the table with the 'disable-hover' class */
-.disable-hover tbody tr:hover {
-  background-color: transparent !important;
+.disable-hover tbody tr[data-hover]:hover td {
+  background-color: none !important;
 }
 
 .summary-row {
