@@ -41,6 +41,7 @@ import {
   IconSortAscending,
   IconArrowsSort,
   IconSortDescending,
+  IconHeart,
 } from "@tabler/icons-react";
 import moment from "moment-timezone";
 
@@ -53,7 +54,19 @@ const TARGET_DATES = {
   THREE_DAYS: "3 Day",
   SEVEN_DAYS: "7 Day",
 };
-const SellerboardTable = ({
+const moveOverrideColorToStart = (array) => {
+  return array.sort((a, b) => {
+    if (a.overrideColor && !b.overrideColor) {
+      return -1;
+    }
+    if (!a.overrideColor && b.overrideColor) {
+      return 1;
+    }
+    return 0;
+  });
+};
+
+const RankingTable = ({
   tableData,
   query,
   loading,
@@ -85,20 +98,6 @@ const SellerboardTable = ({
   // Function to generate columns based on the data
   const generateCustomColumn = (data) => {
     let keyLevels = extractUniqueKeys(data);
-    switch (query?.targetDate) {
-      case TARGET_DATES.TODAY:
-        keyLevels = keyLevels.slice(0, 1);
-        break;
-      case TARGET_DATES.THREE_DAYS:
-        keyLevels = keyLevels.slice(0, 34);
-        break;
-      case TARGET_DATES.SEVEN_DAYS:
-        keyLevels = keyLevels.slice(0, 7);
-        break;
-      default:
-        break;
-    }
-
     const columns = map(keyLevels, (keyLevel) => {
       return {
         accessorKey: keyLevel,
@@ -112,6 +111,8 @@ const SellerboardTable = ({
             key: keyLevel,
           })?.rankChange;
           const { latestRank } = row?.original;
+          const id = row?.original?.id;
+          const foundData = find(data, { id });
           let color = null;
           if (latestRank > 1 && latestRank <= 50) {
             if (rankChange > 1) {
@@ -129,6 +130,9 @@ const SellerboardTable = ({
           let classnames = null;
           if (color && query?.mode[0] === TARGET_MODES.RANKING) {
             classnames = classes["highlight"];
+          }
+          if (foundData?.overrideColor) {
+            classnames = classes["highlight-follow-row"];
           }
           if (row.id === `Total theo ${activeTab}`) {
             classnames = classes["summary-row"];
@@ -183,19 +187,7 @@ const SellerboardTable = ({
       ...customColumns.map((col) => {
         const key = col.accessorKey;
         let keyLevels = flatMap(data, "data");
-        switch (query?.targetDate) {
-          case TARGET_DATES.TODAY:
-            keyLevels = keyLevels.slice(0, 1);
-            break;
-          case TARGET_DATES.THREE_DAYS:
-            keyLevels = keyLevels.slice(0, 4);
-            break;
-          case TARGET_DATES.SEVEN_DAYS:
-            keyLevels = keyLevels.slice(0, 8);
-            break;
-          default:
-            break;
-        }
+
         const keyData = filter(keyLevels, (keyLevel) => keyLevel.key === key);
         const header = join(split(key, " ")?.slice(0, -1), " ");
         const view =
@@ -263,8 +255,7 @@ const SellerboardTable = ({
               </Text>
             );
           }
-          const { image, createdDate, link, latestRank, originalData } =
-            row.original;
+          const { image, createdDate, link, originalData } = row.original;
           let changesData = slice(originalData, 0, 3)
             ?.map((x) => x.rank)
             ?.map((x, index) => {
@@ -273,10 +264,10 @@ const SellerboardTable = ({
                   style={{
                     ...(index === 0
                       ? {
-                          fontSize: 11,
+                          fontSize: 10,
                         }
                       : {
-                          fontSize: 12,
+                          fontSize: 10,
                           color: "gray",
                         }),
                     fontWeight: "bold",
@@ -422,6 +413,7 @@ const SellerboardTable = ({
           return (
             <Select
               data={keys(VALUES)}
+              allowDeselect={false}
               value={CONVERT_NUMBER_TO_STATUS[value]}
               onChange={(value) => {
                 const newData = data.map((item) => {
@@ -506,6 +498,70 @@ const SellerboardTable = ({
                 });
               }}
             />
+          );
+        },
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        size: 130,
+        maxSize: 130,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          const id = row.original.id;
+          const payload = find(data, { id });
+          const follow = payload?.follow;
+          return (
+            <ActionIcon
+              variant={follow ? "gradient" : "default"}
+              size="xl"
+              gradient={follow ? { from: "red", to: "red", deg: 90 } : {}}
+              onClick={() => {
+                const value = follow ? 0 : 1;
+                const newData = data.map((item) => {
+                  if (item.id === id) {
+                    return {
+                      ...item,
+                      follow: value,
+                      ...(value === 1
+                        ? {
+                            overrideColor: true,
+                          }
+                        : {
+                            overrideColor: false,
+                          }),
+                    };
+                  }
+                  return item;
+                });
+
+                const orderedData = moveOverrideColorToStart(newData, id);
+                setData(orderedData);
+                setCustomColumns(generateCustomColumn(orderedData));
+                handleUpdateRanking(id, {
+                  follow: value,
+                });
+              }}
+            >
+              <IconHeart />
+            </ActionIcon>
           );
         },
       },
@@ -733,4 +789,4 @@ const SellerboardTable = ({
   ) : null;
 };
 
-export default SellerboardTable;
+export default RankingTable;

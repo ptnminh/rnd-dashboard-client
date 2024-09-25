@@ -9,6 +9,7 @@ import {
   Badge,
   Tooltip,
   Group,
+  Select,
 } from "@mantine/core";
 import {
   find,
@@ -30,6 +31,11 @@ import classes from "./MyTable.module.css";
 
 import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import LazyLoad from "react-lazyload";
+import {
+  CONVERT_NUMBER_TO_POD_DASHBOARD_STATUS,
+  CONVERT_STATUS_TO_POD_DASHBOARD_NUMBER,
+  POD_DASHBOARD_STATUS,
+} from "../../../constant/common";
 
 const SellerboardTable = ({
   tableData,
@@ -521,6 +527,56 @@ const SellerboardTable = ({
             </Badge>
           ) : (
             <span>{CONVERT_NUMBER_TO_STATUS[size]}</span>
+          );
+        },
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        size: 130,
+        maxSize: 130,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          const id = row.original.id;
+          const payload = find(data, { id });
+          const optimized = payload?.optimized;
+          return (
+            <Select
+              size="xs"
+              allowDeselect={false}
+              data={values(POD_DASHBOARD_STATUS)}
+              value={CONVERT_NUMBER_TO_POD_DASHBOARD_STATUS[optimized]}
+              onChange={(value) => {
+                const newFollow = CONVERT_STATUS_TO_POD_DASHBOARD_NUMBER[value];
+                const newData = data.map((item) => {
+                  if (item.id === id) {
+                    return {
+                      ...item,
+                      optimized: newFollow,
+                    };
+                  }
+                  return item;
+                });
+                setData(newData);
+              }}
+            />
           );
         },
       },

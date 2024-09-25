@@ -210,6 +210,7 @@ const KeywordTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <Select
+              size="xs"
               placeholder="Value"
               allowDeselect={false}
               disabled={foundBrief.status === STATUS.DESIGNED}
@@ -343,10 +344,54 @@ const KeywordTable = ({
       {
         accessorKey: "rndTeam",
         header: "TEAM",
-        size: 100,
+        size: 130,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <Select
+              data={["BD1", "BD2", "BD3", "AMZ"]}
+              allowDeselect={false}
+              size="xs"
+              value={foundBrief.rndTeam}
+              onChange={(value) => {
+                const foundRnDTeam = find(users, {
+                  position: "rnd",
+                  team: value,
+                })?.team;
+                if (!foundRnDTeam) {
+                  showNotification(
+                    "Thất bại",
+                    `RnD không thuộc team ${value}`,
+                    "red"
+                  );
+                  return;
+                }
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        rndTeam: value,
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
+                });
+                rndServices.updateBriefDesign({
+                  uid,
+                  data: {
+                    rndTeam: value,
+                  },
+                });
+              }}
+            />
+          );
+        },
       },
       {
         id: "rndName",
@@ -354,8 +399,42 @@ const KeywordTable = ({
         header: "RND",
         enableEditing: false,
         enableSorting: false,
-        size: 130,
+        size: 150,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          const team = foundBrief?.rndTeam;
+          return (
+            <Select
+              size="xs"
+              data={map(filter(users, { position: "rnd" }), "name") || []}
+              allowDeselect={false}
+              value={foundBrief?.rnd?.name}
+              onChange={(value) => {
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        rndName: value,
+                        rnd: find(users, { name: value })?.uid,
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
+                });
+                rndServices.updateBriefDesign({
+                  uid,
+                  data: {
+                    rnd: find(users, { name: value })?.uid,
+                  },
+                });
+              }}
+            />
+          );
+        },
       },
       {
         id: "designer",
@@ -383,7 +462,7 @@ const KeywordTable = ({
                 openNoteForEPM();
               }}
             >
-              Brief
+              Note
             </Button>
           );
         },
