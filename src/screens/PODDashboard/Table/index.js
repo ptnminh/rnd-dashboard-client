@@ -194,7 +194,8 @@ const SellerboardTable = ({
               </Text>
             );
           }
-          const { imageLink, sku, productLink, designLink, testDate } = row.original;
+          const { imageLink, sku, productLink, designLink, testDate } =
+            row.original;
           return (
             <Flex direction="column">
               <Grid
@@ -226,10 +227,12 @@ const SellerboardTable = ({
                   </Tooltip>
                 </Grid.Col>
                 <Grid.Col span={8}>
-                  <Grid style={{
-                    width: "100%",
-                    height: "100%",
-                  }}>
+                  <Grid
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                    }}
+                  >
                     <Grid.Col
                       span={12}
                       style={{
@@ -261,25 +264,24 @@ const SellerboardTable = ({
                       <Grid.Col
                         span={12}
                         style={{
-
                           padding: 0,
                           marginTop: "5px",
                         }}
                       >
                         <Text
                           style={{
+                            textAlign: "left",
                             fontSize: 11,
                             color: "gray",
+                            marginLeft: "3px",
                           }}
                         >
                           Test Date: {testDate}
                         </Text>
                       </Grid.Col>
                     )}
-
                   </Grid>
                 </Grid.Col>
-
               </Grid>
             </Flex>
           );
