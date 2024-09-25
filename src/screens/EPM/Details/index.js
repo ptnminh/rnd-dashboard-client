@@ -428,42 +428,86 @@ const BriefsTable = ({
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         Edit: ({ row }) => {
+          const uid = row.original.uid;
+          const foundBrief = find(payloads, { uid });
           return (
             <TextInput
-              value={updateBrief[row.original.uid]?.linkProduct}
+              value={foundBrief?.linkProduct}
               readOnly={row.original.status === STATUS.LISTED}
               onChange={(e) => {
-                setUpdateBrief({
-                  ...updateBrief,
-                  [row.original.uid]: {
-                    ...updateBrief[row.original.uid],
-                    linkProduct: e.target.value,
-                  },
+                const value = e.target.value;
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        linkProduct: value,
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
                 });
+              }}
+              onBlur={(e) => {
+                const value = e.target.value;
+                const urlPattern =
+                  /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
+                if (!urlPattern.test(value)) {
+                  showNotification(
+                    "Thất bại",
+                    "Link Product không hợp lệ",
+                    "red"
+                  );
+                  setPayloads((prev) => {
+                    const newPayloads = map(prev, (x) => {
+                      if (x.uid === uid) {
+                        return {
+                          ...x,
+                          linkProduct: "",
+                        };
+                      }
+                      return x;
+                    });
+                    return newPayloads;
+                  });
+                  return;
+                } else {
+                  rndServices
+                    .updateBriefDesign({
+                      uid,
+                      data: {
+                        linkProduct: value,
+                      },
+                    })
+                    .then(() => {
+                      table.setEditingCell(null);
+                    });
+                }
               }}
             />
           );
         },
-        Cell: ({ row }) => (
-          <a
-            style={{
-              cursor: "pointer",
-            }}
-            target="_blank"
-            href={
-              row.original.linkProduct ||
-              updateBrief[row.original.uid]?.linkProduct
-            }
-          >
-            {row.original.linkProduct ||
-            updateBrief[row.original.uid]?.linkProduct ? (
-              <Badge color="blue" variant="filled">
-                {" "}
-                <u>Link</u>{" "}
-              </Badge>
-            ) : null}
-          </a>
-        ),
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <a
+              style={{
+                cursor: "pointer",
+              }}
+              target="_blank"
+              href={foundBrief?.linkProduct}
+            >
+              {foundBrief?.linkProduct ? (
+                <Badge color="blue" variant="filled">
+                  {" "}
+                  <u>Link</u>{" "}
+                </Badge>
+              ) : null}
+            </a>
+          );
+        },
       },
       {
         accessorKey: "status",
@@ -995,58 +1039,7 @@ const BriefsTable = ({
       },
       // when leaving the cell, we want to reset the editing cell
       onBlur: () => {
-        if (isEmpty(updateBrief.linkDesigns)) {
-          setEditingCell(false);
-        }
-        const uidKeys = keys(updateBrief);
-        const newData = map(data, (x) => {
-          if (includes(uidKeys, x.uid)) {
-            return {
-              ...x,
-              ...updateBrief[x.uid],
-            };
-          }
-          return x;
-        });
-        const uid = uidKeys[0];
-        if (uid && updateBrief[uid] && updateBrief[uid].linkProduct) {
-          const urlPattern =
-            /^(https?:\/\/)((([a-z\d]([a-z\d-]*[a-z\d])*)\.)+[a-z]{2,}|((\d{1,3}\.){3}\d{1,3}))(:\d+)?(\/[-a-z\d%_.~+]*)*(\?[;&a-z\d%_.~+=-]*)?(#[\w-]*)?$/i;
-
-          if (!urlPattern.test(updateBrief[uid].linkProduct)) {
-            showNotification("Thất bại", "Link Listing không hợp lệ", "red");
-            setUpdateBrief({
-              ...updateBrief,
-              [uid]: {
-                ...updateBrief[uid],
-                linkProduct: "",
-              },
-            });
-            table.setEditingCell(null);
-            return;
-          }
-          rndServices
-            .updateBriefListing({
-              uid,
-              data: updateBrief[uid],
-            })
-            .then((response) => {
-              if (!response) {
-                setUpdateBrief({
-                  ...updateBrief,
-                  [uid]: {
-                    ...updateBrief[uid],
-                    linkProduct: "",
-                  },
-                });
-              } else {
-                setData(newData);
-              }
-            });
-          table.setEditingCell(null);
-        } else {
-          table.setEditingCell(null);
-        }
+        table.setEditingCell(null);
       },
       sx: {
         cursor: "pointer", //you might want to change the cursor too when adding an onClick
