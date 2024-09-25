@@ -660,11 +660,19 @@ const EPMScreens = () => {
                   </List.Item>
                 </List>
               </Grid.Col>
-              <Grid.Col span={12}>
+              <Grid.Col span={6}>
                 <Editor
                   state={getStringAsEditorState(selectedSKU?.note?.epm)}
                   classEditor={styles.editor}
-                  label="EPM Note"
+                  label="RnD Note"
+                  readOnly={true}
+                />
+              </Grid.Col>
+              <Grid.Col span={6}>
+                <Editor
+                  state={getStringAsEditorState(selectedSKU?.note?.noteForEPM)}
+                  classEditor={styles.editor}
+                  label="Designer Note"
                   readOnly={true}
                 />
               </Grid.Col>

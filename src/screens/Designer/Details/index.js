@@ -12,7 +12,7 @@ import {
 import { modals } from "@mantine/modals";
 import Checkbox from "../../../components/Checkbox";
 
-import { filter, find, includes, isEmpty, keys, map } from "lodash";
+import { filter, find, includes, isEmpty, keys, map, set } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
@@ -53,6 +53,7 @@ const KeywordTable = ({
   sorting,
   setSorting,
   metadata,
+  openNoteForEPM,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
   let [permissions] = useLocalStorage({
@@ -366,6 +367,28 @@ const KeywordTable = ({
         mantineTableBodyCellProps: { className: classes["body-cells"] },
       },
       {
+        accessorKey: "noteForEPM",
+        header: "NOTE FOR EPM",
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        size: 100,
+        enableSorting: false,
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <Button
+              onClick={() => {
+                setSelectedSKU(foundBrief);
+                openNoteForEPM();
+              }}
+            >
+              Brief
+            </Button>
+          );
+        },
+      },
+      {
         accessorKey: "linkDesign",
         header: "LINK DESIGN",
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
@@ -455,6 +478,7 @@ const KeywordTable = ({
           );
         },
       },
+
       {
         accessorKey: "status",
         header: "DONE",

@@ -112,7 +112,6 @@ const Niche = ({
             borderRadius: "12px",
           }}
         >
-
           <div
             style={{
               display: "flex",
@@ -408,10 +407,17 @@ const Niche = ({
             <List.Item>Link Campaign (TIB) - Auto: (Coming soon)</List.Item>
           </List>
         </Grid.Col>
-        <Grid.Col span={12}>
+        <Grid.Col span={6}>
           <Editor
             state={getStringAsEditorState(selectedSKU?.note?.epm)}
-            label="EPM Note"
+            label="RnD Note"
+            readOnly={true}
+          />
+        </Grid.Col>
+        <Grid.Col span={6}>
+          <Editor
+            state={getStringAsEditorState(selectedSKU?.note?.noteForEPM)}
+            label="Designer Note"
             readOnly={true}
           />
         </Grid.Col>
