@@ -49,11 +49,7 @@ const TARGET_MODES = {
   ORDERS: "Orders",
   RANKING: "Ranking",
 };
-const TARGET_DATES = {
-  TODAY: "Today",
-  THREE_DAYS: "3 Day",
-  SEVEN_DAYS: "7 Day",
-};
+
 const moveOverrideColorToStart = (array) => {
   return array.sort((a, b) => {
     if (a.overrideColor && !b.overrideColor) {
@@ -246,6 +242,107 @@ const RankingTable = ({
           return {
             className: classes["head-cells-op-team"],
           };
+        },
+        Header: ({ row }) => {
+          const isShow = query?.mode[0] === TARGET_MODES.RANKING;
+          return (
+            <Group gap={5}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "bold",
+                }}
+              >
+                Product
+              </Text>
+              {isShow && !query?.sortBy && (
+                <ActionIcon
+                  aria-label="Settings"
+                  variant="default"
+                  style={{
+                    background: "none",
+                    border: "none",
+                  }}
+                  onClick={() => {
+                    setPagination({
+                      ...pagination,
+                      currentPage: 1,
+                    });
+                    setSorting([]);
+                    setQuery({
+                      ...query,
+                      sortBy: "latestRank",
+                      sortDir: "desc",
+                    });
+                  }}
+                >
+                  <IconArrowsSort
+                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
+                    stroke={2}
+                  />
+                </ActionIcon>
+              )}
+
+              {isShow &&
+                query?.sortBy === "latestRank" &&
+                query?.sortDir === "desc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setSorting([]);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setQuery({
+                        ...query,
+                        sortBy: "latestRank",
+                        sortDir: "asc",
+                      });
+                    }}
+                  >
+                    <IconSortDescending
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+              {isShow &&
+                query?.sortBy === "latestRank" &&
+                query?.sortDir === "asc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setSorting([]);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setQuery({
+                        ...query,
+                        sortBy: null,
+                        sortDir: null,
+                      });
+                    }}
+                  >
+                    <IconSortAscending
+                      style={{
+                        width: "70%",
+                        height: "70%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+            </Group>
+          );
         },
         Cell: ({ row }) => {
           if (row.id === `Total theo ${activeTab}`) {
