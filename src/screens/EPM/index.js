@@ -171,7 +171,7 @@ const EPMScreens = () => {
       <Card
         className={styles.card}
         title="EPM TASK"
-        classTitle={cn("title-purple", styles.title)}
+        classTitle={styles.title}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
         head={
           <>
