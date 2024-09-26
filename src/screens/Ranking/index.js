@@ -90,7 +90,7 @@ const RankingPODShopifyProducts = () => {
     competitorShortName: "Wanderprints",
     mode: [TARGET_MODES.RANKING],
     targetDate: TARGET_DATES.THREE_DAYS,
-    dateChange: 3,
+    dateRange: 3,
   });
   const [sorting, setSorting] = useState([
     {
@@ -252,21 +252,21 @@ const RankingPODShopifyProducts = () => {
                         case TARGET_DATES.TODAY:
                           setQuery({
                             ...query,
-                            dateChange: 1,
+                            dateRange: 1,
                             targetDate: value,
                           });
                           break;
                         case TARGET_DATES.THREE_DAYS:
                           setQuery({
                             ...query,
-                            dateChange: 3,
+                            dateRange: 3,
                             targetDate: value,
                           });
                           break;
                         case TARGET_DATES.SEVEN_DAYS:
                           setQuery({
                             ...query,
-                            dateChange: 7,
+                            dateRange: 7,
                             targetDate: value,
                           });
                           break;
