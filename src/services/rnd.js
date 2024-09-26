@@ -243,7 +243,7 @@ export const rndServices = {
         return false;
       }
       showNotification("Thành công", "Cập nhật SKU Prefix thành công", "green");
-      return true;
+      return result?.data;
     } catch (error) {
       const code = error?.response?.data?.code;
       if (code === 403) {
@@ -300,15 +300,15 @@ export const rndServices = {
       };
       const sort = !isEmpty(sorting)
         ? {
-          [sorting[0].id === "date" || "time" ? "createdAt" : sorting.id]:
-            sorting[0].id === "time"
-              ? sorting[0].desc
-                ? "asc"
-                : "desc"
-              : sorting[0].desc
+            [sorting[0].id === "date" || "time" ? "createdAt" : sorting.id]:
+              sorting[0].id === "time"
+                ? sorting[0].desc
+                  ? "asc"
+                  : "desc"
+                : sorting[0].desc
                 ? "desc"
                 : "asc",
-        }
+          }
         : {};
       let url = `/briefs/${view}?page=${page}&pageSize=${limit}`;
       if (Object.keys(filter).length !== 0) {

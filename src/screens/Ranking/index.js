@@ -14,7 +14,6 @@ import {
   Modal,
   Radio,
   rem,
-  Select,
   Text,
   Transition,
 } from "@mantine/core";
@@ -33,9 +32,24 @@ const TARGET_DATES = {
 };
 const TARGET_MODES = {
   ORDERS: "Orders",
-  RANKING: "Ranking",
+  RANKING: "Change Rank",
+  DEFAULT_RANKING: "Rank",
 };
 
+// for sorting client opinion
+const priorityList = ["WP", "MC", "TC", "PSN", "PSN (LT)", "PFH", "PFH (LT)"];
+const sortByPriority = (array, priorityList) => {
+  return array.sort((a, b) => {
+    const indexA = priorityList.indexOf(a?.shortName);
+    const indexB = priorityList.indexOf(b?.shortName);
+
+    // If the item is not in the priority list, place it at the end
+    const adjustedIndexA = indexA === -1 ? priorityList.length : indexA;
+    const adjustedIndexB = indexB === -1 ? priorityList.length : indexB;
+
+    return adjustedIndexA - adjustedIndexB;
+  });
+};
 const moveIdsToStart = (array, ids) => {
   return array.sort((a, b) => {
     if (ids.includes(a.id) && !ids.includes(b.id)) {
@@ -73,7 +87,8 @@ const RankingPODShopifyProducts = () => {
   const endDate = moment().format("YYYY-MM-DD");
   const [query, setQuery] = useState({
     competitor: "Wanderprints",
-    mode: [TARGET_MODES.ORDERS],
+    competitorShortName: "Wanderprints",
+    mode: [TARGET_MODES.RANKING],
     targetDate: TARGET_DATES.THREE_DAYS,
     dateChange: 3,
   });
@@ -152,7 +167,7 @@ const RankingPODShopifyProducts = () => {
   };
   const fetchCompetitors = async () => {
     const competitors = await rankingServices.fetchCompetitors();
-    setCompetitors(map(filter(competitors, { alive: true }), "name"));
+    setCompetitors(filter(competitors, { alive: true }));
   };
   useEffect(() => {
     fetchRankings(pagination.currentPage);
@@ -299,38 +314,7 @@ const RankingPODShopifyProducts = () => {
                     </Group>
                   </Radio.Group>
                 </Grid.Col>
-                <Grid.Col
-                  span={2}
-                  style={{
-                    borderRadius: "10px",
-                    flexWrap: "wrap",
-                    width: "100%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Select
-                    styles={{
-                      input: {
-                        height: "100%",
-                      },
-                      root: {
-                        height: "100%",
-                      },
-                    }}
-                    data={competitors || []}
-                    value={query.competitor}
-                    onChange={(value) => {
-                      setPagination({
-                        ...pagination,
-                        currentPage: 1,
-                      });
-                      setQuery({ ...query, competitor: value });
-                    }}
-                  />
-                </Grid.Col>
-                <Grid.Col span={6.5}>
+                <Grid.Col span={8.5}>
                   <Checkbox.Group
                     value={query.mode}
                     label="SHOW DATA"
@@ -376,8 +360,8 @@ const RankingPODShopifyProducts = () => {
                             borderRadius: "50%",
                           },
                         }}
-                        value={TARGET_MODES.ORDERS}
-                        label={TARGET_MODES.ORDERS}
+                        value={TARGET_MODES.RANKING}
+                        label={TARGET_MODES.RANKING}
                       />
                       <Checkbox
                         styles={{
@@ -385,14 +369,170 @@ const RankingPODShopifyProducts = () => {
                             borderRadius: "50%",
                           },
                         }}
-                        value={TARGET_MODES.RANKING}
-                        label={TARGET_MODES.RANKING}
+                        value={TARGET_MODES.DEFAULT_RANKING}
+                        label={TARGET_MODES.DEFAULT_RANKING}
+                      />
+                      <Checkbox
+                        styles={{
+                          input: {
+                            borderRadius: "50%",
+                          },
+                        }}
+                        value={TARGET_MODES.ORDERS}
+                        label={TARGET_MODES.ORDERS}
                       />
                     </Group>
                   </Checkbox.Group>
                 </Grid.Col>
               </Flex>
             </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "start",
+                alignItems: "center",
+                padding: "10px 0px",
+                gap: "5px",
+                width: "100%",
+              }}
+            >
+              <Flex
+                style={{
+                  padding: "10px",
+                  borderRadius: "10px",
+                  backgroundColor: "#EFF0F1",
+                  width: "100%",
+                }}
+              >
+                <Grid.Col
+                  span={12}
+                  style={{
+                    borderRadius: "10px",
+                    flexWrap: "wrap",
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Grid
+                    style={{
+                      width: "100%",
+                    }}
+                  >
+                    <Grid.Col span={8}>
+                      <Radio.Group
+                        value={query?.competitor}
+                        label="POD: "
+                        styles={{
+                          root: {
+                            display: "flex",
+                            justifyContent: "center",
+                          },
+                          label: {
+                            marginRight: "10px",
+                            fontSize: "14px",
+                            fontWeight: "bold",
+                          },
+                        }}
+                        onChange={(value) => {
+                          setQuery({
+                            ...query,
+                            competitor: value,
+                          });
+                        }}
+                      >
+                        <Group
+                          styles={{
+                            root: {
+                              height: "100%",
+                              display: "flex",
+                              justifyContent: "center",
+                            },
+                          }}
+                        >
+                          {map(
+                            filter(sortByPriority(competitors, priorityList), {
+                              category: "POD",
+                            }),
+                            (x) => {
+                              return (
+                                <Radio
+                                  styles={{
+                                    input: {
+                                      borderRadius: "50%",
+                                    },
+                                  }}
+                                  value={x?.name}
+                                  label={x?.shortName || x?.name}
+                                />
+                              );
+                            }
+                          )}
+                        </Group>
+                      </Radio.Group>
+                    </Grid.Col>
+                    <Grid.Col
+                      span={4}
+                      style={{
+                        borderLeft: "1px solid gray",
+                      }}
+                    >
+                      <Radio.Group
+                        value={query?.competitor}
+                        styles={{
+                          root: {
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: "10px",
+                          },
+                          label: {
+                            marginRight: "10px",
+                            fontSize: "14px",
+                            fontWeight: "bold",
+                          },
+                        }}
+                        label="Politics: "
+                        onChange={(value) => {
+                          setQuery({
+                            ...query,
+                            competitor: value,
+                          });
+                        }}
+                      >
+                        <Group
+                          styles={{
+                            root: {
+                              height: "100%",
+                              display: "flex",
+                              justifyContent: "center",
+                            },
+                          }}
+                        >
+                          {map(
+                            filter(competitors, { category: "Politics" }),
+                            (x) => {
+                              return (
+                                <Radio
+                                  styles={{
+                                    input: {
+                                      borderRadius: "50%",
+                                    },
+                                  }}
+                                  value={x?.name}
+                                  label={x?.shortName || x?.name}
+                                />
+                              );
+                            }
+                          )}
+                        </Group>
+                      </Radio.Group>
+                    </Grid.Col>
+                  </Grid>
+                </Grid.Col>
+              </Flex>
+            </div>
+
             <Grid.Col span={12}>
               {!isEmpty(productRankings) && (
                 <Table

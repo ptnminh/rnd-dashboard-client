@@ -26,6 +26,7 @@ import {
   isEmpty,
   orderBy,
   slice,
+  values,
 } from "lodash";
 
 import classes from "./MyTable.module.css";
@@ -41,13 +42,18 @@ import {
   IconSortAscending,
   IconArrowsSort,
   IconSortDescending,
-  IconHeart,
 } from "@tabler/icons-react";
 import moment from "moment-timezone";
+import {
+  CONVERT_NUMBER_TO_RANKING_STATUS,
+  CONVERT_STATUS_TO_RANKING_NUMBER,
+  RANKING_STATUS,
+} from "../../../constant";
 
 const TARGET_MODES = {
   ORDERS: "Orders",
-  RANKING: "Ranking",
+  RANKING: "Change Rank",
+  DEFAULT_RANKING: "Rank",
 };
 
 const moveOverrideColorToStart = (array) => {
@@ -155,6 +161,20 @@ const RankingTable = ({
           }
           const { data } = row.original;
           const keyData = find(data, { key: keyLevel });
+          let viewData = 0;
+          switch (query?.mode[0]) {
+            case TARGET_MODES.ORDERS:
+              viewData = keyData?.ordersChange || 0;
+              break;
+            case TARGET_MODES.RANKING:
+              viewData = keyData?.rankChange || 0;
+              break;
+            case TARGET_MODES.DEFAULT_RANKING:
+              viewData = keyData?.rank || 0;
+              break;
+            default:
+              break;
+          }
           return (
             <Flex direction="column">
               <Text
@@ -163,9 +183,7 @@ const RankingTable = ({
                   fontWeight: "bold",
                 }}
               >
-                {query?.mode[0] === TARGET_MODES.ORDERS
-                  ? keyData?.ordersChange || 0
-                  : keyData?.rankChange || 0}
+                {viewData}
               </Text>
             </Flex>
           );
@@ -183,15 +201,17 @@ const RankingTable = ({
 
   useEffect(() => {
     if (!isEmpty(overrideProductRankings)) {
-      const orderedData = moveOverrideColorToStart(map(data, (item) => {
-        if (overrideProductRankings.includes(item.id)) {
-          return {
-            ...item,
-            overrideColor: true,
-          };
-        }
-        return item;
-      }));
+      const orderedData = moveOverrideColorToStart(
+        map(data, (item) => {
+          if (overrideProductRankings.includes(item.id)) {
+            return {
+              ...item,
+              overrideColor: true,
+            };
+          }
+          return item;
+        })
+      );
       setData(orderedData);
       setCustomColumns(generateCustomColumn(orderedData));
     }
@@ -265,7 +285,13 @@ const RankingTable = ({
           };
         },
         Header: ({ row }) => {
-          const isShow = query?.mode[0] === TARGET_MODES.RANKING;
+          const isShow =
+            query?.mode[0] === TARGET_MODES.RANKING ||
+            TARGET_MODES.DEFAULT_RANKING;
+          const view =
+            query?.mode[0] === TARGET_MODES.ORDERS
+              ? "totalOrdersChanges"
+              : "totalRankChanges";
           return (
             <Group gap={5}>
               <Text
@@ -276,33 +302,41 @@ const RankingTable = ({
               >
                 Product
               </Text>
-              {isShow && !query?.sortBy && (
-                <ActionIcon
-                  aria-label="Settings"
-                  variant="default"
-                  style={{
-                    background: "none",
-                    border: "none",
-                  }}
-                  onClick={() => {
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                    setSorting([]);
-                    setQuery({
-                      ...query,
-                      sortBy: "latestRank",
-                      sortDir: "desc",
-                    });
-                  }}
-                >
-                  <IconArrowsSort
-                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
-                    stroke={2}
-                  />
-                </ActionIcon>
-              )}
+              {isShow &&
+                (!query?.sortBy ||
+                  query?.sortBy === "totalOrdersChanges" ||
+                  query?.sortBy === "totalRankChanges") && (
+                  <ActionIcon
+                    aria-label="Settings"
+                    variant="default"
+                    style={{
+                      background: "none",
+                      border: "none",
+                    }}
+                    onClick={() => {
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setSorting([]);
+                      setQuery({
+                        ...query,
+                        sortBy: "latestRank",
+                        sortDir: "desc",
+                      });
+                    }}
+                  >
+                    <IconArrowsSort
+                      style={{
+                        width: "60%",
+                        height: "60%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#ffffff"
+                    />
+                  </ActionIcon>
+                )}
 
               {isShow &&
                 query?.sortBy === "latestRank" &&
@@ -373,29 +407,14 @@ const RankingTable = ({
               </Text>
             );
           }
-          const { image, createdDate, link, originalData } = row.original;
-          let changesData = slice(originalData, 0, 3)
-            ?.map((x) => x.rank)
-            ?.map((x, index) => {
-              return (
-                <Text
-                  style={{
-                    ...(index === 0
-                      ? {
-                        fontSize: 10,
-                      }
-                      : {
-                        fontSize: 10,
-                        color: "gray",
-                      }),
-                    fontWeight: "bold",
-                    textAlign: "left",
-                  }}
-                >
-                  {index !== 0 ? " <- " : ""} {x}
-                </Text>
-              );
-            });
+          const {
+            image,
+            createdDate,
+            link,
+            originalData,
+            publishedDate,
+            latestRank,
+          } = row.original;
 
           return (
             <Flex direction="column">
@@ -451,19 +470,24 @@ const RankingTable = ({
                         </Text>
                       </Flex>
                     </Grid.Col>
-                    {query?.mode[0] === TARGET_MODES.RANKING && (
-                      <Grid.Col span={12}>
-                        <div
+                    <Grid.Col span={12}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "2px",
+                        }}
+                      >
+                        <Text
                           style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "2px",
+                            fontSize: 14,
+                            fontWeight: "bold",
                           }}
                         >
-                          {changesData}
-                        </div>
-                      </Grid.Col>
-                    )}
+                          Rank: {latestRank}
+                        </Text>
+                      </div>
+                    </Grid.Col>
 
                     <Grid.Col span={12}>
                       <Text
@@ -473,10 +497,28 @@ const RankingTable = ({
                           textAlign: "left",
                         }}
                       >
-                        Đã tạo:{" "}
-                        {moment(createdDate).subtract(createdDate).fromNow()}
+                        Bắt:{" "}
+                        {moment(createdDate)
+                          .subtract(createdDate)
+                          .fromNow(true)}
                       </Text>
                     </Grid.Col>
+                    {publishedDate && (
+                      <Grid.Col span={12}>
+                        <Text
+                          style={{
+                            fontSize: 11,
+                            fontWeight: "bold",
+                            textAlign: "left",
+                          }}
+                        >
+                          List:{" "}
+                          {moment(publishedDate)
+                            .subtract(publishedDate)
+                            .fromNow(true)}
+                        </Text>
+                      </Grid.Col>
+                    )}
                   </Grid>
                 </Grid.Col>
               </Grid>
@@ -487,8 +529,8 @@ const RankingTable = ({
       {
         accessorKey: "value",
         header: "Value",
-        size: 100,
-        maxSize: 100,
+        size: 150,
+        maxSize: 150,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -555,8 +597,8 @@ const RankingTable = ({
       {
         accessorKey: "size",
         header: "Size",
-        size: 100,
-        maxSize: 100,
+        size: 150,
+        maxSize: 150,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -622,8 +664,8 @@ const RankingTable = ({
       {
         accessorKey: "status",
         header: "Status",
-        size: 30,
-        maxSize: 30,
+        size: 200,
+        maxSize: 200,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -647,12 +689,12 @@ const RankingTable = ({
           const payload = find(data, { id });
           const follow = payload?.follow;
           return (
-            <ActionIcon
-              variant={follow ? "gradient" : "default"}
-              size="xl"
-              gradient={follow ? { from: "red", to: "red", deg: 90 } : {}}
-              onClick={() => {
-                const value = follow ? 0 : 1;
+            <Select
+              data={values(RANKING_STATUS)}
+              allowDeselect={false}
+              value={CONVERT_NUMBER_TO_RANKING_STATUS[follow]}
+              onChange={(pureValue) => {
+                const value = CONVERT_STATUS_TO_RANKING_NUMBER[pureValue];
                 const newData = data.map((item) => {
                   if (item.id === id) {
                     if (value === 1) {
@@ -670,16 +712,15 @@ const RankingTable = ({
                       follow: value,
                       ...(value === 1
                         ? {
-                          overrideColor: true,
-                        }
+                            overrideColor: true,
+                          }
                         : {
-                          overrideColor: false,
-                        }),
+                            overrideColor: false,
+                          }),
                     };
                   }
                   return item;
                 });
-
                 const orderedData = moveOverrideColorToStart(newData, id);
                 setData(orderedData);
                 setCustomColumns(generateCustomColumn(orderedData));
@@ -687,9 +728,7 @@ const RankingTable = ({
                   follow: value,
                 });
               }}
-            >
-              <IconHeart />
-            </ActionIcon>
+            />
           );
         },
       },
@@ -715,7 +754,7 @@ const RankingTable = ({
               >
                 Total Changes
               </Text>
-              {!query?.sortBy && (
+              {(!query?.sortBy || query?.sortBy === "latestRank") && (
                 <ActionIcon
                   aria-label="Settings"
                   variant="default"
@@ -739,6 +778,7 @@ const RankingTable = ({
                   <IconArrowsSort
                     style={{ width: "60%", height: "60%", fontWeight: "bold" }}
                     stroke={2}
+                    color="#ffffff"
                   />
                 </ActionIcon>
               )}
