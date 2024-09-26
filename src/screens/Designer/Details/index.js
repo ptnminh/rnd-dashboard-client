@@ -475,30 +475,6 @@ const KeywordTable = ({
         },
       },
       {
-        accessorKey: "noteForEPM",
-        header: "NOTE FOR EPM",
-        mantineTableHeadCellProps: { className: classes["linkDesign"] },
-        mantineTableBodyCellProps: { className: classes["body-cells"] },
-        size: 100,
-        enableSorting: false,
-        Cell: ({ row }) => {
-          const uid = row?.original?.uid;
-          const foundBrief = find(payloads, { uid });
-          const note = foundBrief?.note?.noteForEPM;
-          return (
-            <Button
-              onClick={() => {
-                setSelectedSKU(foundBrief);
-                openNoteForEPM();
-              }}
-              color={note ? "blue" : "#f1f3f5"}
-            >
-              Note
-            </Button>
-          );
-        },
-      },
-      {
         accessorKey: "linkDesign",
         header: "LINK DESIGN",
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
@@ -588,7 +564,30 @@ const KeywordTable = ({
           );
         },
       },
-
+      {
+        accessorKey: "noteForEPM",
+        header: "NOTE FOR EPM",
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        size: 100,
+        enableSorting: false,
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          const note = foundBrief?.note?.noteForEPM;
+          return (
+            <Button
+              onClick={() => {
+                setSelectedSKU(foundBrief);
+                openNoteForEPM();
+              }}
+              color={note ? "blue" : "#f1f3f5"}
+            >
+              Note
+            </Button>
+          );
+        },
+      },
       {
         accessorKey: "status",
         header: "DONE",
