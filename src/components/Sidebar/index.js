@@ -199,41 +199,31 @@ const Sidebar = ({ className, onClose }) => {
           style={{ height: "80%" }}
         >
           <div className={styles.menu}>
-            {map(
-              filter(filteredNavigation, (x) => {
-                if (x.title === PATH_NAMES.DASHBOARD.title) {
-                  if (userInfo?.isAdmin) {
-                    return true;
-                  }
-                  return false;
-                }
-                return true;
-              }),
-              (x, index) =>
-                x.url ? (
-                  <>
-                    <NavLink
-                      className={styles.item}
-                      activeClassName={styles.active}
-                      to={x.url}
-                      key={index}
-                      exact
-                      onClick={onClose}
-                    >
-                      <Icon name={x.icon} size="24" />
-                      {x.title}
-                    </NavLink>
-                  </>
-                ) : (
-                  <Dropdown
-                    className={styles.dropdown}
-                    visibleSidebar={visible}
-                    setValue={setVisible}
+            {map(filteredNavigation, (x, index) =>
+              x.url ? (
+                <>
+                  <NavLink
+                    className={styles.item}
+                    activeClassName={styles.active}
+                    to={x.url}
                     key={index}
-                    item={x}
-                    onClose={onClose}
-                  />
-                )
+                    exact
+                    onClick={onClose}
+                  >
+                    <Icon name={x.icon} size="24" />
+                    {x.title}
+                  </NavLink>
+                </>
+              ) : (
+                <Dropdown
+                  className={styles.dropdown}
+                  visibleSidebar={visible}
+                  setValue={setVisible}
+                  key={index}
+                  item={x}
+                  onClose={onClose}
+                />
+              )
             )}
           </div>
         </ScrollArea>

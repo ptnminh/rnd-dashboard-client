@@ -501,32 +501,32 @@ export const NAVIGATION = [
     arrowDown: true,
     isParent: true,
     turnOffActive: true,
-    permissions: ["read:user"],
+    permissions: ["read:dashboard"],
     dropdown: [
       {
         title: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.title,
         url: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.url,
-        permissions: ["read:user"],
+        permissions: ["read:dashboard"],
       },
       {
         title: PATH_NAMES.DASHBOARD.children.SETTING.title,
         url: PATH_NAMES.DASHBOARD.children.SETTING.url,
-        permissions: ["read:user"],
+        permissions: ["read:dashboard"],
       },
       {
         title: PATH_NAMES.DASHBOARD.children.AMZ_SELLER_BOARD.title,
         url: PATH_NAMES.DASHBOARD.children.AMZ_SELLER_BOARD.url,
-        permissions: ["read:user"],
+        permissions: ["read:dashboard"],
       },
       {
         title: PATH_NAMES.DASHBOARD.children.POD_RANKING.title,
         url: PATH_NAMES.DASHBOARD.children.POD_RANKING.url,
-        permissions: ["read:user"],
+        permissions: ["read:dashboard"],
       },
       {
         title: PATH_NAMES.DASHBOARD.children.POD_AMZ.title,
         url: PATH_NAMES.DASHBOARD.children.POD_AMZ.url,
-        permissions: ["read:user"],
+        permissions: ["read:dashboard"],
       },
     ],
   },
