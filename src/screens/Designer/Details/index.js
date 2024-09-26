@@ -581,7 +581,7 @@ const KeywordTable = ({
                 setSelectedSKU(foundBrief);
                 openNoteForEPM();
               }}
-              color={note ? "blue" : "#f1f3f5"}
+              color={note ? "#f1f3f5" : "blue"}
             >
               Note
             </Button>

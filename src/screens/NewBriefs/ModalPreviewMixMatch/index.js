@@ -20,6 +20,7 @@ const ModalPreviewMixMatch = ({
   selectedProductBases,
   setSelectedProductBases,
   rndInfo,
+  triggerCreateSKUPayload
 }) => {
   return (
     <Modal
@@ -95,6 +96,7 @@ const ModalPreviewMixMatch = ({
               selectedProductBases={selectedProductBases}
               setSelectedProductBases={setSelectedProductBases}
               rndInfo={rndInfo}
+              triggerCreateSKUPayload={triggerCreateSKUPayload}
             />
           </ScrollArea>
         </Grid.Col>

@@ -29,6 +29,7 @@ const Row = ({
   selectedProductBases,
   setSelectedProductBases,
   rndInfo,
+  setTriggerCreateSKUPayload
 }) => {
   const [loading, setLoading] = useState(false);
   const openUpdateModal = ({ skuPrefix, productLineId }) =>
@@ -54,28 +55,6 @@ const Row = ({
       { skuPrefix }
     );
     if (updateProductLineResponse) {
-      setEditSKUs((prev) => {
-        return prev.map((x) => {
-          const prefix = split(x.SKU, "-")[0];
-          if (x.productLineId === productLineId && prefix === "XX") {
-            // find all product lines that have the that skuPrefix
-            const foundSameProductLinesLength = filter(selectedProductBases, {
-              skuPrefix,
-            }).length;
-            let realRnDAccumulator =
-              find(updateProductLineResponse?.skuAccumulators, {
-                rndId: rndInfo?.uid,
-              })?.accumulator +
-              1 +
-              foundSameProductLinesLength;
-            const newSku = `${skuPrefix}-${rndInfo?.shortName}${String(
-              realRnDAccumulator
-            ).padStart(4, "0")}`;
-            return { ...x, newSku, skuPrefix };
-          }
-          return x;
-        });
-      });
       if (!isEmpty(productBases)) {
         setProductBases((prev) => {
           return prev.map((x) => {
@@ -112,7 +91,12 @@ const Row = ({
       if (SKU) {
         setSKU({
           ...SKU,
-          ...(SKU?.productLineId === productLineId && { skuPrefix }),
+          ...(SKU?.productLineId === productLineId && {
+            skuPrefix,
+            ...(!isEmpty(updateProductLineResponse?.skuAccumulators) && {
+              skuAccumulators: updateProductLineResponse?.skuAccumulators,
+            })
+          }),
           sameLayouts: map(SKU?.sameLayouts, (x) => {
             if (x.uid === productLineId) {
               return {
@@ -139,6 +123,7 @@ const Row = ({
           }),
         });
       }
+      setTriggerCreateSKUPayload(true);
     }
     setLoading(false);
   };
@@ -162,11 +147,11 @@ const Row = ({
           (header, index) => (
             <div className={styles.col} key={index}>
               {header === "Hình" ||
-              header === "Design" ||
-              header === "Clipart" ||
-              header === "Hình Product Base" ||
-              header === "Ref" ||
-              header === "Hình Clipart" ? (
+                header === "Design" ||
+                header === "Clipart" ||
+                header === "Hình Product Base" ||
+                header === "Ref" ||
+                header === "Hình Clipart" ? (
                 <ScrollArea offsetScrollbars="x" w={150}>
                   {Array.isArray(item[header]) ? (
                     <Grid>
