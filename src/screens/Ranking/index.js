@@ -27,8 +27,8 @@ import { IconArrowUp } from "@tabler/icons-react";
 
 const TARGET_DATES = {
   TODAY: "Today",
-  THREE_DAYS: "3 Day",
-  SEVEN_DAYS: "7 Day",
+  THREE_DAYS: "3 Days",
+  SEVEN_DAYS: "7 Days",
 };
 const TARGET_MODES = {
   ORDERS: "Orders",

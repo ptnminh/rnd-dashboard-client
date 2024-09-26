@@ -927,6 +927,7 @@ const RankingTable = ({
     enableSorting: true,
     enableMultiSort: false,
     enableBottomToolbar: true,
+    enableTopToolbar: false,
     manualSorting: true,
     mantineBottomToolbarProps: () => {
       return {

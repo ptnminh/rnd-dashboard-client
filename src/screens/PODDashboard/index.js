@@ -21,6 +21,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { dashboardServices } from "../../services";
 import Table from "./Table";
 import {
+  includes,
   isEmpty,
   keys,
   map,
@@ -28,6 +29,7 @@ import {
   orderBy,
   toLower,
   toNumber,
+  uniq,
   values,
 } from "lodash";
 import moment from "moment-timezone";
@@ -47,9 +49,9 @@ const TABS_VIEW = {
 };
 
 const TARGET_DATES = {
+  ONE_DAY: "1 Days",
   THREE_DAYS: "3 Days",
   SEVEN_DAYS: "7 Days",
-  FOURTEEN_DAYS: "14 Days",
 };
 
 const DEFAULT_SORTING = {
@@ -61,6 +63,18 @@ const DEFAULT_SORTING = {
 const TARGET_DATA = {
   ORDERS: "Orders",
   PROFIT: "Profit",
+};
+
+const moveIdsToStart = (array, ids) => {
+  return array.sort((a, b) => {
+    if (ids.includes(a.uid) && !ids.includes(b.uid)) {
+      return -1;
+    }
+    if (!ids.includes(a.uid) && ids.includes(b.uid)) {
+      return 1;
+    }
+    return 0;
+  });
 };
 
 const PODDashboard = () => {
@@ -77,6 +91,7 @@ const PODDashboard = () => {
     currentPage: initialPage,
     totalPages: 1,
   });
+  const [overridePODMetrics, setOverridePODMetrics] = useState([]);
 
   const isMounted = useRef(false);
   const currentWeek = moment().tz("America/Los_Angeles").week();
@@ -85,7 +100,7 @@ const PODDashboard = () => {
   const [query, setQuery] = useState({
     groupByKey: toLower(TABS_VIEW.Date),
     dateRange: 3,
-    targetDate: TARGET_DATES.THREE_DAYS,
+    targetDate: TARGET_DATES.ONE_DAY,
     view: TARGET_DATA.ORDERS,
     toggleTest: true,
   });
@@ -108,9 +123,27 @@ const PODDashboard = () => {
     const { data, metadata } = response;
     if (!isEmpty(data)) {
       if (isLoadmore) {
-        setSaleMetrics((prev) => [...prev, ...data]);
+        const oldSaleMetrics = map(saleMetrics, (x) => {
+          if (includes(overridePODMetrics, x.uid)) {
+            return {
+              ...x,
+              optimized: 1,
+            };
+          }
+          return x;
+        });
+        const newSaleMetrics = [...oldSaleMetrics, ...data];
+        const sortedSaleMetrics = moveIdsToStart(
+          newSaleMetrics,
+          uniq(overridePODMetrics)
+        );
+        setSaleMetrics(sortedSaleMetrics);
       } else {
-        setSaleMetrics(data);
+        const sortedSaleMetrics = moveIdsToStart(
+          data,
+          uniq(overridePODMetrics)
+        );
+        setSaleMetrics(sortedSaleMetrics);
       }
       setPagination({
         currentPage: toNumber(metadata.currentPage) || 1,
@@ -325,10 +358,17 @@ const PODDashboard = () => {
                                   currentPage: 1,
                                 });
                                 switch (value) {
-                                  case TARGET_DATES.FOURTEEN_DAYS:
+                                  case TARGET_DATES.SEVEN_DAYS:
                                     setQuery({
                                       ...query,
-                                      dateRange: 14,
+                                      dateRange: 7,
+                                      targetDate: value,
+                                    });
+                                    break;
+                                  case TARGET_DATES.ONE_DAY:
+                                    setQuery({
+                                      ...query,
+                                      dateRange: 1,
                                       targetDate: value,
                                     });
                                     break;
@@ -336,13 +376,6 @@ const PODDashboard = () => {
                                     setQuery({
                                       ...query,
                                       dateRange: 3,
-                                      targetDate: value,
-                                    });
-                                    break;
-                                  case TARGET_DATES.SEVEN_DAYS:
-                                    setQuery({
-                                      ...query,
-                                      dateRange: 7,
                                       targetDate: value,
                                     });
                                     break;
@@ -366,6 +399,15 @@ const PODDashboard = () => {
                                       borderRadius: "50%",
                                     },
                                   }}
+                                  value={TARGET_DATES.ONE_DAY}
+                                  label={TARGET_DATES.ONE_DAY}
+                                />
+                                <Radio
+                                  styles={{
+                                    input: {
+                                      borderRadius: "50%",
+                                    },
+                                  }}
                                   value={TARGET_DATES.THREE_DAYS}
                                   label={TARGET_DATES.THREE_DAYS}
                                 />
@@ -377,15 +419,6 @@ const PODDashboard = () => {
                                   }}
                                   value={TARGET_DATES.SEVEN_DAYS}
                                   label={TARGET_DATES.SEVEN_DAYS}
-                                />
-                                <Radio
-                                  styles={{
-                                    input: {
-                                      borderRadius: "50%",
-                                    },
-                                  }}
-                                  value={TARGET_DATES.FOURTEEN_DAYS}
-                                  label={TARGET_DATES.FOURTEEN_DAYS}
                                 />
                               </Group>
                             </Radio.Group>
@@ -530,7 +563,7 @@ const PODDashboard = () => {
                                   }}
                                 />
                               </Group>
-                              <Group>
+                              {/* <Group>
                                 <Select
                                   data={values(DEFAULT_SORTING)}
                                   placeholder="Sorting"
@@ -602,7 +635,7 @@ const PODDashboard = () => {
                                     },
                                   }}
                                 />
-                              </Group>
+                              </Group> */}
                             </Flex>
                           </Grid.Col>
                           <Grid.Col span={4}>
@@ -656,6 +689,7 @@ const PODDashboard = () => {
                                   }}
                                   value={TARGET_DATA.PROFIT}
                                   label={TARGET_DATA.PROFIT}
+                                  disabled
                                 />
                               </Group>
                             </Radio.Group>
@@ -675,6 +709,7 @@ const PODDashboard = () => {
                           data: orderBy(row?.sales, ["key"], ["desc"]) || [],
                         };
                       })}
+                      setTableData={setSaleMetrics}
                       query={query}
                       setQuery={setQuery}
                       loading={loadingFetchSaleMetrics}
@@ -685,6 +720,8 @@ const PODDashboard = () => {
                       setPagination={setPagination}
                       pagination={pagination}
                       setIsLoadmore={setIsLoadmore}
+                      overridePODMetrics={overridePODMetrics}
+                      setOverridePODMetrics={setOverridePODMetrics}
                     />
                   )}
                   {loadingFetchSaleMetrics && (
