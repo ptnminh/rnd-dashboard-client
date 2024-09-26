@@ -332,7 +332,7 @@ const Clipart = ({
             )}
             {selectedSKU?.linkDesign && (
               <List.Item>
-                Link Design (NAS):{" "}
+                Design (NAS):{" "}
                 <a
                   style={{
                     display: "inline-block",

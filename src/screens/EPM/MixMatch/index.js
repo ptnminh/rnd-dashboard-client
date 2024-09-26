@@ -311,6 +311,27 @@ const MixMatch = ({
                 </a>
               </List.Item>
             )}
+            {selectedSKU?.linkDesign && (
+              <List.Item>
+                Design (NAS):{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "200px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={selectedSKU?.linkDesign}
+                  target="_blank"
+                >
+                  {selectedSKU?.linkDesign}
+                </a>
+              </List.Item>
+            )}
             {!isEmpty(selectedSKU?.cliparts) && (
               <List.Item>
                 Clipart:{" "}
@@ -345,27 +366,6 @@ const MixMatch = ({
                     );
                   })}
                 </List>
-              </List.Item>
-            )}
-            {selectedSKU?.linkDesign && (
-              <List.Item>
-                Design (NAS):{" "}
-                <a
-                  style={{
-                    display: "inline-block",
-                    width: "200px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    textDecoration: "none",
-                    color: "#228be6",
-                    verticalAlign: "middle",
-                  }}
-                  href={selectedSKU?.linkDesign}
-                  target="_blank"
-                >
-                  {selectedSKU?.linkDesign}
-                </a>
               </List.Item>
             )}
           </List>

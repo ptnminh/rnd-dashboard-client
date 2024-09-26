@@ -330,7 +330,6 @@ const ProductBase = ({
                 </a>
               </List.Item>
             )}
-
             {selectedSKU?.linkDesign && (
               <List.Item>
                 Design (NAS):{" "}
