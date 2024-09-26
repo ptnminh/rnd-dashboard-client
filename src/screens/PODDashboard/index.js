@@ -100,7 +100,7 @@ const PODDashboard = () => {
   const [query, setQuery] = useState({
     groupByKey: toLower(TABS_VIEW.Date),
     dateRange: 3,
-    targetDate: TARGET_DATES.ONE_DAY,
+    targetDate: TARGET_DATES.THREE_DAYS,
     view: TARGET_DATA.ORDERS,
     toggleTest: true,
   });
@@ -163,12 +163,23 @@ const PODDashboard = () => {
   // listen sorting change set isConfirmedQuery to true for refetch data
   useEffect(() => {
     if (!isEmpty(sorting)) {
+      setQuery({
+        ...query,
+        sortBy: null,
+        sortDir: null,
+      });
       setPagination({
         ...pagination,
         currentPage: 1,
       });
     }
   }, [sorting]);
+
+  useEffect(() => {
+    if (query?.sortBy && query?.sortDir) {
+      setSorting([]);
+    }
+  }, [query]);
 
   useEffect(() => {
     const params = new URLSearchParams();

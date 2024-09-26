@@ -292,6 +292,10 @@ export const dashboardServices = {
         params: {
           ...queryParams,
           ...sortingParams,
+          ...(query?.sortBy && {
+            sortBy: query.sortBy,
+            sortDir: query.sortDir,
+          }),
         },
       });
       const { data: result } = response;

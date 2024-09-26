@@ -118,7 +118,7 @@ const SellerboardTable = ({
             }
           }
           let classnames = null;
-          if (color && query?.primarySortBy === keyLevel) {
+          if (color && query?.sortBy === keyLevel) {
             classnames = classes["highlight"];
           }
           if (foundData?.overrideColor || overridePODMetrics?.includes(uid)) {
@@ -241,14 +241,13 @@ const SellerboardTable = ({
                 <Group justify="space-between">
                   <Text
                     style={{
-                      fontSize: "10px",
+                      fontSize: "12px",
                     }}
                   >
                     Ads:
                   </Text>
                   <Group>
-                    {(!query?.primarySortBy ||
-                      query?.primarySortBy !== "testDate") && (
+                    {(!query?.sortBy || query?.sortBy !== "testDate") && (
                       <ActionIcon
                         aria-label="Settings"
                         variant="default"
@@ -264,8 +263,8 @@ const SellerboardTable = ({
                           });
                           setQuery({
                             ...query,
-                            primarySortBy: "testDate",
-                            primarySortDir: "desc",
+                            sortBy: "testDate",
+                            sortDir: "desc",
                           });
                         }}
                       >
@@ -280,8 +279,8 @@ const SellerboardTable = ({
                         />
                       </ActionIcon>
                     )}
-                    {query?.primarySortBy === "testDate" &&
-                      query?.primarySortDir === "desc" && (
+                    {query?.sortBy === "testDate" &&
+                      query?.sortDir === "desc" && (
                         <ActionIcon
                           variant="filled"
                           aria-label="Settings"
@@ -290,8 +289,8 @@ const SellerboardTable = ({
                           onClick={() => {
                             setQuery({
                               ...query,
-                              primarySortBy: "testDate",
-                              primarySortDir: "asc",
+                              sortBy: "testDate",
+                              sortDir: "asc",
                             });
                           }}
                         >
@@ -302,8 +301,8 @@ const SellerboardTable = ({
                           />
                         </ActionIcon>
                       )}
-                    {query?.primarySortBy === "testDate" &&
-                      query?.primarySortDir === "asc" && (
+                    {query?.sortBy === "testDate" &&
+                      query?.sortDir === "asc" && (
                         <ActionIcon
                           variant="filled"
                           aria-label="Settings"
@@ -312,8 +311,8 @@ const SellerboardTable = ({
                           onClick={() => {
                             setQuery({
                               ...query,
-                              primarySortBy: null,
-                              primarySortDir: null,
+                              sortBy: null,
+                              sortDir: null,
                             });
                           }}
                         >
@@ -333,14 +332,13 @@ const SellerboardTable = ({
                 <Group justify="space-between">
                   <Text
                     style={{
-                      fontSize: "10px",
+                      fontSize: "12px",
                     }}
                   >
                     List:
                   </Text>
                   <Group>
-                    {(!query?.primarySortBy ||
-                      query?.primarySortBy !== "createdDate") && (
+                    {(!query?.sortBy || query?.sortBy !== "createdDate") && (
                       <ActionIcon
                         aria-label="Settings"
                         variant="default"
@@ -356,8 +354,8 @@ const SellerboardTable = ({
                           });
                           setQuery({
                             ...query,
-                            primarySortBy: "createdDate",
-                            primarySortDir: "desc",
+                            sortBy: "createdDate",
+                            sortDir: "desc",
                           });
                         }}
                       >
@@ -373,8 +371,8 @@ const SellerboardTable = ({
                       </ActionIcon>
                     )}
 
-                    {query?.primarySortBy === "createdDate" &&
-                      query?.primarySortDir === "desc" && (
+                    {query?.sortBy === "createdDate" &&
+                      query?.sortDir === "desc" && (
                         <ActionIcon
                           variant="filled"
                           aria-label="Settings"
@@ -383,8 +381,8 @@ const SellerboardTable = ({
                           onClick={() => {
                             setQuery({
                               ...query,
-                              primarySortBy: "createdDate",
-                              primarySortDir: "desc",
+                              sortBy: "createdDate",
+                              sortDir: "desc",
                             });
                           }}
                         >
@@ -395,8 +393,8 @@ const SellerboardTable = ({
                           />
                         </ActionIcon>
                       )}
-                    {query?.primarySortBy === "createdDate" &&
-                      query?.primarySortDir === "asc" && (
+                    {query?.sortBy === "createdDate" &&
+                      query?.sortDir === "asc" && (
                         <ActionIcon
                           variant="filled"
                           aria-label="Settings"
@@ -405,8 +403,8 @@ const SellerboardTable = ({
                           onClick={() => {
                             setQuery({
                               ...query,
-                              primarySortBy: null,
-                              primarySortDir: null,
+                              sortBy: null,
+                              sortDir: null,
                             });
                           }}
                         >
@@ -602,8 +600,7 @@ const SellerboardTable = ({
               >
                 Lifetime Order
               </Text>
-              {(!query?.primarySortBy ||
-                query?.primarySortBy !== "totalOrdersLifetime") && (
+              {(!query?.sortBy || query?.sortBy !== "totalOrdersLifetime") && (
                 <ActionIcon
                   aria-label="Settings"
                   variant="default"
@@ -619,8 +616,8 @@ const SellerboardTable = ({
                     });
                     setQuery({
                       ...query,
-                      primarySortBy: "totalOrdersLifetime",
-                      primarySortDir: "desc",
+                      sortBy: "totalOrdersLifetime",
+                      sortDir: "desc",
                     });
                   }}
                 >
@@ -632,8 +629,8 @@ const SellerboardTable = ({
                 </ActionIcon>
               )}
 
-              {query?.primarySortBy === "totalOrdersLifetime" &&
-                query?.primarySortDir === "desc" && (
+              {query?.sortBy === "totalOrdersLifetime" &&
+                query?.sortDir === "desc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
@@ -642,8 +639,8 @@ const SellerboardTable = ({
                     onClick={() => {
                       setQuery({
                         ...query,
-                        primarySortBy: "totalOrdersLifetime",
-                        primarySortDir: "asc",
+                        sortBy: "totalOrdersLifetime",
+                        sortDir: "asc",
                       });
                     }}
                   >
@@ -654,8 +651,8 @@ const SellerboardTable = ({
                     />
                   </ActionIcon>
                 )}
-              {query?.primarySortBy === "totalOrdersLifetime" &&
-                query?.primarySortDir === "asc" && (
+              {query?.sortBy === "totalOrdersLifetime" &&
+                query?.sortDir === "asc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
@@ -664,8 +661,8 @@ const SellerboardTable = ({
                     onClick={() => {
                       setQuery({
                         ...query,
-                        primarySortBy: null,
-                        primarySortDir: null,
+                        sortBy: null,
+                        sortDir: null,
                       });
                     }}
                   >
@@ -699,7 +696,7 @@ const SellerboardTable = ({
             >
               <Text
                 style={{
-                  fontSize: "12px",
+                  fontSize: "14px",
                   fontWeight: "bold",
                 }}
               >
@@ -897,8 +894,7 @@ const SellerboardTable = ({
               >
                 Total Orders
               </Text>
-              {(!query?.primarySortBy ||
-                query?.primarySortBy !== "totalOrdersInRange") && (
+              {(!query?.sortBy || query?.sortBy !== "totalOrdersInRange") && (
                 <ActionIcon
                   aria-label="Settings"
                   variant="default"
@@ -914,8 +910,8 @@ const SellerboardTable = ({
                     });
                     setQuery({
                       ...query,
-                      primarySortBy: "totalOrdersInRange",
-                      primarySortDir: "desc",
+                      sortBy: "totalOrdersInRange",
+                      sortDir: "desc",
                     });
                   }}
                 >
@@ -931,8 +927,8 @@ const SellerboardTable = ({
                 </ActionIcon>
               )}
 
-              {query?.primarySortBy === "totalOrdersInRange" &&
-                query?.primarySortDir === "desc" && (
+              {query?.sortBy === "totalOrdersInRange" &&
+                query?.sortDir === "desc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
@@ -941,8 +937,8 @@ const SellerboardTable = ({
                     onClick={() => {
                       setQuery({
                         ...query,
-                        primarySortBy: "totalOrdersInRange",
-                        primarySortDir: "asc",
+                        sortBy: "totalOrdersInRange",
+                        sortDir: "asc",
                       });
                     }}
                   >
@@ -953,8 +949,8 @@ const SellerboardTable = ({
                     />
                   </ActionIcon>
                 )}
-              {query?.primarySortBy === "totalOrdersInRange" &&
-                query?.primarySortDir === "asc" && (
+              {query?.sortBy === "totalOrdersInRange" &&
+                query?.sortDir === "asc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
@@ -963,8 +959,8 @@ const SellerboardTable = ({
                     onClick={() => {
                       setQuery({
                         ...query,
-                        primarySortBy: null,
-                        primarySortDir: null,
+                        sortBy: null,
+                        sortDir: null,
                       });
                     }}
                   >
