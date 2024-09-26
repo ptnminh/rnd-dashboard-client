@@ -2477,6 +2477,7 @@ const NewCampaigns = () => {
                   setSKU={setSKU}
                   selectedProductBases={selectedProductBases}
                   setSelectedProductBases={setSelectedProductBases}
+                  rndInfo={find(users, { name: rndMember })}
                 />
               </ScrollArea>
             </Grid.Col>
@@ -2533,6 +2534,7 @@ const NewCampaigns = () => {
           SKU={SKU}
           setSKU={setSKU}
           setSelectedProductBases={setSelectedProductBases}
+          rndInfo={find(users, { name: rndMember })}
         />
       )}
 

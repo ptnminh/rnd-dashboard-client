@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./Row.module.sass";
-import { filter, isEmpty, map, split } from "lodash";
+import { filter, find, isEmpty, map, split } from "lodash";
 import {
   ActionIcon,
   Grid,
@@ -28,6 +28,7 @@ const Row = ({
   setSKU,
   selectedProductBases,
   setSelectedProductBases,
+  rndInfo,
 }) => {
   const [loading, setLoading] = useState(false);
   const openUpdateModal = ({ skuPrefix, productLineId }) =>
@@ -56,9 +57,15 @@ const Row = ({
       setEditSKUs((prev) => {
         return prev.map((x) => {
           const prefix = split(x.SKU, "-")[0];
-          const batch = split(x.SKU, "-")[1];
           if (x.productLineId === productLineId && prefix === "XX") {
-            return { ...x, newSku: `${skuPrefix}-${batch}`, skuPrefix };
+            let realRnDAccumulator =
+              find(updateProductLineResponse?.skuAccumulators, {
+                rndId: rndInfo?.uid,
+              })?.accumulator + 1;
+            const newSku = `${skuPrefix}-${rndInfo?.shortName}${String(
+              realRnDAccumulator
+            ).padStart(4, "0")}`;
+            return { ...x, newSku, skuPrefix };
           }
           return x;
         });
