@@ -58,10 +58,16 @@ const Row = ({
         return prev.map((x) => {
           const prefix = split(x.SKU, "-")[0];
           if (x.productLineId === productLineId && prefix === "XX") {
+            // find all product lines that have the that skuPrefix
+            const foundSameProductLinesLength = filter(selectedProductBases, {
+              skuPrefix,
+            }).length;
             let realRnDAccumulator =
               find(updateProductLineResponse?.skuAccumulators, {
                 rndId: rndInfo?.uid,
-              })?.accumulator + 1;
+              })?.accumulator +
+              1 +
+              foundSameProductLinesLength;
             const newSku = `${skuPrefix}-${rndInfo?.shortName}${String(
               realRnDAccumulator
             ).padStart(4, "0")}`;
