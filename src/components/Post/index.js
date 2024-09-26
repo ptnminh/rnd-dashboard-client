@@ -202,7 +202,7 @@ const Ads = ({
                 }}
               >
                 <Grid.Col
-                  span={1}
+                  span={2}
                   style={{
                     height: "80%",
                   }}
@@ -247,7 +247,7 @@ const Ads = ({
                     />
                   )}
                 </Grid.Col>
-                <Grid.Col span={11}>
+                <Grid.Col span={10}>
                   <Flex gap={20} wrap={true}>
                     <Textarea
                       label="Nội dung"
