@@ -71,7 +71,7 @@ const DesignerScreens = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const [openedNoteForEPM, { open: openNoteForEPM, close: closeNoteForEPM }] =
     useDisclosure(false);
-  const [selectedSKU, setSelectedSKU] = useState();
+  const [selectedSKU, setSelectedSKU] = useState({});
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
   const [trigger, setTrigger] = useState(false);
@@ -116,6 +116,7 @@ const DesignerScreens = () => {
     }
     setLoadingFetchBrief(false);
     setTrigger(false);
+    setDesignerNote(getStringAsEditorState(selectedSKU?.note?.designer || ""));
   };
   const fetchUsers = async () => {
     const { data } = await rndServices.getUsers({
@@ -131,6 +132,7 @@ const DesignerScreens = () => {
       uid: selectedSKU.uid,
       data: {
         note: {
+          ...selectedSKU.note,
           designer: getEditorStateAsString(designerNote),
         },
       },
@@ -409,7 +411,7 @@ const DesignerScreens = () => {
                     fontSize: "14px",
                   }}
                 >
-                  • RnD: {selectedSKU?.rnd.name}
+                  • RnD: {selectedSKU?.rnd?.name}
                 </div>
                 <div
                   style={{
@@ -420,7 +422,7 @@ const DesignerScreens = () => {
                     fontSize: "14px",
                   }}
                 >
-                  • Designer:{selectedSKU?.designer.name}
+                  • Designer:{selectedSKU?.designer?.name}
                 </div>
               </Grid.Col>
               <Grid.Col span={5}>
@@ -701,7 +703,7 @@ const DesignerScreens = () => {
                   label="Designer Note"
                   readOnly={selectedSKU?.status === STATUS.DESIGNED}
                   button={selectedSKU?.status !== STATUS.DESIGNED}
-                  onClick={handleUpdateNote}
+                  onClick={() => handleUpdateNote()}
                   loading={loadingUpdateNote}
                 />
               </Grid.Col>
@@ -733,7 +735,7 @@ const DesignerScreens = () => {
             </Grid>
           </Modal>
         )}
-      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[1] && (
+      {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[1] && (
         <ScaleClipart
           opened={opened}
           close={close}
@@ -747,7 +749,7 @@ const DesignerScreens = () => {
           setDesignerNote={setDesignerNote}
         />
       )}
-      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[2] && (
+      {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[2] && (
         <ScaleNiche
           opened={opened}
           close={close}
@@ -761,7 +763,7 @@ const DesignerScreens = () => {
           setDesignerNote={setDesignerNote}
         />
       )}
-      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[3] && (
+      {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[3] && (
         <NewDesign
           opened={opened}
           close={close}
@@ -775,7 +777,7 @@ const DesignerScreens = () => {
           setDesignerNote={setDesignerNote}
         />
       )}
-      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[4] && (
+      {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[4] && (
         <ScaleDesign
           opened={opened}
           close={close}
@@ -789,7 +791,7 @@ const DesignerScreens = () => {
           setDesignerNote={setDesignerNote}
         />
       )}
-      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[5] && (
+      {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[5] && (
         <ScaleMixMatch
           opened={opened}
           close={close}

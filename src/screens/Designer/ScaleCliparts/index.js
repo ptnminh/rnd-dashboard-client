@@ -51,6 +51,7 @@ const ScaleClipart = ({
       uid: selectedSKU.uid,
       data: {
         note: {
+          ...selectedSKU.note,
           designer: getEditorStateAsString(designerNote),
         },
       },
@@ -424,7 +425,7 @@ const ScaleClipart = ({
             label="Designer Note"
             readOnly={selectedSKU?.status !== STATUS.DESIGNED}
             button={true}
-            onClick={handleUpdateNote}
+            onClick={() => handleUpdateNote()}
             loading={loading}
           />
         </Grid.Col>

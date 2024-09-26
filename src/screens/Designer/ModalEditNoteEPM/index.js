@@ -19,6 +19,7 @@ const ModalEditNoteEPM = ({ opened, close, selectedSKU, setTrigger }) => {
       uid: selectedSKU.uid,
       data: {
         note: {
+          ...selectedSKU.note,
           noteForEPM: getEditorStateAsString(noteForEPM),
         },
       },

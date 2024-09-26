@@ -55,6 +55,7 @@ const ScaleNiche = ({
       uid: selectedSKU.uid,
       data: {
         note: {
+          ...selectedSKU.note,
           designer: getEditorStateAsString(designerNote),
         },
       },
@@ -469,7 +470,7 @@ const ScaleNiche = ({
             label="Designer Note"
             readOnly={selectedSKU?.status === STATUS.DESIGNED}
             button={selectedSKU?.status !== STATUS.DESIGNED}
-            onClick={handleUpdateNote}
+            onClick={() => handleUpdateNote()}
             loading={loading}
           />
         </Grid.Col>
