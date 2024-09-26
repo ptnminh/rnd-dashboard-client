@@ -55,6 +55,12 @@ const Row = ({
       { skuPrefix }
     );
     if (updateProductLineResponse) {
+      const productLineRnDAccumulator = find(
+        rndInfo?.productLineRnDAccumulators,
+        {
+          rndId: rndInfo?.rndId,
+        }
+      )?.accumulator;
       if (!isEmpty(productBases)) {
         setProductBases((prev) => {
           return prev.map((x) => {
@@ -65,6 +71,22 @@ const Row = ({
                 ...(!isEmpty(updateProductLineResponse?.skuAccumulators) && {
                   skuAccumulators: updateProductLineResponse?.skuAccumulators,
                 }),
+              };
+            }
+            if (x.skuPrefix === skuPrefix && productLineRnDAccumulator) {
+              return {
+                ...x,
+                skuPrefix,
+                skuAccumulators: map(
+                  x.skuAccumulators, acc => {
+                    if (acc?.rndId === rndInfo?.rndId) {
+                      return {
+                        ...acc,
+                        accumulator: productLineRnDAccumulator
+                      }
+                    }
+                  }
+                )
               };
             }
             return x;
@@ -81,6 +103,21 @@ const Row = ({
                 ...(!isEmpty(updateProductLineResponse?.skuAccumulators) && {
                   skuAccumulators: updateProductLineResponse?.skuAccumulators,
                 }),
+              };
+            }
+            if (x?.skuPrefix === skuPrefix && productLineRnDAccumulator) {
+              return {
+                ...x,
+                skuAccumulators: map(
+                  x.skuAccumulators, acc => {
+                    if (acc?.rndId === rndInfo?.rndId) {
+                      return {
+                        ...acc,
+                        accumulator: productLineRnDAccumulator
+                      }
+                    }
+                  }
+                )
               };
             }
             return x;
@@ -107,6 +144,22 @@ const Row = ({
                 }),
               };
             }
+            if (x?.skuPrefix === skuPrefix && productLineRnDAccumulator) {
+              return {
+                ...x,
+                skuPrefix,
+                skuAccumulators: map(
+                  x.skuAccumulators, acc => {
+                    if (acc?.rndId === rndInfo?.rndId) {
+                      return {
+                        ...acc,
+                        accumulator: productLineRnDAccumulator
+                      }
+                    }
+                  }
+                )
+              };
+            }
             return x;
           }),
           diffLayouts: map(SKU?.diffLayouts, (x) => {
@@ -117,6 +170,22 @@ const Row = ({
                 ...(!isEmpty(updateProductLineResponse?.skuAccumulators) && {
                   skuAccumulators: updateProductLineResponse?.skuAccumulators,
                 }),
+              };
+            }
+            if (x?.skuPrefix === skuPrefix && productLineRnDAccumulator) {
+              return {
+                ...x,
+                skuPrefix,
+                skuAccumulators: map(
+                  x.skuAccumulators, acc => {
+                    if (acc?.rndId === rndInfo?.rndId) {
+                      return {
+                        ...acc,
+                        accumulator: productLineRnDAccumulator
+                      }
+                    }
+                  }
+                )
               };
             }
             return x;

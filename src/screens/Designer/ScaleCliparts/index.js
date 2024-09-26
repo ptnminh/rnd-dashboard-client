@@ -44,6 +44,7 @@ const ScaleClipart = ({
   setDesignerNote,
   designerNote,
 }) => {
+  console.log("selectedSKU", selectedSKU);
   const [loading, setLoading] = useState(false);
   const handleUpdateNote = async () => {
     setLoading(true);
@@ -293,31 +294,31 @@ const ScaleClipart = ({
             )}
             {(selectedSKU?.designLinkRef?.designLink ||
               selectedSKU?.designLinkRef) && (
-              <List.Item>
-                Link Design (NAS):{" "}
-                <a
-                  style={{
-                    display: "inline-block",
-                    width: "100px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    textDecoration: "none",
-                    color: "#228be6",
-                    verticalAlign: "middle",
-                  }}
-                  href={
-                    selectedSKU?.designLinkRef ||
-                    selectedSKU?.productLine?.designLink
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {selectedSKU?.designLinkRef ||
-                    selectedSKU?.productLine?.designLink}
-                </a>
-              </List.Item>
-            )}
+                <List.Item>
+                  Link Design (NAS):{" "}
+                  <a
+                    style={{
+                      display: "inline-block",
+                      width: "100px",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      textDecoration: "none",
+                      color: "#228be6",
+                      verticalAlign: "middle",
+                    }}
+                    href={
+                      selectedSKU?.designLinkRef ||
+                      selectedSKU?.productLine?.designLink
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {selectedSKU?.designLinkRef ||
+                      selectedSKU?.productLine?.designLink}
+                  </a>
+                </List.Item>
+              )}
           </List>
         </Grid.Col>
         <Grid.Col
@@ -423,7 +424,7 @@ const ScaleClipart = ({
             onChange={setDesignerNote}
             classEditor={styles.editor}
             label="Designer Note"
-            readOnly={selectedSKU?.status !== STATUS.DESIGNED}
+            readOnly={selectedSKU?.status === STATUS.DESIGNED}
             button={true}
             onClick={() => handleUpdateNote()}
             loading={loading}

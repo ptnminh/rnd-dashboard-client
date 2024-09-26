@@ -17,15 +17,12 @@ import {
   map,
   flatten,
   uniq,
-  join,
-  split,
   values,
   filter,
   sumBy,
   flatMap,
   merge,
   isEmpty,
-  toNumber,
 } from "lodash";
 
 import classes from "./MyTable.module.css";
