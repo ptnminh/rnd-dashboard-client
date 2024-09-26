@@ -58,6 +58,7 @@ const ScaleClipart = ({
       },
     });
     if (updateNoteResponse) {
+      close()
       setTrigger(true);
       showNotification("Thành công", "Cập nhật Note thành công", "green");
     }

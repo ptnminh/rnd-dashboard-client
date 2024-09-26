@@ -59,6 +59,7 @@ const ScaleMixMatch = ({
       },
     });
     if (updateNoteResponse) {
+      close()
       setTrigger(true);
       showNotification("Thành công", "Cập nhật Note thành công", "green");
     }
@@ -257,31 +258,31 @@ const ScaleMixMatch = ({
             >
               {(selectedSKU?.designLinkRef?.designLink ||
                 selectedSKU?.designLinkRef) && (
-                <List.Item>
-                  Link Design (NAS):{" "}
-                  <a
-                    style={{
-                      display: "inline-block",
-                      width: "120px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      textDecoration: "none",
-                      color: "#228be6",
-                      verticalAlign: "middle",
-                    }}
-                    href={
-                      selectedSKU?.designLinkRef ||
-                      selectedSKU?.productLine?.designLink
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedSKU?.designLinkRef ||
-                      selectedSKU?.productLine?.designLink}
-                  </a>
-                </List.Item>
-              )}
+                  <List.Item>
+                    Link Design (NAS):{" "}
+                    <a
+                      style={{
+                        display: "inline-block",
+                        width: "120px",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textDecoration: "none",
+                        color: "#228be6",
+                        verticalAlign: "middle",
+                      }}
+                      href={
+                        selectedSKU?.designLinkRef ||
+                        selectedSKU?.productLine?.designLink
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {selectedSKU?.designLinkRef ||
+                        selectedSKU?.productLine?.designLink}
+                    </a>
+                  </List.Item>
+                )}
               {selectedSKU?.productLine?.refLink && (
                 <List.Item>
                   Link Product Base (Library):{" "}
