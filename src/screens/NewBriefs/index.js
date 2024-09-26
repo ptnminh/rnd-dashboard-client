@@ -1197,6 +1197,7 @@ const NewCampaigns = () => {
         }),
         ...(briefType === BRIEF_TYPES[1] && {
           clipartIds: x?.clipartIds,
+          productLineId: x?.productLineId || "",
         }),
         ...(briefType === BRIEF_TYPES[2] && {
           quote: x.uid,
