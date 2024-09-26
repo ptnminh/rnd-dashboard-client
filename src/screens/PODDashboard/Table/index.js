@@ -857,11 +857,11 @@ const SellerboardTable = ({
                       optimized: newFollow,
                       ...(newFollow === 1
                         ? {
-                            overrideColor: true,
-                          }
+                          overrideColor: true,
+                        }
                         : {
-                            overrideColor: false,
-                          }),
+                          overrideColor: false,
+                        }),
                     };
                   }
                   return item;
@@ -1025,6 +1025,8 @@ const SellerboardTable = ({
     getRowId: (row) => row.id,
     enableRowSelection: false,
     enableFilters: false,
+    enableToolbarInternalActions: false,
+    enableTopToolbar: false,
     enableColumnActions: false,
     mantineTableHeadCellProps: { className: classes["head-cells"] },
     mantineTableProps: {
