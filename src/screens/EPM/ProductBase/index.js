@@ -21,10 +21,10 @@ import {
   IconExclamationMark,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
-import { isEmpty, map } from "lodash";
+import { isEmpty, join, map } from "lodash";
 import { STATUS } from "../../../constant";
 
-const Clipart = ({
+const ProductBase = ({
   close,
   selectedSKU,
   linkProduct,
@@ -271,7 +271,7 @@ const Clipart = ({
               alignItems: "center",
             }}
           >
-            Scale To Clipart
+            Scale To Product Base
           </div>
           <Image
             radius="md"
@@ -330,9 +330,10 @@ const Clipart = ({
                 </a>
               </List.Item>
             )}
+
             {selectedSKU?.linkDesign && (
               <List.Item>
-                Link Design (NAS):{" "}
+                Design (NAS):{" "}
                 <a
                   style={{
                     display: "inline-block",
@@ -433,4 +434,4 @@ const Clipart = ({
   );
 };
 
-export default Clipart;
+export default ProductBase;

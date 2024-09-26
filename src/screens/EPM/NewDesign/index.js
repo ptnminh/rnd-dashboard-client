@@ -21,7 +21,6 @@ import {
   IconExclamationMark,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
-import styles from "./NewDesign.module.sass";
 import { isEmpty, map } from "lodash";
 import { STATUS } from "../../../constant";
 
@@ -199,7 +198,7 @@ const NewDesign = ({
               alignItems: "center",
             }}
           >
-            Product Line
+            Product Base
           </div>
           <Image
             radius="md"
@@ -231,50 +230,7 @@ const NewDesign = ({
                 <IconCircleCheck style={{ width: rem(16), height: rem(16) }} />
               </ThemeIcon>
             }
-          >
-            {selectedSKU?.productInfo?.tibSearchCampaignLink && (
-              <List.Item>
-                Link Campaign (TIB):{" "}
-                <a
-                  style={{
-                    display: "inline-block",
-                    width: "200px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    textDecoration: "none",
-                    color: "#228be6",
-                    verticalAlign: "middle",
-                  }}
-                  href={selectedSKU?.productInfo?.tibSearchCampaignLink}
-                  target="_blank"
-                >
-                  {selectedSKU?.productInfo?.tibSearchCampaignLink}
-                </a>
-              </List.Item>
-            )}
-            {selectedSKU?.linkProductRef && (
-              <List.Item>
-                Link Store:{" "}
-                <a
-                  style={{
-                    display: "inline-block",
-                    width: "230px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    textDecoration: "none",
-                    color: "#228be6",
-                    verticalAlign: "middle",
-                  }}
-                  href={selectedSKU?.linkProductRef}
-                  target="_blank"
-                >
-                  {selectedSKU?.linkProductRef}
-                </a>
-              </List.Item>
-            )}
-          </List>
+          ></List>
         </Grid.Col>
         <Grid.Col
           span={2}
@@ -317,7 +273,7 @@ const NewDesign = ({
               marginTop: "10px",
             }}
           >
-            {selectedSKU?.sku} mới
+            {selectedSKU?.sku}
           </div>
           <List
             spacing="lg"
@@ -329,6 +285,32 @@ const NewDesign = ({
               </ThemeIcon>
             }
           >
+            {selectedSKU?.productLine?.name && (
+              <List.Item>
+                Product Base: {selectedSKU?.productLine?.name}
+              </List.Item>
+            )}
+            {selectedSKU?.productInfo?.tibSearchCampaignLink && (
+              <List.Item>
+                Campaign (TIB): {""}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "200px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={selectedSKU?.productInfo?.tibSearchCampaignLink}
+                  target="_blank"
+                >
+                  {selectedSKU?.productInfo?.tibSearchCampaignLink}
+                </a>
+              </List.Item>
+            )}
             {!isEmpty(selectedSKU?.cliparts) && (
               <List.Item>
                 Clipart:{" "}
@@ -367,7 +349,7 @@ const NewDesign = ({
             )}
             {selectedSKU?.linkDesign && (
               <List.Item>
-                Link Design (NAS):{" "}
+                Design (NAS):{" "}
                 <a
                   style={{
                     display: "inline-block",
@@ -386,7 +368,6 @@ const NewDesign = ({
                 </a>
               </List.Item>
             )}
-            <List.Item>Link Campaign (TIB) - Auto: (Coming soon)</List.Item>
           </List>
         </Grid.Col>
         <Grid.Col span={6}>
