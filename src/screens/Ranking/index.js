@@ -87,17 +87,13 @@ const RankingPODShopifyProducts = () => {
   const endDate = moment().format("YYYY-MM-DD");
   const [query, setQuery] = useState({
     competitor: "Wanderprints",
-    competitorShortName: "Wanderprints",
     mode: [TARGET_MODES.RANKING],
     targetDate: TARGET_DATES.THREE_DAYS,
     dateRange: 3,
+    sortBy: "totalRankChanges",
+    sortDir: "desc",
   });
-  const [sorting, setSorting] = useState([
-    {
-      id: moment(endDate).format("MMM DD"),
-      desc: true,
-    },
-  ]);
+  const [sorting, setSorting] = useState([]);
   const isMounted = useRef(false);
   const [trigger, setTrigger] = useState(false);
   const [loadingFetchRankings, setLoadingFetchRankings] = useState(true);
@@ -338,7 +334,12 @@ const RankingPODShopifyProducts = () => {
                         ...pagination,
                         currentPage: 1,
                       });
-                      setQuery({ ...query, mode: realValue, sortBy: "" });
+                      setQuery({
+                        ...query,
+                        mode: realValue,
+                        sortBy: "totalRankChanges",
+                        sortDir: "desc",
+                      });
                     }}
                     styles={{
                       root: {

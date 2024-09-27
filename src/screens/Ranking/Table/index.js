@@ -285,10 +285,7 @@ const RankingTable = ({
           const isShow =
             query?.mode[0] === TARGET_MODES.RANKING ||
             TARGET_MODES.DEFAULT_RANKING;
-          const view =
-            query?.mode[0] === TARGET_MODES.ORDERS
-              ? "totalOrdersChanges"
-              : "totalRankChanges";
+
           return (
             <Group gap={5}>
               <Text
@@ -776,6 +773,9 @@ const RankingTable = ({
         enableEditing: false,
         enableSorting: false,
         Header: ({ row }) => {
+          const isShow =
+            query?.mode[0] === TARGET_MODES.RANKING ||
+            TARGET_MODES.DEFAULT_RANKING;
           const view =
             query?.mode[0] === TARGET_MODES.ORDERS
               ? "totalOrdersChanges"
@@ -790,7 +790,9 @@ const RankingTable = ({
               >
                 Total Changes
               </Text>
-              {(!query?.sortBy || query?.sortBy === "latestRank") && (
+              {(!isEmpty(sorting) ||
+                !query?.sortBy ||
+                query.sortBy === "latestRank") && (
                 <ActionIcon
                   aria-label="Settings"
                   variant="default"
@@ -812,66 +814,76 @@ const RankingTable = ({
                   }}
                 >
                   <IconArrowsSort
-                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
+                    style={{
+                      width: "60%",
+                      height: "60%",
+                      fontWeight: "bold",
+                    }}
                     stroke={2}
                     color="#ffffff"
                   />
                 </ActionIcon>
               )}
-              {query?.sortBy === view && query?.sortDir === "desc" && (
-                <ActionIcon
-                  variant="filled"
-                  aria-label="Settings"
-                  color="transparent"
-                  onClick={() => {
-                    setSorting([]);
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                    setQuery({
-                      ...query,
-                      sortBy: view,
-                      sortDir: "asc",
-                    });
-                  }}
-                >
-                  <IconSortDescending
-                    style={{ width: "70%", height: "70%" }}
-                    stroke={2}
-                    color="#70B1ED"
-                  />
-                </ActionIcon>
-              )}
-              {query?.sortBy === view && query?.sortDir === "asc" && (
-                <ActionIcon
-                  variant="filled"
-                  aria-label="Settings"
-                  color="transparent"
-                  onClick={() => {
-                    setSorting([]);
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                    setQuery({
-                      ...query,
-                      sortBy: null,
-                      sortDir: null,
-                    });
-                  }}
-                >
-                  <IconSortAscending
-                    style={{
-                      width: "70%",
-                      height: "70%",
-                      fontWeight: "bold",
+              {(query?.sortBy === "totalOrdersChanges" ||
+                query?.sortBy === "totalRankChanges") &&
+                isEmpty(sorting) &&
+                query?.sortDir === "desc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setSorting([]);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setQuery({
+                        ...query,
+                        sortBy: view,
+                        sortDir: "asc",
+                      });
                     }}
-                    stroke={2}
-                    color="#70B1ED"
-                  />
-                </ActionIcon>
-              )}
+                  >
+                    <IconSortDescending
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+              {(query?.sortBy === "totalOrdersChanges" ||
+                query?.sortBy === "totalRankChanges") &&
+                isEmpty(sorting) &&
+                query?.sortDir === "asc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setSorting([]);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setQuery({
+                        ...query,
+                        sortBy: null,
+                        sortDir: null,
+                      });
+                    }}
+                  >
+                    <IconSortAscending
+                      style={{
+                        width: "70%",
+                        height: "70%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
             </Group>
           );
         },
