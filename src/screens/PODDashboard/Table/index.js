@@ -118,9 +118,9 @@ const SellerboardTable = ({
           if (color && query?.sortBy === keyLevel) {
             classnames = classes["highlight"];
           }
-          if (foundData?.overrideColor || overridePODMetrics?.includes(uid)) {
-            classnames = classes["highlight-follow-row"];
-          }
+          // if (foundData?.overrideColor || overridePODMetrics?.includes(uid)) {
+          //   classnames = classes["highlight-follow-row"];
+          // }
           if (row.id === `Total theo ${activeTab}`) {
             classnames = classes["summary-row"];
           }
@@ -854,11 +854,11 @@ const SellerboardTable = ({
                       optimized: newFollow,
                       ...(newFollow === 1
                         ? {
-                          overrideColor: true,
-                        }
+                            overrideColor: true,
+                          }
                         : {
-                          overrideColor: false,
-                        }),
+                            overrideColor: false,
+                          }),
                     };
                   }
                   return item;

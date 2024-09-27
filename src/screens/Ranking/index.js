@@ -108,7 +108,12 @@ const RankingPODShopifyProducts = () => {
       query: omit(
         {
           ...query,
-          view: query.mode[0] === TARGET_MODES.ORDERS ? "order" : "rank",
+          view:
+            query.mode[0] === TARGET_MODES.ORDERS
+              ? "order"
+              : query.mode[0] === TARGET_MODES.RANKING
+              ? "rankChange"
+              : "rank",
         },
         [
           "sortValue",

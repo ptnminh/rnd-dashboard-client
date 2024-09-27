@@ -25,8 +25,8 @@ import {
   keys,
   isEmpty,
   orderBy,
-  slice,
   values,
+  slice,
 } from "lodash";
 
 import classes from "./MyTable.module.css";
@@ -135,12 +135,12 @@ const RankingTable = ({
           if (color && query?.mode[0] === TARGET_MODES.RANKING) {
             classnames = classes["highlight"];
           }
-          if (
-            foundData?.overrideColor ||
-            overrideProductRankings.includes(id)
-          ) {
-            classnames = classes["highlight-follow-row"];
-          }
+          // if (
+          //   foundData?.overrideColor ||
+          //   overrideProductRankings.includes(id)
+          // ) {
+          //   classnames = classes["highlight-follow-row"];
+          // }
           if (row.id === `Total theo ${activeTab}`) {
             classnames = classes["summary-row"];
           }
@@ -265,8 +265,8 @@ const RankingTable = ({
       {
         accessorKey: "product",
         header: "Product",
-        size: 250,
-        maxSize: 250,
+        size: 300,
+        maxSize: 300,
         enableEditing: false,
         enableSorting: false,
         enableMultiSort: true,
@@ -415,7 +415,28 @@ const RankingTable = ({
             publishedDate,
             latestRank,
           } = row.original;
-
+          let changesData = slice(originalData, 0, 3)
+            ?.map((x) => x.rank)
+            ?.map((x, index) => {
+              return (
+                <Text
+                  style={{
+                    ...(index === 0
+                      ? {
+                          fontSize: 14,
+                        }
+                      : {
+                          fontSize: 14,
+                          color: "gray",
+                        }),
+                    fontWeight: "bold",
+                    textAlign: "left",
+                  }}
+                >
+                  {index !== 0 ? "<-" : ""} {x}
+                </Text>
+              );
+            });
           return (
             <Flex direction="column">
               <Grid
@@ -484,39 +505,57 @@ const RankingTable = ({
                             fontWeight: "bold",
                           }}
                         >
-                          Rank: {latestRank}
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "2px",
+                            }}
+                          >
+                            {changesData}
+                          </div>
                         </Text>
                       </div>
                     </Grid.Col>
-
-                    <Grid.Col span={12}>
-                      <Text
-                        style={{
-                          fontSize: 11,
-                          fontWeight: "bold",
-                          textAlign: "left",
-                        }}
-                      >
-                        Bắt:{" "}
-                        {moment(createdDate)
-                          .subtract(createdDate)
-                          .fromNow(true)}
-                      </Text>
-                    </Grid.Col>
-                    {publishedDate && (
+                    {(publishedDate || createdDate) && (
                       <Grid.Col span={12}>
-                        <Text
+                        <Group
                           style={{
-                            fontSize: 11,
-                            fontWeight: "bold",
-                            textAlign: "left",
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "2px",
+                            justifyContent: "start",
                           }}
                         >
-                          List:{" "}
-                          {moment(publishedDate)
-                            .subtract(publishedDate)
-                            .fromNow(true)}
-                        </Text>
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              fontWeight: "bold",
+                              textAlign: "left",
+                              width: "100%",
+                            }}
+                          >
+                            Bắt:{" "}
+                            {moment(createdDate)
+                              .subtract(createdDate)
+                              .fromNow(true)}
+                          </Text>
+                          {publishedDate && (
+                            <Text
+                              style={{
+                                fontSize: 11,
+                                fontWeight: "bold",
+                                textAlign: "left",
+                                width: "100%",
+                              }}
+                            >
+                              List:{" "}
+                              {moment(publishedDate)
+                                .subtract(publishedDate)
+                                .fromNow(true)}
+                            </Text>
+                          )}
+                        </Group>
                       </Grid.Col>
                     )}
                   </Grid>
@@ -844,7 +883,7 @@ const RankingTable = ({
             className:
               row.id === `Total theo ${activeTab}`
                 ? classes["summary-row"]
-                : classes["body-cells-op-team"],
+                : classes["total-changes"],
           };
         },
         mantineTableHeadCellProps: () => {

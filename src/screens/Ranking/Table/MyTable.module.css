@@ -62,6 +62,12 @@
   text-align: center !important;
 }
 
+.total-changes {
+  background-color: #d7e2fb;
+  vertical-align: middle !important;
+  text-align: center !important;
+}
+
 .edit-header {
   background-color: #646A72;
   color: #ffffff;
