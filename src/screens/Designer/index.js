@@ -161,7 +161,9 @@ const DesignerScreens = () => {
       ) {
         setDesignerNote(
           getStringAsEditorState(
-            selectedSKU?.note?.mixMatch || selectedSKU?.note?.designer || ""
+            selectedSKU?.note?.mixMatch ||
+              selectedSKU?.note?.designer ||
+              selectedSKU?.attribute?.refDesignMarketNote
           )
         );
       } else {
