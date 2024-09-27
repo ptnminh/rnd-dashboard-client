@@ -61,9 +61,19 @@
   vertical-align: middle !important;
   text-align: center !important;
 }
+.body-cells-op-team[data-hover]:hover td {
+  background: none;
+}
+
 
 .total-changes {
   background-color: #d7e2fb;
+  vertical-align: middle !important;
+  text-align: center !important;
+}
+
+.highlight-follow {
+  background-color: #A2E09C;
   vertical-align: middle !important;
   text-align: center !important;
 }
@@ -175,6 +185,7 @@
   @mixin light {
     --mrt-base-background-color: rgb(244, 233, 255);
   }
+  --mrt-row-hover-background-color: "none";
 
   /* It's also best to redefine all of the other MRT CSS variables that derive from --mrt-base-background-color */
   /* ... */
