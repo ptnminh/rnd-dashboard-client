@@ -160,7 +160,9 @@ const DesignerScreens = () => {
         selectedSKU?.briefType === BRIEF_TYPES[5]
       ) {
         setDesignerNote(
-          getStringAsEditorState(selectedSKU?.note?.mixMatch || "")
+          getStringAsEditorState(
+            selectedSKU?.note?.mixMatch || selectedSKU?.note?.designer || ""
+          )
         );
       } else {
         setDesignerNote(

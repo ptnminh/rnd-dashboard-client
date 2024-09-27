@@ -42,10 +42,9 @@ const ScaleMixMatch = ({
   handleUpdateLinkDesign,
   opened,
   setTrigger,
+  setDesignerNote,
+  designerNote,
 }) => {
-  const [designerNote, setDesignerNote] = useState(
-    getStringAsEditorState(selectedSKU?.note?.mixMatch || "")
-  );
   const [loading, setLoading] = useState(false);
   const handleUpdateNote = async () => {
     setLoading(true);

@@ -44,10 +44,9 @@ const ScaleNiche = ({
   handleUpdateLinkDesign,
   opened,
   setTrigger,
+  designerNote,
+  setDesignerNote,
 }) => {
-  const [designerNote, setDesignerNote] = useState(
-    getStringAsEditorState(selectedSKU?.note?.designer || "")
-  );
   const [loading, setLoading] = useState(false);
   const handleUpdateNote = async () => {
     setLoading(true);
@@ -61,7 +60,7 @@ const ScaleNiche = ({
       },
     });
     if (updateNoteResponse) {
-      close()
+      close();
       setTrigger(true);
       showNotification("Thành công", "Cập nhật Note thành công", "green");
     }
@@ -275,31 +274,31 @@ const ScaleNiche = ({
             )}
             {(selectedSKU?.designLinkRef?.designLink ||
               selectedSKU?.designLinkRef) && (
-                <List.Item>
-                  Link Design (NAS):{" "}
-                  <a
-                    style={{
-                      display: "inline-block",
-                      width: "120px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      textDecoration: "none",
-                      color: "#228be6",
-                      verticalAlign: "middle",
-                    }}
-                    href={
-                      selectedSKU?.designLinkRef ||
-                      selectedSKU?.productLine?.designLink
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedSKU?.designLinkRef ||
-                      selectedSKU?.productLine?.designLink}
-                  </a>
-                </List.Item>
-              )}
+              <List.Item>
+                Link Design (NAS):{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "120px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={
+                    selectedSKU?.designLinkRef ||
+                    selectedSKU?.productLine?.designLink
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {selectedSKU?.designLinkRef ||
+                    selectedSKU?.productLine?.designLink}
+                </a>
+              </List.Item>
+            )}
           </List>
         </Grid.Col>
         <Grid.Col
