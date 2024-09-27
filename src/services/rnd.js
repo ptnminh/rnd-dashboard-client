@@ -278,6 +278,7 @@ export const rndServices = {
     view = "design",
     sorting,
     sorted,
+    priority,
     campaignStatus,
   }) => {
     try {
@@ -297,6 +298,7 @@ export const rndServices = {
         ...(postStatus && { postStatus }),
         ...(campaignStatus && { campaignStatus }),
         ...(view && { view }),
+        ...(priority === 2 && { priority }),
       };
       const sort = !isEmpty(sorting)
         ? {
