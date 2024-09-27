@@ -253,6 +253,10 @@ const RankingPODShopifyProducts = () => {
                   <Radio.Group
                     value={query?.targetDate}
                     onChange={(value) => {
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
                       switch (value) {
                         case TARGET_DATES.TODAY:
                           setQuery({

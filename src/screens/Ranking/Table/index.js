@@ -159,7 +159,7 @@ const RankingTable = ({
               </Text>
             );
           }
-          const { data, isMissing } = row.original;
+          const { data } = row.original;
           const keyData = find(data, { key: keyLevel });
           let viewData = 0;
           switch (query?.mode[0]) {
@@ -183,7 +183,7 @@ const RankingTable = ({
                   fontWeight: "bold",
                 }}
               >
-                {isMissing ? "x" : viewData}
+                {keyData?.isMissing ? "x" : viewData}
               </Text>
             </Flex>
           );
