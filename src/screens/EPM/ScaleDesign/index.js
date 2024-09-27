@@ -202,7 +202,9 @@ const ScaleDesign = ({
           </div>
           <Image
             radius="md"
-            src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
+            src={
+              selectedSKU?.skuInfo?.image || "/images/content/not_found_2.jpg"
+            }
             height={200}
             fit="contain"
           />
