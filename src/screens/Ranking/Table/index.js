@@ -254,10 +254,7 @@ const RankingTable = ({
   }, [data, customColumns]);
 
   // Combine table data with the Total theo ${activeTab} row
-  const tableDataWithSummary = useMemo(
-    () => [...data, summaryRow],
-    [data, summaryRow]
-  );
+  const tableDataWithSummary = useMemo(() => [...data], [data]);
 
   // UseMemo to construct final columns array with sorted custom columns
   const columns = useMemo(() => {
