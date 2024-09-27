@@ -9,28 +9,48 @@ import {
   Badge,
   Tooltip,
   Group,
+  Select,
+  ActionIcon,
 } from "@mantine/core";
 import {
   find,
   map,
   flatten,
   uniq,
-  join,
-  split,
   values,
   filter,
   sumBy,
   flatMap,
   merge,
   isEmpty,
-  toNumber,
 } from "lodash";
 
 import classes from "./MyTable.module.css";
-
+import {
+  IconSortAscending,
+  IconSortDescending,
+  IconArrowsSort,
+} from "@tabler/icons-react";
 import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
 import LazyLoad from "react-lazyload";
-
+import {
+  CONVERT_NUMBER_TO_POD_DASHBOARD_STATUS,
+  CONVERT_STATUS_TO_POD_DASHBOARD_NUMBER,
+  POD_DASHBOARD_STATUS,
+} from "../../../constant/common";
+import { dashboardServices } from "../../../services";
+import moment from "moment-timezone";
+const moveOverrideColorToStart = (array) => {
+  return array.sort((a, b) => {
+    if (a.overrideColor && !b.overrideColor) {
+      return -1;
+    }
+    if (!a.overrideColor && b.overrideColor) {
+      return 1;
+    }
+    return 0;
+  });
+};
 const SellerboardTable = ({
   tableData,
   query,
@@ -42,7 +62,13 @@ const SellerboardTable = ({
   setPagination,
   pagination,
   setIsLoadmore,
+  setOverridePODMetrics,
+  overridePODMetrics,
+  setTableData,
 }) => {
+  const handleUpdatePODDashboard = async (id, data) => {
+    await dashboardServices.handleUpdatePODDashboard({ id, data });
+  };
   // Function to extract unique keys from the data array
   const extractUniqueKeys = (dataset) => {
     // Flatten the 'data' arrays from each item and map to the 'key' property
@@ -70,6 +96,9 @@ const SellerboardTable = ({
           const rankChange = find(row.original.data, {
             key: keyLevel,
           })?.rankChange;
+          const uid = row?.original?.uid;
+          const foundData = find(data, { uid });
+
           const { latestRank } = row?.original;
           let color = null;
           if (latestRank > 1 && latestRank <= 50) {
@@ -86,9 +115,12 @@ const SellerboardTable = ({
             }
           }
           let classnames = null;
-          if (color && query?.primarySortBy === keyLevel) {
+          if (color && query?.sortBy === keyLevel) {
             classnames = classes["highlight"];
           }
+          // if (foundData?.overrideColor || overridePODMetrics?.includes(uid)) {
+          //   classnames = classes["highlight-follow-row"];
+          // }
           if (row.id === `Total theo ${activeTab}`) {
             classnames = classes["summary-row"];
           }
@@ -133,6 +165,24 @@ const SellerboardTable = ({
     setCustomColumns(generateCustomColumn(tableData));
   }, [tableData]);
 
+  useEffect(() => {
+    if (!isEmpty(overridePODMetrics)) {
+      const orderedData = moveOverrideColorToStart(
+        map(data, (item) => {
+          if (overridePODMetrics.includes(item.uid)) {
+            return {
+              ...item,
+              overrideColor: true,
+            };
+          }
+          return item;
+        })
+      );
+      setData(orderedData);
+      setCustomColumns(generateCustomColumn(orderedData));
+    }
+  }, [overridePODMetrics]);
+
   // Compute the Total theo ${activeTab} row data
   const summaryRow = useMemo(() => {
     const columns = merge(
@@ -149,7 +199,7 @@ const SellerboardTable = ({
     );
     return {
       id: `Total theo ${activeTab}`, // Unique ID for the Total theo ${activeTab} row
-      product: `Summary`,
+      product: `Lifetime Order`,
       totalInRanges: sumBy(data, "totalOrdersInRange")?.toLocaleString(), // Example: sum of orders
       ...columns,
     };
@@ -172,6 +222,206 @@ const SellerboardTable = ({
         enableEditing: false,
         enableSorting: false,
         enableMultiSort: true,
+        Header: () => {
+          return (
+            <Group gap={30}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "bold",
+                }}
+              >
+                Product
+              </Text>
+
+              <Flex direction="column">
+                <Group justify="space-between">
+                  <Text
+                    style={{
+                      fontSize: "12px",
+                    }}
+                  >
+                    Ads:
+                  </Text>
+                  <Group>
+                    {(!query?.sortBy || query?.sortBy !== "testDate") && (
+                      <ActionIcon
+                        aria-label="Settings"
+                        variant="default"
+                        size="sm"
+                        style={{
+                          background: "none",
+                          border: "none",
+                        }}
+                        onClick={() => {
+                          setPagination({
+                            ...pagination,
+                            currentPage: 1,
+                          });
+                          setQuery({
+                            ...query,
+                            sortBy: "testDate",
+                            sortDir: "desc",
+                          });
+                        }}
+                      >
+                        <IconArrowsSort
+                          style={{
+                            width: "60%",
+                            height: "60%",
+                            fontWeight: "bold",
+                          }}
+                          stroke={2}
+                          color="#ffffff"
+                        />
+                      </ActionIcon>
+                    )}
+                    {query?.sortBy === "testDate" &&
+                      query?.sortDir === "desc" && (
+                        <ActionIcon
+                          variant="filled"
+                          aria-label="Settings"
+                          color="transparent"
+                          size="sm"
+                          onClick={() => {
+                            setQuery({
+                              ...query,
+                              sortBy: "testDate",
+                              sortDir: "asc",
+                            });
+                          }}
+                        >
+                          <IconSortDescending
+                            style={{ width: "70%", height: "70%" }}
+                            stroke={2}
+                            color="#70B1ED"
+                          />
+                        </ActionIcon>
+                      )}
+                    {query?.sortBy === "testDate" &&
+                      query?.sortDir === "asc" && (
+                        <ActionIcon
+                          variant="filled"
+                          aria-label="Settings"
+                          size="sm"
+                          color="transparent"
+                          onClick={() => {
+                            setQuery({
+                              ...query,
+                              sortBy: null,
+                              sortDir: null,
+                            });
+                          }}
+                        >
+                          <IconSortAscending
+                            style={{
+                              width: "70%",
+                              height: "70%",
+                              fontWeight: "bold",
+                            }}
+                            stroke={2}
+                            color="#70B1ED"
+                          />
+                        </ActionIcon>
+                      )}
+                  </Group>
+                </Group>
+                <Group justify="space-between">
+                  <Text
+                    style={{
+                      fontSize: "12px",
+                    }}
+                  >
+                    List:
+                  </Text>
+                  <Group>
+                    {(!query?.sortBy || query?.sortBy !== "createdDate") && (
+                      <ActionIcon
+                        aria-label="Settings"
+                        variant="default"
+                        size="sm"
+                        style={{
+                          background: "none",
+                          border: "none",
+                        }}
+                        onClick={() => {
+                          setPagination({
+                            ...pagination,
+                            currentPage: 1,
+                          });
+                          setQuery({
+                            ...query,
+                            sortBy: "createdDate",
+                            sortDir: "desc",
+                          });
+                        }}
+                      >
+                        <IconArrowsSort
+                          style={{
+                            width: "60%",
+                            height: "60%",
+                            fontWeight: "bold",
+                          }}
+                          stroke={2}
+                          color="#ffffff"
+                        />
+                      </ActionIcon>
+                    )}
+
+                    {query?.sortBy === "createdDate" &&
+                      query?.sortDir === "desc" && (
+                        <ActionIcon
+                          variant="filled"
+                          aria-label="Settings"
+                          color="transparent"
+                          size="sm"
+                          onClick={() => {
+                            setQuery({
+                              ...query,
+                              sortBy: "createdDate",
+                              sortDir: "desc",
+                            });
+                          }}
+                        >
+                          <IconSortDescending
+                            style={{ width: "70%", height: "70%" }}
+                            stroke={2}
+                            color="#70B1ED"
+                          />
+                        </ActionIcon>
+                      )}
+                    {query?.sortBy === "createdDate" &&
+                      query?.sortDir === "asc" && (
+                        <ActionIcon
+                          variant="filled"
+                          aria-label="Settings"
+                          size="sm"
+                          color="transparent"
+                          onClick={() => {
+                            setQuery({
+                              ...query,
+                              sortBy: null,
+                              sortDir: null,
+                            });
+                          }}
+                        >
+                          <IconSortAscending
+                            style={{
+                              width: "70%",
+                              height: "70%",
+                              fontWeight: "bold",
+                            }}
+                            stroke={2}
+                            color="#70B1ED"
+                          />
+                        </ActionIcon>
+                      )}
+                  </Group>
+                </Group>
+              </Flex>
+            </Group>
+          );
+        },
         mantineTableBodyCellProps: ({ row }) => {
           return {
             className:
@@ -194,8 +444,14 @@ const SellerboardTable = ({
               </Text>
             );
           }
-          const { imageLink, sku, productLink, designLink, testDate } =
-            row.original;
+          const {
+            imageLink,
+            sku,
+            productLink,
+            designLink,
+            testDate,
+            createdDate,
+          } = row.original;
           return (
             <Flex direction="column">
               <Grid
@@ -260,6 +516,29 @@ const SellerboardTable = ({
                         </Text>
                       </Flex>
                     </Grid.Col>
+                    {createdDate && (
+                      <Grid.Col
+                        span={12}
+                        style={{
+                          padding: 0,
+                          marginTop: "5px",
+                        }}
+                      >
+                        <Text
+                          style={{
+                            textAlign: "left",
+                            fontSize: 11,
+                            color: "gray",
+                            marginLeft: "3px",
+                          }}
+                        >
+                          List:{" "}
+                          {moment(createdDate)
+                            .subtract(createdDate)
+                            .fromNow(true)}
+                        </Text>
+                      </Grid.Col>
+                    )}
                     {testDate && (
                       <Grid.Col
                         span={12}
@@ -276,7 +555,8 @@ const SellerboardTable = ({
                             marginLeft: "3px",
                           }}
                         >
-                          Test Date: {testDate}
+                          Ads:{" "}
+                          {moment(testDate).subtract(testDate).fromNow(true)}
                         </Text>
                       </Grid.Col>
                     )}
@@ -289,8 +569,8 @@ const SellerboardTable = ({
       },
       {
         accessorKey: "createdDate",
-        size: 100,
-        maxSize: 100,
+        size: 150,
+        maxSize: 150,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -315,9 +595,9 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                Summary
+                Lifetime Order
               </Text>
-              {/* {!query?.primarySortBy && (
+              {(!query?.sortBy || query?.sortBy !== "totalOrdersLifetime") && (
                 <ActionIcon
                   aria-label="Settings"
                   variant="default"
@@ -333,20 +613,21 @@ const SellerboardTable = ({
                     });
                     setQuery({
                       ...query,
-                      primarySortBy: "totalOrders",
-                      primarySortDir: "desc",
+                      sortBy: "totalOrdersLifetime",
+                      sortDir: "desc",
                     });
                   }}
                 >
                   <IconArrowsSort
                     style={{ width: "60%", height: "60%", fontWeight: "bold" }}
                     stroke={2}
+                    color="#ffffff"
                   />
                 </ActionIcon>
               )}
 
-              {query?.primarySortBy === "totalOrders" &&
-                query?.primarySortDir === "desc" && (
+              {query?.sortBy === "totalOrdersLifetime" &&
+                query?.sortDir === "desc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
@@ -355,8 +636,8 @@ const SellerboardTable = ({
                     onClick={() => {
                       setQuery({
                         ...query,
-                        primarySortBy: "totalOrders",
-                        primarySortDir: "asc",
+                        sortBy: "totalOrdersLifetime",
+                        sortDir: "asc",
                       });
                     }}
                   >
@@ -367,8 +648,8 @@ const SellerboardTable = ({
                     />
                   </ActionIcon>
                 )}
-              {query?.primarySortBy === "totalOrders" &&
-                query?.primarySortDir === "asc" && (
+              {query?.sortBy === "totalOrdersLifetime" &&
+                query?.sortDir === "asc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
@@ -377,8 +658,8 @@ const SellerboardTable = ({
                     onClick={() => {
                       setQuery({
                         ...query,
-                        primarySortBy: null,
-                        primarySortDir: null,
+                        sortBy: null,
+                        sortDir: null,
                       });
                     }}
                   >
@@ -392,7 +673,7 @@ const SellerboardTable = ({
                       color="#70B1ED"
                     />
                   </ActionIcon>
-                )} */}
+                )}
             </Group>
           );
         },
@@ -412,7 +693,7 @@ const SellerboardTable = ({
             >
               <Text
                 style={{
-                  fontSize: "12px",
+                  fontSize: "14px",
                   fontWeight: "bold",
                 }}
               >
@@ -525,12 +806,175 @@ const SellerboardTable = ({
         },
       },
       {
-        accessorKey: "totalInRanges",
-        header: "Total Orders/Profit",
-        size: 70,
-        maxSize: 70,
+        accessorKey: "status",
+        header: "Status",
+        size: 130,
+        maxSize: 130,
         enableEditing: false,
         enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          const uid = row.original.uid;
+          const payload = find(data, { uid });
+          const optimized = payload?.optimized;
+          return (
+            <Select
+              size="xs"
+              allowDeselect={false}
+              data={values(POD_DASHBOARD_STATUS)}
+              value={CONVERT_NUMBER_TO_POD_DASHBOARD_STATUS[optimized]}
+              onChange={(value) => {
+                const newFollow = CONVERT_STATUS_TO_POD_DASHBOARD_NUMBER[value];
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    if (newFollow === 1) {
+                      setOverridePODMetrics([...overridePODMetrics, uid]);
+                    } else {
+                      setOverridePODMetrics(
+                        overridePODMetrics.filter((x) => x !== uid)
+                      );
+                    }
+                    return {
+                      ...item,
+                      optimized: newFollow,
+                      ...(newFollow === 1
+                        ? {
+                            overrideColor: true,
+                          }
+                        : {
+                            overrideColor: false,
+                          }),
+                    };
+                  }
+                  return item;
+                });
+                const orderedData = moveOverrideColorToStart(newData, uid);
+                setData(orderedData);
+                setTableData(orderedData);
+                setCustomColumns(generateCustomColumn(orderedData));
+                handleUpdatePODDashboard(uid, { optimized: newFollow });
+              }}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "totalInRanges",
+        header: "Total Orders",
+        size: 120,
+        maxSize: 120,
+        enableEditing: false,
+        enableSorting: false,
+        Header: () => {
+          return (
+            <Group gap={5}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "bold",
+                }}
+              >
+                Total Orders
+              </Text>
+              {(!query?.sortBy || query?.sortBy !== "totalOrdersInRange") && (
+                <ActionIcon
+                  aria-label="Settings"
+                  variant="default"
+                  size="sm"
+                  style={{
+                    background: "none",
+                    border: "none",
+                  }}
+                  onClick={() => {
+                    setPagination({
+                      ...pagination,
+                      currentPage: 1,
+                    });
+                    setQuery({
+                      ...query,
+                      sortBy: "totalOrdersInRange",
+                      sortDir: "desc",
+                    });
+                  }}
+                >
+                  <IconArrowsSort
+                    style={{
+                      width: "60%",
+                      height: "60%",
+                      fontWeight: "bold",
+                    }}
+                    stroke={2}
+                    color="#ffffff"
+                  />
+                </ActionIcon>
+              )}
+
+              {query?.sortBy === "totalOrdersInRange" &&
+                query?.sortDir === "desc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    size="sm"
+                    onClick={() => {
+                      setQuery({
+                        ...query,
+                        sortBy: "totalOrdersInRange",
+                        sortDir: "asc",
+                      });
+                    }}
+                  >
+                    <IconSortDescending
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+              {query?.sortBy === "totalOrdersInRange" &&
+                query?.sortDir === "asc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    size="sm"
+                    color="transparent"
+                    onClick={() => {
+                      setQuery({
+                        ...query,
+                        sortBy: null,
+                        sortDir: null,
+                      });
+                    }}
+                  >
+                    <IconSortAscending
+                      style={{
+                        width: "70%",
+                        height: "70%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+            </Group>
+          );
+        },
         mantineTableBodyCellProps: ({ row }) => {
           return {
             className:
@@ -578,6 +1022,8 @@ const SellerboardTable = ({
     getRowId: (row) => row.id,
     enableRowSelection: false,
     enableFilters: false,
+    enableToolbarInternalActions: false,
+    enableTopToolbar: false,
     enableColumnActions: false,
     mantineTableHeadCellProps: { className: classes["head-cells"] },
     mantineTableProps: {

@@ -17,6 +17,7 @@ import {
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
+  getEditorStateAsString,
   getStringAsEditorState,
 } from "../../../utils";
 import {
@@ -30,6 +31,9 @@ import Editor from "../../../components/Editor";
 import styles from "./ScaleNiche.module.sass";
 import { isEmpty, map } from "lodash";
 import { STATUS } from "../../../constant";
+import { useState } from "react";
+import { rndServices } from "../../../services";
+import { showNotification } from "../../../utils/index";
 
 const ScaleNiche = ({
   close,
@@ -39,7 +43,30 @@ const ScaleNiche = ({
   setLinkDesign,
   handleUpdateLinkDesign,
   opened,
+  setTrigger,
 }) => {
+  const [designerNote, setDesignerNote] = useState(
+    getStringAsEditorState(selectedSKU?.note?.designer || "")
+  );
+  const [loading, setLoading] = useState(false);
+  const handleUpdateNote = async () => {
+    setLoading(true);
+    const updateNoteResponse = await rndServices.updateBriefDesign({
+      uid: selectedSKU.uid,
+      data: {
+        note: {
+          ...selectedSKU.note,
+          designer: getEditorStateAsString(designerNote),
+        },
+      },
+    });
+    if (updateNoteResponse) {
+      close()
+      setTrigger(true);
+      showNotification("Thành công", "Cập nhật Note thành công", "green");
+    }
+    setLoading(false);
+  };
   return (
     <Modal
       opened={opened}
@@ -438,10 +465,14 @@ const ScaleNiche = ({
 
         <Grid.Col span={12}>
           <Editor
-            state={getStringAsEditorState(selectedSKU?.note?.designer)}
+            state={designerNote}
+            onChange={setDesignerNote}
             classEditor={styles.editor}
             label="Designer Note"
-            readOnly={true}
+            readOnly={selectedSKU?.status === STATUS.DESIGNED}
+            button={selectedSKU?.status !== STATUS.DESIGNED}
+            onClick={() => handleUpdateNote()}
+            loading={loading}
           />
         </Grid.Col>
         <Grid.Col span={12}>

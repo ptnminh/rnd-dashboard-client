@@ -292,6 +292,10 @@ export const dashboardServices = {
         params: {
           ...queryParams,
           ...sortingParams,
+          ...(query?.sortBy && {
+            sortBy: query.sortBy,
+            sortDir: query.sortDir,
+          }),
         },
       });
       const { data: result } = response;
@@ -301,6 +305,33 @@ export const dashboardServices = {
       return result;
     } catch (error) {
       console.log("Error at fetchSaleMetrics:", error);
+      return false;
+    }
+  },
+  handleUpdatePODDashboard: async ({ id, data }) => {
+    try {
+      const { data: result } = await apiClient.put(`/sku-reports/${id}`, data);
+      if (result?.success === false) {
+        showNotification(
+          "Thất bại",
+          result?.message || "Cập nhật thất bại",
+          "red"
+        );
+        return false;
+      }
+      return result;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      } else {
+        console.log("Error at fetchQuotes:", error);
+        showNotification("Thất bại", "Cập nhật thất bại", "red");
+      }
       return false;
     }
   },

@@ -12,7 +12,7 @@ import {
 import { modals } from "@mantine/modals";
 import Checkbox from "../../../components/Checkbox";
 
-import { filter, find, includes, isEmpty, keys, map } from "lodash";
+import { filter, find, includes, isEmpty, keys, map, set } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
@@ -53,6 +53,7 @@ const KeywordTable = ({
   sorting,
   setSorting,
   metadata,
+  openNoteForEPM,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
   let [permissions] = useLocalStorage({
@@ -199,7 +200,7 @@ const KeywordTable = ({
       {
         accessorKey: "value",
         header: "VALUE",
-        size: 150,
+        size: 130,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
@@ -209,6 +210,7 @@ const KeywordTable = ({
           const foundBrief = find(payloads, { uid });
           return (
             <Select
+              size="xs"
               placeholder="Value"
               allowDeselect={false}
               disabled={foundBrief.status === STATUS.DESIGNED}
@@ -346,6 +348,39 @@ const KeywordTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <Select
+              data={["BD1", "BD2", "BD3", "AMZ"]}
+              allowDeselect={false}
+              size="xs"
+              value={foundBrief.rndTeam}
+              onChange={(value) => {
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        rndTeam: value,
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
+                });
+                rndServices.updateBriefDesign({
+                  uid,
+                  data: {
+                    rndTeam: value,
+                  },
+                });
+              }}
+            />
+          );
+        },
       },
       {
         id: "rndName",
@@ -353,8 +388,45 @@ const KeywordTable = ({
         header: "RND",
         enableEditing: false,
         enableSorting: false,
-        size: 130,
+        size: 150,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <Select
+              size="xs"
+              data={map(filter(users, { position: "rnd" }), "name") || []}
+              allowDeselect={false}
+              value={foundBrief?.rnd?.name}
+              onChange={(value) => {
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        rnd: {
+                          ...x.rnd,
+                          name: value,
+                        },
+                        rndId: find(users, { name: value })?.uid,
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
+                });
+                rndServices.updateBriefDesign({
+                  uid,
+                  data: {
+                    rndId: find(users, { name: value })?.uid,
+                  },
+                });
+              }}
+            />
+          );
+        },
       },
       {
         id: "designer",
@@ -362,8 +434,45 @@ const KeywordTable = ({
         header: "DESIGNER",
         enableEditing: false,
         enableSorting: false,
-        size: 130,
+        size: 150,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          return (
+            <Select
+              size="xs"
+              data={map(filter(users, { position: "designer" }), "name") || []}
+              allowDeselect={false}
+              value={foundBrief?.designer?.name}
+              onChange={(value) => {
+                setPayloads((prev) => {
+                  const newPayloads = map(prev, (x) => {
+                    if (x.uid === uid) {
+                      return {
+                        ...x,
+                        designer: {
+                          ...x.designer,
+                          name: value,
+                        },
+                        designerId: find(users, { name: value })?.uid,
+                      };
+                    }
+                    return x;
+                  });
+                  return newPayloads;
+                });
+                rndServices.updateBriefDesign({
+                  uid,
+                  data: {
+                    designerId: find(users, { name: value })?.uid,
+                  },
+                });
+              }}
+            />
+          );
+        },
       },
       {
         accessorKey: "linkDesign",
@@ -456,6 +565,30 @@ const KeywordTable = ({
         },
       },
       {
+        accessorKey: "noteForEPM",
+        header: "NOTE FOR EPM",
+        mantineTableHeadCellProps: { className: classes["linkDesign"] },
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        size: 100,
+        enableSorting: false,
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          const note = foundBrief?.note?.noteForEPM;
+          return (
+            <Button
+              onClick={() => {
+                setSelectedSKU(foundBrief);
+                openNoteForEPM();
+              }}
+              color={note ? "#f1f3f5" : "blue"}
+            >
+              Note
+            </Button>
+          );
+        },
+      },
+      {
         accessorKey: "status",
         header: "DONE",
         size: 100,
@@ -469,13 +602,20 @@ const KeywordTable = ({
           return (
             <Button
               variant="filled"
-              color={row.original.status === 2 ? "red" : "green"}
+              color={foundBrief?.status === 2 ? "red" : "green"}
               leftSection={
-                row.original.status === 2 ? <IconBan /> : <IconCheck />
+                foundBrief?.status === 2 ? <IconBan /> : <IconCheck />
               }
-              disabled={row?.original?.status === 1 && !foundBrief?.linkDesign}
+              disabled={foundBrief.status === 1 && !foundBrief?.linkDesign}
+              onClick={() => {
+                openUpdateStatusConfirmModal({
+                  uid,
+                  status: foundBrief?.status,
+                  sku: foundBrief?.sku,
+                });
+              }}
             >
-              {row.original.status === 2 ? "Undone" : "Done"}
+              {foundBrief?.status === 2 ? "Undone" : "Done"}
             </Button>
           );
         },
@@ -539,6 +679,21 @@ const KeywordTable = ({
       labels: { confirm: "Delete", cancel: "Cancel" },
       confirmProps: { color: "red" },
       onConfirm: () => handleDeleteBrief(row.original.uid),
+    });
+
+  // CONFIRM UPDATE STATUS
+  const openUpdateStatusConfirmModal = ({ uid, status, sku }) =>
+    modals.openConfirmModal({
+      title: "Confirm Modal",
+      centered: true,
+      children: <Text>Are you sure you want to update {sku}?</Text>,
+      labels: { confirm: "Update", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      onConfirm: () =>
+        handleUpdateStatus({
+          uid,
+          status,
+        }),
     });
 
   const handleDeleteBrief = async (uid) => {
@@ -902,20 +1057,6 @@ const KeywordTable = ({
         }
       },
       onClick: () => {
-        if (
-          cell &&
-          cell.column.id === "status" &&
-          (includes(permissions, "update:design") ||
-            includes(permissions, "update:brief"))
-        ) {
-          handleUpdateStatus({
-            uid: row.original.uid,
-            status: row.original.status,
-          }).then((response) => {
-            console.log(response);
-          });
-          return;
-        }
         if (
           cell &&
           cell.column.id === "remove" &&

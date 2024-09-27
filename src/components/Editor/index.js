@@ -7,6 +7,8 @@ import Tooltip from "../Tooltip";
 import { uploadServices } from "../../services/uploads";
 import { generateRandomString } from "../../utils";
 import { AtomicBlockUtils, EditorState } from "draft-js";
+import { ActionIcon, Tooltip as MantineTooltip } from "@mantine/core";
+import { IconDeviceFloppy } from "@tabler/icons-react";
 
 // Function to handle image uploads
 const uploadImageCallBack = async (file) => {
@@ -29,6 +31,8 @@ const Editor = ({
   readOnly = false,
   classEditorWrapper,
   isHideToolbar = false,
+  onClick,
+  loading,
 }) => {
   const handlePastedFiles = useCallback(
     (files) => {
@@ -132,7 +136,24 @@ const Editor = ({
         handlePastedFiles={handlePastedFiles}
       />
       {button && (
-        <button className={cn("button-small", styles.button)}>{button}</button>
+        <MantineTooltip label="Save">
+          <ActionIcon
+            variant="filled"
+            aria-label="Settings"
+            style={{
+              position: "absolute",
+              top: "45px",
+              right: "5px",
+            }}
+            onClick={onClick}
+            loading={loading || false}
+          >
+            <IconDeviceFloppy
+              style={{ width: "70%", height: "70%" }}
+              stroke={1.5}
+            />
+          </ActionIcon>
+        </MantineTooltip>
       )}
     </div>
   );

@@ -33,6 +33,7 @@ import Editor from "../../components/Editor";
 import {
   CONVERT_BRIEF_TYPE_TO_OBJECT_NAME,
   CONVERT_NUMBER_TO_STATUS,
+  getEditorStateAsString,
   getStringAsEditorState,
 } from "../../utils";
 import { rndServices } from "../../services";
@@ -44,6 +45,7 @@ import ScaleDesign from "./ScaleDesign";
 import ScaleMixMatch from "./ScaleMixMatch";
 import ScaleClipart from "./ScaleCliparts";
 import ScaleNiche from "./Niche";
+import ModalEditNoteEPM from "./ModalEditNoteEPM";
 
 const DesignerScreens = () => {
   const navigate = useNavigate();
@@ -67,7 +69,9 @@ const DesignerScreens = () => {
   const [sorting, setSorting] = useState([]);
 
   const [opened, { open, close }] = useDisclosure(false);
-  const [selectedSKU, setSelectedSKU] = useState();
+  const [openedNoteForEPM, { open: openNoteForEPM, close: closeNoteForEPM }] =
+    useDisclosure(false);
+  const [selectedSKU, setSelectedSKU] = useState({});
   const [updateBrief, setUpdateBrief] = useState({});
   const [editingCell, setEditingCell] = useState(false);
   const [trigger, setTrigger] = useState(false);
@@ -112,12 +116,33 @@ const DesignerScreens = () => {
     }
     setLoadingFetchBrief(false);
     setTrigger(false);
+    setDesignerNote(getStringAsEditorState(selectedSKU?.note?.designer || ""));
   };
   const fetchUsers = async () => {
     const { data } = await rndServices.getUsers({
       limit: -1,
     });
     setUsers(data);
+  };
+  const [designerNote, setDesignerNote] = useState("");
+  const [loadingUpdateNote, setLoadingUpdateNote] = useState(false);
+  const handleUpdateNote = async () => {
+    setLoadingUpdateNote(true);
+    const updateNoteResponse = await rndServices.updateBriefDesign({
+      uid: selectedSKU.uid,
+      data: {
+        note: {
+          ...selectedSKU.note,
+          designer: getEditorStateAsString(designerNote),
+        },
+      },
+    });
+    if (updateNoteResponse) {
+      close()
+      setTrigger(true);
+      showNotification("Thành công", "Cập nhật Note thành công", "green");
+    }
+    setLoadingUpdateNote(false);
   };
   const handlePageChange = (page) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
@@ -126,6 +151,14 @@ const DesignerScreens = () => {
   useEffect(() => {
     fetchBriefs(pagination.currentPage);
   }, [search, pagination.currentPage, query, trigger, sorting]);
+
+  useEffect(() => {
+    if (selectedSKU) {
+      setDesignerNote(
+        getStringAsEditorState(selectedSKU?.note?.designer || "")
+      );
+    }
+  }, [selectedSKU]);
 
   useEffect(() => {
     // Update the URL when search or page changes
@@ -232,6 +265,7 @@ const DesignerScreens = () => {
           setSorting={setSorting}
           sorting={sorting}
           metadata={metadata}
+          openNoteForEPM={openNoteForEPM}
         />
       </Card>
       <Pagination
@@ -378,7 +412,7 @@ const DesignerScreens = () => {
                     fontSize: "14px",
                   }}
                 >
-                  • RnD: {selectedSKU?.rnd.name}
+                  • RnD: {selectedSKU?.rnd?.name}
                 </div>
                 <div
                   style={{
@@ -389,7 +423,7 @@ const DesignerScreens = () => {
                     fontSize: "14px",
                   }}
                 >
-                  • Designer:{selectedSKU?.designer.name}
+                  • Designer:{selectedSKU?.designer?.name}
                 </div>
               </Grid.Col>
               <Grid.Col span={5}>
@@ -664,10 +698,14 @@ const DesignerScreens = () => {
               </Grid.Col>
               <Grid.Col span={12}>
                 <Editor
-                  state={getStringAsEditorState(selectedSKU?.note?.designer)}
+                  state={designerNote}
+                  onChange={setDesignerNote}
                   classEditor={styles.editor}
                   label="Designer Note"
-                  readOnly={true}
+                  readOnly={selectedSKU?.status === STATUS.DESIGNED}
+                  button={selectedSKU?.status !== STATUS.DESIGNED}
+                  onClick={() => handleUpdateNote()}
+                  loading={loadingUpdateNote}
                 />
               </Grid.Col>
               <Grid.Col span={12}>
@@ -698,7 +736,7 @@ const DesignerScreens = () => {
             </Grid>
           </Modal>
         )}
-      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[1] && (
+      {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[1] && (
         <ScaleClipart
           opened={opened}
           close={close}
@@ -707,9 +745,12 @@ const DesignerScreens = () => {
           loadingUpdateDesignLink={loadingUpdateDesignLink}
           setLinkDesign={setLinkDesign}
           handleUpdateLinkDesign={handleUpdateLinkDesign}
+          setTrigger={setTrigger}
+          designerNote={designerNote}
+          setDesignerNote={setDesignerNote}
         />
       )}
-      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[2] && (
+      {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[2] && (
         <ScaleNiche
           opened={opened}
           close={close}
@@ -718,9 +759,12 @@ const DesignerScreens = () => {
           loadingUpdateDesignLink={loadingUpdateDesignLink}
           setLinkDesign={setLinkDesign}
           handleUpdateLinkDesign={handleUpdateLinkDesign}
+          setTrigger={setTrigger}
+          designerNote={designerNote}
+          setDesignerNote={setDesignerNote}
         />
       )}
-      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[3] && (
+      {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[3] && (
         <NewDesign
           opened={opened}
           close={close}
@@ -729,9 +773,12 @@ const DesignerScreens = () => {
           loadingUpdateDesignLink={loadingUpdateDesignLink}
           setLinkDesign={setLinkDesign}
           handleUpdateLinkDesign={handleUpdateLinkDesign}
+          setTrigger={setTrigger}
+          designerNote={designerNote}
+          setDesignerNote={setDesignerNote}
         />
       )}
-      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[4] && (
+      {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[4] && (
         <ScaleDesign
           opened={opened}
           close={close}
@@ -740,9 +787,12 @@ const DesignerScreens = () => {
           loadingUpdateDesignLink={loadingUpdateDesignLink}
           setLinkDesign={setLinkDesign}
           handleUpdateLinkDesign={handleUpdateLinkDesign}
+          setTrigger={setTrigger}
+          designerNote={designerNote}
+          setDesignerNote={setDesignerNote}
         />
       )}
-      {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[5] && (
+      {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[5] && (
         <ScaleMixMatch
           opened={opened}
           close={close}
@@ -751,6 +801,17 @@ const DesignerScreens = () => {
           loadingUpdateDesignLink={loadingUpdateDesignLink}
           setLinkDesign={setLinkDesign}
           handleUpdateLinkDesign={handleUpdateLinkDesign}
+          setTrigger={setTrigger}
+          designerNote={designerNote}
+          setDesignerNote={setDesignerNote}
+        />
+      )}
+      {selectedSKU && openedNoteForEPM && (
+        <ModalEditNoteEPM
+          opened={openedNoteForEPM}
+          close={closeNoteForEPM}
+          selectedSKU={selectedSKU}
+          setTrigger={setTrigger}
         />
       )}
     </>

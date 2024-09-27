@@ -112,7 +112,6 @@ const Niche = ({
             borderRadius: "12px",
           }}
         >
-
           <div
             style={{
               display: "flex",
@@ -199,7 +198,7 @@ const Niche = ({
               alignItems: "center",
             }}
           >
-            Ref
+            Ref - Artwork
           </div>
           <Image
             radius="md"
@@ -229,49 +228,6 @@ const Niche = ({
               </ThemeIcon>
             }
           >
-            {selectedSKU?.designLinkRef && (
-              <List.Item>
-                Link Design (NAS):{" "}
-                <a
-                  style={{
-                    display: "inline-block",
-                    width: "200px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    textDecoration: "none",
-                    color: "#228be6",
-                    verticalAlign: "middle",
-                  }}
-                  href={selectedSKU?.designLinkRef}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {selectedSKU?.designLinkRef}
-                </a>
-              </List.Item>
-            )}
-            {selectedSKU?.productInfo?.tibSearchCampaignLink && (
-              <List.Item>
-                Link Campaign (TIB):{" "}
-                <a
-                  style={{
-                    display: "inline-block",
-                    width: "200px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    textDecoration: "none",
-                    color: "#228be6",
-                    verticalAlign: "middle",
-                  }}
-                  href={selectedSKU?.productInfo?.tibSearchCampaignLink}
-                  target="_blank"
-                >
-                  {selectedSKU?.productInfo?.tibSearchCampaignLink}
-                </a>
-              </List.Item>
-            )}
             {selectedSKU?.linkProductRef && (
               <List.Item>
                 Link Store:{" "}
@@ -336,7 +292,7 @@ const Niche = ({
               marginTop: "10px",
             }}
           >
-            {selectedSKU?.sku} mới
+            {selectedSKU?.sku}
           </div>
           <List
             spacing="lg"
@@ -348,6 +304,53 @@ const Niche = ({
               </ThemeIcon>
             }
           >
+            {selectedSKU?.productLine?.name && (
+              <List.Item>
+                Product Base: {selectedSKU?.productLine?.name}
+              </List.Item>
+            )}
+            {selectedSKU?.productInfo?.tibSearchCampaignLink && (
+              <List.Item>
+                Campaign (TIB): {""}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "200px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={selectedSKU?.productInfo?.tibSearchCampaignLink}
+                  target="_blank"
+                >
+                  {selectedSKU?.productInfo?.tibSearchCampaignLink}
+                </a>
+              </List.Item>
+            )}
+            {selectedSKU?.linkDesign && (
+              <List.Item>
+                Design (NAS):{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "200px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={selectedSKU?.linkDesign}
+                  target="_blank"
+                >
+                  {selectedSKU?.linkDesign}
+                </a>
+              </List.Item>
+            )}
             {!isEmpty(selectedSKU?.cliparts) && (
               <List.Item>
                 Clipart:{" "}
@@ -384,34 +387,19 @@ const Niche = ({
                 </List>
               </List.Item>
             )}
-            {selectedSKU?.linkDesign && (
-              <List.Item>
-                Link Design (NAS):{" "}
-                <a
-                  style={{
-                    display: "inline-block",
-                    width: "200px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    textDecoration: "none",
-                    color: "#228be6",
-                    verticalAlign: "middle",
-                  }}
-                  href={selectedSKU?.linkDesign}
-                  target="_blank"
-                >
-                  {selectedSKU?.linkDesign}
-                </a>
-              </List.Item>
-            )}
-            <List.Item>Link Campaign (TIB) - Auto: (Coming soon)</List.Item>
           </List>
         </Grid.Col>
-        <Grid.Col span={12}>
+        <Grid.Col span={6}>
           <Editor
             state={getStringAsEditorState(selectedSKU?.note?.epm)}
-            label="EPM Note"
+            label="RnD Note"
+            readOnly={true}
+          />
+        </Grid.Col>
+        <Grid.Col span={6}>
+          <Editor
+            state={getStringAsEditorState(selectedSKU?.note?.noteForEPM)}
+            label="Designer Note"
             readOnly={true}
           />
         </Grid.Col>

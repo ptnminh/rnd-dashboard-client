@@ -24,7 +24,7 @@ import Editor from "../../../components/Editor";
 import { isEmpty, map } from "lodash";
 import { STATUS } from "../../../constant";
 
-const Clipart = ({
+const MixMatch = ({
   close,
   selectedSKU,
   linkProduct,
@@ -198,11 +198,14 @@ const Clipart = ({
               alignItems: "center",
             }}
           >
-            Ref - Artwork
+            Product Base
           </div>
           <Image
             radius="md"
-            src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
+            src={
+              selectedSKU?.productLine?.image ||
+              "/images/content/not_found_2.jpg"
+            }
             height={200}
             fit="contain"
           />
@@ -216,7 +219,7 @@ const Clipart = ({
               marginTop: "10px",
             }}
           >
-            {selectedSKU?.skuRef}
+            {selectedSKU?.productLine?.name}
           </div>
           <List
             spacing="lg"
@@ -227,29 +230,7 @@ const Clipart = ({
                 <IconCircleCheck style={{ width: rem(16), height: rem(16) }} />
               </ThemeIcon>
             }
-          >
-            {selectedSKU?.linkProductRef && (
-              <List.Item>
-                Link Store:{" "}
-                <a
-                  style={{
-                    display: "inline-block",
-                    width: "230px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    textDecoration: "none",
-                    color: "#228be6",
-                    verticalAlign: "middle",
-                  }}
-                  href={selectedSKU?.linkProductRef}
-                  target="_blank"
-                >
-                  {selectedSKU?.linkProductRef}
-                </a>
-              </List.Item>
-            )}
-          </List>
+          ></List>
         </Grid.Col>
         <Grid.Col
           span={2}
@@ -271,7 +252,7 @@ const Clipart = ({
               alignItems: "center",
             }}
           >
-            Scale To Clipart
+            Design + Clipart
           </div>
           <Image
             radius="md"
@@ -433,4 +414,4 @@ const Clipart = ({
   );
 };
 
-export default Clipart;
+export default MixMatch;

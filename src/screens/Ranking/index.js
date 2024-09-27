@@ -20,24 +20,46 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { rankingServices } from "../../services";
 import Table from "./Table";
-import { isEmpty, omit, toNumber } from "lodash";
+import { filter, includes, isEmpty, map, omit, toNumber, uniq } from "lodash";
 import moment from "moment-timezone";
 import { useDisclosure, useWindowScroll } from "@mantine/hooks";
 import { IconArrowUp } from "@tabler/icons-react";
 
-const TARGET_COMPETITORS = {
-  PAWFECTHOUSE: "Pawfecthouse",
-  MACORNER: "Macorner",
-  WANDERPRINTS: "Wanderprints",
-};
 const TARGET_DATES = {
   TODAY: "Today",
-  THREE_DAYS: "3 Day",
-  SEVEN_DAYS: "7 Day",
+  THREE_DAYS: "3 Days",
+  SEVEN_DAYS: "7 Days",
 };
 const TARGET_MODES = {
   ORDERS: "Orders",
-  RANKING: "Ranking",
+  RANKING: "Change Rank",
+  DEFAULT_RANKING: "Rank",
+};
+
+// for sorting client opinion
+const priorityList = ["WP", "MC", "TC", "PSN", "PSN (LT)", "PFH", "PFH (LT)"];
+const sortByPriority = (array, priorityList) => {
+  return array.sort((a, b) => {
+    const indexA = priorityList.indexOf(a?.shortName);
+    const indexB = priorityList.indexOf(b?.shortName);
+
+    // If the item is not in the priority list, place it at the end
+    const adjustedIndexA = indexA === -1 ? priorityList.length : indexA;
+    const adjustedIndexB = indexB === -1 ? priorityList.length : indexB;
+
+    return adjustedIndexA - adjustedIndexB;
+  });
+};
+const moveIdsToStart = (array, ids) => {
+  return array.sort((a, b) => {
+    if (ids.includes(a.id) && !ids.includes(b.id)) {
+      return -1;
+    }
+    if (!ids.includes(a.id) && ids.includes(b.id)) {
+      return 1;
+    }
+    return 0;
+  });
 };
 
 const RankingPODShopifyProducts = () => {
@@ -52,31 +74,27 @@ const RankingPODShopifyProducts = () => {
   ] = useDisclosure(false);
   const [search, setSearch] = useState(initialSearch);
   const [visible, setVisible] = useState(true);
+  const [overrideProductRankings, setOverrideProductRankings] = useState([]);
   // const [isConfirmedQuery, setIsConfirmedQuery] = useState(true);
   const [isLoadmore, setIsLoadmore] = useState(false);
   const [productRankings, setProductRankings] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
+  const [competitors, setCompetitors] = useState([]);
   const [pagination, setPagination] = useState({
     currentPage: initialPage,
     totalPages: 1,
   });
-  const threeDayAgo = moment().subtract(3, "days").format("YYYY-MM-DD");
-  const sevenDayAgo = moment().subtract(7, "days").format("YYYY-MM-DD");
   const endDate = moment().format("YYYY-MM-DD");
   const [query, setQuery] = useState({
-    competitor: TARGET_COMPETITORS.WANDERPRINTS,
-    mode: [TARGET_MODES.ORDERS],
+    competitor: "Wanderprints",
+    mode: [TARGET_MODES.RANKING],
     targetDate: TARGET_DATES.THREE_DAYS,
-    dateChange: 3,
+    dateRange: 3,
+    sortBy: "totalRankChanges",
+    sortDir: "desc",
   });
-  const [sorting, setSorting] = useState([
-    {
-      id: moment(endDate).format("MMM DD"),
-      desc: true,
-    },
-  ]);
+  const [sorting, setSorting] = useState([]);
   const isMounted = useRef(false);
-
   const [trigger, setTrigger] = useState(false);
   const [loadingFetchRankings, setLoadingFetchRankings] = useState(true);
   const fetchRankings = async (page) => {
@@ -86,7 +104,12 @@ const RankingPODShopifyProducts = () => {
       query: omit(
         {
           ...query,
-          view: query.mode[0] === TARGET_MODES.ORDERS ? "order" : "rank",
+          view:
+            query.mode[0] === TARGET_MODES.ORDERS
+              ? "order"
+              : query.mode[0] === TARGET_MODES.RANKING
+              ? "rankChange"
+              : "rank",
         },
         [
           "sortValue",
@@ -107,9 +130,29 @@ const RankingPODShopifyProducts = () => {
     const { data, metadata } = response;
     if (!isEmpty(data)) {
       if (isLoadmore) {
-        setProductRankings((prev) => [...prev, ...data]);
+        const oldProductRankings = map(productRankings, (x) => {
+          if (includes(overrideProductRankings, x.id)) {
+            return {
+              ...x,
+              follow: 1,
+            };
+          }
+          return {
+            ...x,
+          };
+        });
+        const newProductRankings = [...oldProductRankings, ...data];
+        const sortedProductRankings = moveIdsToStart(
+          newProductRankings,
+          uniq(overrideProductRankings)
+        );
+        setProductRankings(sortedProductRankings);
       } else {
-        setProductRankings(data);
+        const sortedProductRankings = moveIdsToStart(
+          data,
+          uniq(overrideProductRankings)
+        );
+        setProductRankings(sortedProductRankings);
       }
       setPagination({
         currentPage: toNumber(metadata.currentPage) || 1,
@@ -123,9 +166,17 @@ const RankingPODShopifyProducts = () => {
     setLoadingFetchRankings(false);
     setTrigger(false);
   };
+  const fetchCompetitors = async () => {
+    const competitors = await rankingServices.fetchCompetitors();
+    setCompetitors(filter(competitors, { alive: true }));
+  };
   useEffect(() => {
     fetchRankings(pagination.currentPage);
   }, [search, query, trigger, sorting, pagination.currentPage]);
+
+  useEffect(() => {
+    fetchCompetitors();
+  }, []);
 
   // listen sorting change set isConfirmedQuery to true for refetch data
   useEffect(() => {
@@ -198,25 +249,29 @@ const RankingPODShopifyProducts = () => {
                   <Radio.Group
                     value={query?.targetDate}
                     onChange={(value) => {
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
                       switch (value) {
                         case TARGET_DATES.TODAY:
                           setQuery({
                             ...query,
-                            dateChange: 1,
+                            dateRange: 1,
                             targetDate: value,
                           });
                           break;
                         case TARGET_DATES.THREE_DAYS:
                           setQuery({
                             ...query,
-                            dateChange: 3,
+                            dateRange: 3,
                             targetDate: value,
                           });
                           break;
                         case TARGET_DATES.SEVEN_DAYS:
                           setQuery({
                             ...query,
-                            dateChange: 7,
+                            dateRange: 7,
                             targetDate: value,
                           });
                           break;
@@ -264,58 +319,7 @@ const RankingPODShopifyProducts = () => {
                     </Group>
                   </Radio.Group>
                 </Grid.Col>
-                <Grid.Col
-                  span={5}
-                  style={{
-                    gap: "10px",
-                    padding: "10px",
-                    borderRadius: "10px",
-                    backgroundColor: "#e2eaff",
-                    flexWrap: "wrap",
-                    width: "100%",
-                    height: "50px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    border: "1px solid #4f80ff",
-                    borderColor: "#4f80ff",
-                  }}
-                >
-                  <Radio.Group
-                    value={query?.competitor}
-                    onChange={(value) => {
-                      setPagination({
-                        ...pagination,
-                        currentPage: 1,
-                      });
-                      setQuery({ ...query, competitor: value });
-                    }}
-                  >
-                    <Group
-                      styles={{
-                        root: {
-                          height: "100%",
-                          display: "flex",
-                          justifyContent: "space-between",
-                        },
-                      }}
-                    >
-                      <Radio
-                        value={TARGET_COMPETITORS.WANDERPRINTS}
-                        label={TARGET_COMPETITORS.WANDERPRINTS}
-                      />
-                      <Radio
-                        value={TARGET_COMPETITORS.MACORNER}
-                        label={TARGET_COMPETITORS.MACORNER}
-                      />
-                      <Radio
-                        value={TARGET_COMPETITORS.PAWFECTHOUSE}
-                        label={TARGET_COMPETITORS.PAWFECTHOUSE}
-                      />
-                    </Group>
-                  </Radio.Group>
-                </Grid.Col>
-                <Grid.Col span={3.5}>
+                <Grid.Col span={8.5}>
                   <Checkbox.Group
                     value={query.mode}
                     label="SHOW DATA"
@@ -330,7 +334,12 @@ const RankingPODShopifyProducts = () => {
                         ...pagination,
                         currentPage: 1,
                       });
-                      setQuery({ ...query, mode: realValue });
+                      setQuery({
+                        ...query,
+                        mode: realValue,
+                        sortBy: "totalRankChanges",
+                        sortDir: "desc",
+                      });
                     }}
                     styles={{
                       root: {
@@ -361,8 +370,8 @@ const RankingPODShopifyProducts = () => {
                             borderRadius: "50%",
                           },
                         }}
-                        value={TARGET_MODES.ORDERS}
-                        label={TARGET_MODES.ORDERS}
+                        value={TARGET_MODES.RANKING}
+                        label={TARGET_MODES.RANKING}
                       />
                       <Checkbox
                         styles={{
@@ -370,14 +379,170 @@ const RankingPODShopifyProducts = () => {
                             borderRadius: "50%",
                           },
                         }}
-                        value={TARGET_MODES.RANKING}
-                        label={TARGET_MODES.RANKING}
+                        value={TARGET_MODES.DEFAULT_RANKING}
+                        label={TARGET_MODES.DEFAULT_RANKING}
+                      />
+                      <Checkbox
+                        styles={{
+                          input: {
+                            borderRadius: "50%",
+                          },
+                        }}
+                        value={TARGET_MODES.ORDERS}
+                        label={TARGET_MODES.ORDERS}
                       />
                     </Group>
                   </Checkbox.Group>
                 </Grid.Col>
               </Flex>
             </div>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "start",
+                alignItems: "center",
+                padding: "10px 0px",
+                gap: "5px",
+                width: "100%",
+              }}
+            >
+              <Flex
+                style={{
+                  padding: "10px",
+                  borderRadius: "10px",
+                  backgroundColor: "#EFF0F1",
+                  width: "100%",
+                }}
+              >
+                <Grid.Col
+                  span={12}
+                  style={{
+                    borderRadius: "10px",
+                    flexWrap: "wrap",
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Grid
+                    style={{
+                      width: "100%",
+                    }}
+                  >
+                    <Grid.Col span={8}>
+                      <Radio.Group
+                        value={query?.competitor}
+                        label="POD: "
+                        styles={{
+                          root: {
+                            display: "flex",
+                            justifyContent: "center",
+                          },
+                          label: {
+                            marginRight: "10px",
+                            fontSize: "14px",
+                            fontWeight: "bold",
+                          },
+                        }}
+                        onChange={(value) => {
+                          setQuery({
+                            ...query,
+                            competitor: value,
+                          });
+                        }}
+                      >
+                        <Group
+                          styles={{
+                            root: {
+                              height: "100%",
+                              display: "flex",
+                              justifyContent: "center",
+                            },
+                          }}
+                        >
+                          {map(
+                            filter(sortByPriority(competitors, priorityList), {
+                              category: "POD",
+                            }),
+                            (x) => {
+                              return (
+                                <Radio
+                                  styles={{
+                                    input: {
+                                      borderRadius: "50%",
+                                    },
+                                  }}
+                                  value={x?.name}
+                                  label={x?.shortName || x?.name}
+                                />
+                              );
+                            }
+                          )}
+                        </Group>
+                      </Radio.Group>
+                    </Grid.Col>
+                    <Grid.Col
+                      span={4}
+                      style={{
+                        borderLeft: "1px solid gray",
+                      }}
+                    >
+                      <Radio.Group
+                        value={query?.competitor}
+                        styles={{
+                          root: {
+                            display: "flex",
+                            justifyContent: "center",
+                            gap: "10px",
+                          },
+                          label: {
+                            marginRight: "10px",
+                            fontSize: "14px",
+                            fontWeight: "bold",
+                          },
+                        }}
+                        label="Politics: "
+                        onChange={(value) => {
+                          setQuery({
+                            ...query,
+                            competitor: value,
+                          });
+                        }}
+                      >
+                        <Group
+                          styles={{
+                            root: {
+                              height: "100%",
+                              display: "flex",
+                              justifyContent: "center",
+                            },
+                          }}
+                        >
+                          {map(
+                            filter(competitors, { category: "Politics" }),
+                            (x) => {
+                              return (
+                                <Radio
+                                  styles={{
+                                    input: {
+                                      borderRadius: "50%",
+                                    },
+                                  }}
+                                  value={x?.name}
+                                  label={x?.shortName || x?.name}
+                                />
+                              );
+                            }
+                          )}
+                        </Group>
+                      </Radio.Group>
+                    </Grid.Col>
+                  </Grid>
+                </Grid.Col>
+              </Flex>
+            </div>
+
             <Grid.Col span={12}>
               {!isEmpty(productRankings) && (
                 <Table
@@ -393,6 +558,8 @@ const RankingPODShopifyProducts = () => {
                   setSelectedProduct={setSelectedProduct}
                   query={query}
                   setQuery={setQuery}
+                  setOverrideProductRankings={setOverrideProductRankings}
+                  overrideProductRankings={overrideProductRankings}
                 />
               )}
               {loadingFetchRankings && (

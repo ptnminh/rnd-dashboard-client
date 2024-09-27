@@ -9,14 +9,10 @@ import {
   Flex,
   TextInput,
   Button,
-  ScrollArea,
-  Card,
-  Group,
-  Text,
+  HoverCard,
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
-  getEditorStateAsString,
   getStringAsEditorState,
 } from "../../../utils";
 import {
@@ -25,45 +21,18 @@ import {
   IconExclamationMark,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
-import styles from "./ScaleCliparts.module.sass";
-import { map } from "lodash";
+import { isEmpty, join, map } from "lodash";
 import { STATUS } from "../../../constant";
-import { useState } from "react";
-import { rndServices } from "../../../services";
-import { showNotification } from "../../../utils/index";
 
-const ScaleClipart = ({
+const ProductBase = ({
   close,
   selectedSKU,
-  linkDesign,
-  loadingUpdateDesignLink,
-  setLinkDesign,
-  handleUpdateLinkDesign,
+  linkProduct,
+  loadingUpdateProductLink,
+  setLinkProduct,
+  handleUpdateLinkProduct,
   opened,
-  setTrigger,
-  setDesignerNote,
-  designerNote,
 }) => {
-  console.log("selectedSKU", selectedSKU);
-  const [loading, setLoading] = useState(false);
-  const handleUpdateNote = async () => {
-    setLoading(true);
-    const updateNoteResponse = await rndServices.updateBriefDesign({
-      uid: selectedSKU.uid,
-      data: {
-        note: {
-          ...selectedSKU.note,
-          designer: getEditorStateAsString(designerNote),
-        },
-      },
-    });
-    if (updateNoteResponse) {
-      close()
-      setTrigger(true);
-      showNotification("Thành công", "Cập nhật Note thành công", "green");
-    }
-    setLoading(false);
-  };
   return (
     <Modal
       opened={opened}
@@ -74,7 +43,7 @@ const ScaleClipart = ({
         blur: 3,
       }}
       radius="md"
-      size="80%"
+      size="1000px"
       styles={{
         title: {
           fontSize: "21px",
@@ -89,7 +58,7 @@ const ScaleClipart = ({
       title={selectedSKU?.sku}
     >
       <LoadingOverlay
-        visible={loadingUpdateDesignLink}
+        visible={loadingUpdateProductLink}
         zIndex={1000}
         overlayProps={{ radius: "sm", blur: 2 }}
       />
@@ -131,12 +100,11 @@ const ScaleClipart = ({
                 textAlign: "center",
               }}
             >
-              Scale Clipart
+              {selectedSKU?.briefType}
             </Grid.Col>
             <Grid.Col span={4}></Grid.Col>
           </Grid>
         </Grid.Col>
-
         <Grid.Col
           span={5}
           style={{
@@ -206,7 +174,18 @@ const ScaleClipart = ({
               fontSize: "14px",
             }}
           >
-            • Designer:{selectedSKU?.designer.name}
+            • Designer: {selectedSKU?.designer.name}
+          </div>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              padding: "5px",
+              fontSize: "14px",
+            }}
+          >
+            • EPM: {selectedSKU?.epm.name}
           </div>
         </Grid.Col>
         <Grid.Col span={5}>
@@ -214,12 +193,12 @@ const ScaleClipart = ({
             style={{
               display: "flex",
               justifyContent: "center",
-              padding: "5px",
+              padding: "10px",
               fontSize: "18px",
               alignItems: "center",
             }}
           >
-            REF
+            Ref - Artwork
           </div>
           <Image
             radius="md"
@@ -251,7 +230,7 @@ const ScaleClipart = ({
           >
             {selectedSKU?.linkProductRef && (
               <List.Item>
-                Link Product:{" "}
+                Link Store:{" "}
                 <a
                   style={{
                     display: "inline-block",
@@ -265,65 +244,15 @@ const ScaleClipart = ({
                   }}
                   href={selectedSKU?.linkProductRef}
                   target="_blank"
-                  rel="noopener noreferrer"
                 >
                   {selectedSKU?.linkProductRef}
                 </a>
               </List.Item>
             )}
-            {selectedSKU?.productLine?.refLink && (
-              <List.Item>
-                Link Product Base (Library):{" "}
-                <a
-                  style={{
-                    display: "inline-block",
-                    width: "230px",
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    textDecoration: "none",
-                    color: "#228be6",
-                    verticalAlign: "middle",
-                  }}
-                  href={selectedSKU?.productLine?.refLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {selectedSKU?.productLine?.refLink}
-                </a>
-              </List.Item>
-            )}
-            {(selectedSKU?.designLinkRef?.designLink ||
-              selectedSKU?.designLinkRef) && (
-                <List.Item>
-                  Link Design (NAS):{" "}
-                  <a
-                    style={{
-                      display: "inline-block",
-                      width: "100px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      textDecoration: "none",
-                      color: "#228be6",
-                      verticalAlign: "middle",
-                    }}
-                    href={
-                      selectedSKU?.designLinkRef ||
-                      selectedSKU?.productLine?.designLink
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedSKU?.designLinkRef ||
-                      selectedSKU?.productLine?.designLink}
-                  </a>
-                </List.Item>
-              )}
           </List>
         </Grid.Col>
         <Grid.Col
-          span={1}
+          span={2}
           style={{
             display: "flex",
             justifyContent: "center",
@@ -332,114 +261,157 @@ const ScaleClipart = ({
         >
           <IconArrowBigRightLinesFilled size={56} color="#228be6" />
         </Grid.Col>
-        <Grid.Col span={6}>
+        <Grid.Col span={5}>
           <div
             style={{
               display: "flex",
               justifyContent: "center",
-              padding: "5px",
+              padding: "10px",
               fontSize: "18px",
               alignItems: "center",
             }}
           >
-            SCALE
+            Scale To Product Base
           </div>
-          <ScrollArea offsetScrollbars="y" h={350}>
-            <Flex wrap={true} gap={15} direction="column">
-              {map(selectedSKU?.cliparts, (clipart) => (
-                <Card shadow="sm" padding="lg" radius="md" withBorder>
-                  <Card.Section
-                    style={{
-                      padding: "5px",
-                    }}
-                  >
-                    <Grid>
-                      <Grid.Col span={3}>
-                        <Image
-                          src={
-                            clipart.image || "/images/content/not_found_2.jpg"
-                          }
-                          h="100px"
-                          w="100%"
-                          alt="Norway"
-                          style={{
-                            objectFit: "contain",
-                          }}
-                        />
-                      </Grid.Col>
-                      <Grid.Col
-                        span={9}
+          <Image
+            radius="md"
+            src={
+              selectedSKU?.designInfo?.thumbLink ||
+              "/images/content/not_found_2.jpg"
+            }
+            height={200}
+            fit="contain"
+          />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "10px",
+              fontSize: "18px",
+              alignItems: "center",
+              marginTop: "10px",
+            }}
+          >
+            {selectedSKU?.sku}
+          </div>
+          <List
+            spacing="lg"
+            size="sm"
+            center
+            icon={
+              <ThemeIcon color="teal" size={24} radius="xl">
+                <IconCircleCheck style={{ width: rem(16), height: rem(16) }} />
+              </ThemeIcon>
+            }
+          >
+            {selectedSKU?.productLine?.name && (
+              <List.Item>
+                Product Base: {selectedSKU?.productLine?.name}
+              </List.Item>
+            )}
+            {selectedSKU?.productInfo?.tibSearchCampaignLink && (
+              <List.Item>
+                Campaign (TIB): {""}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "200px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={selectedSKU?.productInfo?.tibSearchCampaignLink}
+                  target="_blank"
+                >
+                  {selectedSKU?.productInfo?.tibSearchCampaignLink}
+                </a>
+              </List.Item>
+            )}
+            {selectedSKU?.linkDesign && (
+              <List.Item>
+                Design (NAS):{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "200px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={selectedSKU?.linkDesign}
+                  target="_blank"
+                >
+                  {selectedSKU?.linkDesign}
+                </a>
+              </List.Item>
+            )}
+            {!isEmpty(selectedSKU?.cliparts) && (
+              <List.Item>
+                Clipart:{" "}
+                <List
+                  listStyleType="disc"
+                  withPadding
+                  style={{
+                    marginTop: "10px",
+                  }}
+                >
+                  {map(selectedSKU?.cliparts, (clipart) => {
+                    return (
+                      <List.Item
                         style={{
-                          display: "flex",
+                          fontSize: "12px",
                         }}
                       >
-                        <Group>
-                          <Text fw={500}>{clipart?.name}</Text>
-                          <List
-                            spacing="lg"
-                            size="sm"
-                            center
-                            icon={
-                              <ThemeIcon color="teal" size={24} radius="xl">
-                                <IconCircleCheck
-                                  style={{ width: rem(16), height: rem(16) }}
-                                />
-                              </ThemeIcon>
-                            }
-                          >
-                            {clipart.refLink && (
-                              <List.Item>
-                                Link Clipart:{" "}
-                                <a
-                                  style={{
-                                    display: "inline-block",
-                                    width: "230px",
-                                    whiteSpace: "nowrap",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    textDecoration: "none",
-                                    color: "#228be6",
-                                    verticalAlign: "middle",
-                                  }}
-                                  href={clipart.refLink}
-                                  target="_blank"
-                                >
-                                  {clipart.refLink}
-                                </a>
-                              </List.Item>
-                            )}
-                          </List>
-                        </Group>
-                      </Grid.Col>
-                    </Grid>
-                  </Card.Section>
-                </Card>
-              ))}
-            </Flex>
-          </ScrollArea>
+                        <HoverCard width={280} shadow="md">
+                          <HoverCard.Target>
+                            <a href={clipart?.refLink} target="_blank">
+                              {clipart.name}
+                            </a>
+                          </HoverCard.Target>
+                          <HoverCard.Dropdown>
+                            <iframe
+                              src={clipart?.refLink}
+                              title={clipart.name}
+                            ></iframe>
+                          </HoverCard.Dropdown>
+                        </HoverCard>
+                      </List.Item>
+                    );
+                  })}
+                </List>
+              </List.Item>
+            )}
+          </List>
         </Grid.Col>
-
-        <Grid.Col span={12}>
+        <Grid.Col span={6}>
           <Editor
-            state={designerNote}
-            onChange={setDesignerNote}
-            classEditor={styles.editor}
+            state={getStringAsEditorState(selectedSKU?.note?.epm)}
+            label="RnD Note"
+            readOnly={true}
+          />
+        </Grid.Col>
+        <Grid.Col span={6}>
+          <Editor
+            state={getStringAsEditorState(selectedSKU?.note?.noteForEPM)}
             label="Designer Note"
-            readOnly={selectedSKU?.status === STATUS.DESIGNED}
-            button={true}
-            onClick={() => handleUpdateNote()}
-            loading={loading}
+            readOnly={true}
           />
         </Grid.Col>
         <Grid.Col span={12}>
           <Flex gap={10}>
             <TextInput
-              placeholder="Output - Link Design (NAS)"
+              placeholder="Output - Link Website"
               style={{
                 flex: "1 1 90%",
               }}
-              value={linkDesign}
-              onChange={(event) => setLinkDesign(event.target.value)}
+              value={linkProduct}
+              onChange={(event) => setLinkProduct(event.target.value)}
             />
             <Button
               style={{
@@ -447,9 +419,9 @@ const ScaleClipart = ({
                 backgroundColor: "#62D256",
                 color: "#ffffff",
               }}
-              disabled={selectedSKU?.status === STATUS.DESIGNED}
+              disabled={selectedSKU?.status === STATUS.LISTED}
               onClick={() => {
-                handleUpdateLinkDesign(selectedSKU?.uid);
+                handleUpdateLinkProduct(selectedSKU?.uid);
               }}
             >
               DONE
@@ -461,4 +433,4 @@ const ScaleClipart = ({
   );
 };
 
-export default ScaleClipart;
+export default ProductBase;

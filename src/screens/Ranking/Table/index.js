@@ -25,6 +25,7 @@ import {
   keys,
   isEmpty,
   orderBy,
+  values,
   slice,
 } from "lodash";
 
@@ -43,17 +44,31 @@ import {
   IconSortDescending,
 } from "@tabler/icons-react";
 import moment from "moment-timezone";
+import {
+  CONVERT_NUMBER_TO_RANKING_STATUS,
+  CONVERT_STATUS_TO_RANKING_NUMBER,
+  RANKING_STATUS,
+} from "../../../constant";
 
 const TARGET_MODES = {
   ORDERS: "Orders",
-  RANKING: "Ranking",
+  RANKING: "Change Rank",
+  DEFAULT_RANKING: "Rank",
 };
-const TARGET_DATES = {
-  TODAY: "Today",
-  THREE_DAYS: "3 Day",
-  SEVEN_DAYS: "7 Day",
+
+const moveOverrideColorToStart = (array) => {
+  return array.sort((a, b) => {
+    if (a.overrideColor && !b.overrideColor) {
+      return -1;
+    }
+    if (!a.overrideColor && b.overrideColor) {
+      return 1;
+    }
+    return 0;
+  });
 };
-const SellerboardTable = ({
+
+const RankingTable = ({
   tableData,
   query,
   loading,
@@ -66,6 +81,8 @@ const SellerboardTable = ({
   setIsLoadmore,
   openPreviewImage,
   setSelectedProduct,
+  setOverrideProductRankings,
+  overrideProductRankings,
 }) => {
   const handleUpdateRanking = async (id, data) => {
     await rankingServices.updateRanking({ id, data });
@@ -85,20 +102,6 @@ const SellerboardTable = ({
   // Function to generate columns based on the data
   const generateCustomColumn = (data) => {
     let keyLevels = extractUniqueKeys(data);
-    switch (query?.targetDate) {
-      case TARGET_DATES.TODAY:
-        keyLevels = keyLevels.slice(0, 1);
-        break;
-      case TARGET_DATES.THREE_DAYS:
-        keyLevels = keyLevels.slice(0, 34);
-        break;
-      case TARGET_DATES.SEVEN_DAYS:
-        keyLevels = keyLevels.slice(0, 7);
-        break;
-      default:
-        break;
-    }
-
     const columns = map(keyLevels, (keyLevel) => {
       return {
         accessorKey: keyLevel,
@@ -112,6 +115,8 @@ const SellerboardTable = ({
             key: keyLevel,
           })?.rankChange;
           const { latestRank } = row?.original;
+          const id = row?.original?.id;
+          const foundData = find(data, { id });
           let color = null;
           if (latestRank > 1 && latestRank <= 50) {
             if (rankChange > 1) {
@@ -130,6 +135,12 @@ const SellerboardTable = ({
           if (color && query?.mode[0] === TARGET_MODES.RANKING) {
             classnames = classes["highlight"];
           }
+          // if (
+          //   foundData?.overrideColor ||
+          //   overrideProductRankings.includes(id)
+          // ) {
+          //   classnames = classes["highlight-follow-row"];
+          // }
           if (row.id === `Total theo ${activeTab}`) {
             classnames = classes["summary-row"];
           }
@@ -150,6 +161,20 @@ const SellerboardTable = ({
           }
           const { data } = row.original;
           const keyData = find(data, { key: keyLevel });
+          let viewData = 0;
+          switch (query?.mode[0]) {
+            case TARGET_MODES.ORDERS:
+              viewData = keyData?.ordersChange || 0;
+              break;
+            case TARGET_MODES.RANKING:
+              viewData = keyData?.rankChange || 0;
+              break;
+            case TARGET_MODES.DEFAULT_RANKING:
+              viewData = keyData?.rank || 0;
+              break;
+            default:
+              break;
+          }
           return (
             <Flex direction="column">
               <Text
@@ -158,9 +183,7 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                {query?.mode[0] === TARGET_MODES.ORDERS
-                  ? keyData?.ordersChange || 0
-                  : keyData?.rankChange || 0}
+                {keyData?.isMissing ? "x" : viewData}
               </Text>
             </Flex>
           );
@@ -176,6 +199,24 @@ const SellerboardTable = ({
     setCustomColumns(generateCustomColumn(tableData));
   }, [tableData]);
 
+  useEffect(() => {
+    if (!isEmpty(overrideProductRankings)) {
+      const orderedData = moveOverrideColorToStart(
+        map(data, (item) => {
+          if (overrideProductRankings.includes(item.id)) {
+            return {
+              ...item,
+              overrideColor: true,
+            };
+          }
+          return item;
+        })
+      );
+      setData(orderedData);
+      setCustomColumns(generateCustomColumn(orderedData));
+    }
+  }, [overrideProductRankings]);
+
   // Compute the Total theo ${activeTab} row data
   const summaryRow = useMemo(() => {
     const columns = merge(
@@ -183,19 +224,7 @@ const SellerboardTable = ({
       ...customColumns.map((col) => {
         const key = col.accessorKey;
         let keyLevels = flatMap(data, "data");
-        switch (query?.targetDate) {
-          case TARGET_DATES.TODAY:
-            keyLevels = keyLevels.slice(0, 1);
-            break;
-          case TARGET_DATES.THREE_DAYS:
-            keyLevels = keyLevels.slice(0, 4);
-            break;
-          case TARGET_DATES.SEVEN_DAYS:
-            keyLevels = keyLevels.slice(0, 8);
-            break;
-          default:
-            break;
-        }
+
         const keyData = filter(keyLevels, (keyLevel) => keyLevel.key === key);
         const header = join(split(key, " ")?.slice(0, -1), " ");
         const view =
@@ -225,10 +254,7 @@ const SellerboardTable = ({
   }, [data, customColumns]);
 
   // Combine table data with the Total theo ${activeTab} row
-  const tableDataWithSummary = useMemo(
-    () => [...data, summaryRow],
-    [data, summaryRow]
-  );
+  const tableDataWithSummary = useMemo(() => [...data], [data]);
 
   // UseMemo to construct final columns array with sorted custom columns
   const columns = useMemo(() => {
@@ -236,8 +262,8 @@ const SellerboardTable = ({
       {
         accessorKey: "product",
         header: "Product",
-        size: 250,
-        maxSize: 250,
+        size: 300,
+        maxSize: 300,
         enableEditing: false,
         enableSorting: false,
         enableMultiSort: true,
@@ -255,6 +281,118 @@ const SellerboardTable = ({
             className: classes["head-cells-op-team"],
           };
         },
+        Header: ({ row }) => {
+          const isShow =
+            query?.mode[0] === TARGET_MODES.RANKING ||
+            TARGET_MODES.DEFAULT_RANKING;
+
+          return (
+            <Group gap={5}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "bold",
+                }}
+              >
+                Product
+              </Text>
+              {isShow &&
+                (!query?.sortBy ||
+                  query?.sortBy === "totalOrdersChanges" ||
+                  query?.sortBy === "totalRankChanges") && (
+                  <ActionIcon
+                    aria-label="Settings"
+                    variant="default"
+                    style={{
+                      background: "none",
+                      border: "none",
+                    }}
+                    onClick={() => {
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setSorting([]);
+                      setQuery({
+                        ...query,
+                        sortBy: "latestRank",
+                        sortDir: "desc",
+                      });
+                    }}
+                  >
+                    <IconArrowsSort
+                      style={{
+                        width: "60%",
+                        height: "60%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#ffffff"
+                    />
+                  </ActionIcon>
+                )}
+
+              {isShow &&
+                query?.sortBy === "latestRank" &&
+                query?.sortDir === "desc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setSorting([]);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setQuery({
+                        ...query,
+                        sortBy: "latestRank",
+                        sortDir: "asc",
+                      });
+                    }}
+                  >
+                    <IconSortDescending
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+              {isShow &&
+                query?.sortBy === "latestRank" &&
+                query?.sortDir === "asc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setSorting([]);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setQuery({
+                        ...query,
+                        sortBy: null,
+                        sortDir: null,
+                      });
+                    }}
+                  >
+                    <IconSortAscending
+                      style={{
+                        width: "70%",
+                        height: "70%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+            </Group>
+          );
+        },
         Cell: ({ row }) => {
           if (row.id === `Total theo ${activeTab}`) {
             return (
@@ -263,8 +401,14 @@ const SellerboardTable = ({
               </Text>
             );
           }
-          const { image, createdDate, link, latestRank, originalData } =
-            row.original;
+          const {
+            image,
+            createdDate,
+            link,
+            originalData,
+            publishedDate,
+            latestRank,
+          } = row.original;
           let changesData = slice(originalData, 0, 3)
             ?.map((x) => x.rank)
             ?.map((x, index) => {
@@ -273,21 +417,20 @@ const SellerboardTable = ({
                   style={{
                     ...(index === 0
                       ? {
-                          fontSize: 11,
+                          fontSize: 14,
                         }
                       : {
-                          fontSize: 12,
+                          fontSize: 14,
                           color: "gray",
                         }),
                     fontWeight: "bold",
                     textAlign: "left",
                   }}
                 >
-                  {index !== 0 ? " <- " : ""} {x}
+                  {index !== 0 ? "<-" : ""} {x}
                 </Text>
               );
             });
-
           return (
             <Flex direction="column">
               <Grid
@@ -342,32 +485,73 @@ const SellerboardTable = ({
                         </Text>
                       </Flex>
                     </Grid.Col>
-                    {query?.mode[0] === TARGET_MODES.RANKING && (
-                      <Grid.Col span={12}>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "2px",
-                          }}
-                        >
-                          {changesData}
-                        </div>
-                      </Grid.Col>
-                    )}
-
                     <Grid.Col span={12}>
-                      <Text
+                      <div
                         style={{
-                          fontSize: 11,
-                          fontWeight: "bold",
-                          textAlign: "left",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "2px",
                         }}
                       >
-                        Đã tạo:{" "}
-                        {moment(createdDate).subtract(createdDate).fromNow()}
-                      </Text>
+                        <Text
+                          style={{
+                            fontSize: 14,
+                            fontWeight: "bold",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "2px",
+                            }}
+                          >
+                            {changesData}
+                          </div>
+                        </Text>
+                      </div>
                     </Grid.Col>
+                    {(publishedDate || createdDate) && (
+                      <Grid.Col span={12}>
+                        <Group
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "2px",
+                            justifyContent: "start",
+                          }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 11,
+                              fontWeight: "bold",
+                              textAlign: "left",
+                              width: "100%",
+                            }}
+                          >
+                            Bắt:{" "}
+                            {moment(createdDate)
+                              .subtract(createdDate)
+                              .fromNow(true)}
+                          </Text>
+                          {publishedDate && (
+                            <Text
+                              style={{
+                                fontSize: 11,
+                                fontWeight: "bold",
+                                textAlign: "left",
+                                width: "100%",
+                              }}
+                            >
+                              List:{" "}
+                              {moment(publishedDate)
+                                .subtract(publishedDate)
+                                .fromNow(true)}
+                            </Text>
+                          )}
+                        </Group>
+                      </Grid.Col>
+                    )}
                   </Grid>
                 </Grid.Col>
               </Grid>
@@ -378,8 +562,8 @@ const SellerboardTable = ({
       {
         accessorKey: "value",
         header: "Value",
-        size: 100,
-        maxSize: 100,
+        size: 150,
+        maxSize: 150,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -422,6 +606,7 @@ const SellerboardTable = ({
           return (
             <Select
               data={keys(VALUES)}
+              allowDeselect={false}
               value={CONVERT_NUMBER_TO_STATUS[value]}
               onChange={(value) => {
                 const newData = data.map((item) => {
@@ -445,8 +630,8 @@ const SellerboardTable = ({
       {
         accessorKey: "size",
         header: "Size",
-        size: 100,
-        maxSize: 100,
+        size: 150,
+        maxSize: 150,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -510,6 +695,77 @@ const SellerboardTable = ({
         },
       },
       {
+        accessorKey: "status",
+        header: "Status",
+        size: 200,
+        maxSize: 200,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          const id = row.original.id;
+          const payload = find(data, { id });
+          const follow = payload?.follow;
+          return (
+            <Select
+              data={values(RANKING_STATUS)}
+              allowDeselect={false}
+              value={CONVERT_NUMBER_TO_RANKING_STATUS[follow]}
+              onChange={(pureValue) => {
+                const value = CONVERT_STATUS_TO_RANKING_NUMBER[pureValue];
+                const newData = data.map((item) => {
+                  if (item.id === id) {
+                    if (value === 1) {
+                      setOverrideProductRankings([
+                        ...overrideProductRankings,
+                        id,
+                      ]);
+                    } else {
+                      setOverrideProductRankings(
+                        overrideProductRankings.filter((x) => x !== id)
+                      );
+                    }
+                    return {
+                      ...item,
+                      follow: value,
+                      ...(value === 1
+                        ? {
+                            overrideColor: true,
+                          }
+                        : {
+                            overrideColor: false,
+                          }),
+                    };
+                  }
+                  return item;
+                });
+                const orderedData = moveOverrideColorToStart(newData, id);
+                setData(orderedData);
+                setCustomColumns(generateCustomColumn(orderedData));
+                handleUpdateRanking(id, {
+                  follow: value,
+                });
+              }}
+            />
+          );
+        },
+      },
+      {
         accessorKey: "totalInRanges",
         header: "Total Changes",
         size: 150,
@@ -517,6 +773,9 @@ const SellerboardTable = ({
         enableEditing: false,
         enableSorting: false,
         Header: ({ row }) => {
+          const isShow =
+            query?.mode[0] === TARGET_MODES.RANKING ||
+            TARGET_MODES.DEFAULT_RANKING;
           const view =
             query?.mode[0] === TARGET_MODES.ORDERS
               ? "totalOrdersChanges"
@@ -531,7 +790,9 @@ const SellerboardTable = ({
               >
                 Total Changes
               </Text>
-              {!query?.sortBy && (
+              {(!isEmpty(sorting) ||
+                !query?.sortBy ||
+                query.sortBy === "latestRank") && (
                 <ActionIcon
                   aria-label="Settings"
                   variant="default"
@@ -553,65 +814,76 @@ const SellerboardTable = ({
                   }}
                 >
                   <IconArrowsSort
-                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
-                    stroke={2}
-                  />
-                </ActionIcon>
-              )}
-              {query?.sortBy === view && query?.sortDir === "desc" && (
-                <ActionIcon
-                  variant="filled"
-                  aria-label="Settings"
-                  color="transparent"
-                  onClick={() => {
-                    setSorting([]);
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                    setQuery({
-                      ...query,
-                      sortBy: view,
-                      sortDir: "asc",
-                    });
-                  }}
-                >
-                  <IconSortDescending
-                    style={{ width: "70%", height: "70%" }}
-                    stroke={2}
-                    color="#70B1ED"
-                  />
-                </ActionIcon>
-              )}
-              {query?.sortBy === view && query?.sortDir === "asc" && (
-                <ActionIcon
-                  variant="filled"
-                  aria-label="Settings"
-                  color="transparent"
-                  onClick={() => {
-                    setSorting([]);
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                    setQuery({
-                      ...query,
-                      sortBy: null,
-                      sortDir: null,
-                    });
-                  }}
-                >
-                  <IconSortAscending
                     style={{
-                      width: "70%",
-                      height: "70%",
+                      width: "60%",
+                      height: "60%",
                       fontWeight: "bold",
                     }}
                     stroke={2}
-                    color="#70B1ED"
+                    color="#ffffff"
                   />
                 </ActionIcon>
               )}
+              {(query?.sortBy === "totalOrdersChanges" ||
+                query?.sortBy === "totalRankChanges") &&
+                isEmpty(sorting) &&
+                query?.sortDir === "desc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setSorting([]);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setQuery({
+                        ...query,
+                        sortBy: view,
+                        sortDir: "asc",
+                      });
+                    }}
+                  >
+                    <IconSortDescending
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+              {(query?.sortBy === "totalOrdersChanges" ||
+                query?.sortBy === "totalRankChanges") &&
+                isEmpty(sorting) &&
+                query?.sortDir === "asc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    onClick={() => {
+                      setSorting([]);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setQuery({
+                        ...query,
+                        sortBy: null,
+                        sortDir: null,
+                      });
+                    }}
+                  >
+                    <IconSortAscending
+                      style={{
+                        width: "70%",
+                        height: "70%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
             </Group>
           );
         },
@@ -620,7 +892,7 @@ const SellerboardTable = ({
             className:
               row.id === `Total theo ${activeTab}`
                 ? classes["summary-row"]
-                : classes["body-cells-op-team"],
+                : classes["total-changes"],
           };
         },
         mantineTableHeadCellProps: () => {
@@ -703,6 +975,7 @@ const SellerboardTable = ({
     enableSorting: true,
     enableMultiSort: false,
     enableBottomToolbar: true,
+    enableTopToolbar: false,
     manualSorting: true,
     mantineBottomToolbarProps: () => {
       return {
@@ -733,4 +1006,4 @@ const SellerboardTable = ({
   ) : null;
 };
 
-export default SellerboardTable;
+export default RankingTable;

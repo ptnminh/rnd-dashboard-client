@@ -200,7 +200,7 @@ const generateScaleDesignTable = ({
         imageRef:
           selectedProductBases[0]?.image || selectedProductBases[0]?.imageSrc,
         uniqueId: `${x.uid}`,
-        productLineId: selectedProductBases[0]?.uid
+        productLineId: selectedProductBases[0]?.uid,
       };
     })
   );
@@ -230,7 +230,7 @@ const generateScaleClipArtTable = ({
         skuPrefix: SKU?.skuPrefix,
         clipartIds: map(x.cliparts, "uid"),
         uniqueId: `${realRnDAccumulator}_${x.index}`,
-        productLineId: SKU?.productLineId
+        productLineId: SKU?.productLineId,
       };
     })
   );
@@ -266,7 +266,7 @@ const generateScaleQuoteTable = ({
           nextAccumulator: currentRnDAccumulator + selectedQuotes.length,
           skuPrefix: SKU?.skuPrefix,
           uniqueId: x.uid,
-          productLineId: SKU?.productLineId
+          productLineId: SKU?.productLineId,
         };
       }
     )
@@ -302,7 +302,7 @@ const generateScaleNewDesign = ({
           note: getEditorStateAsString(x?.note),
         }),
         uniqueId: `${realRnDAccumulator}_${x?.designLinkRef}`,
-        productLineId: selectedProductBases[0]?.uid
+        productLineId: selectedProductBases[0]?.uid,
       };
     })
   );
@@ -338,7 +338,7 @@ const generateScaleMixMatch = ({
         nextAccumulator: currentRnDAccumulator + grouppedCliparts.length,
         skuPrefix: prefix,
         uniqueId: `${realRnDAccumulator}_${x.index}_${marketBrief?.designLinkRef}`,
-        productLineId: selectedProductBases[0]?.uid
+        productLineId: selectedProductBases[0]?.uid,
       };
     })
   );
@@ -577,6 +577,7 @@ const NewCampaigns = () => {
   const topScrollClipArtRef = useRef(null);
   const [designs, setDesigns] = useState([]);
   const [editSKUs, setEditSKUs] = useState([]);
+  const [triggerCreateSKUPayload, setTriggerCreateSKUPayload] = useState(false);
   const [
     openedModalPreviewGroupClipart,
     {
@@ -722,7 +723,6 @@ const NewCampaigns = () => {
         break;
     }
     setIsDeletingRow(true);
-
   };
   useEffect(() => {
     if (isDeletingRow) {
@@ -739,13 +739,32 @@ const NewCampaigns = () => {
         selectedSKUs,
         marketBrief,
         grouppedCliparts,
-      })
+      });
       setEditSKUs(skus);
       setIsDeletingRow(false);
     }
-  }, [
-    isDeletingRow
-  ])
+  }, [isDeletingRow]);
+
+  useEffect(() => {
+    if (triggerCreateSKUPayload) {
+      const skus = generateScaleProductBaseOnBriefType({
+        type: briefType,
+        SKU,
+        collections: validCollections,
+        rndSortName: find(users, { name: rndMember })?.shortName,
+        selectedClipArts,
+        selectedQuotes,
+        designs,
+        selectedProductBases,
+        rndId: find(users, { name: rndMember })?.uid,
+        selectedSKUs,
+        marketBrief,
+        grouppedCliparts,
+      });
+      setEditSKUs(skus);
+      setIsDeletingRow(false);
+    }
+  }, [triggerCreateSKUPayload]);
 
   const {
     register,
@@ -1014,13 +1033,26 @@ const NewCampaigns = () => {
       return;
     }
     setCreateBriefLoading(true);
-    let generatedSKUs = editSKUs;
+    let generatedSKUs = generateScaleProductBaseOnBriefType({
+      type: briefType,
+      SKU,
+      collections: validCollections,
+      rndSortName: find(users, { name: rndMember })?.shortName,
+      selectedClipArts,
+      selectedQuotes,
+      designs,
+      selectedProductBases,
+      rndId: find(users, { name: rndMember })?.uid,
+      selectedSKUs,
+      marketBrief,
+      grouppedCliparts,
+    });
     generatedSKUs = map(generatedSKUs, (x) => {
       if (x.newSku) {
         return {
           ...x,
-          SKU: x.newSku
-        }
+          SKU: x.newSku,
+        };
       }
       return x;
     });
@@ -1185,6 +1217,7 @@ const NewCampaigns = () => {
         }),
         ...(briefType === BRIEF_TYPES[1] && {
           clipartIds: x?.clipartIds,
+          productLineId: x?.productLineId || "",
         }),
         ...(briefType === BRIEF_TYPES[2] && {
           quote: x.uid,
@@ -2287,7 +2320,7 @@ const NewCampaigns = () => {
                       selectedSKUs,
                       marketBrief,
                       grouppedCliparts,
-                    })
+                    });
                     setEditSKUs(skus);
                   }}
                   style={{
@@ -2311,187 +2344,193 @@ const NewCampaigns = () => {
           </Card>
         </div>
       </div>
-      {opened && (<Modal
-        opened={opened}
-        onClose={close}
-        transitionProps={{ transition: "fade", duration: 200 }}
-        overlayProps={{
-          backgroundOpacity: 0.55,
-          blur: 3,
-        }}
-        radius="md"
-        size="1000px"
-        styles={{
-          title: {
-            fontSize: "21px",
-            fontWeight: "bold",
-            margin: "auto",
-          },
-          close: {
-            margin: "none",
-            marginInlineStart: "unset",
-          },
-        }}
-        title="Preview Brief"
-      >
-        <Grid>
-          <Grid.Col span={12}>
-            <div
-              style={{
-                padding: "10px",
-                backgroundColor: "#D9F5D6",
-                border: "1px solid #62D256",
-                color: "#000000",
-                borderColor: "#62D256",
-                fontSize: "18px",
-                borderRadius: "12px",
-              }}
-            >
-              <Grid>
-                <Grid.Col span={4}>
-                  <Text
-                    style={{
-                      fontWeight: "bold",
-                      fontSize: "14px",
-                    }}
-                  >
-                    Batch: <span>&nbsp;{batch}</span>
-                  </Text>
-                </Grid.Col>
-                <Grid.Col
-                  span={4}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: "100%",
-                  }}
-                >
-                  <Badge
-                    size="lg"
-                    variant="gradient"
-                    gradient={{ from: "blue", to: "cyan", deg: 90 }}
-                    style={{ margin: "0 5px" }}
-                  >
-                    {generateTextPreview(briefType, layout)}
-                  </Badge>{" "}
-                </Grid.Col>
-                <Grid.Col span={4}>
-                  <div
+      {opened && (
+        <Modal
+          opened={opened}
+          onClose={close}
+          transitionProps={{ transition: "fade", duration: 200 }}
+          overlayProps={{
+            backgroundOpacity: 0.55,
+            blur: 3,
+          }}
+          radius="md"
+          size="1000px"
+          styles={{
+            title: {
+              fontSize: "21px",
+              fontWeight: "bold",
+              margin: "auto",
+            },
+            close: {
+              margin: "none",
+              marginInlineStart: "unset",
+            },
+          }}
+          title="Preview Brief"
+        >
+          <Grid>
+            <Grid.Col span={12}>
+              <div
+                style={{
+                  padding: "10px",
+                  backgroundColor: "#D9F5D6",
+                  border: "1px solid #62D256",
+                  color: "#000000",
+                  borderColor: "#62D256",
+                  fontSize: "18px",
+                  borderRadius: "12px",
+                }}
+              >
+                <Grid>
+                  <Grid.Col span={4}>
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                      }}
+                    >
+                      Batch: <span>&nbsp;{batch}</span>
+                    </Text>
+                  </Grid.Col>
+                  <Grid.Col
+                    span={4}
                     style={{
                       display: "flex",
                       alignItems: "center",
-                      justifyContent: "end",
-                      fontSize: "14px",
+                      justifyContent: "center",
+                      width: "100%",
                     }}
                   >
-                    {workGroup} - {rndMember}
-                  </div>
-                </Grid.Col>
-              </Grid>
-            </div>
-          </Grid.Col>
-          <Grid.Col span={4}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                padding: "10px",
-                fontSize: "20px",
-                alignItems: "center",
-              }}
-            >
-              {briefType !== BRIEF_TYPES[3] ? "REF" : "PRODUCT LINE"}
-            </div>
-            <Image
-              radius="md"
-              src={
-                SKU?.image ||
-                selectedProductBases[0]?.imageSrc ||
-                "/images/content/not_found_2.jpg"
-              }
-            />
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                padding: "10px",
-                fontSize: "18px",
-                alignItems: "center",
-                marginTop: "10px",
-              }}
-            >
-              {SKU?.sku || selectedProductBases[0]?.name}
-            </div>
-          </Grid.Col>
-          <Grid.Col span={8}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                padding: "10px",
-                fontSize: "20px",
-              }}
-            >
-              SCALE
-            </div>
-            <ScrollArea h={300} scrollbars="y" scrollbarSize={2}>
-              <CustomTable
-                items={map(
-                  orderBy(
-                    editSKUs,
-                    [(item) => !item?.SKU?.startsWith("XX"), "SKU"]
-                  ),
-                  (x, index) => {
-                    return {
-                      ...x,
-                      No: index + 1,
-                    };
-                  }
-                )}
-                headers={generateHeaderTable(briefType, isKeepClipArt)?.headers}
-                onRemove={handleRemoveRow}
-                headerRemove={
-                  generateHeaderTable(briefType, isKeepClipArt)?.removeHeader
+                    <Badge
+                      size="lg"
+                      variant="gradient"
+                      gradient={{ from: "blue", to: "cyan", deg: 90 }}
+                      style={{ margin: "0 5px" }}
+                    >
+                      {generateTextPreview(briefType, layout)}
+                    </Badge>{" "}
+                  </Grid.Col>
+                  <Grid.Col span={4}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "end",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {workGroup} - {rndMember}
+                    </div>
+                  </Grid.Col>
+                </Grid>
+              </div>
+            </Grid.Col>
+            <Grid.Col span={4}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "10px",
+                  fontSize: "20px",
+                  alignItems: "center",
+                }}
+              >
+                {briefType !== BRIEF_TYPES[3] ? "REF" : "PRODUCT LINE"}
+              </div>
+              <Image
+                radius="md"
+                src={
+                  SKU?.image ||
+                  selectedProductBases[0]?.imageSrc ||
+                  "/images/content/not_found_2.jpg"
                 }
-                setEditSKUs={setEditSKUs}
-                editSKUs={editSKUs}
-                productBases={productBases}
-                setProductBases={setProductBases}
-                SKU={SKU}
-                setSKU={setSKU}
-                selectedProductBases={selectedProductBases}
-                setSelectedProductBases={setSelectedProductBases}
               />
-            </ScrollArea>
-          </Grid.Col>
-          <Grid.Col
-            span={12}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-            }}
-          >
-            <Button
-              className={cn(
-                "button-stroke-blue button-small",
-                styles.createButton
-              )}
-              loading={createBriefLoading}
-              onClick={handleSubmitBrief}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "10px",
+                  fontSize: "18px",
+                  alignItems: "center",
+                  marginTop: "10px",
+                }}
+              >
+                {SKU?.sku || selectedProductBases[0]?.name}
+              </div>
+            </Grid.Col>
+            <Grid.Col span={8}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  padding: "10px",
+                  fontSize: "20px",
+                }}
+              >
+                SCALE
+              </div>
+              <ScrollArea h={300} scrollbars="y" scrollbarSize={2}>
+                <CustomTable
+                  items={map(
+                    orderBy(editSKUs, [
+                      (item) => !item?.SKU?.startsWith("XX"),
+                      "SKU",
+                    ]),
+                    (x, index) => {
+                      return {
+                        ...x,
+                        No: index + 1,
+                      };
+                    }
+                  )}
+                  headers={
+                    generateHeaderTable(briefType, isKeepClipArt)?.headers
+                  }
+                  onRemove={handleRemoveRow}
+                  headerRemove={
+                    generateHeaderTable(briefType, isKeepClipArt)?.removeHeader
+                  }
+                  setEditSKUs={setEditSKUs}
+                  editSKUs={editSKUs}
+                  productBases={productBases}
+                  setProductBases={setProductBases}
+                  SKU={SKU}
+                  setSKU={setSKU}
+                  selectedProductBases={selectedProductBases}
+                  setSelectedProductBases={setSelectedProductBases}
+                  rndInfo={find(users, { name: rndMember })}
+                  setTriggerCreateSKUPayload={setTriggerCreateSKUPayload}
+                />
+              </ScrollArea>
+            </Grid.Col>
+            <Grid.Col
+              span={12}
               style={{
-                width: "100px",
-                borderRadius: "20px",
-                borderWidth: "2px",
-                backgroundColor: "#3FA433",
-                color: "#ffffff",
+                display: "flex",
+                justifyContent: "center",
               }}
             >
-              <span>Tạo Brief</span>
-            </Button>
-          </Grid.Col>
-        </Grid>
-      </Modal>)}
+              <Button
+                className={cn(
+                  "button-stroke-blue button-small",
+                  styles.createButton
+                )}
+                loading={createBriefLoading}
+                onClick={handleSubmitBrief}
+                style={{
+                  width: "100px",
+                  borderRadius: "20px",
+                  borderWidth: "2px",
+                  backgroundColor: "#3FA433",
+                  color: "#ffffff",
+                }}
+              >
+                <span>Tạo Brief</span>
+              </Button>
+            </Grid.Col>
+          </Grid>
+        </Modal>
+      )}
 
       {openedModalPreviewMixMatch && (
         <ModalPreviewMixMatch
@@ -2517,6 +2556,9 @@ const NewCampaigns = () => {
           SKU={SKU}
           setSKU={setSKU}
           setSelectedProductBases={setSelectedProductBases}
+          rndInfo={find(users, { name: rndMember })}
+          setTriggerCreateSKUPayload={setTriggerCreateSKUPayload}
+
         />
       )}
 

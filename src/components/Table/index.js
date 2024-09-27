@@ -17,6 +17,8 @@ const Table = ({
   setSKU,
   selectedProductBases,
   setSelectedProductBases,
+  rndInfo,
+  setTriggerCreateSKUPayload
 }) => {
   const [selectedFilters, setSelectedFilters] = useState([]);
 
@@ -60,6 +62,8 @@ const Table = ({
             setSKU={setSKU}
             selectedProductBases={selectedProductBases}
             setSelectedProductBases={setSelectedProductBases}
+            rndInfo={rndInfo}
+            setTriggerCreateSKUPayload={setTriggerCreateSKUPayload}
           />
         ))}
       </div>
