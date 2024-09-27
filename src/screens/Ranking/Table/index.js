@@ -48,6 +48,7 @@ import {
   CONVERT_NUMBER_TO_RANKING_STATUS,
   CONVERT_STATUS_TO_RANKING_NUMBER,
   RANKING_STATUS,
+  RND_SIZES,
 } from "../../../constant";
 
 const TARGET_MODES = {
@@ -635,10 +636,11 @@ const RankingTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
+          const size = row?.original?.size || 2;
           return {
             className:
-              row.id === `Total theo ${activeTab}`
-                ? classes["summary-row"]
+              size === 3
+                ? classes["highlight-follow"]
                 : classes["body-cells-op-team"],
           };
         },
@@ -702,10 +704,11 @@ const RankingTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
+          const size = row?.original?.follow;
           return {
             className:
-              row.id === `Total theo ${activeTab}`
-                ? classes["summary-row"]
+              size === 1
+                ? classes["highlight-follow"]
                 : classes["body-cells-op-team"],
           };
         },
