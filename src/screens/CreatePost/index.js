@@ -4,7 +4,6 @@ import {
   Checkbox,
   Flex,
   Group,
-  Image,
   Pagination,
   Progress,
   rem,
@@ -659,14 +658,7 @@ const CreatePost = ({
                   />
                 ))}
               </Flex>
-            ) : (
-              <Image
-                src="/images/content/not_found_2.jpg"
-                h={400}
-                fit="contain"
-                w="100%"
-              />
-            )}
+            ) : null}
           </Card>
           <Group
             justify={isEmpty(brief) ? "space-between" : "flex-end"}
