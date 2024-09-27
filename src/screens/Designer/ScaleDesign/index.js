@@ -37,10 +37,9 @@ const ScaleDesign = ({
   handleUpdateLinkDesign,
   opened,
   setTrigger,
+  setDesignerNote,
+  designerNote,
 }) => {
-  const [designerNote, setDesignerNote] = useState(
-    getStringAsEditorState(selectedSKU?.note?.designer || "")
-  );
   const [loading, setLoading] = useState(false);
   const handleUpdateNote = async () => {
     setLoading(true);
@@ -54,7 +53,7 @@ const ScaleDesign = ({
       },
     });
     if (updateNoteResponse) {
-      close()
+      close();
       setTrigger(true);
       showNotification("Thành công", "Cập nhật Note thành công", "green");
     }
