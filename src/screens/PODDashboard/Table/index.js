@@ -217,8 +217,8 @@ const SellerboardTable = ({
       {
         accessorKey: "product",
         header: "Product",
-        size: 200,
-        maxSize: 200,
+        size: 230,
+        maxSize: 230,
         enableEditing: false,
         enableSorting: false,
         enableMultiSort: true,
@@ -460,13 +460,13 @@ const SellerboardTable = ({
                 }}
               >
                 <Grid.Col
-                  span={4}
+                  span={6}
                   style={{
                     padding: 0,
                   }}
                 >
                   <Tooltip label={productLink}>
-                    <LazyLoad height={50} once={true}>
+                    <LazyLoad height={200} once={true}>
                       <Image
                         src={imageLink || "/images/content/not_found_2.jpg"}
                         width="100%"
@@ -482,7 +482,7 @@ const SellerboardTable = ({
                     </LazyLoad>
                   </Tooltip>
                 </Grid.Col>
-                <Grid.Col span={8}>
+                <Grid.Col span={6}>
                   <Grid
                     style={{
                       width: "100%",
@@ -1051,6 +1051,9 @@ const SellerboardTable = ({
       return {
         className: classes["bottom-toolbar"],
       };
+    },
+    mantinePaperProps: {
+      style: { "--mrt-row-hover-background-color": "#E1EAFF" },
     },
     renderBottomToolbarCustomActions: () => {
       return (

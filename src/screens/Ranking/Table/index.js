@@ -980,6 +980,9 @@ const RankingTable = ({
     enableBottomToolbar: true,
     enableTopToolbar: false,
     manualSorting: true,
+    mantinePaperProps: {
+      style: { "--mrt-row-hover-background-color": "#E1EAFF" },
+    },
     mantineBottomToolbarProps: () => {
       return {
         className: classes["bottom-toolbar"],

@@ -966,32 +966,7 @@ const BriefsTable = ({
               <IconFilterOff />
             </Button>
           </Flex>
-          <Flex
-            style={{
-              gap: "30px",
-              padding: "10px",
-              borderRadius: "10px",
-              backgroundColor: "#EFF0F1",
-            }}
-            justify="end"
-          >
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Undone: {metadata?.totalUndoneBriefsWithFilter}
-            </div>
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
-            </div>
-          </Flex>
+
           {editingCell && !isEmpty(updateBrief.linkDesigns) && (
             <Flex>
               <Button
