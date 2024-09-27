@@ -147,6 +147,12 @@ const RankingTable = ({
           }
           return {
             className: classnames || classes["body-cells-op-team"],
+            ...(color &&
+              query?.mode[0] === TARGET_MODES.RANKING && {
+                style: {
+                  "--mrt-row-hover-background-color": "#A2E09C",
+                },
+              }),
           };
         },
         mantineTableHeadCellProps: {
@@ -642,6 +648,9 @@ const RankingTable = ({
               size === 3
                 ? classes["highlight-follow"]
                 : classes["body-cells-op-team"],
+            ...(size === 3 && {
+              style: { "--mrt-row-hover-background-color": "#A2E09C" },
+            }),
           };
         },
         mantineTableHeadCellProps: () => {
@@ -704,12 +713,15 @@ const RankingTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
-          const size = row?.original?.follow;
+          const follow = row?.original?.follow;
           return {
             className:
-              size === 1
+              follow === 1
                 ? classes["highlight-follow"]
                 : classes["body-cells-op-team"],
+            ...(follow === 1 && {
+              style: { "--mrt-row-hover-background-color": "#A2E09C" },
+            }),
           };
         },
         mantineTableHeadCellProps: () => {
@@ -896,6 +908,9 @@ const RankingTable = ({
               row.id === `Total theo ${activeTab}`
                 ? classes["summary-row"]
                 : classes["total-changes"],
+            style: {
+              "--mrt-row-hover-background-color": "#d7e2fb",
+            },
           };
         },
         mantineTableHeadCellProps: () => {
@@ -982,6 +997,7 @@ const RankingTable = ({
     manualSorting: true,
     mantinePaperProps: {
       style: { "--mrt-row-hover-background-color": "#E1EAFF" },
+      hover: false,
     },
     mantineBottomToolbarProps: () => {
       return {
