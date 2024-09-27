@@ -1198,7 +1198,11 @@ const NewCampaigns = () => {
         rndId: find(users, { name: rndMember })?.uid,
         epmId: find(users, { name: epmMember })?.uid,
         designerId: find(users, { name: designerMember })?.uid,
-        ...(epmNote || designerNote || mktNote || marketBrief?.note
+        ...(epmNote ||
+        designerNote ||
+        mktNote ||
+        marketBrief?.note ||
+        refDesignMarketNote
           ? {
               note: {
                 ...(epmNote && { epm: getEditorStateAsString(epmNote) }),
