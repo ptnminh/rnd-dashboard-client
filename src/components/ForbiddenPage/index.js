@@ -1,9 +1,11 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { ActionIcon, Tooltip } from "@mantine/core";
 import React from "react";
-import { IconLogout } from "@tabler/icons-react";
+import { IconLogout, IconHome } from "@tabler/icons-react";
 import { LOCAL_STORAGE_KEY } from "../../constant/localStorage";
 import { useLocalStorage } from "../../hooks";
+import { useNavigate } from "react-router-dom";
+import { PATH_NAMES } from "../../Routes/routes";
 
 const ForbiddenPage = () => {
   const { logout } = useAuth0();
@@ -15,6 +17,7 @@ const ForbiddenPage = () => {
     key: LOCAL_STORAGE_KEY.PERMISSIONS,
     defaultValue: [],
   });
+  const navigate = useNavigate();
   return (
     <div
       style={{
@@ -58,6 +61,23 @@ const ForbiddenPage = () => {
           }}
         >
           <IconLogout color="#1A1D1F" />
+        </ActionIcon>
+      </Tooltip>
+      <Tooltip label="Về trang chủ" withArrow>
+        <ActionIcon
+          variant="filled"
+          size="xl"
+          color="#54FE55"
+          style={{
+            position: "absolute",
+            top: "100px",
+            left: "30px",
+          }}
+          onClick={() => {
+            navigate(PATH_NAMES?.DIRECTION.url);
+          }}
+        >
+          <IconHome color="#1A1D1F" />
         </ActionIcon>
       </Tooltip>
     </div>
