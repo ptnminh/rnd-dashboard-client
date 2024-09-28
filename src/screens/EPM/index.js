@@ -195,7 +195,7 @@ const EPMScreens = () => {
                   fontSize: "16px",
                 }}
               >
-                Undone: {metadata?.totalTimeToDoneAllBriefsV2Round}
+                Số card: {metadata?.totalUndoneBriefs}
               </div>
               <div
                 style={{
@@ -203,7 +203,7 @@ const EPMScreens = () => {
                   fontSize: "16px",
                 }}
               >
-                Time to done: {metadata?.totalTimeToDoneBriefs}h
+                Time to done: {metadata?.totalTimeToDoneAllBriefsV2Round || 0}
               </div>
             </Flex>
           </>
@@ -229,6 +229,7 @@ const EPMScreens = () => {
             >
               <Switch
                 checked={query?.priority === 2}
+                labelPosition="left"
                 onChange={() => {
                   setQuery({
                     ...query,
@@ -249,7 +250,7 @@ const EPMScreens = () => {
                   fontSize: "16px",
                 }}
               >
-                Undone: {metadata?.totalTimeToDoneBriefsWithFilterV2Round}
+                Số card: {metadata?.totalUndoneBriefsWithFilter}
               </div>
               <div
                 style={{
@@ -257,7 +258,7 @@ const EPMScreens = () => {
                   fontSize: "16px",
                 }}
               >
-                Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
+                Time to done: {metadata?.totalTimeToDoneBriefsWithFilterV2Round}
               </div>
             </Flex>
           </Grid.Col>
