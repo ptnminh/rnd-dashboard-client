@@ -256,7 +256,9 @@ const DesignerScreens = () => {
                   fontSize: "16px",
                 }}
               >
-                Time to done: {metadata?.totalTimeToDoneAllBriefsV2Round || 0}
+                Time to done: {metadata?.totalTimeToDoneAllBriefsV2Round || 0}{
+                  metadata?.totalTimeToDoneAllBriefsV2Round > 1 ? " Days " : " Day "
+                }
               </div>
             </Flex>
           </>
@@ -312,7 +314,7 @@ const DesignerScreens = () => {
                   fontSize: "16px",
                 }}
               >
-                Time to done: {metadata?.totalTimeToDoneBriefsWithFilterV2Round || 0}
+                Time to done: {metadata?.totalTimeToDoneBriefsWithFilterV2Round || 0}{metadata?.totalTimeToDoneBriefsWithFilterV2Round > 1 ? " Days " : " Day "}
               </div>
             </Flex>
           </Grid.Col>
