@@ -149,10 +149,10 @@ const RankingTable = ({
             className: classnames || classes["body-cells-op-team"],
             ...(color &&
               query?.mode[0] === TARGET_MODES.RANKING && {
-                style: {
-                  "--mrt-row-hover-background-color": "#A2E09C",
-                },
-              }),
+              style: {
+                "--mrt-row-hover-background-color": "#A2E09C",
+              },
+            }),
           };
         },
         mantineTableHeadCellProps: {
@@ -424,12 +424,12 @@ const RankingTable = ({
                   style={{
                     ...(index === 0
                       ? {
-                          fontSize: 14,
-                        }
+                        fontSize: 14,
+                      }
                       : {
-                          fontSize: 14,
-                          color: "gray",
-                        }),
+                        fontSize: 14,
+                        color: "gray",
+                      }),
                     fontWeight: "bold",
                     textAlign: "left",
                   }}
@@ -645,12 +645,10 @@ const RankingTable = ({
           const size = row?.original?.size || 2;
           return {
             className:
-              size === 3
-                ? classes["highlight-follow"]
-                : classes["body-cells-op-team"],
-            ...(size === 3 && {
-              style: { "--mrt-row-hover-background-color": "#A2E09C" },
-            }),
+              classes["body-cells-op-team"],
+            // ...(size === 3 && {
+            //   style: { "--mrt-row-hover-background-color": "#A2E09C" },
+            // }),
           };
         },
         mantineTableHeadCellProps: () => {
@@ -685,6 +683,14 @@ const RankingTable = ({
           return (
             <Select
               data={keys(SIZES)}
+              styles={{
+                ...(size === 3 && {
+                  input: {
+                    backgroundColor: "#3c7c36",
+                    color: "#FFFFFF"
+                  }
+                })
+              }}
               value={CONVERT_NUMBER_TO_STATUS[size]}
               onChange={(value) => {
                 const newData = data.map((item) => {
@@ -716,12 +722,10 @@ const RankingTable = ({
           const follow = row?.original?.follow;
           return {
             className:
-              follow === 1
-                ? classes["highlight-follow"]
-                : classes["body-cells-op-team"],
-            ...(follow === 1 && {
-              style: { "--mrt-row-hover-background-color": "#A2E09C" },
-            }),
+              classes["body-cells-op-team"],
+            // ...(follow === 1 && {
+            //   style: { "--mrt-row-hover-background-color": "#A2E09C" },
+            // }),
           };
         },
         mantineTableHeadCellProps: () => {
@@ -739,6 +743,14 @@ const RankingTable = ({
           return (
             <Select
               data={values(RANKING_STATUS)}
+              styles={{
+                ...(follow === 1 && {
+                  input: {
+                    backgroundColor: "#3c7c36",
+                    color: "#FFFFFF"
+                  }
+                })
+              }}
               allowDeselect={false}
               value={CONVERT_NUMBER_TO_RANKING_STATUS[follow]}
               onChange={(pureValue) => {
@@ -760,11 +772,11 @@ const RankingTable = ({
                       follow: value,
                       ...(value === 1
                         ? {
-                            overrideColor: true,
-                          }
+                          overrideColor: true,
+                        }
                         : {
-                            overrideColor: false,
-                          }),
+                          overrideColor: false,
+                        }),
                     };
                   }
                   return item;
@@ -808,37 +820,37 @@ const RankingTable = ({
               {(!isEmpty(sorting) ||
                 !query?.sortBy ||
                 query.sortBy === "latestRank") && (
-                <ActionIcon
-                  aria-label="Settings"
-                  variant="default"
-                  style={{
-                    background: "none",
-                    border: "none",
-                  }}
-                  onClick={() => {
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                    setSorting([]);
-                    setQuery({
-                      ...query,
-                      sortBy: view,
-                      sortDir: "desc",
-                    });
-                  }}
-                >
-                  <IconArrowsSort
+                  <ActionIcon
+                    aria-label="Settings"
+                    variant="default"
                     style={{
-                      width: "60%",
-                      height: "60%",
-                      fontWeight: "bold",
+                      background: "none",
+                      border: "none",
                     }}
-                    stroke={2}
-                    color="#ffffff"
-                  />
-                </ActionIcon>
-              )}
+                    onClick={() => {
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setSorting([]);
+                      setQuery({
+                        ...query,
+                        sortBy: view,
+                        sortDir: "desc",
+                      });
+                    }}
+                  >
+                    <IconArrowsSort
+                      style={{
+                        width: "60%",
+                        height: "60%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#ffffff"
+                    />
+                  </ActionIcon>
+                )}
               {(query?.sortBy === "totalOrdersChanges" ||
                 query?.sortBy === "totalRankChanges") &&
                 isEmpty(sorting) &&
