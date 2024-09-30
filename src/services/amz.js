@@ -75,7 +75,7 @@ export const amzServices = {
   },
   handleUpdateAMZDashboard: async (sku, data) => {
     try {
-      const url = `${AMZ_URL}/api/asins/${sku}`;
+      const url = `${AMZ_URL}/asins/${sku}`;
       const response = await axios.put(url, data);
       const { data: result } = response;
       if (result?.success === "false" || result?.success === false) {
