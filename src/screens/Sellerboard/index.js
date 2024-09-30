@@ -915,6 +915,8 @@ const Sellerboard = () => {
           // }),
         });
       }
+      setListingDays("");
+      setAdDaysNum("");
       setIsConfirmedQuery(true);
     } else {
       isMounted.current = true;
