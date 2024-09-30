@@ -73,4 +73,18 @@ export const amzServices = {
       return false;
     }
   },
+  handleUpdateAMZDashboard: async (sku, data) => {
+    try {
+      const url = `${AMZ_URL}/api/asins/${sku}`;
+      const response = await axios.put(url, data);
+      const { data: result } = response;
+      if (result?.success === "false" || result?.success === false) {
+        return false;
+      }
+      return result;
+    } catch (error) {
+      console.log("Error at handleUpdateAMZDashboard:", error);
+      return false;
+    }
+  }
 };

@@ -854,11 +854,11 @@ const SellerboardTable = ({
                       optimized: newFollow,
                       ...(newFollow === 1
                         ? {
-                            overrideColor: true,
-                          }
+                          overrideColor: true,
+                        }
                         : {
-                            overrideColor: false,
-                          }),
+                          overrideColor: false,
+                        }),
                     };
                   }
                   return item;

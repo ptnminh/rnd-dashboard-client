@@ -31,7 +31,6 @@ import {
   toLower,
   toNumber,
   uniq,
-  values,
 } from "lodash";
 import moment from "moment-timezone";
 import { useWindowScroll } from "@mantine/hooks";
@@ -55,12 +54,6 @@ const TARGET_DATES = {
   SEVEN_DAYS: "7 Days",
 };
 
-const DEFAULT_SORTING = {
-  CREATED_DATE_DESC: "Created Date (Newest)",
-  CREATED_DATE_ASC: "Created Date (Oldest)",
-  TOTAL_DESC: "Total Orders (A-Z)",
-  TOTAL_ASC: "Total Orders (Z-A)",
-};
 const TARGET_DATA = {
   ORDERS: "Orders",
   PROFIT: "Profit",

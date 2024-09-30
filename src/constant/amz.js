@@ -9,3 +9,15 @@ export const AMZ_SORTING = {
   createdDateAsc: "Created Date (A-Z)",
   createdDateDesc: "Created Date (Z-A)",
 };
+export const AMZ_DASHBOARD_STATUS = {
+  NOT_TOUCH: "Chưa touch",
+  OPTIMIZED: "Optimized",
+};
+export const CONVERT_NUMBER_TO_AMZ_DASHBOARD_STATUS = {
+  0: AMZ_DASHBOARD_STATUS.NOT_TOUCH,
+  1: AMZ_DASHBOARD_STATUS.OPTIMIZED,
+};
+export const CONVERT_STATUS_TO_AMZ_DASHBOARD_NUMBER = {
+  [AMZ_DASHBOARD_STATUS.NOT_TOUCH]: 0,
+  [AMZ_DASHBOARD_STATUS.OPTIMIZED]: 1,
+};
