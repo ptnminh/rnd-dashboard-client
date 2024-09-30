@@ -8,7 +8,9 @@ import { Logo } from "./logo";
 import {
   ActionIcon,
   Avatar,
+  Box,
   Button,
+  Collapse,
   Flex,
   Grid,
   Group,
@@ -19,7 +21,7 @@ import {
   ScrollArea,
   Tooltip,
 } from "@mantine/core";
-import { IconLogout, IconBrandSamsungpass } from "@tabler/icons-react";
+import { IconLogout, IconBrandSamsungpass, IconArrowBarRight, IconArrowBarLeft } from "@tabler/icons-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useDisclosure } from "@mantine/hooks";
 import { NAVIGATION, PATH_NAMES } from "../../Routes";
@@ -150,7 +152,7 @@ const UpdatePassword = ({ closeModal, user }) => {
     </form>
   );
 };
-const Sidebar = ({ className, onClose }) => {
+const Sidebar = ({ className, onClose, openedToggle, toggle }) => {
   const [visible, setVisible] = useState(false);
   const { logout, user } = useAuth0();
   const [opened, { open, close }] = useDisclosure(false);
@@ -183,114 +185,148 @@ const Sidebar = ({ className, onClose }) => {
   );
   return (
     <>
-      <div
+      <Box
         className={cn(styles.sidebar, className, { [styles.active]: visible })}
+        style={{
+          ...(openedToggle ? {
+            width: "290px",
+            padding: "16px"
+          } : {
+            width: "150px",
+            padding: "12px"
+          })
+        }}
       >
         <button className={styles.close} onClick={onClose}>
           <Icon name="close" size="24" />
         </button>
-        <Link className={styles.logo} to="/" onClick={onClose}>
-          <Logo />
-        </Link>
-        <ScrollArea
-          scrollbars="y"
-          scrollbarSize={4}
-          scrollHideDelay={1000}
-          style={{ height: "80%" }}
-        >
-          <div className={styles.menu}>
-            {map(filteredNavigation, (x, index) =>
-              x.url ? (
-                <>
-                  <NavLink
-                    className={styles.item}
-                    activeClassName={styles.active}
-                    to={x.url}
-                    key={index}
-                    exact
-                    onClick={onClose}
-                  >
-                    <Icon name={x.icon} size="24" />
-                    {x.title}
-                  </NavLink>
-                </>
-              ) : (
-                <Dropdown
-                  className={styles.dropdown}
-                  visibleSidebar={visible}
-                  setValue={setVisible}
-                  key={index}
-                  item={x}
-                  onClose={onClose}
-                />
-              )
-            )}
-          </div>
-        </ScrollArea>
-        <button className={styles.toggle} onClick={() => setVisible(!visible)}>
-          <Icon name="arrow-right" size="24" />
-          <Icon name="close" size="24" />
-        </button>
-      </div>
-      <div
-        style={{
-          position: "fixed",
-          left: 0,
-          bottom: "10px",
-          cursor: "pointer",
-          width: "290px",
-          padding: "24px",
-        }}
-      >
-        <Group
-          style={{
+        <Group align="start" justify="space-between" style={{
+          ...(openedToggle ? {
+            flexDirection: "row",
             justifyContent: "space-between",
-          }}
-        >
-          <Menu shadow="md" width={200}>
-            <Menu.Target>
-              <Flex direction="column" gap="5px">
-                <Avatar
-                  color="cyan"
-                  variant="filled"
-                  radius="xl"
-                  size="lg"
-                  src={user?.picture}
-                />
-              </Flex>
-            </Menu.Target>
-            <Menu.Dropdown>
-              <Menu.Item
-                leftSection={
-                  <IconBrandSamsungpass
-                    style={{ width: rem(14), height: rem(14) }}
+            alignItems: "start",
+          } : {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "start",
+          })
+        }}>
+          <div>
+            <Link className={styles.logo} to="/" onClick={onClose}>
+              <Logo />
+            </Link>
+          </div>
+          {
+            openedToggle ? <IconArrowBarLeft style={{ width: '20px', height: '20px', cursor: "pointer", marginTop: "8px" }} onClick={toggle} stroke={1.5} /> : <IconArrowBarRight style={{ width: '20px', height: '20px', cursor: "pointer", marginTop: "8px" }} onClick={toggle} stroke={1.5} />
+          }
+        </Group>
+        <Collapse in={openedToggle} style={{
+          height: "800px !important",
+        }} h={800}>
+          <ScrollArea
+            scrollbars="y"
+            scrollbarSize={4}
+            scrollHideDelay={1000}
+            style={{ height: "80%" }}
+          >
+            <div className={styles.menu}>
+              {map(filteredNavigation, (x, index) =>
+                x.url ? (
+                  <>
+                    <NavLink
+                      className={styles.item}
+                      activeClassName={styles.active}
+                      to={x.url}
+                      key={index}
+                      exact
+                      onClick={onClose}
+                    >
+                      <Icon name={x.icon} size="24" />
+                      {x.title}
+                    </NavLink>
+                  </>
+                ) : (
+                  <Dropdown
+                    className={styles.dropdown}
+                    visibleSidebar={visible}
+                    setValue={setVisible}
+                    key={index}
+                    item={x}
+                    onClose={onClose}
                   />
-                }
-                onClick={() => {
-                  open();
-                }}
-              >
-                Change Password
-              </Menu.Item>
-            </Menu.Dropdown>
-          </Menu>
+                )
+              )}
+            </div>
+          </ScrollArea>
 
-          <Tooltip label="Đăng xuất" withArrow>
-            <ActionIcon
-              variant="filled"
-              size="xl"
-              color="#EFEFEF"
-              onClick={() => {
-                removeToken();
-                removePermissions();
-                logout();
+
+          <div
+            style={{
+              position: "fixed",
+              left: 0,
+              bottom: "10px",
+              cursor: "pointer",
+              width: "290px",
+              padding: "24px",
+            }}
+          >
+            <Group
+              style={{
+                justifyContent: "space-between",
               }}
             >
-              <IconLogout color="#1A1D1F" />
-            </ActionIcon>
-          </Tooltip>
-        </Group>
-      </div>
+              <Menu shadow="md" width={200}>
+                <Menu.Target>
+                  <Flex direction="column" gap="5px">
+                    <Avatar
+                      color="cyan"
+                      variant="filled"
+                      radius="xl"
+                      size="lg"
+                      src={user?.picture}
+                    />
+                  </Flex>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Item
+                    leftSection={
+                      <IconBrandSamsungpass
+                        style={{ width: rem(14), height: rem(14) }}
+                      />
+                    }
+                    onClick={() => {
+                      open();
+                    }}
+                  >
+                    Change Password
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
+
+              <Tooltip label="Đăng xuất" withArrow>
+                <ActionIcon
+                  variant="filled"
+                  size="xl"
+                  color="#EFEFEF"
+                  onClick={() => {
+                    removeToken();
+                    removePermissions();
+                    logout();
+                  }}
+                >
+                  <IconLogout color="#1A1D1F" />
+                </ActionIcon>
+              </Tooltip>
+            </Group>
+          </div>
+          <button className={styles.toggle} onClick={() => setVisible(!visible)}>
+            <Icon name="arrow-right" size="24" />
+            <Icon name="close" size="24" />
+          </button>
+        </Collapse>
+
+      </Box>
+
       <Modal
         opened={opened}
         onClose={close}

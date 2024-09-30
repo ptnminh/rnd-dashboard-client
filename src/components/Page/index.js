@@ -9,6 +9,7 @@ import { find, forEach, intersection, isEmpty, map } from "lodash";
 import { LOCAL_STORAGE_KEY } from "../../constant";
 import { authServices } from "../../services/auth";
 import { useLocalStorage } from "../../hooks";
+import { useDisclosure } from "@mantine/hooks";
 
 const findNavigationItem = (navigation, pathname) => {
   let result = null;
@@ -109,11 +110,21 @@ const Page = ({ wide, children }) => {
       navigate("/verify-email");
     }
   }, [isAuthenticated]);
+  const [openedToggle, { toggle }] = useDisclosure(false);
+
   return !isForbidden ? (
-    <div className={styles.page}>
+    <div className={styles.page} style={{
+      ...(openedToggle ? {
+        padding: "0 0 0 290px",
+      } : {
+        padding: "0 0 0 150px",
+      })
+    }}>
       <Sidebar
         className={cn(styles.sidebar, { [styles.visible]: visible })}
         onClose={() => setVisible(false)}
+        openedToggle={openedToggle}
+        toggle={toggle}
       />
       <div className={styles.inner}>
         <div
