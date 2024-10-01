@@ -46,7 +46,12 @@ import {
   FULFILLMENT_CHANNELS,
 } from "../../../constant";
 import moment from "moment-timezone";
-import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS, CONVERT_STATUS_TO_NUMBER, VALUES } from "../../../utils";
+import {
+  arraysMatchUnordered,
+  CONVERT_NUMBER_TO_STATUS,
+  CONVERT_STATUS_TO_NUMBER,
+  VALUES,
+} from "../../../utils";
 import { DateRangePicker } from "rsuite";
 import LazyLoad from "react-lazyload";
 import { amzServices } from "../../../services";
@@ -83,7 +88,6 @@ const SellerboardTable = ({
   listingDays,
   setListingDays,
 }) => {
-
   const handleUpdateAMZDashboard = async (sku, data) => {
     await amzServices.handleUpdateAMZDashboard(sku, data);
   };
@@ -274,7 +278,8 @@ const SellerboardTable = ({
                     Ads:
                   </Text>
                   <Group>
-                    {(!query?.primarySortBy || query?.primarySortBy !== "testDate") && (
+                    {(!query?.primarySortBy ||
+                      query?.primarySortBy !== "testDate") && (
                       <ActionIcon
                         aria-label="Settings"
                         variant="default"
@@ -376,7 +381,8 @@ const SellerboardTable = ({
                     List:
                   </Text>
                   <Group>
-                    {(!query?.primarySortBy || query?.primarySortBy !== "createdDate") && (
+                    {(!query?.primarySortBy ||
+                      query?.primarySortBy !== "createdDate") && (
                       <ActionIcon
                         aria-label="Settings"
                         variant="default"
@@ -523,7 +529,7 @@ const SellerboardTable = ({
                       span={12}
                       style={{
                         paddingLeft: 0,
-                        paddingRight: 0
+                        paddingRight: 0,
                       }}
                     >
                       <Flex>
@@ -545,7 +551,7 @@ const SellerboardTable = ({
                         display: "flex",
                         justifyContent: "start",
                         paddingLeft: 0,
-                        paddingRight: 0
+                        paddingRight: 0,
                       }}
                     >
                       <Tooltip label={url}>
@@ -554,7 +560,7 @@ const SellerboardTable = ({
                             fontSize: 12,
                             color: "gray",
                             cursor: "pointer",
-                            textAlign: "left"
+                            textAlign: "left",
                           }}
                           onClick={() => {
                             window.open(url, "_blank");
@@ -577,7 +583,6 @@ const SellerboardTable = ({
                             textAlign: "left",
                             fontSize: 11,
                             color: "gray",
-
                           }}
                         >
                           List:{" "}
@@ -600,7 +605,6 @@ const SellerboardTable = ({
                             textAlign: "left",
                             fontSize: 11,
                             color: "gray",
-
                           }}
                         >
                           Ads:{" "}
@@ -610,7 +614,6 @@ const SellerboardTable = ({
                     )}
                   </Grid>
                 </Grid.Col>
-
               </Grid>
             </Flex>
           );
@@ -921,11 +924,11 @@ const SellerboardTable = ({
                       optimized: newFollow,
                       ...(newFollow === 1
                         ? {
-                          overrideColor: true,
-                        }
+                            overrideColor: true,
+                          }
                         : {
-                          overrideColor: false,
-                        }),
+                            overrideColor: false,
+                          }),
                     };
                   }
                   return item;
@@ -971,7 +974,8 @@ const SellerboardTable = ({
               >
                 Total Orders
               </Text>
-              {(!query?.primarySortBy || query?.primarySortBy !== "ordersInRange") && (
+              {(!query?.primarySortBy ||
+                query?.primarySortBy !== "ordersInRange") && (
                 <ActionIcon
                   aria-label="Settings"
                   variant="default"
@@ -1132,7 +1136,7 @@ const SellerboardTable = ({
               backgroundColor: "#EFF0F1",
               flexWrap: "wrap",
               width: "100%",
-              alignItems: "end"
+              alignItems: "end",
             }}
           >
             <MultiSelect
@@ -1176,7 +1180,6 @@ const SellerboardTable = ({
                   display: "none",
                 },
               }}
-
               value={
                 arraysMatchUnordered(query?.storeValues, ["PFH", "QZL", "GGT"])
                   ? ["All"]
@@ -1208,7 +1211,7 @@ const SellerboardTable = ({
                 });
               }}
             />
-            <MultiSelect
+            {/* <MultiSelect
               label="Channel"
               placeholder="Channel"
               data={FULFILLMENT_CHANNELS}
@@ -1283,7 +1286,7 @@ const SellerboardTable = ({
                 });
               }}
 
-            />
+            /> */}
             <Select
               data={keys(VALUES)}
               placeholder="Value"
@@ -1317,10 +1320,7 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 },
               }}
-              value={
-                CONVERT_NUMBER_TO_STATUS[query.value] ||
-                null
-              }
+              value={CONVERT_NUMBER_TO_STATUS[query.value] || null}
               onChange={(value) => {
                 setPagination({
                   ...pagination,

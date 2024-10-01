@@ -462,9 +462,19 @@ const PODDashboard = () => {
                                 ...pagination,
                                 currentPage: 1,
                               });
+                              if (query?.toggleTest) {
+                                setAdDaysNum("");
+                              } else {
+                                setAdDaysNum("30");
+                              }
                               setQuery({
                                 ...query,
                                 toggleTest: !query.toggleTest,
+                                ...(query?.toggleTest
+                                  ? { adDays: null }
+                                  : {
+                                      adDays: 30,
+                                    }),
                               });
                             }}
                             styles={{
@@ -734,7 +744,7 @@ const PODDashboard = () => {
                       tableData={map(saleMetrics, (row) => {
                         return {
                           ...row,
-                          data: orderBy(row?.sales, ["key"], ["desc"]) || [],
+                          data: row?.sales,
                         };
                       })}
                       setTableData={setSaleMetrics}

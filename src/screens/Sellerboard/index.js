@@ -22,13 +22,31 @@ import {
 import { useLocation, useNavigate } from "react-router-dom";
 import { amzServices } from "../../services";
 import Table from "./Table";
-import { filter, includes, isEmpty, join, keys, map, omit, orderBy, toLower, toNumber, uniq, values } from "lodash";
+import {
+  filter,
+  includes,
+  isEmpty,
+  join,
+  keys,
+  map,
+  omit,
+  orderBy,
+  toLower,
+  toNumber,
+  uniq,
+  values,
+} from "lodash";
 import SurvivalModeTable from "./SurvivalMode";
 import moment from "moment-timezone";
 import { useWindowScroll } from "@mantine/hooks";
 import { IconArrowUp, IconFilterOff } from "@tabler/icons-react";
 import { AMZ_SORTING, AMZ_STORES, FULFILLMENT_CHANNELS } from "../../constant";
-import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS, CONVERT_STATUS_TO_NUMBER, VALUES } from "../../utils";
+import {
+  arraysMatchUnordered,
+  CONVERT_NUMBER_TO_STATUS,
+  CONVERT_STATUS_TO_NUMBER,
+  VALUES,
+} from "../../utils";
 import { DateRangePicker } from "rsuite";
 
 const TABS_VIEW = {
@@ -37,7 +55,6 @@ const TABS_VIEW = {
   Month: "Month",
   SURVIVAL: "Survival",
 };
-
 
 const TARGET_DATES = {
   ONE_DAY: "1 Days",
@@ -57,12 +74,9 @@ const moveIdsToStart = (array, ids) => {
   });
 };
 
-
-
 const FilterNormalModeHeader = ({
   query,
   setQuery,
-  activeTab,
   setIsLoadmore,
   setPagination,
   setIsConfirmedQuery,
@@ -93,7 +107,7 @@ const FilterNormalModeHeader = ({
           backgroundColor: "#EFF0F1",
           flexWrap: "wrap",
           width: "100%",
-          alignItems: "end"
+          alignItems: "end",
         }}
       >
         <MultiSelect
@@ -137,7 +151,6 @@ const FilterNormalModeHeader = ({
               display: "none",
             },
           }}
-
           value={
             arraysMatchUnordered(query?.storeValues, ["PFH", "QZL", "GGT"])
               ? ["All"]
@@ -169,7 +182,7 @@ const FilterNormalModeHeader = ({
             });
           }}
         />
-        <MultiSelect
+        {/* <MultiSelect
           label="Channel"
           placeholder="Channel"
           data={FULFILLMENT_CHANNELS}
@@ -243,8 +256,7 @@ const FilterNormalModeHeader = ({
               fulfillmentChannelValues: [],
             });
           }}
-
-        />
+        /> */}
         <Select
           data={keys(VALUES)}
           placeholder="Value"
@@ -278,10 +290,7 @@ const FilterNormalModeHeader = ({
               fontWeight: "bold",
             },
           }}
-          value={
-            CONVERT_NUMBER_TO_STATUS[query.value] ||
-            null
-          }
+          value={CONVERT_NUMBER_TO_STATUS[query.value] || null}
           onChange={(value) => {
             setPagination({
               ...pagination,
@@ -710,10 +719,10 @@ const Sellerboard = () => {
           ...(query?.ordersInRange &&
             query?.startDate &&
             query?.endDate && {
-            startDate: query.startDate,
-            endDate: query.endDate,
-            ordersInRange: toNumber(query.ordersInRange),
-          }),
+              startDate: query.startDate,
+              endDate: query.endDate,
+              ordersInRange: toNumber(query.ordersInRange),
+            }),
           ...(query?.minOrders && {
             minOrders: toNumber(query.minOrders),
           }),
@@ -725,7 +734,7 @@ const Sellerboard = () => {
           "isConfirmed",
           "fulfillmentChannelValues",
           "salesDateValue",
-          "targetDate"
+          "targetDate",
         ]
       ),
       limit: 50,
@@ -750,10 +759,7 @@ const Sellerboard = () => {
         );
         setSaleMetrics(sortedSaleMetrics);
       } else {
-        const sortedSaleMetrics = moveIdsToStart(
-          data,
-          uniq(overrideMetrics)
-        );
+        const sortedSaleMetrics = moveIdsToStart(data, uniq(overrideMetrics));
         setSaleMetrics(sortedSaleMetrics);
       }
       setPagination({
@@ -942,7 +948,7 @@ const Sellerboard = () => {
                 height: "100%",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between"
+                justifyContent: "space-between",
               }}
             >
               <Switch
@@ -950,9 +956,7 @@ const Sellerboard = () => {
                 label={TABS_VIEW.SURVIVAL}
                 onChange={(event) => {
                   const value = event.currentTarget.checked;
-                  setActiveTab(
-                    value ? TABS_VIEW.SURVIVAL : TABS_VIEW.Date
-                  );
+                  setActiveTab(value ? TABS_VIEW.SURVIVAL : TABS_VIEW.Date);
                 }}
                 style={{
                   cursor: "pointer",
@@ -1158,10 +1162,18 @@ const Sellerboard = () => {
                               ...pagination,
                               currentPage: 1,
                             });
+                            if (query?.toggleTest) {
+                              setListingDays("");
+                              setAdDaysNum("");
+                            }
                             setIsConfirmedQuery(true);
                             setQuery({
                               ...query,
                               toggleTest: !query.toggleTest,
+                              ...(query.toggleTest && {
+                                adDays: null,
+                                listingDays: null,
+                              }),
                             });
                           }}
                           styles={{
@@ -1179,12 +1191,7 @@ const Sellerboard = () => {
                   {activeTab === TABS_VIEW.Date && !isEmpty(saleMetrics) && (
                     <Table
                       className={styles.Table}
-                      tableData={map(saleMetrics, (x) => {
-                        return {
-                          ...x,
-                          data: orderBy(x.data, ["key"], "desc")
-                        }
-                      })}
+                      tableData={saleMetrics}
                       query={query}
                       setQuery={setQuery}
                       loading={loadingFetchSaleMetrics}
@@ -1240,12 +1247,7 @@ const Sellerboard = () => {
                   {activeTab === TABS_VIEW.Week && !isEmpty(saleMetrics) && (
                     <Table
                       className={styles.Table}
-                      tableData={map(saleMetrics, (x) => {
-                        return {
-                          ...x,
-                          data: orderBy(x.data, ["key"], "desc")
-                        }
-                      })}
+                      tableData={saleMetrics}
                       query={query}
                       setQuery={setQuery}
                       loading={loadingFetchSaleMetrics}
@@ -1301,12 +1303,7 @@ const Sellerboard = () => {
                   {activeTab === TABS_VIEW.Month && !isEmpty(saleMetrics) && (
                     <Table
                       className={styles.Table}
-                      tableData={map(saleMetrics, (x) => {
-                        return {
-                          ...x,
-                          data: orderBy(x.data, ["key"], "desc")
-                        }
-                      })}
+                      tableData={saleMetrics}
                       query={query}
                       setQuery={setQuery}
                       loading={loadingFetchSaleMetrics}

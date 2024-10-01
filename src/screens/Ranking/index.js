@@ -3,6 +3,7 @@ import styles from "./RankingPODShopifyProducts.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import {
+  ActionIcon,
   Affix,
   Button,
   Checkbox,
@@ -13,17 +14,29 @@ import {
   Loader,
   Modal,
   Radio,
+  RangeSlider,
   rem,
   Text,
+  TextInput,
+  Tooltip,
   Transition,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { rankingServices } from "../../services";
 import Table from "./Table";
-import { filter, includes, isEmpty, map, omit, toNumber, uniq } from "lodash";
+import {
+  filter,
+  includes,
+  isEmpty,
+  map,
+  omit,
+  set,
+  toNumber,
+  uniq,
+} from "lodash";
 import moment from "moment-timezone";
 import { useDisclosure, useWindowScroll } from "@mantine/hooks";
-import { IconArrowUp } from "@tabler/icons-react";
+import { IconArrowUp, IconCheck } from "@tabler/icons-react";
 
 const TARGET_DATES = {
   TODAY: "Today",
@@ -178,6 +191,9 @@ const RankingPODShopifyProducts = () => {
     fetchCompetitors();
   }, []);
 
+  const [fromRank, setFromRank] = useState(0);
+  const [toRank, setToRank] = useState(0);
+
   // listen sorting change set isConfirmedQuery to true for refetch data
   useEffect(() => {
     if (isMounted.current) {
@@ -224,7 +240,7 @@ const RankingPODShopifyProducts = () => {
                 style={{
                   padding: "10px",
                   borderRadius: "10px",
-                  backgroundColor: "#EFF0F1",
+                  backgroundColor: "rgb(239 240 241 / 32%)",
                   width: "100%",
                 }}
               >
@@ -253,6 +269,7 @@ const RankingPODShopifyProducts = () => {
                         ...pagination,
                         currentPage: 1,
                       });
+
                       switch (value) {
                         case TARGET_DATES.TODAY:
                           setQuery({
@@ -319,7 +336,107 @@ const RankingPODShopifyProducts = () => {
                     </Group>
                   </Radio.Group>
                 </Grid.Col>
-                <Grid.Col span={8.5}>
+                <Grid.Col
+                  span={3.5}
+                  style={{
+                    gap: "5px",
+                    borderRadius: "10px",
+                    flexWrap: "wrap",
+                    width: "100%",
+                    height: "50px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "start",
+                    marginRight: "2px",
+                  }}
+                >
+                  <Group
+                    justify="start"
+                    style={{
+                      height: "100%",
+                    }}
+                  >
+                    <Grid
+                      style={{
+                        height: "100%",
+                      }}
+                    >
+                      <Grid.Col span={5}>
+                        <TextInput
+                          value={fromRank || ""}
+                          placeholder="From Rank"
+                          onChange={(event) => {
+                            setFromRank(event.target.value);
+                          }}
+                          styles={{
+                            root: {
+                              display: "flex",
+                              justifyContent: "end",
+                              alignItems: "center",
+                            },
+                            label: {
+                              fontSize: "12px",
+                              fontWeight: "bold",
+                            },
+                          }}
+                        />
+                      </Grid.Col>
+                      <Grid.Col span={5}>
+                        {" "}
+                        <TextInput
+                          placeholder="To Rank"
+                          value={toRank || ""}
+                          onChange={(event) => {
+                            setToRank(event.target.value);
+                          }}
+                          styles={{
+                            root: {
+                              display: "flex",
+                              justifyContent: "start",
+                              alignItems: "start",
+                            },
+                            label: {
+                              fontSize: "12px",
+                              fontWeight: "bold",
+                            },
+                          }}
+                        />
+                      </Grid.Col>
+                      <Grid.Col
+                        span={2}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Tooltip label="Confirm">
+                          <ActionIcon
+                            aria-label="default action icon"
+                            size="xs"
+                            color="lime.4"
+                            loading={loadingFetchRankings}
+                            onClick={() => {
+                              setPagination({
+                                ...pagination,
+                                currentPage: 1,
+                              });
+                              setQuery({
+                                ...query,
+                                ...(fromRank && {
+                                  fromRank: toNumber(fromRank),
+                                }),
+                                ...(toRank && { toRank: toNumber(toRank) }),
+                              });
+                            }}
+                          >
+                            <IconCheck />{" "}
+                          </ActionIcon>
+                        </Tooltip>
+                      </Grid.Col>
+                    </Grid>
+                  </Group>
+                </Grid.Col>
+                <Grid.Col span={5}>
                   <Checkbox.Group
                     value={query.mode}
                     label="SHOW DATA"
@@ -330,10 +447,14 @@ const RankingPODShopifyProducts = () => {
                       } else {
                         realValue = value[1] ? [value[1]] : value;
                       }
+                      setFromRank("");
+                      setToRank("");
                       setPagination({
                         ...pagination,
                         currentPage: 1,
                       });
+                      setFromRank("");
+                      setToRank("");
                       setQuery({
                         ...query,
                         mode: realValue,
@@ -446,6 +567,8 @@ const RankingPODShopifyProducts = () => {
                           },
                         }}
                         onChange={(value) => {
+                          setFromRank("");
+                          setToRank("");
                           setQuery({
                             ...query,
                             competitor: value,
@@ -504,6 +627,8 @@ const RankingPODShopifyProducts = () => {
                         }}
                         label="Politics: "
                         onChange={(value) => {
+                          setFromRank("");
+                          setToRank("");
                           setQuery({
                             ...query,
                             competitor: value,
