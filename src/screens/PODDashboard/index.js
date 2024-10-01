@@ -88,9 +88,9 @@ const PODDashboard = () => {
   const [overridePODMetrics, setOverridePODMetrics] = useState([]);
 
   const isMounted = useRef(false);
-  const currentWeek = moment().tz("America/Los_Angeles").week();
-  const currentYear = moment().tz("America/Los_Angeles").year();
-  const endDate = moment().tz("America/Los_Angeles").format("YYYY-MM-DD");
+  const currentWeek = moment().week();
+  const currentYear = moment().year();
+  const endDate = moment().format("YYYY-MM-DD");
   const [query, setQuery] = useState({
     groupByKey: toLower(TABS_VIEW.Date),
     dateRange: 3,
