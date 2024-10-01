@@ -707,7 +707,7 @@ const Sellerboard = () => {
   ]);
   const [trigger, setTrigger] = useState(false);
   const [listingDays, setListingDays] = useState("");
-  const [adDaysNum, setAdDaysNum] = useState("");
+  const [adDaysNum, setAdDaysNum] = useState("30");
   const [loadingFetchSaleMetrics, setLoadingFetchSaleMetrics] = useState(true);
   const fetchSaleMetrics = async (page) => {
     setLoadingFetchSaleMetrics(true);
@@ -1165,6 +1165,8 @@ const Sellerboard = () => {
                             if (query?.toggleTest) {
                               setListingDays("");
                               setAdDaysNum("");
+                            } else {
+                              setAdDaysNum("30");
                             }
                             setIsConfirmedQuery(true);
                             setQuery({

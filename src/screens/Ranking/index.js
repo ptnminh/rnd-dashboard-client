@@ -37,6 +37,7 @@ import {
 import moment from "moment-timezone";
 import { useDisclosure, useWindowScroll } from "@mantine/hooks";
 import { IconArrowUp, IconCheck } from "@tabler/icons-react";
+import { showNotification } from "../../utils/index";
 
 const TARGET_DATES = {
   TODAY: "Today",
@@ -73,6 +74,11 @@ const moveIdsToStart = (array, ids) => {
     }
     return 0;
   });
+};
+
+const validRank = (value) => {
+  // value exists and between 1 and 750
+  return value && value >= 1 && value <= 750;
 };
 
 const RankingPODShopifyProducts = () => {
@@ -364,7 +370,7 @@ const RankingPODShopifyProducts = () => {
                       <Grid.Col span={5}>
                         <TextInput
                           value={fromRank || ""}
-                          placeholder="From Rank"
+                          placeholder="From Rank (1)"
                           onChange={(event) => {
                             setFromRank(event.target.value);
                           }}
@@ -384,7 +390,7 @@ const RankingPODShopifyProducts = () => {
                       <Grid.Col span={5}>
                         {" "}
                         <TextInput
-                          placeholder="To Rank"
+                          placeholder="To Rank (750)"
                           value={toRank || ""}
                           onChange={(event) => {
                             setToRank(event.target.value);
@@ -420,13 +426,31 @@ const RankingPODShopifyProducts = () => {
                                 ...pagination,
                                 currentPage: 1,
                               });
-                              setQuery({
-                                ...query,
-                                ...(fromRank && {
-                                  fromRank: toNumber(fromRank),
-                                }),
-                                ...(toRank && { toRank: toNumber(toRank) }),
-                              });
+                              if (fromRank > toRank) {
+                                showNotification(
+                                  "Thất bại",
+                                  "From Rank phải nhỏ hơn To Rank",
+                                  "red"
+                                );
+                                return;
+                              }
+                              if (!fromRank && !toRank) {
+                                showNotification(
+                                  "Thất bại",
+                                  "Vui lòng nhập giá trị Rank",
+                                  "red"
+                                );
+                                return;
+                              }
+                              if (!isEmpty(fromRank) && !isEmpty(toRank)) {
+                                setQuery({
+                                  ...query,
+                                  ...(fromRank && {
+                                    fromRank: toNumber(fromRank),
+                                  }),
+                                  ...(toRank && { toRank: toNumber(toRank) }),
+                                });
+                              }
                             }}
                           >
                             <IconCheck />{" "}

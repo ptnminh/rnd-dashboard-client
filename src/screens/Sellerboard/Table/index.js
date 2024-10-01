@@ -649,7 +649,10 @@ const SellerboardTable = ({
               >
                 Lifetime Order
               </Text>
-              {!query?.primarySortBy && (
+              {(!query?.primarySortBy ||
+                query?.primarySortBy === "ordersInRange" ||
+                query?.primarySortBy === "createdDate" ||
+                query?.primarySortBy === "testDate") && (
                 <ActionIcon
                   aria-label="Settings"
                   variant="default"
@@ -671,7 +674,11 @@ const SellerboardTable = ({
                   }}
                 >
                   <IconArrowsSort
-                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
+                    style={{
+                      width: "60%",
+                      height: "60%",
+                      fontWeight: "bold",
+                    }}
                     stroke={2}
                     color="#ffffff"
                   />
