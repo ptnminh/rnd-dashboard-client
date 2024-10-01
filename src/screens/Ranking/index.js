@@ -275,11 +275,15 @@ const RankingPODShopifyProducts = () => {
                         ...pagination,
                         currentPage: 1,
                       });
+                      setFromRank("");
+                      setToRank("");
 
                       switch (value) {
                         case TARGET_DATES.TODAY:
                           setQuery({
                             ...query,
+                            fromRank: "",
+                            toRank: "",
                             dateRange: 1,
                             targetDate: value,
                           });
@@ -287,6 +291,8 @@ const RankingPODShopifyProducts = () => {
                         case TARGET_DATES.THREE_DAYS:
                           setQuery({
                             ...query,
+                            fromRank: "",
+                            toRank: "",
                             dateRange: 3,
                             targetDate: value,
                           });
@@ -294,6 +300,8 @@ const RankingPODShopifyProducts = () => {
                         case TARGET_DATES.SEVEN_DAYS:
                           setQuery({
                             ...query,
+                            fromRank: "",
+                            toRank: "",
                             dateRange: 7,
                             targetDate: value,
                           });
@@ -483,6 +491,8 @@ const RankingPODShopifyProducts = () => {
                       setQuery({
                         ...query,
                         mode: realValue,
+                        fromRank: "",
+                        toRank: "",
                         sortBy: "totalRankChanges",
                         sortDir: "desc",
                       });
@@ -596,6 +606,8 @@ const RankingPODShopifyProducts = () => {
                           setToRank("");
                           setQuery({
                             ...query,
+                            fromRank: "",
+                            toRank: "",
                             competitor: value,
                           });
                         }}
@@ -656,6 +668,8 @@ const RankingPODShopifyProducts = () => {
                           setToRank("");
                           setQuery({
                             ...query,
+                            fromRank: "",
+                            toRank: "",
                             competitor: value,
                           });
                         }}
