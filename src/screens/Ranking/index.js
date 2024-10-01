@@ -426,18 +426,19 @@ const RankingPODShopifyProducts = () => {
                                 ...pagination,
                                 currentPage: 1,
                               });
-                              if (fromRank > toRank) {
-                                showNotification(
-                                  "Thất bại",
-                                  "From Rank phải nhỏ hơn To Rank",
-                                  "red"
-                                );
-                                return;
-                              }
+
                               if (!fromRank && !toRank) {
                                 showNotification(
                                   "Thất bại",
                                   "Vui lòng nhập giá trị Rank",
+                                  "red"
+                                );
+                                return;
+                              }
+                              if (toNumber(fromRank) > toNumber(toRank)) {
+                                showNotification(
+                                  "Thất bại",
+                                  "From Rank phải nhỏ hơn To Rank",
                                   "red"
                                 );
                                 return;

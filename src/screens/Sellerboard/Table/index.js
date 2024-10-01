@@ -505,9 +505,9 @@ const SellerboardTable = ({
           return (
             <Flex direction="column">
               <Grid>
-                <Grid.Col span={5}>
+                <Grid.Col span={6}>
                   <Tooltip label={url}>
-                    <LazyLoad height={50} once={true}>
+                    <LazyLoad height={100} once={true}>
                       <Image
                         src={image || "/images/content/not_found_2.jpg"}
                         width="100%"
@@ -523,7 +523,7 @@ const SellerboardTable = ({
                     </LazyLoad>
                   </Tooltip>
                 </Grid.Col>
-                <Grid.Col span={7}>
+                <Grid.Col span={6}>
                   <Grid>
                     <Grid.Col
                       span={12}
@@ -543,32 +543,6 @@ const SellerboardTable = ({
                           {sku}
                         </Text>
                       </Flex>
-                    </Grid.Col>
-
-                    <Grid.Col
-                      span={12}
-                      style={{
-                        display: "flex",
-                        justifyContent: "start",
-                        paddingLeft: 0,
-                        paddingRight: 0,
-                      }}
-                    >
-                      <Tooltip label={url}>
-                        <Text
-                          style={{
-                            fontSize: 12,
-                            color: "gray",
-                            cursor: "pointer",
-                            textAlign: "left",
-                          }}
-                          onClick={() => {
-                            window.open(url, "_blank");
-                          }}
-                        >
-                          {ASIN} - {fulfillmentChannel}
-                        </Text>
-                      </Tooltip>
                     </Grid.Col>
                     {createdDate && (
                       <Grid.Col
@@ -612,6 +586,32 @@ const SellerboardTable = ({
                         </Text>
                       </Grid.Col>
                     )}
+
+                    <Grid.Col
+                      span={12}
+                      style={{
+                        display: "flex",
+                        justifyContent: "start",
+                        paddingLeft: 0,
+                        paddingRight: 0,
+                      }}
+                    >
+                      <Tooltip label={url}>
+                        <Text
+                          style={{
+                            fontSize: 12,
+                            color: "gray",
+                            cursor: "pointer",
+                            textAlign: "left",
+                          }}
+                          onClick={() => {
+                            window.open(url, "_blank");
+                          }}
+                        >
+                          {ASIN} - {fulfillmentChannel}
+                        </Text>
+                      </Tooltip>
+                    </Grid.Col>
                   </Grid>
                 </Grid.Col>
               </Grid>
