@@ -323,7 +323,7 @@ const RankingTable = ({
                       setQuery({
                         ...query,
                         sortBy: "latestRank",
-                        sortDir: "desc",
+                        sortDir: "asc",
                       });
                     }}
                   >
@@ -341,7 +341,7 @@ const RankingTable = ({
 
               {isShow &&
                 query?.sortBy === "latestRank" &&
-                query?.sortDir === "desc" && (
+                query?.sortDir === "asc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
@@ -355,7 +355,7 @@ const RankingTable = ({
                       setQuery({
                         ...query,
                         sortBy: "latestRank",
-                        sortDir: "asc",
+                        sortDir: "desc",
                       });
                     }}
                   >
@@ -368,7 +368,7 @@ const RankingTable = ({
                 )}
               {isShow &&
                 query?.sortBy === "latestRank" &&
-                query?.sortDir === "asc" && (
+                query?.sortDir === "desc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
