@@ -110,16 +110,21 @@ const Page = ({ wide, children }) => {
       navigate("/verify-email");
     }
   }, [isAuthenticated]);
-  const [openedToggle, { toggle }] = useDisclosure(false);
+  const [openedToggle, { toggle }] = useDisclosure(true);
 
   return !isForbidden ? (
-    <div className={styles.page} style={{
-      ...(openedToggle ? {
-        padding: "0 0 0 290px",
-      } : {
-        padding: "0 0 0 150px",
-      })
-    }}>
+    <div
+      className={styles.page}
+      style={{
+        ...(openedToggle
+          ? {
+              padding: "0 0 0 290px",
+            }
+          : {
+              padding: "0 0 0 50px",
+            }),
+      }}
+    >
       <Sidebar
         className={cn(styles.sidebar, { [styles.visible]: visible })}
         onClose={() => setVisible(false)}
