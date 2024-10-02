@@ -31,7 +31,6 @@ import {
   toLower,
   toNumber,
   uniq,
-  values,
 } from "lodash";
 import moment from "moment-timezone";
 import { useWindowScroll } from "@mantine/hooks";
@@ -55,12 +54,6 @@ const TARGET_DATES = {
   SEVEN_DAYS: "7 Days",
 };
 
-const DEFAULT_SORTING = {
-  CREATED_DATE_DESC: "Created Date (Newest)",
-  CREATED_DATE_ASC: "Created Date (Oldest)",
-  TOTAL_DESC: "Total Orders (A-Z)",
-  TOTAL_ASC: "Total Orders (Z-A)",
-};
 const TARGET_DATA = {
   ORDERS: "Orders",
   PROFIT: "Profit",
@@ -95,9 +88,9 @@ const PODDashboard = () => {
   const [overridePODMetrics, setOverridePODMetrics] = useState([]);
 
   const isMounted = useRef(false);
-  const currentWeek = moment().tz("America/Los_Angeles").week();
-  const currentYear = moment().tz("America/Los_Angeles").year();
-  const endDate = moment().tz("America/Los_Angeles").format("YYYY-MM-DD");
+  const currentWeek = moment().week();
+  const currentYear = moment().year();
+  const endDate = moment().format("YYYY-MM-DD");
   const [query, setQuery] = useState({
     groupByKey: toLower(TABS_VIEW.Date),
     dateRange: 3,
@@ -469,9 +462,19 @@ const PODDashboard = () => {
                                 ...pagination,
                                 currentPage: 1,
                               });
+                              if (query?.toggleTest) {
+                                setAdDaysNum("");
+                              } else {
+                                setAdDaysNum("30");
+                              }
                               setQuery({
                                 ...query,
                                 toggleTest: !query.toggleTest,
+                                ...(query?.toggleTest
+                                  ? { adDays: null }
+                                  : {
+                                      adDays: 30,
+                                    }),
                               });
                             }}
                             styles={{
@@ -741,7 +744,7 @@ const PODDashboard = () => {
                       tableData={map(saleMetrics, (row) => {
                         return {
                           ...row,
-                          data: orderBy(row?.sales, ["key"], ["desc"]) || [],
+                          data: row?.sales,
                         };
                       })}
                       setTableData={setSaleMetrics}

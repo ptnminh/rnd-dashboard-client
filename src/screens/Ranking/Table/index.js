@@ -149,10 +149,10 @@ const RankingTable = ({
             className: classnames || classes["body-cells-op-team"],
             ...(color &&
               query?.mode[0] === TARGET_MODES.RANKING && {
-              style: {
-                "--mrt-row-hover-background-color": "#A2E09C",
-              },
-            }),
+                style: {
+                  "--mrt-row-hover-background-color": "#A2E09C",
+                },
+              }),
           };
         },
         mantineTableHeadCellProps: {
@@ -197,7 +197,7 @@ const RankingTable = ({
         },
       };
     });
-    return orderBy(columns, "header", "desc");
+    return columns;
   };
 
   // UseEffect to generate and sort columns based on tableData
@@ -323,7 +323,7 @@ const RankingTable = ({
                       setQuery({
                         ...query,
                         sortBy: "latestRank",
-                        sortDir: "desc",
+                        sortDir: "asc",
                       });
                     }}
                   >
@@ -341,7 +341,7 @@ const RankingTable = ({
 
               {isShow &&
                 query?.sortBy === "latestRank" &&
-                query?.sortDir === "desc" && (
+                query?.sortDir === "asc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
@@ -355,7 +355,7 @@ const RankingTable = ({
                       setQuery({
                         ...query,
                         sortBy: "latestRank",
-                        sortDir: "asc",
+                        sortDir: "desc",
                       });
                     }}
                   >
@@ -368,7 +368,7 @@ const RankingTable = ({
                 )}
               {isShow &&
                 query?.sortBy === "latestRank" &&
-                query?.sortDir === "asc" && (
+                query?.sortDir === "desc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
@@ -424,12 +424,12 @@ const RankingTable = ({
                   style={{
                     ...(index === 0
                       ? {
-                        fontSize: 14,
-                      }
+                          fontSize: 14,
+                        }
                       : {
-                        fontSize: 14,
-                        color: "gray",
-                      }),
+                          fontSize: 14,
+                          color: "gray",
+                        }),
                     fontWeight: "bold",
                     textAlign: "left",
                   }}
@@ -644,8 +644,7 @@ const RankingTable = ({
         mantineTableBodyCellProps: ({ row }) => {
           const size = row?.original?.size || 2;
           return {
-            className:
-              classes["body-cells-op-team"],
+            className: classes["body-cells-op-team"],
             // ...(size === 3 && {
             //   style: { "--mrt-row-hover-background-color": "#A2E09C" },
             // }),
@@ -687,9 +686,9 @@ const RankingTable = ({
                 ...(size === 3 && {
                   input: {
                     backgroundColor: "#3c7c36",
-                    color: "#FFFFFF"
-                  }
-                })
+                    color: "#FFFFFF",
+                  },
+                }),
               }}
               value={CONVERT_NUMBER_TO_STATUS[size]}
               onChange={(value) => {
@@ -721,8 +720,7 @@ const RankingTable = ({
         mantineTableBodyCellProps: ({ row }) => {
           const follow = row?.original?.follow;
           return {
-            className:
-              classes["body-cells-op-team"],
+            className: classes["body-cells-op-team"],
             // ...(follow === 1 && {
             //   style: { "--mrt-row-hover-background-color": "#A2E09C" },
             // }),
@@ -747,9 +745,9 @@ const RankingTable = ({
                 ...(follow === 1 && {
                   input: {
                     backgroundColor: "#3c7c36",
-                    color: "#FFFFFF"
-                  }
-                })
+                    color: "#FFFFFF",
+                  },
+                }),
               }}
               allowDeselect={false}
               value={CONVERT_NUMBER_TO_RANKING_STATUS[follow]}
@@ -772,11 +770,11 @@ const RankingTable = ({
                       follow: value,
                       ...(value === 1
                         ? {
-                          overrideColor: true,
-                        }
+                            overrideColor: true,
+                          }
                         : {
-                          overrideColor: false,
-                        }),
+                            overrideColor: false,
+                          }),
                     };
                   }
                   return item;
@@ -820,37 +818,37 @@ const RankingTable = ({
               {(!isEmpty(sorting) ||
                 !query?.sortBy ||
                 query.sortBy === "latestRank") && (
-                  <ActionIcon
-                    aria-label="Settings"
-                    variant="default"
+                <ActionIcon
+                  aria-label="Settings"
+                  variant="default"
+                  style={{
+                    background: "none",
+                    border: "none",
+                  }}
+                  onClick={() => {
+                    setPagination({
+                      ...pagination,
+                      currentPage: 1,
+                    });
+                    setSorting([]);
+                    setQuery({
+                      ...query,
+                      sortBy: view,
+                      sortDir: "desc",
+                    });
+                  }}
+                >
+                  <IconArrowsSort
                     style={{
-                      background: "none",
-                      border: "none",
+                      width: "60%",
+                      height: "60%",
+                      fontWeight: "bold",
                     }}
-                    onClick={() => {
-                      setPagination({
-                        ...pagination,
-                        currentPage: 1,
-                      });
-                      setSorting([]);
-                      setQuery({
-                        ...query,
-                        sortBy: view,
-                        sortDir: "desc",
-                      });
-                    }}
-                  >
-                    <IconArrowsSort
-                      style={{
-                        width: "60%",
-                        height: "60%",
-                        fontWeight: "bold",
-                      }}
-                      stroke={2}
-                      color="#ffffff"
-                    />
-                  </ActionIcon>
-                )}
+                    stroke={2}
+                    color="#ffffff"
+                  />
+                </ActionIcon>
+              )}
               {(query?.sortBy === "totalOrdersChanges" ||
                 query?.sortBy === "totalRankChanges") &&
                 isEmpty(sorting) &&
@@ -957,7 +955,7 @@ const RankingTable = ({
       },
     ];
     // Combine base columns and custom columns, ensuring custom columns are always sorted
-    return [...baseColumns, ...orderBy(customColumns, "header", "desc")];
+    return [...baseColumns, ...customColumns];
   }, [customColumns, data, summaryRow]);
 
   const table = useMantineReactTable({

@@ -7,25 +7,46 @@ import {
   Button,
   Flex,
   Grid,
+  Group,
   Loader,
   MultiSelect,
+  Radio,
   rem,
   Select,
   Switch,
   Tabs,
+  Text,
   TextInput,
   Transition,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import { amzServices } from "../../services";
 import Table from "./Table";
-import { filter, isEmpty, join, omit, toLower, toNumber, values } from "lodash";
+import {
+  filter,
+  includes,
+  isEmpty,
+  join,
+  keys,
+  map,
+  omit,
+  orderBy,
+  toLower,
+  toNumber,
+  uniq,
+  values,
+} from "lodash";
 import SurvivalModeTable from "./SurvivalMode";
 import moment from "moment-timezone";
 import { useWindowScroll } from "@mantine/hooks";
 import { IconArrowUp, IconFilterOff } from "@tabler/icons-react";
 import { AMZ_SORTING, AMZ_STORES, FULFILLMENT_CHANNELS } from "../../constant";
-import { arraysMatchUnordered } from "../../utils";
+import {
+  arraysMatchUnordered,
+  CONVERT_NUMBER_TO_STATUS,
+  CONVERT_STATUS_TO_NUMBER,
+  VALUES,
+} from "../../utils";
 import { DateRangePicker } from "rsuite";
 
 const TABS_VIEW = {
@@ -35,15 +56,36 @@ const TABS_VIEW = {
   SURVIVAL: "Survival",
 };
 
+const TARGET_DATES = {
+  ONE_DAY: "1 Days",
+  THREE_DAYS: "3 Days",
+  SEVEN_DAYS: "7 Days",
+};
+
+const moveIdsToStart = (array, ids) => {
+  return array.sort((a, b) => {
+    if (ids.includes(a.sku) && !ids.includes(b.sku)) {
+      return -1;
+    }
+    if (!ids.includes(a.sku) && ids.includes(b.sku)) {
+      return 1;
+    }
+    return 0;
+  });
+};
+
 const FilterNormalModeHeader = ({
   query,
   setQuery,
-  activeTab,
   setIsLoadmore,
   setPagination,
   setIsConfirmedQuery,
   loading,
   pagination,
+  setListingDays,
+  setAdDaysNum,
+  listingDays,
+  adDaysNum,
 }) => {
   return (
     <div
@@ -65,12 +107,42 @@ const FilterNormalModeHeader = ({
           backgroundColor: "#EFF0F1",
           flexWrap: "wrap",
           width: "100%",
+          alignItems: "end",
         }}
       >
         <MultiSelect
           placeholder="Store"
           data={AMZ_STORES}
+          label="Store"
+          // styles={{
+          //   root: {
+          //     display: "flex",
+          //     alignItems: "center",
+          //     gap: "10px",
+          //   },
+          //   label: {
+          //     fontSize: "12px",
+          //     fontWeight: "bold",
+          //   },
+          //   input: {
+          //     width: "130px",
+          //     minHeight: "35px",
+          //   },
+          //   inputField: {
+          //     display: "none",
+          //   },
+          // }}
           styles={{
+            root: {
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "start",
+              gap: "10px",
+            },
+            label: {
+              fontSize: "12px",
+              fontWeight: "bold",
+            },
             input: {
               width: "130px",
               minHeight: "35px",
@@ -110,13 +182,42 @@ const FilterNormalModeHeader = ({
             });
           }}
         />
-        <MultiSelect
+        {/* <MultiSelect
+          label="Channel"
           placeholder="Channel"
           data={FULFILLMENT_CHANNELS}
+          // styles={{
+          //   root: {
+          //     display: "flex",
+          //     alignItems: "center",
+          //     gap: "10px",
+          //   },
+          //   input: {
+          //     width: "130px",
+          //     minHeight: "35px",
+          //   },
+          //   label: {
+          //     fontSize: "12px",
+          //     fontWeight: "bold",
+          //   },
+          //   inputField: {
+          //     display: "none",
+          //   },
+          // }}
           styles={{
+            root: {
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "start",
+              gap: "10px",
+            },
             input: {
               width: "130px",
               minHeight: "35px",
+            },
+            label: {
+              fontSize: "12px",
+              fontWeight: "bold",
             },
             inputField: {
               display: "none",
@@ -155,45 +256,155 @@ const FilterNormalModeHeader = ({
               fulfillmentChannelValues: [],
             });
           }}
-        />
-        {activeTab === "Date" && (
-          <DateRangePicker
-            size="sx"
-            // label="Created Date"
-            placeholder="Date"
-            style={{
+        /> */}
+        <Select
+          data={keys(VALUES)}
+          placeholder="Value"
+          label="Value"
+          // styles={{
+          //   root: {
+          //     display: "flex",
+          //     alignItems: "center",
+          //     gap: "10px",
+          //   },
+          //   input: {
+          //     width: "100px",
+          //   },
+          //   label: {
+          //     fontSize: "12px",
+          //     fontWeight: "bold",
+          //   },
+          // }}
+          styles={{
+            root: {
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "start",
+              gap: "10px",
+            },
+            input: {
               width: "100px",
+            },
+            label: {
+              fontSize: "12px",
+              fontWeight: "bold",
+            },
+          }}
+          value={CONVERT_NUMBER_TO_STATUS[query.value] || null}
+          onChange={(value) => {
+            setPagination({
+              ...pagination,
+              currentPage: 1,
+            });
+            setQuery({
+              ...query,
+              value: CONVERT_STATUS_TO_NUMBER[value],
+            });
+          }}
+          clearable
+          onClear={() => {
+            setPagination({
+              ...pagination,
+              currentPage: 1,
+            });
+            setQuery({
+              ...query,
+              value: null,
+            });
+          }}
+        />
+        {/* {activeTab === "Date" && (
+       
+        )} */}
+        <Group>
+          <TextInput
+            label="List"
+            value={listingDays}
+            onChange={(event) => {
+              const value = event.target.value;
+              setListingDays(value);
+              if (value) {
+                setQuery({
+                  ...query,
+                  listingDays: toNumber(value),
+                });
+              }
             }}
-            value={query.dateValue}
-            onOk={(value) =>
-              setQuery({
-                ...query,
-                dateValue: value,
-                startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
-                endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
-              })
-            }
-            onClean={() => {
-              setQuery({
-                ...query,
-                dateValue: null,
-                startCreatedDate: null,
-                endCreatedDate: null,
-              });
-            }}
-            onShortcutClick={(shortcut) => {
-              setQuery({
-                ...query,
-                dateValue: shortcut.value,
-                startCreatedDate: moment(shortcut.value[0]).format(
-                  "YYYY-MM-DD"
-                ),
-                endCreatedDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
-              });
+            // styles={{
+            //   root: {
+            //     display: "flex",
+            //     alignItems: "center",
+            //     gap: "10px",
+            //   },
+            //   input: {
+            //     width: "70px",
+            //   },
+            //   label: {
+            //     fontSize: "12px",
+            //     fontWeight: "bold",
+            //   },
+            // }}
+            styles={{
+              root: {
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "start",
+                gap: "10px",
+              },
+              input: {
+                width: "70px",
+              },
+              label: {
+                fontSize: "12px",
+                fontWeight: "bold",
+              },
             }}
           />
-        )}
-        {activeTab === "Week" && (
+          <TextInput
+            label="Ads"
+            value={adDaysNum}
+            onChange={(event) => {
+              const value = event.target.value;
+              setAdDaysNum(value);
+              if (value) {
+                setQuery({
+                  ...query,
+                  adDays: toNumber(value),
+                });
+              }
+            }}
+            // styles={{
+            //   root: {
+            //     display: "flex",
+            //     alignItems: "center",
+            //     gap: "10px",
+            //   },
+            //   input: {
+            //     width: "70px",
+            //   },
+            //   label: {
+            //     fontSize: "12px",
+            //     fontWeight: "bold",
+            //   },
+            // }}
+            styles={{
+              root: {
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "start",
+                gap: "10px",
+              },
+              input: {
+                width: "70px",
+              },
+              label: {
+                fontSize: "12px",
+                fontWeight: "bold",
+              },
+            }}
+          />
+        </Group>
+        {/* {activeTab === "Week" && (
           <DateRangePicker
             size="sx"
             // label="Created Date"
@@ -272,121 +483,8 @@ const FilterNormalModeHeader = ({
               });
             }}
           />
-        )}
-        {activeTab === "Date" && (
-          <>
-            <DateRangePicker
-              size="sx"
-              // label="Sales Date"
-              placeholder="Sales Date"
-              style={{
-                width: "100px",
-              }}
-              value={query.salesDateValue}
-              onOk={(value) => {
-                setQuery({
-                  ...query,
-                  salesDateValue: value,
-                  startDate: moment(value[0]).format("YYYY-MM-DD"),
-                  endDate: moment(value[1]).format("YYYY-MM-DD"),
-                  minOrders: 1,
-                });
-              }}
-              onOpen={() => {
-                console.log("open");
-              }}
-              onClean={() => {
-                setQuery({
-                  ...query,
-                  salesDateValue: null,
-                  startDate: null,
-                  endDate: null,
-                  minOrders: "",
-                });
-              }}
-              onShortcutClick={(shortcut) => {
-                setQuery({
-                  ...query,
-                  salesDateValue: shortcut.value,
-                  startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
-                  endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
-                  minOrders: 1,
-                });
-              }}
-            />
-            <TextInput
-              placeholder="Min Orders"
-              style={{
-                width: "90px",
-              }}
-              value={query?.minOrders}
-              onChange={(event) => {
-                setQuery({
-                  ...query,
-                  minOrders: event.target.value,
-                });
-              }}
-            />
-          </>
-        )}
-        <Select
-          placeholder="Sorting"
-          data={values(AMZ_SORTING)}
-          styles={{
-            input: {
-              width: "150px",
-            },
-          }}
-          value={query?.sortValue || null}
-          onChange={(value) => {
-            let primarySortBy = "";
-            let primarySortDir = "";
-            switch (value) {
-              case AMZ_SORTING.ordersAsc:
-                primarySortBy = "totalOrders";
-                primarySortDir = "asc";
-                break;
-              case AMZ_SORTING.ordersDesc:
-                primarySortBy = "totalOrders";
-                primarySortDir = "desc";
-                break;
-              case AMZ_SORTING.saleInRangeAsc:
-                primarySortBy = "ordersInRange";
-                primarySortDir = "asc";
-                break;
-              case AMZ_SORTING.saleInRangeDesc:
-                primarySortBy = "ordersInRange";
-                primarySortDir = "desc";
-                break;
-              case AMZ_SORTING.createdDateAsc:
-                primarySortBy = "createdDate";
-                primarySortDir = "asc";
-                break;
-              case AMZ_SORTING.createdDateDesc:
-                primarySortBy = "createdDate";
-                primarySortDir = "desc";
-                break;
-              default:
-                value = null;
-            }
-            setQuery({
-              ...query,
-              sortValue: value,
-              primarySortBy,
-              primarySortDir,
-            });
-          }}
-          clearable
-          searchable
-          onClear={() => {
-            setQuery({
-              ...query,
-              sortValue: null,
-              primarySortBy: null,
-              primarySortDir: null,
-            });
-          }}
-        />
+        )} */}
+
         <Button
           loading={loading}
           onClick={() => {
@@ -407,6 +505,8 @@ const FilterNormalModeHeader = ({
               ...pagination,
               currentPage: 1,
             });
+            setListingDays("");
+            setAdDaysNum("");
             setQuery({
               stores: null,
               fulfillmentChannel: null,
@@ -424,6 +524,8 @@ const FilterNormalModeHeader = ({
               startCreatedDate: null,
               endCreatedDate: null,
               minOrders: "",
+              listingDays: "",
+              adDays: "",
             });
           }}
         >
@@ -555,6 +657,8 @@ const Sellerboard = () => {
   const [isLoadmore, setIsLoadmore] = useState(false);
   const [saleMetrics, setSaleMetrics] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
+  const [overrideMetrics, setOverrideMetrics] = useState([]);
+
   const [pagination, setPagination] = useState({
     currentPage: initialPage,
     totalPages: 1,
@@ -577,10 +681,13 @@ const Sellerboard = () => {
     storeValues: ["PFH", "QZL", "GGT"],
     fulfillmentChannel: "FBA,FBM",
     fulfillmentChannelValues: ["FBA", "FBM"],
-    minOrders: 1,
-    salesDateValue: [new Date(startDate), new Date(endDate)],
-    startDate,
-    endDate,
+    // minOrders: 1,
+    // salesDateValue: [new Date(startDate), new Date(endDate)],
+    // startDate,
+    // endDate,
+    dateRange: 3,
+    targetDate: TARGET_DATES.THREE_DAYS,
+    toggleTest: true,
   });
   const [survivalModeQuery, setSurvivalModeQuery] = useState({
     groupByKey: "date",
@@ -599,6 +706,8 @@ const Sellerboard = () => {
     },
   ]);
   const [trigger, setTrigger] = useState(false);
+  const [listingDays, setListingDays] = useState("");
+  const [adDaysNum, setAdDaysNum] = useState("30");
   const [loadingFetchSaleMetrics, setLoadingFetchSaleMetrics] = useState(true);
   const fetchSaleMetrics = async (page) => {
     setLoadingFetchSaleMetrics(true);
@@ -625,6 +734,7 @@ const Sellerboard = () => {
           "isConfirmed",
           "fulfillmentChannelValues",
           "salesDateValue",
+          "targetDate",
         ]
       ),
       limit: 50,
@@ -633,9 +743,24 @@ const Sellerboard = () => {
     const { data, metaData } = response;
     if (data) {
       if (isLoadmore) {
-        setSaleMetrics((prev) => [...prev, ...data]);
+        const oldSaleMetrics = map(saleMetrics, (x) => {
+          if (includes(overrideMetrics, x.sku)) {
+            return {
+              ...x,
+              optimized: 1,
+            };
+          }
+          return x;
+        });
+        const newSaleMetrics = [...oldSaleMetrics, ...data];
+        const sortedSaleMetrics = moveIdsToStart(
+          newSaleMetrics,
+          uniq(overrideMetrics)
+        );
+        setSaleMetrics(sortedSaleMetrics);
       } else {
-        setSaleMetrics(data);
+        const sortedSaleMetrics = moveIdsToStart(data, uniq(overrideMetrics));
+        setSaleMetrics(sortedSaleMetrics);
       }
       setPagination({
         currentPage: toNumber(metaData.currentPage) || 1,
@@ -782,14 +907,22 @@ const Sellerboard = () => {
           storeValues: ["PFH", "QZL", "GGT"],
           fulfillmentChannelValues: ["FBA", "FBM"],
           fulfillmentChannel: "FBA,FBM",
+          toggleTest: true,
           ...(activeTab === TABS_VIEW.Date && {
-            minOrders: 1,
-            salesDateValue: [new Date(startDate), new Date(endDate)],
-            startDate,
-            endDate,
+            targetDate: TARGET_DATES.THREE_DAYS,
+            dateRange: 3,
           }),
+          // adDays: 7,
+          // ...(activeTab === TABS_VIEW.Date && {
+          //   minOrders: 1,
+          //   salesDateValue: [new Date(startDate), new Date(endDate)],
+          //   startDate,
+          //   endDate,
+          // }),
         });
       }
+      setListingDays("");
+      setAdDaysNum("");
       setIsConfirmedQuery(true);
     } else {
       isMounted.current = true;
@@ -805,6 +938,32 @@ const Sellerboard = () => {
           title="AMZ Sellerboard"
           classTitle={cn("title-purple", styles.title)}
           classCardHead={cn(styles.head, { [styles.hidden]: visible })}
+          head={
+            <Flex
+              style={{
+                gap: "8px",
+                padding: "10px",
+                borderRadius: "10px",
+                backgroundColor: "#EFF0F1",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Switch
+                checked={activeTab === TABS_VIEW.SURVIVAL}
+                label={TABS_VIEW.SURVIVAL}
+                onChange={(event) => {
+                  const value = event.currentTarget.checked;
+                  setActiveTab(value ? TABS_VIEW.SURVIVAL : TABS_VIEW.Date);
+                }}
+                style={{
+                  cursor: "pointer",
+                }}
+              />
+            </Flex>
+          }
         >
           <Grid>
             <Grid.Col span="12">
@@ -881,31 +1040,152 @@ const Sellerboard = () => {
                       >
                         {TABS_VIEW.Month}
                       </Tabs.Tab>
-                    </Flex>
-                    <Flex
-                      style={{
-                        gap: "8px",
-                        padding: "10px",
-                        borderRadius: "10px",
-                        backgroundColor: "#EFF0F1",
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                      }}
-                    >
-                      <Switch
-                        checked={activeTab === TABS_VIEW.SURVIVAL}
-                        label={TABS_VIEW.SURVIVAL}
-                        onChange={(event) => {
-                          const value = event.currentTarget.checked;
-                          setActiveTab(
-                            value ? TABS_VIEW.SURVIVAL : TABS_VIEW.Date
-                          );
-                        }}
+
+                      {activeTab === TABS_VIEW.Date && (
+                        <Grid.Col
+                          span={4}
+                          style={{
+                            borderRadius: "10px",
+                            width: "100%",
+                            height: "100%",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "start",
+                            marginRight: "2px",
+                            padding: "10px",
+                            backgroundColor: "#e2eaff",
+                            border: "1px solid #4f80ff",
+                            borderColor: "#4f80ff",
+                          }}
+                        >
+                          <Radio.Group
+                            value={query?.targetDate}
+                            onChange={(value) => {
+                              setPagination({
+                                ...pagination,
+                                currentPage: 1,
+                              });
+                              setIsConfirmedQuery(true);
+                              switch (value) {
+                                case TARGET_DATES.SEVEN_DAYS:
+                                  setQuery({
+                                    ...query,
+                                    dateRange: 7,
+                                    targetDate: value,
+                                  });
+                                  break;
+                                case TARGET_DATES.ONE_DAY:
+                                  setQuery({
+                                    ...query,
+                                    dateRange: 1,
+                                    targetDate: value,
+                                  });
+                                  break;
+                                case TARGET_DATES.THREE_DAYS:
+                                  setQuery({
+                                    ...query,
+                                    dateRange: 3,
+                                    targetDate: value,
+                                  });
+                                  break;
+                                default:
+                                  break;
+                              }
+                            }}
+                          >
+                            <Group
+                              styles={{
+                                root: {
+                                  height: "100%",
+                                  display: "flex",
+                                  justifyContent: "center",
+                                },
+                              }}
+                            >
+                              <Radio
+                                styles={{
+                                  input: {
+                                    borderRadius: "50%",
+                                  },
+                                }}
+                                value={TARGET_DATES.ONE_DAY}
+                                label={TARGET_DATES.ONE_DAY}
+                              />
+                              <Radio
+                                styles={{
+                                  input: {
+                                    borderRadius: "50%",
+                                  },
+                                }}
+                                value={TARGET_DATES.THREE_DAYS}
+                                label={TARGET_DATES.THREE_DAYS}
+                              />
+                              <Radio
+                                styles={{
+                                  input: {
+                                    borderRadius: "50%",
+                                  },
+                                }}
+                                value={TARGET_DATES.SEVEN_DAYS}
+                                label={TARGET_DATES.SEVEN_DAYS}
+                              />
+                            </Group>
+                          </Radio.Group>
+                        </Grid.Col>
+                      )}
+                      <Grid.Col
+                        span={activeTab === TABS_VIEW.Date ? 4.5 : 8}
                         style={{
-                          cursor: "pointer",
+                          borderRadius: "10px",
+                          width: "100%",
+                          height: "100%",
+                          marginRight: "2px",
+                          padding: "10px",
+                          display: "flex",
+                          justifyContent: "end",
                         }}
-                      />
+                      >
+                        <Text
+                          style={{
+                            marginRight: "10px",
+                            fontWeight: "bold",
+                            fontSize: "14px",
+                          }}
+                        >
+                          All SKU
+                        </Text>
+                        <Switch
+                          checked={query?.toggleTest}
+                          label="SKU Test"
+                          onChange={() => {
+                            setPagination({
+                              ...pagination,
+                              currentPage: 1,
+                            });
+                            if (query?.toggleTest) {
+                              setListingDays("");
+                              setAdDaysNum("");
+                            } else {
+                              setAdDaysNum("30");
+                            }
+                            setIsConfirmedQuery(true);
+                            setQuery({
+                              ...query,
+                              toggleTest: !query.toggleTest,
+                              ...(query.toggleTest && {
+                                adDays: null,
+                                listingDays: null,
+                              }),
+                            });
+                          }}
+                          styles={{
+                            label: {
+                              fontSize: "14px",
+                              fontWeight: "bold",
+                            },
+                          }}
+                        />
+                      </Grid.Col>
                     </Flex>
                   </div>
                 </Tabs.List>
@@ -925,6 +1205,13 @@ const Sellerboard = () => {
                       setPagination={setPagination}
                       pagination={pagination}
                       setIsLoadmore={setIsLoadmore}
+                      overrideMetrics={overrideMetrics}
+                      setOverrideMetrics={setOverrideMetrics}
+                      setTableData={setSaleMetrics}
+                      setListingDays={setListingDays}
+                      setAdDaysNum={setAdDaysNum}
+                      adDaysNum={adDaysNum}
+                      listingDays={listingDays}
                     />
                   )}
                   {loadingFetchSaleMetrics && (
@@ -951,6 +1238,10 @@ const Sellerboard = () => {
                       setIsConfirmedQuery={setIsConfirmedQuery}
                       loading={loadingFetchSaleMetrics}
                       pagination={pagination}
+                      setListingDays={setListingDays}
+                      setAdDaysNum={setAdDaysNum}
+                      adDaysNum={adDaysNum}
+                      listingDays={listingDays}
                     />
                   )}
                 </Tabs.Panel>
@@ -970,6 +1261,13 @@ const Sellerboard = () => {
                       setPagination={setPagination}
                       pagination={pagination}
                       setIsLoadmore={setIsLoadmore}
+                      overrideMetrics={overrideMetrics}
+                      setOverrideMetrics={setOverrideMetrics}
+                      setTableData={setSaleMetrics}
+                      setListingDays={setListingDays}
+                      setAdDaysNum={setAdDaysNum}
+                      adDaysNum={adDaysNum}
+                      listingDays={listingDays}
                     />
                   )}
                   {loadingFetchSaleMetrics && (
@@ -996,6 +1294,10 @@ const Sellerboard = () => {
                       setIsConfirmedQuery={setIsConfirmedQuery}
                       loading={loadingFetchSaleMetrics}
                       pagination={pagination}
+                      setListingDays={setListingDays}
+                      setAdDaysNum={setAdDaysNum}
+                      adDaysNum={adDaysNum}
+                      listingDays={listingDays}
                     />
                   )}
                 </Tabs.Panel>
@@ -1015,6 +1317,13 @@ const Sellerboard = () => {
                       setPagination={setPagination}
                       pagination={pagination}
                       setIsLoadmore={setIsLoadmore}
+                      overrideMetrics={overrideMetrics}
+                      setOverrideMetrics={setOverrideMetrics}
+                      setTableData={setSaleMetrics}
+                      setListingDays={setListingDays}
+                      setAdDaysNum={setAdDaysNum}
+                      adDaysNum={adDaysNum}
+                      listingDays={listingDays}
                     />
                   )}
                   {loadingFetchSaleMetrics && (
@@ -1041,6 +1350,10 @@ const Sellerboard = () => {
                       setIsConfirmedQuery={setIsConfirmedQuery}
                       loading={loadingFetchSaleMetrics}
                       pagination={pagination}
+                      setListingDays={setListingDays}
+                      setAdDaysNum={setAdDaysNum}
+                      adDaysNum={adDaysNum}
+                      listingDays={listingDays}
                     />
                   )}
                 </Tabs.Panel>
