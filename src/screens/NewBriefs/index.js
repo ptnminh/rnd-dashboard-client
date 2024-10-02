@@ -74,6 +74,7 @@ import MarketBriefDesign from "./MarketBrief";
 import ModalPreviewMixMatch from "./ModalPreviewMixMatch";
 import ModalPreviewGroupClipart from "./ModalPreviewGroupClipart";
 import Optimized from "./Optimized";
+import ModalPreviewOptimized from "./ModalPreviewOptimized";
 
 const generateScaleProductLinesTable = ({
   selectedProductLines,
@@ -148,6 +149,11 @@ const generateTextPreview = (type, layout) => {
       return "New - Phủ Market";
     case BRIEF_TYPES[4]:
       return "Design";
+    case BRIEF_TYPES[6]:
+      return BRIEF_TYPES[6];
+    case BRIEF_TYPES[7]:
+      return BRIEF_TYPES[7];
+    case BRIEF_TYPES[8]:
     default:
       return "";
   }
@@ -167,7 +173,7 @@ const generateCardTitle = (type) => {
     case BRIEF_TYPES[5]:
       return "6. Note";
     case BRIEF_TYPES[6]:
-      return "5. Note";
+      return "3. Note";
     default:
       return "Note";
   }
@@ -350,22 +356,17 @@ const generateScaleMixMatch = ({
   return tables;
 };
 
-const generateOptimizedSKU = ({ SKU, grouppedCliparts, rndId }) => {
-  const skuAccumulators = SKU?.skuAccumulators || [];
-  const currentRnDAccumulator =
-    find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
+const generateOptimizedSKU = ({ SKU }) => {
+  if (isEmpty(SKU)) return [];
   return [
     {
       No: 1,
-      Hình: map(grouppedCliparts, "imageSrc"),
+      Hình: SKU?.image,
       SKU: SKU?.sku,
       Remove: "x",
       uid: SKU?.uid,
       skuPrefix: SKU?.skuPrefix,
-      clipartIds: map(grouppedCliparts, "uid"),
       uniqueId: `${SKU?.uid}`,
-      productLineId: SKU?.productLineId,
-      nextAccumulator: currentRnDAccumulator + 1,
     },
   ];
 };
@@ -437,7 +438,23 @@ const generateScaleProductBaseOnBriefType = ({
       });
       return mixMatchPayloads;
     case BRIEF_TYPES[6]:
-      return [];
+      const optimizedListingPayloads = generateOptimizedSKU({
+        SKU,
+        rndId,
+      });
+      return optimizedListingPayloads;
+    case BRIEF_TYPES[7]:
+      const generateOptimizedAdsPayloads = generateOptimizedSKU({
+        SKU,
+        rndId,
+      });
+      return generateOptimizedAdsPayloads;
+    case BRIEF_TYPES[8]:
+      const generateOptimizedFullflow = generateOptimizedSKU({
+        SKU,
+        rndId,
+      });
+      return generateOptimizedFullflow;
     default:
       return [];
   }
@@ -483,6 +500,18 @@ const generateHeaderTable = (type, isKeepClipArt = true) => {
           "Remove",
           "uid",
         ],
+      };
+    case BRIEF_TYPES[6]:
+      return {
+        headers: ["No", "Hình", "SKU", "Remove"],
+      };
+    case BRIEF_TYPES[7]:
+      return {
+        headers: ["No", "Hình", "SKU", "Remove"],
+      };
+    case BRIEF_TYPES[8]:
+      return {
+        headers: ["No", "Hình", "SKU", "Remove"],
       };
     default:
       return [];
@@ -746,6 +775,15 @@ const NewCampaigns = () => {
             (x) => x.index.toString() !== name.toString()
           )
         );
+        break;
+      case BRIEF_TYPES[6]:
+        setSKU({});
+        break;
+      case BRIEF_TYPES[7]:
+        setSKU({});
+        break;
+      case BRIEF_TYPES[8]:
+        setSKU({});
         break;
       default:
         break;
@@ -1091,6 +1129,10 @@ const NewCampaigns = () => {
     }
     let designerTime;
     let epmTime;
+    const isOptimized =
+      briefType === BRIEF_TYPES[6] ||
+      briefType === BRIEF_TYPES[7] ||
+      briefType === BRIEF_TYPES[8];
 
     switch (briefType) {
       case BRIEF_TYPES[0]: {
@@ -1290,6 +1332,7 @@ const NewCampaigns = () => {
     });
     const createBriefResponse = await rndServices.createBriefs({
       payloads: data,
+      isOptimized,
     });
     if (createBriefResponse) {
       close();
@@ -2187,412 +2230,443 @@ const NewCampaigns = () => {
             </Card>
           </div>
         )}
-        {briefType === BRIEF_TYPES[6] && (
+        {briefType !== BRIEF_TYPES[6] &&
+          briefType !== BRIEF_TYPES[7] &&
+          briefType !== BRIEF_TYPES[8] && (
+            <div className={styles.row}>
+              <Card
+                className={cn(styles.cardNote)}
+                title={generateCardTitle(briefType)}
+                classTitle="title-green"
+                classCardHead={styles.classCardHead}
+                classSpanTitle={styles.classScaleSpanTitle}
+              >
+                <Grid>
+                  <Grid.Col span={4}>
+                    <Editor
+                      state={designerNote}
+                      onChange={setDesignerNote}
+                      classEditor={styles.editor}
+                      label="Designer Note"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={4}>
+                    <Editor
+                      state={epmNote}
+                      onChange={setEPMNote}
+                      classEditor={styles.editor}
+                      label="EPM Note"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={4}>
+                    <Editor
+                      state={mktNote}
+                      onChange={setMKTNote}
+                      classEditor={styles.editor}
+                      label="MKT Note"
+                    />
+                  </Grid.Col>
+                  <Grid.Col span={12}>
+                    <div
+                      className={cn(
+                        "button-stroke-blue button-small",
+                        styles.createButton
+                      )}
+                      onClick={() => {
+                        if (!rndMember) {
+                          showNotification(
+                            "Thất bại",
+                            "Vui lòng chọn RND",
+                            "red"
+                          );
+                          return;
+                        }
+                        if (
+                          !SKU &&
+                          briefType !== BRIEF_TYPES[3] &&
+                          briefType !== BRIEF_TYPES[4] &&
+                          briefType !== BRIEF_TYPES[5]
+                        ) {
+                          showNotification(
+                            "Thất bại",
+                            "Vui lòng chọn SKU",
+                            "red"
+                          );
+                          return;
+                        }
+                        if (
+                          (briefType === BRIEF_TYPES[1] ||
+                            briefType === BRIEF_TYPES[5]) &&
+                          isEmpty(grouppedCliparts)
+                        ) {
+                          showNotification(
+                            "Thất bại",
+                            "Vui lòng chọn Clipart. Chọn Clipart & di chuột vào button Group hoặc Separate để biết thêm chi tiết",
+                            "red"
+                          );
+                          myClipartHeaderRef.current.scrollIntoView({
+                            behavior: "smooth",
+                          });
+                          return;
+                        }
+                        if (
+                          isEmpty(grouppedCliparts) &&
+                          isEmpty(selectedQuotes) &&
+                          isEmpty(selectedProductBases) &&
+                          isEmpty(designs) &&
+                          isEmpty(selectedSKUs)
+                        ) {
+                          showNotification(
+                            "Thất bại",
+                            "Vui lòng chọn Product Line hoặc Clipart hoặc Quote",
+                            "red"
+                          );
+                          return;
+                        }
+                        if (
+                          isKeepClipArt === KEEP_CLIPARTS[1] &&
+                          isEmpty(selectedClipArts)
+                        ) {
+                          showNotification(
+                            "Thất bại",
+                            "Vui lòng chọn Clipart",
+                            "red"
+                          );
+                          return;
+                        }
+                        if (
+                          briefType === BRIEF_TYPES[2] &&
+                          isEmpty(selectedQuotes)
+                        ) {
+                          showNotification(
+                            "Thất bại",
+                            "Vui lòng chọn Quote",
+                            "red"
+                          );
+                          return;
+                        }
+                        if (
+                          briefType === BRIEF_TYPES[3] &&
+                          (isEmpty(selectedProductBases) || isEmpty(designs))
+                        ) {
+                          showNotification(
+                            "Thất bại",
+                            "Vui lòng chọn Product Base hoặc Design",
+                            "red"
+                          );
+                          return;
+                        }
+                        if (
+                          briefType === BRIEF_TYPES[4] &&
+                          (isEmpty(selectedSKUs) ||
+                            isEmpty(selectedProductBases))
+                        ) {
+                          showNotification(
+                            "Thất bại",
+                            "Vui lòng chọn Product Base và Product",
+                            "red"
+                          );
+                          return;
+                        }
+                        if (briefType !== BRIEF_TYPES[5]) {
+                          open();
+                        } else {
+                          if (isEmpty(marketBrief)) {
+                            showNotification(
+                              "Thất bại",
+                              "Vui lòng nhập thông tin Ref",
+                              "red"
+                            );
+                            return;
+                          }
+                          if (isEmpty(grouppedCliparts)) {
+                            showNotification(
+                              "Thất bại",
+                              "Vui lòng chọn Clipart",
+                              "red"
+                            );
+                            return;
+                          }
+                          if (isEmpty(selectedProductBases)) {
+                            showNotification(
+                              "Thất bại",
+                              "Vui lòng chọn Product Line",
+                              "red"
+                            );
+                            return;
+                          }
+                          openModalPreviewMixMatch();
+                        }
+                        const skus = generateScaleProductBaseOnBriefType({
+                          type: briefType,
+                          SKU,
+                          collections: validCollections,
+                          rndSortName: find(users, { name: rndMember })
+                            ?.shortName,
+                          selectedClipArts,
+                          selectedQuotes,
+                          designs,
+                          selectedProductBases,
+                          rndId: find(users, { name: rndMember })?.uid,
+                          selectedSKUs,
+                          marketBrief,
+                          grouppedCliparts,
+                        });
+                        setEditSKUs(skus);
+                      }}
+                      style={{
+                        marginTop: "24px",
+                        marginBottom: "12px",
+                        marginRight: "auto",
+                        width: "150px",
+                        borderRadius: "20px",
+                        borderColor: "#62D256",
+                        borderWidth: "2px",
+                        backgroundColor: "#D9F5D6",
+                        border: "1px solid #62D256",
+                        color: "#000000",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <span>Preview Brief</span>
+                    </div>
+                  </Grid.Col>
+                </Grid>
+              </Card>
+            </div>
+          )}
+        {(briefType === BRIEF_TYPES[6] ||
+          briefType === BRIEF_TYPES[7] ||
+          briefType === BRIEF_TYPES[8]) && (
           <Optimized
             briefType={briefType}
-            topScrollClipArtRef={topScrollClipArtRef}
-            myClipartHeaderRef={myClipartHeaderRef}
-            selectedClipArts={selectedClipArts}
-            handleSeparateClipart={handleSeparateClipart}
-            handleMergeClipart={handleMergeClipart}
-            grouppedCliparts={grouppedCliparts}
-            handleSyncCliparts={handleSyncCliparts}
-            loaderIcon={loaderIcon}
-            openModalPreviewGroupClipart={openModalPreviewGroupClipart}
-            searchClipArt={searchClipArt}
-            setSearchClipArt={setSearchClipArt}
-            filtersClipArt={filtersClipArt}
-            query={query}
-            setQuery={setQuery}
-            clipArts={clipArts}
-            fetchClipArts={fetchClipArts}
-            fetchClipArtsLoading={fetchClipArtsLoading}
-            pagination={pagination}
-            handlePageChange={handlePageChange}
-            setSelectedClipArts={setSelectedClipArts}
-            isKeepClipArt={isKeepClipArt}
-            setKeepClipArt={setKeepClipArt}
+            generateCardTitle={generateCardTitle}
+            designerNote={designerNote}
+            setDesignerNote={setDesignerNote}
+            epmNote={epmNote}
+            setEPMNote={setEPMNote}
+            mktNote={mktNote}
+            setMKTNote={setMKTNote}
+            users={users}
+            rndMember={rndMember}
+            setEditSKUs={setEditSKUs}
+            SKU={SKU}
+            generateScaleProductBaseOnBriefType={
+              generateScaleProductBaseOnBriefType
+            }
+            openModal={open}
           />
         )}
-        <div className={styles.row}>
-          <Card
-            className={cn(styles.cardNote)}
-            title={generateCardTitle(briefType)}
-            classTitle="title-green"
-            classCardHead={styles.classCardHead}
-            classSpanTitle={styles.classScaleSpanTitle}
+      </div>
+      {opened &&
+        briefType !== BRIEF_TYPES[6] &&
+        briefType !== BRIEF_TYPES[7] &&
+        briefType !== BRIEF_TYPES[8] && (
+          <Modal
+            opened={opened}
+            onClose={close}
+            transitionProps={{ transition: "fade", duration: 200 }}
+            overlayProps={{
+              backgroundOpacity: 0.55,
+              blur: 3,
+            }}
+            radius="md"
+            size="1000px"
+            styles={{
+              title: {
+                fontSize: "21px",
+                fontWeight: "bold",
+                margin: "auto",
+              },
+              close: {
+                margin: "none",
+                marginInlineStart: "unset",
+              },
+            }}
+            title="Preview Brief"
           >
             <Grid>
-              <Grid.Col span={4}>
-                <Editor
-                  state={designerNote}
-                  onChange={setDesignerNote}
-                  classEditor={styles.editor}
-                  label="Designer Note"
-                />
-              </Grid.Col>
-              <Grid.Col span={4}>
-                <Editor
-                  state={epmNote}
-                  onChange={setEPMNote}
-                  classEditor={styles.editor}
-                  label="EPM Note"
-                />
-              </Grid.Col>
-              <Grid.Col span={4}>
-                <Editor
-                  state={mktNote}
-                  onChange={setMKTNote}
-                  classEditor={styles.editor}
-                  label="MKT Note"
-                />
-              </Grid.Col>
               <Grid.Col span={12}>
                 <div
+                  style={{
+                    padding: "10px",
+                    backgroundColor: "#D9F5D6",
+                    border: "1px solid #62D256",
+                    color: "#000000",
+                    borderColor: "#62D256",
+                    fontSize: "18px",
+                    borderRadius: "12px",
+                  }}
+                >
+                  <Grid>
+                    <Grid.Col span={4}>
+                      <Text
+                        style={{
+                          fontWeight: "bold",
+                          fontSize: "14px",
+                        }}
+                      >
+                        Batch: <span>&nbsp;{batch}</span>
+                      </Text>
+                    </Grid.Col>
+                    <Grid.Col
+                      span={4}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "100%",
+                      }}
+                    >
+                      <Badge
+                        size="lg"
+                        variant="gradient"
+                        gradient={{ from: "blue", to: "cyan", deg: 90 }}
+                        style={{ margin: "0 5px" }}
+                      >
+                        {generateTextPreview(briefType, layout)}
+                      </Badge>{" "}
+                    </Grid.Col>
+                    <Grid.Col span={4}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "end",
+                          fontSize: "14px",
+                        }}
+                      >
+                        {workGroup} - {rndMember}
+                      </div>
+                    </Grid.Col>
+                  </Grid>
+                </div>
+              </Grid.Col>
+              <Grid.Col span={4}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    padding: "10px",
+                    fontSize: "20px",
+                    alignItems: "center",
+                  }}
+                >
+                  {briefType !== BRIEF_TYPES[3] ? "REF" : "PRODUCT LINE"}
+                </div>
+                <Image
+                  radius="md"
+                  src={
+                    SKU?.image ||
+                    selectedProductBases[0]?.imageSrc ||
+                    "/images/content/not_found_2.jpg"
+                  }
+                />
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    padding: "10px",
+                    fontSize: "18px",
+                    alignItems: "center",
+                    marginTop: "10px",
+                  }}
+                >
+                  {SKU?.sku || selectedProductBases[0]?.name}
+                </div>
+              </Grid.Col>
+              <Grid.Col span={8}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    padding: "10px",
+                    fontSize: "20px",
+                  }}
+                >
+                  SCALE
+                </div>
+                <ScrollArea h={300} scrollbars="y" scrollbarSize={2}>
+                  <CustomTable
+                    items={map(
+                      orderBy(editSKUs, [
+                        (item) => !item?.SKU?.startsWith("XX"),
+                        "SKU",
+                      ]),
+                      (x, index) => {
+                        return {
+                          ...x,
+                          No: index + 1,
+                        };
+                      }
+                    )}
+                    headers={
+                      generateHeaderTable(briefType, isKeepClipArt)?.headers
+                    }
+                    onRemove={handleRemoveRow}
+                    headerRemove={
+                      generateHeaderTable(briefType, isKeepClipArt)
+                        ?.removeHeader
+                    }
+                    setEditSKUs={setEditSKUs}
+                    editSKUs={editSKUs}
+                    productBases={productBases}
+                    setProductBases={setProductBases}
+                    SKU={SKU}
+                    setSKU={setSKU}
+                    selectedProductBases={selectedProductBases}
+                    setSelectedProductBases={setSelectedProductBases}
+                    rndInfo={find(users, { name: rndMember })}
+                    setTriggerCreateSKUPayload={setTriggerCreateSKUPayload}
+                  />
+                </ScrollArea>
+              </Grid.Col>
+              <Grid.Col
+                span={12}
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <Button
                   className={cn(
                     "button-stroke-blue button-small",
                     styles.createButton
                   )}
-                  onClick={() => {
-                    if (!rndMember) {
-                      showNotification("Thất bại", "Vui lòng chọn RND", "red");
-                      return;
-                    }
-                    if (
-                      !SKU &&
-                      briefType !== BRIEF_TYPES[3] &&
-                      briefType !== BRIEF_TYPES[4] &&
-                      briefType !== BRIEF_TYPES[5]
-                    ) {
-                      showNotification("Thất bại", "Vui lòng chọn SKU", "red");
-                      return;
-                    }
-                    if (
-                      (briefType === BRIEF_TYPES[1] ||
-                        briefType === BRIEF_TYPES[5]) &&
-                      isEmpty(grouppedCliparts)
-                    ) {
-                      showNotification(
-                        "Thất bại",
-                        "Vui lòng chọn Clipart. Chọn Clipart & di chuột vào button Group hoặc Separate để biết thêm chi tiết",
-                        "red"
-                      );
-                      myClipartHeaderRef.current.scrollIntoView({
-                        behavior: "smooth",
-                      });
-                      return;
-                    }
-                    if (
-                      isEmpty(grouppedCliparts) &&
-                      isEmpty(selectedQuotes) &&
-                      isEmpty(selectedProductBases) &&
-                      isEmpty(designs) &&
-                      isEmpty(selectedSKUs)
-                    ) {
-                      showNotification(
-                        "Thất bại",
-                        "Vui lòng chọn Product Line hoặc Clipart hoặc Quote",
-                        "red"
-                      );
-                      return;
-                    }
-                    if (
-                      isKeepClipArt === KEEP_CLIPARTS[1] &&
-                      isEmpty(selectedClipArts)
-                    ) {
-                      showNotification(
-                        "Thất bại",
-                        "Vui lòng chọn Clipart",
-                        "red"
-                      );
-                      return;
-                    }
-                    if (
-                      briefType === BRIEF_TYPES[2] &&
-                      isEmpty(selectedQuotes)
-                    ) {
-                      showNotification(
-                        "Thất bại",
-                        "Vui lòng chọn Quote",
-                        "red"
-                      );
-                      return;
-                    }
-                    if (
-                      briefType === BRIEF_TYPES[3] &&
-                      (isEmpty(selectedProductBases) || isEmpty(designs))
-                    ) {
-                      showNotification(
-                        "Thất bại",
-                        "Vui lòng chọn Product Base hoặc Design",
-                        "red"
-                      );
-                      return;
-                    }
-                    if (
-                      briefType === BRIEF_TYPES[4] &&
-                      (isEmpty(selectedSKUs) || isEmpty(selectedProductBases))
-                    ) {
-                      showNotification(
-                        "Thất bại",
-                        "Vui lòng chọn Product Base và Product",
-                        "red"
-                      );
-                      return;
-                    }
-                    if (briefType !== BRIEF_TYPES[5]) {
-                      open();
-                    } else {
-                      if (isEmpty(marketBrief)) {
-                        showNotification(
-                          "Thất bại",
-                          "Vui lòng nhập thông tin Ref",
-                          "red"
-                        );
-                        return;
-                      }
-                      if (isEmpty(grouppedCliparts)) {
-                        showNotification(
-                          "Thất bại",
-                          "Vui lòng chọn Clipart",
-                          "red"
-                        );
-                        return;
-                      }
-                      if (isEmpty(selectedProductBases)) {
-                        showNotification(
-                          "Thất bại",
-                          "Vui lòng chọn Product Line",
-                          "red"
-                        );
-                        return;
-                      }
-                      openModalPreviewMixMatch();
-                    }
-                    const skus = generateScaleProductBaseOnBriefType({
-                      type: briefType,
-                      SKU,
-                      collections: validCollections,
-                      rndSortName: find(users, { name: rndMember })?.shortName,
-                      selectedClipArts,
-                      selectedQuotes,
-                      designs,
-                      selectedProductBases,
-                      rndId: find(users, { name: rndMember })?.uid,
-                      selectedSKUs,
-                      marketBrief,
-                      grouppedCliparts,
-                    });
-                    setEditSKUs(skus);
-                  }}
+                  loading={createBriefLoading}
+                  onClick={handleSubmitBrief}
                   style={{
-                    marginTop: "24px",
-                    marginBottom: "12px",
-                    marginRight: "auto",
-                    width: "150px",
+                    width: "100px",
                     borderRadius: "20px",
-                    borderColor: "#62D256",
                     borderWidth: "2px",
-                    backgroundColor: "#D9F5D6",
-                    border: "1px solid #62D256",
-                    color: "#000000",
-                    cursor: "pointer",
+                    backgroundColor: "#3FA433",
+                    color: "#ffffff",
                   }}
                 >
-                  <span>Preview Brief</span>
-                </div>
+                  <span>Tạo Brief</span>
+                </Button>
               </Grid.Col>
             </Grid>
-          </Card>
-        </div>
-      </div>
-      {opened && (
-        <Modal
-          opened={opened}
-          onClose={close}
-          transitionProps={{ transition: "fade", duration: 200 }}
-          overlayProps={{
-            backgroundOpacity: 0.55,
-            blur: 3,
-          }}
-          radius="md"
-          size="1000px"
-          styles={{
-            title: {
-              fontSize: "21px",
-              fontWeight: "bold",
-              margin: "auto",
-            },
-            close: {
-              margin: "none",
-              marginInlineStart: "unset",
-            },
-          }}
-          title="Preview Brief"
-        >
-          <Grid>
-            <Grid.Col span={12}>
-              <div
-                style={{
-                  padding: "10px",
-                  backgroundColor: "#D9F5D6",
-                  border: "1px solid #62D256",
-                  color: "#000000",
-                  borderColor: "#62D256",
-                  fontSize: "18px",
-                  borderRadius: "12px",
-                }}
-              >
-                <Grid>
-                  <Grid.Col span={4}>
-                    <Text
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: "14px",
-                      }}
-                    >
-                      Batch: <span>&nbsp;{batch}</span>
-                    </Text>
-                  </Grid.Col>
-                  <Grid.Col
-                    span={4}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: "100%",
-                    }}
-                  >
-                    <Badge
-                      size="lg"
-                      variant="gradient"
-                      gradient={{ from: "blue", to: "cyan", deg: 90 }}
-                      style={{ margin: "0 5px" }}
-                    >
-                      {generateTextPreview(briefType, layout)}
-                    </Badge>{" "}
-                  </Grid.Col>
-                  <Grid.Col span={4}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "end",
-                        fontSize: "14px",
-                      }}
-                    >
-                      {workGroup} - {rndMember}
-                    </div>
-                  </Grid.Col>
-                </Grid>
-              </div>
-            </Grid.Col>
-            <Grid.Col span={4}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  padding: "10px",
-                  fontSize: "20px",
-                  alignItems: "center",
-                }}
-              >
-                {briefType !== BRIEF_TYPES[3] ? "REF" : "PRODUCT LINE"}
-              </div>
-              <Image
-                radius="md"
-                src={
-                  SKU?.image ||
-                  selectedProductBases[0]?.imageSrc ||
-                  "/images/content/not_found_2.jpg"
-                }
-              />
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  padding: "10px",
-                  fontSize: "18px",
-                  alignItems: "center",
-                  marginTop: "10px",
-                }}
-              >
-                {SKU?.sku || selectedProductBases[0]?.name}
-              </div>
-            </Grid.Col>
-            <Grid.Col span={8}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  padding: "10px",
-                  fontSize: "20px",
-                }}
-              >
-                SCALE
-              </div>
-              <ScrollArea h={300} scrollbars="y" scrollbarSize={2}>
-                <CustomTable
-                  items={map(
-                    orderBy(editSKUs, [
-                      (item) => !item?.SKU?.startsWith("XX"),
-                      "SKU",
-                    ]),
-                    (x, index) => {
-                      return {
-                        ...x,
-                        No: index + 1,
-                      };
-                    }
-                  )}
-                  headers={
-                    generateHeaderTable(briefType, isKeepClipArt)?.headers
-                  }
-                  onRemove={handleRemoveRow}
-                  headerRemove={
-                    generateHeaderTable(briefType, isKeepClipArt)?.removeHeader
-                  }
-                  setEditSKUs={setEditSKUs}
-                  editSKUs={editSKUs}
-                  productBases={productBases}
-                  setProductBases={setProductBases}
-                  SKU={SKU}
-                  setSKU={setSKU}
-                  selectedProductBases={selectedProductBases}
-                  setSelectedProductBases={setSelectedProductBases}
-                  rndInfo={find(users, { name: rndMember })}
-                  setTriggerCreateSKUPayload={setTriggerCreateSKUPayload}
-                />
-              </ScrollArea>
-            </Grid.Col>
-            <Grid.Col
-              span={12}
-              style={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <Button
-                className={cn(
-                  "button-stroke-blue button-small",
-                  styles.createButton
-                )}
-                loading={createBriefLoading}
-                onClick={handleSubmitBrief}
-                style={{
-                  width: "100px",
-                  borderRadius: "20px",
-                  borderWidth: "2px",
-                  backgroundColor: "#3FA433",
-                  color: "#ffffff",
-                }}
-              >
-                <span>Tạo Brief</span>
-              </Button>
-            </Grid.Col>
-          </Grid>
-        </Modal>
-      )}
+          </Modal>
+        )}
+      {opened &&
+        (briefType === BRIEF_TYPES[6] ||
+          briefType === BRIEF_TYPES[7] ||
+          briefType === BRIEF_TYPES[8]) && (
+          <ModalPreviewOptimized
+            opened={opened}
+            close={close}
+            batch={batch}
+            workGroup={workGroup}
+            rndMember={rndMember}
+            briefType={briefType}
+            handleSubmitBrief={handleSubmitBrief}
+            SKU={SKU}
+            generateTextPreview={generateTextPreview}
+            layout={layout}
+            createBriefLoading={createBriefLoading}
+          />
+        )}
 
       {openedModalPreviewMixMatch && (
         <ModalPreviewMixMatch
