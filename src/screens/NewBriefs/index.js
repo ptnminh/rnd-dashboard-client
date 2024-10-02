@@ -73,6 +73,7 @@ import Clipart from "./Clipart";
 import MarketBriefDesign from "./MarketBrief";
 import ModalPreviewMixMatch from "./ModalPreviewMixMatch";
 import ModalPreviewGroupClipart from "./ModalPreviewGroupClipart";
+import Optimized from "./Optimized";
 
 const generateScaleProductLinesTable = ({
   selectedProductLines,
@@ -165,6 +166,8 @@ const generateCardTitle = (type) => {
       return "4. Note";
     case BRIEF_TYPES[5]:
       return "6. Note";
+    case BRIEF_TYPES[6]:
+      return "5. Note";
     default:
       return "Note";
   }
@@ -346,6 +349,27 @@ const generateScaleMixMatch = ({
   );
   return tables;
 };
+
+const generateOptimizedSKU = ({ SKU, grouppedCliparts, rndId }) => {
+  const skuAccumulators = SKU?.skuAccumulators || [];
+  const currentRnDAccumulator =
+    find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
+  return [
+    {
+      No: 1,
+      Hình: map(grouppedCliparts, "imageSrc"),
+      SKU: SKU?.sku,
+      Remove: "x",
+      uid: SKU?.uid,
+      skuPrefix: SKU?.skuPrefix,
+      clipartIds: map(grouppedCliparts, "uid"),
+      uniqueId: `${SKU?.uid}`,
+      productLineId: SKU?.productLineId,
+      nextAccumulator: currentRnDAccumulator + 1,
+    },
+  ];
+};
+
 const generateScaleProductBaseOnBriefType = ({
   type,
   SKU,
@@ -412,6 +436,8 @@ const generateScaleProductBaseOnBriefType = ({
         marketBrief,
       });
       return mixMatchPayloads;
+    case BRIEF_TYPES[6]:
+      return [];
     default:
       return [];
   }
@@ -2160,6 +2186,33 @@ const NewCampaigns = () => {
               </Grid>
             </Card>
           </div>
+        )}
+        {briefType === BRIEF_TYPES[6] && (
+          <Optimized
+            briefType={briefType}
+            topScrollClipArtRef={topScrollClipArtRef}
+            myClipartHeaderRef={myClipartHeaderRef}
+            selectedClipArts={selectedClipArts}
+            handleSeparateClipart={handleSeparateClipart}
+            handleMergeClipart={handleMergeClipart}
+            grouppedCliparts={grouppedCliparts}
+            handleSyncCliparts={handleSyncCliparts}
+            loaderIcon={loaderIcon}
+            openModalPreviewGroupClipart={openModalPreviewGroupClipart}
+            searchClipArt={searchClipArt}
+            setSearchClipArt={setSearchClipArt}
+            filtersClipArt={filtersClipArt}
+            query={query}
+            setQuery={setQuery}
+            clipArts={clipArts}
+            fetchClipArts={fetchClipArts}
+            fetchClipArtsLoading={fetchClipArtsLoading}
+            pagination={pagination}
+            handlePageChange={handlePageChange}
+            setSelectedClipArts={setSelectedClipArts}
+            isKeepClipArt={isKeepClipArt}
+            setKeepClipArt={setKeepClipArt}
+          />
         )}
         <div className={styles.row}>
           <Card
