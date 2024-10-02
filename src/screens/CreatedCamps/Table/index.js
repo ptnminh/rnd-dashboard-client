@@ -1,6 +1,14 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import { Badge, Button, Flex, Image, Select, TextInput } from "@mantine/core";
+import {
+  Badge,
+  Button,
+  Flex,
+  Image,
+  Select,
+  TextInput,
+  Text,
+} from "@mantine/core";
 import { ceil, keys } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
@@ -11,6 +19,7 @@ import {
   CONVERT_STATUS_TO_NUMBER,
 } from "../../../utils";
 import { rndServices } from "../../../services";
+import { modals } from "@mantine/modals";
 
 const CampaignsTable = ({
   campaigns,
@@ -205,6 +214,38 @@ const CampaignsTable = ({
         enableSorting: true,
         size: 100,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+      },
+      {
+        accessorKey: "actions",
+        header: "ACTIONS",
+        enableSorting: false,
+        Cell: (record) => {
+          return (
+            <div>
+              <Button
+                onClick={() => {
+                  modals.openConfirmModal({
+                    title: "Please confirm your action",
+                    children: (
+                      <Text size="sm">
+                        This action is so important that you are required to
+                        confirm it with a modal. Please click one of these
+                        buttons to proceed.
+                      </Text>
+                    ),
+                    labels: { confirm: "Confirm", cancel: "Cancel" },
+                    onConfirm: () => handleCreateVideo(record.row.original),
+                  });
+                }}
+                variant="filled"
+                color="green"
+                size="sx"
+              >
+                Request Video
+              </Button>
+            </div>
+          );
+        },
       },
     ],
     [validationErrors, accounts, sampleCampaigns, campaigns, campsPayload]
@@ -461,6 +502,10 @@ const CampaignsTable = ({
     }),
     onSortingChange: setSorting,
   });
+
+  const handleCreateVideo = (row) => {
+    console.log(row);
+  };
 
   return (
     <>

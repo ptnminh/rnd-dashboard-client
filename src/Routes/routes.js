@@ -205,6 +205,20 @@ export const PATH_NAMES = {
       },
     },
   },
+  VIDEO: {
+    title: "6. Request Video",
+    url: "/video",
+    children: {
+      SAMPLE: {
+        title: "1. Sample",
+        url: "/request-video/sample",
+      },
+      VIDEO: {
+        title: "2. Video",
+        url: "/request-video/video",
+      },
+    },
+  },
 };
 
 export const NAVIGATION = [
@@ -406,6 +420,29 @@ export const NAVIGATION = [
       //   arrowDown: true,
       //   permissions: ["read:epm_setting"],
       // },
+    ],
+  },
+  {
+    title: PATH_NAMES.VIDEO.title,
+    icon: "diamond",
+    isParent: true,
+    pathname: "/video",
+    arrowDown: true,
+    permissions: ["read:video"],
+    turnOffActive: true,
+    dropdown: [
+      {
+        title: PATH_NAMES.VIDEO.children.SAMPLE.title,
+        url: PATH_NAMES.VIDEO.children.SAMPLE.url,
+        arrowDown: true,
+        permissions: ["read:video"],
+      },
+      {
+        title: PATH_NAMES.VIDEO.children.VIDEO.title,
+        url: PATH_NAMES.VIDEO.children.VIDEO.url,
+        arrowDown: true,
+        permissions: ["read:video"],
+      },
     ],
   },
   {
