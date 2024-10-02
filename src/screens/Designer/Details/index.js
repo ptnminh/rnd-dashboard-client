@@ -23,6 +23,7 @@ import {
   IconBan,
 } from "@tabler/icons-react";
 import {
+  BRIEF_TYPES,
   CHOOSE_BRIEF_TYPES,
   LOCAL_STORAGE_KEY,
   STATUS,
@@ -67,11 +68,12 @@ const KeywordTable = ({
     setData(briefs);
     setPayloads(briefs);
   }, [briefs]);
-  const handleUpdateStatus = async ({ uid, status }) => {
+  const handleUpdateStatus = async ({ uid, status, realStatus }) => {
     await rndServices.updateBriefDesign({
       uid,
       data: {
         status: status === 1 ? 2 : 1,
+        ...(realStatus && { status: realStatus }),
       },
     });
     setTrigger(true);
@@ -539,7 +541,11 @@ const KeywordTable = ({
                     });
                 }
               }}
-              readOnly={row?.original?.status === 2}
+              readOnly={[
+                STATUS.DESIGNED,
+                STATUS.OPTIMIZED_LISTING_DESIGNED,
+                STATUS.OPTIMIZED_ADS_DESIGNED,
+              ].includes(row?.original?.status)}
             />
           );
         },
@@ -602,20 +608,70 @@ const KeywordTable = ({
           return (
             <Button
               variant="filled"
-              color={foundBrief?.status === 2 ? "red" : "green"}
+              color={
+                [
+                  STATUS.DESIGNED,
+                  STATUS.OPTIMIZED_LISTING_DESIGNED,
+                  STATUS.OPTIMIZED_ADS_DESIGNED,
+                ].includes(row?.original?.status)
+                  ? "red"
+                  : "green"
+              }
               leftSection={
-                foundBrief?.status === 2 ? <IconBan /> : <IconCheck />
+                [
+                  STATUS.DESIGNED,
+                  STATUS.OPTIMIZED_LISTING_DESIGNED,
+                  STATUS.OPTIMIZED_ADS_DESIGNED,
+                ].includes(row?.original?.status) ? (
+                  <IconBan />
+                ) : (
+                  <IconCheck />
+                )
               }
               disabled={foundBrief.status === 1 && !foundBrief?.linkDesign}
               onClick={() => {
+                let realStatus = null;
+                switch (foundBrief?.briefType) {
+                  case BRIEF_TYPES[6]:
+                    if (foundBrief?.status === STATUS.BRIEF_CREATED) {
+                      realStatus = STATUS.OPTIMIZED_LISTING_DESIGNED;
+                    } else {
+                      realStatus = STATUS.BRIEF_CREATED;
+                    }
+                    break;
+                  case BRIEF_TYPES[7]:
+                    if (foundBrief?.status === STATUS.BRIEF_CREATED) {
+                      realStatus = STATUS.OPTIMIZED_ADS_DESIGNED;
+                    } else {
+                      realStatus = STATUS.BRIEF_CREATED;
+                    }
+                    break;
+                  case BRIEF_TYPES[8]:
+                    if (foundBrief?.status === STATUS.BRIEF_CREATED) {
+                      realStatus = STATUS.DESIGNED;
+                    } else {
+                      realStatus = STATUS.BRIEF_CREATED;
+                    }
+                    break;
+                  default:
+                    realStatus = null;
+                    break;
+                }
                 openUpdateStatusConfirmModal({
                   uid,
                   status: foundBrief?.status,
                   sku: foundBrief?.sku,
+                  realStatus,
                 });
               }}
             >
-              {foundBrief?.status === 2 ? "Undone" : "Done"}
+              {[
+                STATUS.DESIGNED,
+                STATUS.OPTIMIZED_LISTING_DESIGNED,
+                STATUS.OPTIMIZED_ADS_DESIGNED,
+              ].includes(row?.original?.status)
+                ? "Undone"
+                : "Done"}
             </Button>
           );
         },
@@ -682,7 +738,7 @@ const KeywordTable = ({
     });
 
   // CONFIRM UPDATE STATUS
-  const openUpdateStatusConfirmModal = ({ uid, status, sku }) =>
+  const openUpdateStatusConfirmModal = ({ uid, status, sku, realStatus }) =>
     modals.openConfirmModal({
       title: "Confirm Modal",
       centered: true,
@@ -693,6 +749,7 @@ const KeywordTable = ({
         handleUpdateStatus({
           uid,
           status,
+          realStatus,
         }),
     });
 
@@ -977,7 +1034,7 @@ const KeywordTable = ({
               onChange={(value) =>
                 setQuery({
                   ...query,
-                  status: value === "Done" ? [2] : [1],
+                  status: value === "Done" ? [2, 12, 22] : [1],
                   statusValue: value,
                 })
               }
@@ -985,7 +1042,7 @@ const KeywordTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [1, 2],
+                  status: [1, 2, 12, 22],
                   statusValue: null,
                 });
               }}
@@ -1001,7 +1058,7 @@ const KeywordTable = ({
                   rndTeam: null,
                   rnd: null,
                   designer: null,
-                  status: [1, 2],
+                  status: [1, 2, 12, 22],
                   sizeValue: null,
                   rndName: null,
                   designerName: null,

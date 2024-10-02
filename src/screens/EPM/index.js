@@ -40,6 +40,7 @@ import Niche from "./Niche";
 import ProductBase from "./ProductBase";
 import ScaleDesign from "./ScaleDesign";
 import MixMatch from "./MixMatch";
+import Optimized from "./Optimized";
 
 const EPMScreens = () => {
   const navigate = useNavigate();
@@ -58,7 +59,7 @@ const EPMScreens = () => {
   });
   const [query, setQuery] = useState({
     statusValue: "Undone",
-    status: [2],
+    status: [2, 12],
     priority: 1,
   });
   const [sorting, setSorting] = useState([]);
@@ -151,12 +152,24 @@ const EPMScreens = () => {
       setLoadingUpdateProductLink(false);
       return;
     }
+    let realStatus = null;
+    switch (selectedSKU?.briefType) {
+      case BRIEF_TYPES[6]:
+        if (selectedSKU?.status === STATUS.OPTIMIZED_LISTING_DESIGNED) {
+          realStatus = STATUS.OPTIMIZED_LISTING_EPM;
+        }
+        break;
+      default:
+        realStatus = null;
+        break;
+    }
     if (linkProduct) {
       const updateResponse = await rndServices.updateBriefListing({
         uid,
         data: {
           linkProduct,
           status: STATUS.LISTED,
+          ...(realStatus && { status: realStatus }),
         },
       });
       if (updateResponse) {
@@ -203,9 +216,10 @@ const EPMScreens = () => {
                   fontSize: "16px",
                 }}
               >
-                Time to done: {metadata?.totalTimeToDoneAllBriefsV2Round || 0}{
-                  metadata?.totalTimeToDoneAllBriefsV2Round > 1 ? " Days " : " Day "
-                }
+                Time to done: {metadata?.totalTimeToDoneAllBriefsV2Round || 0}
+                {metadata?.totalTimeToDoneAllBriefsV2Round > 1
+                  ? " Days "
+                  : " Day "}
               </div>
             </Flex>
           </>
@@ -260,11 +274,11 @@ const EPMScreens = () => {
                   fontSize: "16px",
                 }}
               >
-                Time to done: {metadata?.totalTimeToDoneBriefsWithFilterV2Round || 0}{
-                  metadata?.totalTimeToDoneBriefsWithFilterV2Round > 1
-                    ? " Days "
-                    : " Day "
-                }
+                Time to done:{" "}
+                {metadata?.totalTimeToDoneBriefsWithFilterV2Round || 0}
+                {metadata?.totalTimeToDoneBriefsWithFilterV2Round > 1
+                  ? " Days "
+                  : " Day "}
               </div>
             </Flex>
           </Grid.Col>
@@ -365,6 +379,20 @@ const EPMScreens = () => {
           handleUpdateLinkProduct={handleUpdateLinkProduct}
         />
       )}
+      {selectedSKU &&
+        (selectedSKU?.briefType === BRIEF_TYPES[6] ||
+          selectedSKU?.briefType === BRIEF_TYPES[7] ||
+          selectedSKU?.briefType === BRIEF_TYPES[8]) && (
+          <Optimized
+            opened={opened}
+            close={close}
+            selectedSKU={selectedSKU}
+            linkProduct={linkProduct}
+            loadingUpdateProductLink={loadingUpdateProductLink}
+            setLinkProduct={setLinkProduct}
+            handleUpdateLinkProduct={handleUpdateLinkProduct}
+          />
+        )}
     </>
   );
 };

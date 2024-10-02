@@ -51,7 +51,7 @@ const CreateCampsScreen = () => {
     totalPages: 1,
   });
   const [query, setQuery] = useState({
-    status: [3],
+    status: [3, 22],
     campaignStatus: ["unfulfilled", "partial"],
     postStatus: ["fulfilled", "partial"],
   });
