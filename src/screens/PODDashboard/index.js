@@ -15,6 +15,7 @@ import {
   Switch,
   Tabs,
   Text,
+  TextInput,
   Transition,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -30,7 +31,6 @@ import {
   toLower,
   toNumber,
   uniq,
-  values,
 } from "lodash";
 import moment from "moment-timezone";
 import { useWindowScroll } from "@mantine/hooks";
@@ -54,12 +54,6 @@ const TARGET_DATES = {
   SEVEN_DAYS: "7 Days",
 };
 
-const DEFAULT_SORTING = {
-  CREATED_DATE_DESC: "Created Date (Newest)",
-  CREATED_DATE_ASC: "Created Date (Oldest)",
-  TOTAL_DESC: "Total Orders (A-Z)",
-  TOTAL_ASC: "Total Orders (Z-A)",
-};
 const TARGET_DATA = {
   ORDERS: "Orders",
   PROFIT: "Profit",
@@ -94,15 +88,16 @@ const PODDashboard = () => {
   const [overridePODMetrics, setOverridePODMetrics] = useState([]);
 
   const isMounted = useRef(false);
-  const currentWeek = moment().tz("America/Los_Angeles").week();
-  const currentYear = moment().tz("America/Los_Angeles").year();
-  const endDate = moment().tz("America/Los_Angeles").format("YYYY-MM-DD");
+  const currentWeek = moment().week();
+  const currentYear = moment().year();
+  const endDate = moment().format("YYYY-MM-DD");
   const [query, setQuery] = useState({
     groupByKey: toLower(TABS_VIEW.Date),
     dateRange: 3,
     targetDate: TARGET_DATES.THREE_DAYS,
     view: TARGET_DATA.ORDERS,
     toggleTest: true,
+    adDays: 30,
   });
   const [sorting, setSorting] = useState([
     {
@@ -233,6 +228,9 @@ const PODDashboard = () => {
       isMounted.current = true;
     }
   }, [activeTab]);
+
+  const [listingDays, setListingDays] = useState("");
+  const [adDaysNum, setAdDaysNum] = useState("30");
 
   const [scroll, scrollTo] = useWindowScroll();
   return (
@@ -464,9 +462,19 @@ const PODDashboard = () => {
                                 ...pagination,
                                 currentPage: 1,
                               });
+                              if (query?.toggleTest) {
+                                setAdDaysNum("");
+                              } else {
+                                setAdDaysNum("30");
+                              }
                               setQuery({
                                 ...query,
                                 toggleTest: !query.toggleTest,
+                                ...(query?.toggleTest
+                                  ? { adDays: null }
+                                  : {
+                                      adDays: 30,
+                                    }),
                               });
                             }}
                             styles={{
@@ -574,79 +582,98 @@ const PODDashboard = () => {
                                   }}
                                 />
                               </Group>
-                              {/* <Group>
-                                <Select
-                                  data={values(DEFAULT_SORTING)}
-                                  placeholder="Sorting"
-                                  value={query?.sortingValue}
-                                  onClear={() => {
-                                    setPagination({
-                                      ...pagination,
-                                      currentPage: 1,
-                                    });
-                                    setQuery({
-                                      ...query,
-                                      primarySortBy: null,
-                                      primarySortDir: null,
-                                      sortingValue: null,
-                                    });
-                                  }}
-                                  onChange={(value) => {
-                                    setPagination({
-                                      ...pagination,
-                                      currentPage: 1,
-                                    });
-                                    switch (value) {
-                                      case DEFAULT_SORTING.CREATED_DATE_DESC:
-                                        setQuery({
-                                          ...query,
-                                          primarySortBy: "createdDate",
-                                          primarySortDir: "desc",
-                                          sortingValue: value,
-                                        });
-                                        break;
-                                      case DEFAULT_SORTING.CREATED_DATE_ASC:
-                                        setQuery({
-                                          ...query,
-                                          primarySortBy: "createdDate",
-                                          primarySortDir: "asc",
-                                          sortingValue: value,
-                                        });
-                                        break;
-                                      case DEFAULT_SORTING.TOTAL_DESC:
-                                        setQuery({
-                                          ...query,
-                                          primarySortBy: "totalOrdersInRange",
-                                          primarySortDir: "desc",
-                                          sortingValue: value,
-                                        });
-                                        break;
-                                      case DEFAULT_SORTING.TOTAL_ASC:
-                                        setQuery({
-                                          ...query,
-                                          primarySortBy: "totalOrdersInRange",
-                                          primarySortDir: "asc",
-                                          sortingValue: value,
-                                        });
-                                        break;
-                                      default:
-                                        break;
+                              <Group>
+                                <TextInput
+                                  label="List"
+                                  value={listingDays}
+                                  onChange={(event) => {
+                                    const value = event.target.value;
+                                    setListingDays(value);
+                                    if (!value) {
+                                      setPagination({
+                                        ...pagination,
+                                        currentPage: 1,
+                                      });
+                                      setQuery({
+                                        ...query,
+                                        listingDays: null,
+                                      });
                                     }
                                   }}
-                                  size="sm"
-                                  label="Sorting"
+                                  onKeyDown={(event) => {
+                                    const value = event.target.value;
+                                    if (event.key === "Enter" && value) {
+                                      setPagination({
+                                        ...pagination,
+                                        currentPage: 1,
+                                      });
+                                      setQuery({
+                                        ...query,
+                                        listingDays: toNumber(listingDays),
+                                      });
+                                    }
+                                  }}
                                   styles={{
                                     root: {
                                       display: "flex",
                                       alignItems: "center",
+                                      gap: "10px",
+                                    },
+                                    input: {
+                                      width: "70px",
                                     },
                                     label: {
-                                      marginRight: "10px",
+                                      fontSize: "12px",
                                       fontWeight: "bold",
                                     },
                                   }}
                                 />
-                              </Group> */}
+                                <TextInput
+                                  label="Ads"
+                                  value={adDaysNum}
+                                  onChange={(event) => {
+                                    const value = event.target.value;
+                                    setAdDaysNum(value);
+                                    if (!value) {
+                                      setPagination({
+                                        ...pagination,
+                                        currentPage: 1,
+                                      });
+                                      setQuery({
+                                        ...query,
+                                        adDays: null,
+                                      });
+                                    }
+                                  }}
+                                  onKeyDown={(event) => {
+                                    const value = event.target.value;
+                                    if (event.key === "Enter" && value) {
+                                      setPagination({
+                                        ...pagination,
+                                        currentPage: 1,
+                                      });
+                                      setQuery({
+                                        ...query,
+                                        adDays: toNumber(adDaysNum),
+                                      });
+                                    }
+                                  }}
+                                  styles={{
+                                    root: {
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "10px",
+                                    },
+                                    input: {
+                                      width: "70px",
+                                    },
+                                    label: {
+                                      fontSize: "12px",
+                                      fontWeight: "bold",
+                                    },
+                                  }}
+                                />
+                              </Group>
                             </Flex>
                           </Grid.Col>
                           <Grid.Col span={4}>
@@ -717,7 +744,7 @@ const PODDashboard = () => {
                       tableData={map(saleMetrics, (row) => {
                         return {
                           ...row,
-                          data: orderBy(row?.sales, ["key"], ["desc"]) || [],
+                          data: row?.sales,
                         };
                       })}
                       setTableData={setSaleMetrics}

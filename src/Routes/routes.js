@@ -119,48 +119,52 @@ export const PATH_NAMES = {
         url: "/mkt",
       },
       POST: {
-        title: "2. Post",
+        title: "1. Post",
         children: {
           DASHBOARD: {
-            title: "2.1 Dashboard",
+            title: "1.1 Post lẻ",
             url: "/mkt/post/dashboard",
           },
           CREATE: {
-            title: "2.2 Lên Post",
+            title: "1.2 Post nhiều",
             url: "/mkt/post/create",
+          },
+          ASSIGN_CTA: {
+            title: "1.3 Gắn CTA",
+            url: "/mkt/post/assign-cta",
           },
         },
       },
       CAMP: {
-        title: "3. Camp",
+        title: "2. Camp",
         children: {
           CREATE: {
-            title: "3.1 Tạo",
+            title: "2.1 Tạo",
             url: "/mkt/camp/dashboard",
           },
           CREATED: {
-            title: "3.2 Đã tạo",
+            title: "2.2 Đã tạo",
             url: "/mkt/camp/created",
           },
         },
       },
       MATERIAL: {
-        title: "4. Setting",
+        title: "3. Setting",
         children: {
           ACCOUNT: {
-            title: "4.1 Account",
+            title: "3.1 Account",
             url: "/mkt/material/account",
           },
           ROOT_CAMPAIGN: {
-            title: "4.2 Camp phôi",
+            title: "3.2 Camp phôi",
             url: "/mkt/material/root-campaign",
           },
           CAMPAIGN_CAPTION: {
-            title: "4.3 - Caption",
+            title: "3.3 - Caption",
             url: "/mkt/material/caption",
           },
           SETTING: {
-            title: "4.4 - Setting",
+            title: "3.4 - Setting",
             url: "/mkt/material/setting",
           },
         },
@@ -454,12 +458,12 @@ export const NAVIGATION = [
     turnOffActive: true,
     permissions: ["read:mkt"],
     dropdown: [
-      {
-        title: PATH_NAMES.MKT.children.LIST_SKU.title,
-        url: PATH_NAMES.MKT.children.LIST_SKU.url,
-        arrowDown: true,
-        permissions: ["read:mkt_post", "read:mkt_camp"],
-      },
+      // {
+      //   title: PATH_NAMES.MKT.children.LIST_SKU.title,
+      //   url: PATH_NAMES.MKT.children.LIST_SKU.url,
+      //   arrowDown: true,
+      //   permissions: ["read:mkt_post", "read:mkt_camp"],
+      // },
       {
         title: PATH_NAMES.MKT.children.POST.title,
         arrowDown: true,
@@ -472,6 +476,11 @@ export const NAVIGATION = [
           {
             title: PATH_NAMES.MKT.children.POST.children.CREATE.title,
             pathname: PATH_NAMES.MKT.children.POST.children.CREATE.url,
+            permissions: ["read:mkt_post"],
+          },
+          {
+            title: PATH_NAMES.MKT.children.POST.children.ASSIGN_CTA.title,
+            pathname: PATH_NAMES.MKT.children.POST.children.ASSIGN_CTA.url,
             permissions: ["read:mkt_post"],
           },
         ],

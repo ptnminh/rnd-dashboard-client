@@ -48,6 +48,7 @@ import {
   CONVERT_NUMBER_TO_RANKING_STATUS,
   CONVERT_STATUS_TO_RANKING_NUMBER,
   RANKING_STATUS,
+  RND_SIZES,
 } from "../../../constant";
 
 const TARGET_MODES = {
@@ -146,6 +147,12 @@ const RankingTable = ({
           }
           return {
             className: classnames || classes["body-cells-op-team"],
+            ...(color &&
+              query?.mode[0] === TARGET_MODES.RANKING && {
+                style: {
+                  "--mrt-row-hover-background-color": "#A2E09C",
+                },
+              }),
           };
         },
         mantineTableHeadCellProps: {
@@ -190,7 +197,7 @@ const RankingTable = ({
         },
       };
     });
-    return orderBy(columns, "header", "desc");
+    return columns;
   };
 
   // UseEffect to generate and sort columns based on tableData
@@ -316,7 +323,7 @@ const RankingTable = ({
                       setQuery({
                         ...query,
                         sortBy: "latestRank",
-                        sortDir: "desc",
+                        sortDir: "asc",
                       });
                     }}
                   >
@@ -334,7 +341,7 @@ const RankingTable = ({
 
               {isShow &&
                 query?.sortBy === "latestRank" &&
-                query?.sortDir === "desc" && (
+                query?.sortDir === "asc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
@@ -348,7 +355,7 @@ const RankingTable = ({
                       setQuery({
                         ...query,
                         sortBy: "latestRank",
-                        sortDir: "asc",
+                        sortDir: "desc",
                       });
                     }}
                   >
@@ -361,7 +368,7 @@ const RankingTable = ({
                 )}
               {isShow &&
                 query?.sortBy === "latestRank" &&
-                query?.sortDir === "asc" && (
+                query?.sortDir === "desc" && (
                   <ActionIcon
                     variant="filled"
                     aria-label="Settings"
@@ -635,11 +642,12 @@ const RankingTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
+          const size = row?.original?.size || 2;
           return {
-            className:
-              row.id === `Total theo ${activeTab}`
-                ? classes["summary-row"]
-                : classes["body-cells-op-team"],
+            className: classes["body-cells-op-team"],
+            // ...(size === 3 && {
+            //   style: { "--mrt-row-hover-background-color": "#A2E09C" },
+            // }),
           };
         },
         mantineTableHeadCellProps: () => {
@@ -674,6 +682,14 @@ const RankingTable = ({
           return (
             <Select
               data={keys(SIZES)}
+              styles={{
+                ...(size === 3 && {
+                  input: {
+                    backgroundColor: "#3c7c36",
+                    color: "#FFFFFF",
+                  },
+                }),
+              }}
               value={CONVERT_NUMBER_TO_STATUS[size]}
               onChange={(value) => {
                 const newData = data.map((item) => {
@@ -702,11 +718,12 @@ const RankingTable = ({
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
+          const follow = row?.original?.follow;
           return {
-            className:
-              row.id === `Total theo ${activeTab}`
-                ? classes["summary-row"]
-                : classes["body-cells-op-team"],
+            className: classes["body-cells-op-team"],
+            // ...(follow === 1 && {
+            //   style: { "--mrt-row-hover-background-color": "#A2E09C" },
+            // }),
           };
         },
         mantineTableHeadCellProps: () => {
@@ -724,6 +741,14 @@ const RankingTable = ({
           return (
             <Select
               data={values(RANKING_STATUS)}
+              styles={{
+                ...(follow === 1 && {
+                  input: {
+                    backgroundColor: "#3c7c36",
+                    color: "#FFFFFF",
+                  },
+                }),
+              }}
               allowDeselect={false}
               value={CONVERT_NUMBER_TO_RANKING_STATUS[follow]}
               onChange={(pureValue) => {
@@ -893,6 +918,9 @@ const RankingTable = ({
               row.id === `Total theo ${activeTab}`
                 ? classes["summary-row"]
                 : classes["total-changes"],
+            style: {
+              "--mrt-row-hover-background-color": "#d7e2fb",
+            },
           };
         },
         mantineTableHeadCellProps: () => {
@@ -927,7 +955,7 @@ const RankingTable = ({
       },
     ];
     // Combine base columns and custom columns, ensuring custom columns are always sorted
-    return [...baseColumns, ...orderBy(customColumns, "header", "desc")];
+    return [...baseColumns, ...customColumns];
   }, [customColumns, data, summaryRow]);
 
   const table = useMantineReactTable({
@@ -977,6 +1005,10 @@ const RankingTable = ({
     enableBottomToolbar: true,
     enableTopToolbar: false,
     manualSorting: true,
+    mantinePaperProps: {
+      style: { "--mrt-row-hover-background-color": "#E1EAFF" },
+      hover: false,
+    },
     mantineBottomToolbarProps: () => {
       return {
         className: classes["bottom-toolbar"],

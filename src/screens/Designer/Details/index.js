@@ -602,13 +602,20 @@ const KeywordTable = ({
           return (
             <Button
               variant="filled"
-              color={row.original.status === 2 ? "red" : "green"}
+              color={foundBrief?.status === 2 ? "red" : "green"}
               leftSection={
-                row.original.status === 2 ? <IconBan /> : <IconCheck />
+                foundBrief?.status === 2 ? <IconBan /> : <IconCheck />
               }
-              disabled={row?.original?.status === 1 && !foundBrief?.linkDesign}
+              disabled={foundBrief.status === 1 && !foundBrief?.linkDesign}
+              onClick={() => {
+                openUpdateStatusConfirmModal({
+                  uid,
+                  status: foundBrief?.status,
+                  sku: foundBrief?.sku,
+                });
+              }}
             >
-              {row.original.status === 2 ? "Undone" : "Done"}
+              {foundBrief?.status === 2 ? "Undone" : "Done"}
             </Button>
           );
         },
@@ -672,6 +679,21 @@ const KeywordTable = ({
       labels: { confirm: "Delete", cancel: "Cancel" },
       confirmProps: { color: "red" },
       onConfirm: () => handleDeleteBrief(row.original.uid),
+    });
+
+  // CONFIRM UPDATE STATUS
+  const openUpdateStatusConfirmModal = ({ uid, status, sku }) =>
+    modals.openConfirmModal({
+      title: "Confirm Modal",
+      centered: true,
+      children: <Text>Are you sure you want to update {sku}?</Text>,
+      labels: { confirm: "Update", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      onConfirm: () =>
+        handleUpdateStatus({
+          uid,
+          status,
+        }),
     });
 
   const handleDeleteBrief = async (uid) => {
@@ -993,32 +1015,6 @@ const KeywordTable = ({
               <IconFilterOff />
             </Button>
           </Flex>
-          <Flex
-            style={{
-              gap: "30px",
-              padding: "10px",
-              borderRadius: "10px",
-              backgroundColor: "#EFF0F1",
-            }}
-            justify="end"
-          >
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Undone: {metadata?.totalUndoneBriefsWithFilter}
-            </div>
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
-            </div>
-          </Flex>
         </div>
       );
     },
@@ -1035,20 +1031,6 @@ const KeywordTable = ({
         }
       },
       onClick: () => {
-        if (
-          cell &&
-          cell.column.id === "status" &&
-          (includes(permissions, "update:design") ||
-            includes(permissions, "update:brief"))
-        ) {
-          handleUpdateStatus({
-            uid: row.original.uid,
-            status: row.original.status,
-          }).then((response) => {
-            console.log(response);
-          });
-          return;
-        }
         if (
           cell &&
           cell.column.id === "remove" &&

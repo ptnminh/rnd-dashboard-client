@@ -35,6 +35,7 @@ import Sellerboard from "./screens/Sellerboard";
 import RankingPODShopifyProducts from "./screens/Ranking";
 import PODDashboard from "./screens/PODDashboard";
 import RequestVideoSample from "./screens/RequestVideoSample";
+import CreatedPost from "./screens/CreatedPost";
 
 function App() {
   return (
@@ -183,7 +184,15 @@ function App() {
         path="/mkt/post/create"
         element={
           <Page title="MKT">
-            <CreatePost />
+            <CreatePost createType="single_post" />
+          </Page>
+        }
+      />
+      <Route
+        path="/mkt/post/assign-cta"
+        element={
+          <Page title="MKT">
+            <CreatedPost createType="multiple_post" />
           </Page>
         }
       />

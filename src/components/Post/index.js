@@ -106,7 +106,7 @@ const Ads = ({
           padding: "10px",
           ...(includes(choosePosts, uid) &&
             !postId && {
-              backgroundColor: "#ffecd2",
+              backgroundColor: "#dbdad823",
             }),
         }}
       >
@@ -202,7 +202,7 @@ const Ads = ({
                 }}
               >
                 <Grid.Col
-                  span={1}
+                  span={2}
                   style={{
                     height: "80%",
                   }}
@@ -247,7 +247,7 @@ const Ads = ({
                     />
                   )}
                 </Grid.Col>
-                <Grid.Col span={11}>
+                <Grid.Col span={10}>
                   <Flex gap={20} wrap={true}>
                     <Textarea
                       label="Nội dung"
@@ -822,7 +822,7 @@ const PostCamp = ({
           style={{
             height: "100px",
             padding: "10px",
-            backgroundColor: "#E0EAFF",
+            backgroundColor: "#376cdd72",
           }}
         >
           <Image
@@ -838,7 +838,7 @@ const PostCamp = ({
           style={{
             height: "100px",
             padding: "10px",
-            backgroundColor: "#E0EAFF",
+            backgroundColor: "#376cdd72",
           }}
           wrap={true}
         >

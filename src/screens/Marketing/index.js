@@ -170,7 +170,7 @@ export const CreateWaitingPosts = () => {
     <>
       <Card
         className={styles.card}
-        title="List SKU đang đợi"
+        title="Post lẻ"
         classTitle={cn("title-purple", styles.title)}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
       >

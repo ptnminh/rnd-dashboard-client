@@ -20,6 +20,7 @@ import {
   Button,
   LoadingOverlay,
   HoverCard,
+  Switch,
 } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
@@ -58,6 +59,7 @@ const EPMScreens = () => {
   const [query, setQuery] = useState({
     statusValue: "Undone",
     status: [2],
+    priority: 1,
   });
   const [sorting, setSorting] = useState([]);
   const [opened, { open, close }] = useDisclosure(false);
@@ -174,7 +176,7 @@ const EPMScreens = () => {
       <Card
         className={styles.card}
         title="EPM TASK"
-        classTitle={cn("title-purple", styles.title)}
+        classTitle={styles.title}
         classCardHead={cn(styles.head, { [styles.hidden]: visible })}
         head={
           <>
@@ -193,7 +195,7 @@ const EPMScreens = () => {
                   fontSize: "16px",
                 }}
               >
-                Undone: {metadata?.totalUndoneBriefs}
+                Số card: {metadata?.totalUndoneBriefs}
               </div>
               <div
                 style={{
@@ -201,12 +203,72 @@ const EPMScreens = () => {
                   fontSize: "16px",
                 }}
               >
-                Time to done: {metadata?.totalTimeToDoneBriefs}h
+                Time to done: {metadata?.totalTimeToDoneAllBriefsV2Round || 0}{
+                  metadata?.totalTimeToDoneAllBriefsV2Round > 1 ? " Days " : " Day "
+                }
               </div>
             </Flex>
           </>
         }
       >
+        <Grid
+          style={{
+            padding: "10px",
+            display: "flex",
+            justifyContent: "start",
+          }}
+        >
+          <Grid.Col span={6}>
+            <Flex
+              style={{
+                gap: "30px",
+                padding: "10px",
+                borderRadius: "10px",
+                backgroundColor: "#EFF0F1",
+              }}
+              justify="start"
+              align="center"
+            >
+              <Switch
+                checked={query?.priority === 2}
+                labelPosition="left"
+                onChange={() => {
+                  setQuery({
+                    ...query,
+                    priority: query?.priority === 1 ? 2 : 1,
+                  });
+                }}
+                styles={{
+                  label: {
+                    fontSize: "16px",
+                    fontWeight: "bold",
+                  },
+                }}
+                label="Priority View"
+              />
+              <div
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                }}
+              >
+                Số card: {metadata?.totalUndoneBriefsWithFilter}
+              </div>
+              <div
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "16px",
+                }}
+              >
+                Time to done: {metadata?.totalTimeToDoneBriefsWithFilterV2Round || 0}{
+                  metadata?.totalTimeToDoneBriefsWithFilterV2Round > 1
+                    ? " Days "
+                    : " Day "
+                }
+              </div>
+            </Flex>
+          </Grid.Col>
+        </Grid>
         <Table
           className={styles.details}
           onClose={() => setVisible(false)}

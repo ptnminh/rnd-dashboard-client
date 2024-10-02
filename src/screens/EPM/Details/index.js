@@ -518,20 +518,25 @@ const BriefsTable = ({
         mantineTableHeadCellProps: { className: classes["linkDesign"] },
         Cell: (props) => {
           const { row } = props;
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
           return (
             <Button
               variant="filled"
-              color={row.original.status === 3 ? "red" : "green"}
+              color={foundBrief?.status === 3 ? "red" : "green"}
               leftSection={
-                row.original.status === 3 ? <IconBan /> : <IconCheck />
+                foundBrief?.status === 3 ? <IconBan /> : <IconCheck />
               }
-              disabled={
-                row?.original?.status === 2 &&
-                !row?.original?.linkProduct &&
-                !updateBrief[row.original.uid]?.linkProduct
-              }
+              disabled={foundBrief.status === 2 && !foundBrief?.linkProduct}
+              onClick={() => {
+                openUpdateStatusConfirmModal({
+                  uid,
+                  status: foundBrief?.status,
+                  sku: foundBrief?.sku,
+                });
+              }}
             >
-              {row.original.status === 3 ? "Undone" : "Done"}
+              {foundBrief?.status === 3 ? "Undone" : "Done"}
             </Button>
           );
         },
@@ -594,6 +599,21 @@ const BriefsTable = ({
       labels: { confirm: "Delete", cancel: "Cancel" },
       confirmProps: { color: "red" },
       onConfirm: () => handleDeleteBrief(row.original.uid),
+    });
+
+  // CONFIRM UPDATE STATUS
+  const openUpdateStatusConfirmModal = ({ uid, status, sku }) =>
+    modals.openConfirmModal({
+      title: "Confirm Modal",
+      centered: true,
+      children: <Text>Are you sure you want to update {sku}?</Text>,
+      labels: { confirm: "Update", cancel: "Cancel" },
+      confirmProps: { color: "red" },
+      onConfirm: () =>
+        handleUpdateStatus({
+          uid,
+          status,
+        }),
     });
 
   const handleDeleteBrief = async (uid) => {
@@ -946,32 +966,7 @@ const BriefsTable = ({
               <IconFilterOff />
             </Button>
           </Flex>
-          <Flex
-            style={{
-              gap: "30px",
-              padding: "10px",
-              borderRadius: "10px",
-              backgroundColor: "#EFF0F1",
-            }}
-            justify="end"
-          >
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Undone: {metadata?.totalUndoneBriefsWithFilter}
-            </div>
-            <div
-              style={{
-                fontWeight: "bold",
-                fontSize: "16px",
-              }}
-            >
-              Time to done: {metadata?.totalTimeToDoneBriefsWithFilter}h
-            </div>
-          </Flex>
+
           {editingCell && !isEmpty(updateBrief.linkDesigns) && (
             <Flex>
               <Button
@@ -999,20 +994,6 @@ const BriefsTable = ({
         }
       },
       onClick: () => {
-        if (
-          cell &&
-          cell.column.id === "status" &&
-          (includes(permissions, "update:epm") ||
-            includes(permissions, "update:brief"))
-        ) {
-          handleUpdateStatus({
-            uid: row.original.uid,
-            status: row.original.status,
-          }).then((response) => {
-            console.log(response);
-          });
-          return;
-        }
         if (
           cell &&
           cell.column.id === "remove" &&

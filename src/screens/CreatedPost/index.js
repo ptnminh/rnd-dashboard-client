@@ -4,6 +4,7 @@ import {
   Checkbox,
   Flex,
   Group,
+  Image,
   Pagination,
   Progress,
   rem,
@@ -37,7 +38,7 @@ import { BRIEF_SORTINGS, CONVERT_BRIEF_SORTINGS } from "../../constant/briefs";
 import { CTA_STATUS } from "../../constant";
 import { modals } from "@mantine/modals";
 
-const CreatePost = ({
+const CreatedPost = ({
   brief,
   closeModalCreatePostFromBrief,
   setTriggerFetchBrief,
@@ -49,7 +50,7 @@ const CreatePost = ({
   });
   const hasSetChoosePosts = useRef(false);
   const [batch, setBatch] = useState("");
-  const [activeTab, setActiveTab] = useState("readyPost");
+  const [activeTab, setActiveTab] = useState("createdPost");
   const [searchSKU, setSearchSKU] = useState("");
   const [filterCta, setFilterCta] = useState(CTA_STATUS.UN_ASSIGNED);
   const [loadingFetchBrief, setLoadingFetchBrief] = useState(false);
@@ -254,9 +255,7 @@ const CreatePost = ({
       setLoadingCreatePost(false);
       return;
     }
-    const createPostResponse = await postService.createPost(
-      transformedPayloads
-    );
+    const createPostResponse = await postService.d(transformedPayloads);
     if (createPostResponse?.success === false || !createPostResponse) {
       const errors = createPostResponse?.errorList || [];
       setPostErrors(errors);
@@ -367,7 +366,7 @@ const CreatePost = ({
       children: <Text size="sm">Nhớ gắn cta cho post hình nha!</Text>,
       labels: { confirm: "Confirm", cancel: "Cancel" },
       onCancel: () => console.log("Cancel"),
-      onConfirm: () => console.log("Cancel"),
+      onConfirm: () => console.log("Confirm"),
     });
   return (
     <>
@@ -970,4 +969,4 @@ const CreatePost = ({
   );
 };
 
-export default CreatePost;
+export default CreatedPost;

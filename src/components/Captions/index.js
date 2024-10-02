@@ -18,7 +18,7 @@ import cn from "classnames";
 import { useEffect, useState } from "react";
 import styles from "./Captions.module.sass";
 import { IconFilterOff, IconSearch } from "@tabler/icons-react";
-import { drop, find, map } from "lodash";
+import { drop, find, map, uniq } from "lodash";
 
 const ListCaptions = ({
   captions,
@@ -96,7 +96,7 @@ const ListCaptions = ({
           <Autocomplete
             placeholder="Product Line..."
             size="sm"
-            data={map(allProductBases, "name")}
+            data={uniq(map(allProductBases, "name"))}
             value={searchProductLine}
             clearable
             onChange={(value) => {

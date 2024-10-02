@@ -28,6 +28,7 @@ import {
   merge,
   isEmpty,
   toNumber,
+  keys,
 } from "lodash";
 import {
   IconFilterOff,
@@ -37,14 +38,35 @@ import {
 } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import {
+  AMZ_DASHBOARD_STATUS,
   AMZ_SORTING,
   AMZ_STORES,
+  CONVERT_NUMBER_TO_AMZ_DASHBOARD_STATUS,
+  CONVERT_STATUS_TO_AMZ_DASHBOARD_NUMBER,
   FULFILLMENT_CHANNELS,
 } from "../../../constant";
 import moment from "moment-timezone";
-import { arraysMatchUnordered, CONVERT_NUMBER_TO_STATUS } from "../../../utils";
+import {
+  arraysMatchUnordered,
+  CONVERT_NUMBER_TO_STATUS,
+  CONVERT_STATUS_TO_NUMBER,
+  VALUES,
+} from "../../../utils";
 import { DateRangePicker } from "rsuite";
 import LazyLoad from "react-lazyload";
+import { amzServices } from "../../../services";
+
+const moveOverrideColorToStart = (array) => {
+  return array.sort((a, b) => {
+    if (a.overrideColor && !b.overrideColor) {
+      return -1;
+    }
+    if (!a.overrideColor && b.overrideColor) {
+      return 1;
+    }
+    return 0;
+  });
+};
 
 const SellerboardTable = ({
   tableData,
@@ -58,7 +80,17 @@ const SellerboardTable = ({
   setPagination,
   pagination,
   setIsLoadmore,
+  setOverrideMetrics,
+  overrideMetrics,
+  setTableData,
+  adDaysNum,
+  setAdDaysNum,
+  listingDays,
+  setListingDays,
 }) => {
+  const handleUpdateAMZDashboard = async (sku, data) => {
+    await amzServices.handleUpdateAMZDashboard(sku, data);
+  };
   // Function to extract unique keys from the data array
   const extractUniqueKeys = (dataset) => {
     // Flatten the 'data' arrays from each item and map to the 'key' property
@@ -119,6 +151,24 @@ const SellerboardTable = ({
     });
     return columns;
   };
+
+  useEffect(() => {
+    if (!isEmpty(overrideMetrics)) {
+      const orderedData = moveOverrideColorToStart(
+        map(data, (item) => {
+          if (overrideMetrics.includes(item.sku)) {
+            return {
+              ...item,
+              overrideColor: true,
+            };
+          }
+          return item;
+        })
+      );
+      setData(orderedData);
+      setCustomColumns(generateCustomColumn(orderedData));
+    }
+  }, [overrideMetrics]);
 
   // UseEffect to generate and sort columns based on tableData
   useEffect(() => {
@@ -192,8 +242,8 @@ const SellerboardTable = ({
       {
         accessorKey: "product",
         header: "Product",
-        size: 200,
-        maxSize: 200,
+        size: 250,
+        maxSize: 250,
         enableEditing: false,
         enableSorting: false,
         enableMultiSort: true,
@@ -205,6 +255,230 @@ const SellerboardTable = ({
                 : classes["body-cells-op-team"],
             rowSpan: row.id === `Total theo ${activeTab}` ? 3 : 1, // Row span for Total theo ${activeTab} row
           };
+        },
+        Header: () => {
+          return (
+            <Group gap={30}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "bold",
+                }}
+              >
+                Product
+              </Text>
+
+              <Flex direction="column">
+                <Group justify="space-between">
+                  <Text
+                    style={{
+                      fontSize: "12px",
+                    }}
+                  >
+                    Ads:
+                  </Text>
+                  <Group>
+                    {(!query?.primarySortBy ||
+                      query?.primarySortBy !== "testDate") && (
+                      <ActionIcon
+                        aria-label="Settings"
+                        variant="default"
+                        size="sm"
+                        style={{
+                          background: "none",
+                          border: "none",
+                        }}
+                        onClick={() => {
+                          setPagination({
+                            ...pagination,
+                            currentPage: 1,
+                          });
+                          setIsConfirmedQuery(true);
+                          setQuery({
+                            ...query,
+                            primarySortBy: "testDate",
+                            primarySortDir: "desc",
+                          });
+                        }}
+                      >
+                        <IconArrowsSort
+                          style={{
+                            width: "60%",
+                            height: "60%",
+                            fontWeight: "bold",
+                          }}
+                          stroke={2}
+                          color="#ffffff"
+                        />
+                      </ActionIcon>
+                    )}
+                    {query?.primarySortBy === "testDate" &&
+                      query?.primarySortDir === "desc" && (
+                        <ActionIcon
+                          variant="filled"
+                          aria-label="Settings"
+                          color="transparent"
+                          size="sm"
+                          onClick={() => {
+                            setIsConfirmedQuery(true);
+                            setPagination({
+                              ...pagination,
+                              currentPage: 1,
+                            });
+                            setQuery({
+                              ...query,
+                              primarySortBy: "testDate",
+                              primarySortDir: "asc",
+                            });
+                          }}
+                        >
+                          <IconSortDescending
+                            style={{ width: "70%", height: "70%" }}
+                            stroke={2}
+                            color="#70B1ED"
+                          />
+                        </ActionIcon>
+                      )}
+                    {query?.primarySortBy === "testDate" &&
+                      query?.primarySortDir === "asc" && (
+                        <ActionIcon
+                          variant="filled"
+                          aria-label="Settings"
+                          size="sm"
+                          color="transparent"
+                          onClick={() => {
+                            setIsConfirmedQuery(true);
+                            setPagination({
+                              ...pagination,
+                              currentPage: 1,
+                            });
+                            setQuery({
+                              ...query,
+                              primarySortBy: null,
+                              primarySortDir: null,
+                            });
+                          }}
+                        >
+                          <IconSortAscending
+                            style={{
+                              width: "70%",
+                              height: "70%",
+                              fontWeight: "bold",
+                            }}
+                            stroke={2}
+                            color="#70B1ED"
+                          />
+                        </ActionIcon>
+                      )}
+                  </Group>
+                </Group>
+                <Group justify="space-between">
+                  <Text
+                    style={{
+                      fontSize: "12px",
+                    }}
+                  >
+                    List:
+                  </Text>
+                  <Group>
+                    {(!query?.primarySortBy ||
+                      query?.primarySortBy !== "createdDate") && (
+                      <ActionIcon
+                        aria-label="Settings"
+                        variant="default"
+                        size="sm"
+                        style={{
+                          background: "none",
+                          border: "none",
+                        }}
+                        onClick={() => {
+                          setIsConfirmedQuery(true);
+                          setPagination({
+                            ...pagination,
+                            currentPage: 1,
+                          });
+                          setQuery({
+                            ...query,
+                            primarySortBy: "createdDate",
+                            primarySortDir: "desc",
+                          });
+                        }}
+                      >
+                        <IconArrowsSort
+                          style={{
+                            width: "60%",
+                            height: "60%",
+                            fontWeight: "bold",
+                          }}
+                          stroke={2}
+                          color="#ffffff"
+                        />
+                      </ActionIcon>
+                    )}
+
+                    {query?.primarySortBy === "createdDate" &&
+                      query?.primarySortDir === "desc" && (
+                        <ActionIcon
+                          variant="filled"
+                          aria-label="Settings"
+                          color="transparent"
+                          size="sm"
+                          onClick={() => {
+                            setIsConfirmedQuery(true);
+                            setPagination({
+                              ...pagination,
+                              currentPage: 1,
+                            });
+                            setQuery({
+                              ...query,
+                              primarySortBy: "createdDate",
+                              primarySortDir: "desc",
+                            });
+                          }}
+                        >
+                          <IconSortDescending
+                            style={{ width: "70%", height: "70%" }}
+                            stroke={2}
+                            color="#70B1ED"
+                          />
+                        </ActionIcon>
+                      )}
+                    {query?.primarySortBy === "createdDate" &&
+                      query?.primarySortDir === "asc" && (
+                        <ActionIcon
+                          variant="filled"
+                          aria-label="Settings"
+                          size="sm"
+                          color="transparent"
+                          onClick={() => {
+                            setIsConfirmedQuery(true);
+                            setPagination({
+                              ...pagination,
+                              currentPage: 1,
+                            });
+                            setQuery({
+                              ...query,
+                              primarySortBy: null,
+                              primarySortDir: null,
+                            });
+                          }}
+                        >
+                          <IconSortAscending
+                            style={{
+                              width: "70%",
+                              height: "70%",
+                              fontWeight: "bold",
+                            }}
+                            stroke={2}
+                            color="#70B1ED"
+                          />
+                        </ActionIcon>
+                      )}
+                  </Group>
+                </Group>
+              </Flex>
+            </Group>
+          );
         },
         mantineTableHeadCellProps: ({ row }) => {
           return {
@@ -221,24 +495,23 @@ const SellerboardTable = ({
           }
           const {
             ASIN,
-            title,
             image,
-            store,
             fulfillmentChannel,
             sku,
-            totalOrders,
+            createdDate,
+            testDate,
           } = row.original;
           const url = `https://www.amazon.com/dp/${ASIN}`;
           return (
             <Flex direction="column">
               <Grid>
-                <Grid.Col span={4}>
+                <Grid.Col span={6}>
                   <Tooltip label={url}>
-                    <LazyLoad height={50} once={true}>
+                    <LazyLoad height={100} once={true}>
                       <Image
                         src={image || "/images/content/not_found_2.jpg"}
                         width="100%"
-                        height="50px"
+                        height="100%"
                         style={{
                           cursor: "pointer",
                         }}
@@ -250,12 +523,13 @@ const SellerboardTable = ({
                     </LazyLoad>
                   </Tooltip>
                 </Grid.Col>
-                <Grid.Col span={8}>
+                <Grid.Col span={6}>
                   <Grid>
                     <Grid.Col
                       span={12}
                       style={{
-                        padding: "0 5px",
+                        paddingLeft: 0,
+                        paddingRight: 0,
                       }}
                     >
                       <Flex>
@@ -263,18 +537,63 @@ const SellerboardTable = ({
                           style={{
                             fontSize: 14,
                             fontWeight: "bold",
+                            textAlign: "left",
                           }}
                         >
                           {sku}
                         </Text>
                       </Flex>
                     </Grid.Col>
+                    {createdDate && (
+                      <Grid.Col
+                        span={12}
+                        style={{
+                          padding: 0,
+                          marginTop: "5px",
+                        }}
+                      >
+                        <Text
+                          style={{
+                            textAlign: "left",
+                            fontSize: 11,
+                            color: "gray",
+                          }}
+                        >
+                          List:{" "}
+                          {moment(createdDate)
+                            .subtract(createdDate)
+                            .fromNow(true)}
+                        </Text>
+                      </Grid.Col>
+                    )}
+                    {testDate && (
+                      <Grid.Col
+                        span={12}
+                        style={{
+                          padding: 0,
+                          marginTop: "5px",
+                        }}
+                      >
+                        <Text
+                          style={{
+                            textAlign: "left",
+                            fontSize: 11,
+                            color: "gray",
+                          }}
+                        >
+                          Ads:{" "}
+                          {moment(testDate).subtract(testDate).fromNow(true)}
+                        </Text>
+                      </Grid.Col>
+                    )}
 
                     <Grid.Col
                       span={12}
                       style={{
                         display: "flex",
                         justifyContent: "start",
+                        paddingLeft: 0,
+                        paddingRight: 0,
                       }}
                     >
                       <Tooltip label={url}>
@@ -283,6 +602,7 @@ const SellerboardTable = ({
                             fontSize: 12,
                             color: "gray",
                             cursor: "pointer",
+                            textAlign: "left",
                           }}
                           onClick={() => {
                             window.open(url, "_blank");
@@ -327,9 +647,12 @@ const SellerboardTable = ({
                   fontWeight: "bold",
                 }}
               >
-                Summary
+                Lifetime Order
               </Text>
-              {!query?.primarySortBy && (
+              {(!query?.primarySortBy ||
+                query?.primarySortBy === "ordersInRange" ||
+                query?.primarySortBy === "createdDate" ||
+                query?.primarySortBy === "testDate") && (
                 <ActionIcon
                   aria-label="Settings"
                   variant="default"
@@ -351,8 +674,13 @@ const SellerboardTable = ({
                   }}
                 >
                   <IconArrowsSort
-                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
+                    style={{
+                      width: "60%",
+                      height: "60%",
+                      fontWeight: "bold",
+                    }}
                     stroke={2}
+                    color="#ffffff"
                   />
                 </ActionIcon>
               )}
@@ -365,6 +693,10 @@ const SellerboardTable = ({
                     color="transparent"
                     onClick={() => {
                       setIsConfirmedQuery(true);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
                       setQuery({
                         ...query,
                         primarySortBy: "totalOrders",
@@ -387,6 +719,10 @@ const SellerboardTable = ({
                     color="transparent"
                     onClick={() => {
                       setIsConfirmedQuery(true);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
                       setQuery({
                         ...query,
                         primarySortBy: null,
@@ -412,7 +748,7 @@ const SellerboardTable = ({
           if (row.id === `Total theo ${activeTab}`) {
             return null;
           }
-          const { createdDate, totalOrders } = row.original;
+          const { totalOrders } = row.original;
           return (
             <Group
               style={{
@@ -424,13 +760,13 @@ const SellerboardTable = ({
             >
               <Text
                 style={{
-                  fontSize: "12px",
+                  fontSize: "14px",
                   fontWeight: "bold",
                 }}
               >
                 {totalOrders?.toLocaleString()}
               </Text>
-              <Text
+              {/* <Text
                 style={{
                   fontSize: "12px",
                   fontWeight: "thin",
@@ -440,7 +776,7 @@ const SellerboardTable = ({
                 {moment(createdDate)
                   .tz("America/Los_Angeles")
                   .format("DD MMM YYYY")}
-              </Text>
+              </Text> */}
             </Group>
           );
         },
@@ -497,8 +833,8 @@ const SellerboardTable = ({
         },
       },
       {
-        accessorKey: "totalInRanges",
-        header: "Total In Ranges",
+        accessorKey: "size",
+        header: "Size",
         size: 50,
         maxSize: 50,
         enableEditing: false,
@@ -515,6 +851,231 @@ const SellerboardTable = ({
           return {
             className: classes["head-cells-op-team"],
           };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          let color = null;
+          const size = row.original.size || 2;
+          switch (size) {
+            case 1:
+              color = "green";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "red";
+              break;
+            case 1.5:
+              color = "#006400";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[size]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[size]}</span>
+          );
+        },
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        size: 130,
+        maxSize: 130,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          const sku = row?.original?.sku;
+          const optimized = row?.original?.optimized || 0;
+          return (
+            <Select
+              size="xs"
+              allowDeselect={false}
+              data={values(AMZ_DASHBOARD_STATUS)}
+              value={CONVERT_NUMBER_TO_AMZ_DASHBOARD_STATUS[optimized]}
+              onChange={(value) => {
+                const newFollow = CONVERT_STATUS_TO_AMZ_DASHBOARD_NUMBER[value];
+                const newData = data.map((item) => {
+                  if (item.sku === sku) {
+                    if (newFollow === 1) {
+                      setOverrideMetrics([...overrideMetrics, sku]);
+                    } else {
+                      setOverrideMetrics(
+                        overrideMetrics.filter((x) => x !== sku)
+                      );
+                    }
+                    return {
+                      ...item,
+                      optimized: newFollow,
+                      ...(newFollow === 1
+                        ? {
+                            overrideColor: true,
+                          }
+                        : {
+                            overrideColor: false,
+                          }),
+                    };
+                  }
+                  return item;
+                });
+                const orderedData = moveOverrideColorToStart(newData, sku);
+                setData(orderedData);
+                setTableData(orderedData);
+                setCustomColumns(generateCustomColumn(orderedData));
+                handleUpdateAMZDashboard(sku, { optimized: newFollow });
+              }}
+            />
+          );
+        },
+      },
+      {
+        accessorKey: "totalInRanges",
+        header: "Total Orders",
+        size: 150,
+        maxSize: 150,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Header: () => {
+          return (
+            <Group gap={5}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  fontWeight: "bold",
+                }}
+              >
+                Total Orders
+              </Text>
+              {(!query?.primarySortBy ||
+                query?.primarySortBy !== "ordersInRange") && (
+                <ActionIcon
+                  aria-label="Settings"
+                  variant="default"
+                  size="sm"
+                  style={{
+                    background: "none",
+                    border: "none",
+                  }}
+                  onClick={() => {
+                    setIsConfirmedQuery(true);
+                    setPagination({
+                      ...pagination,
+                      currentPage: 1,
+                    });
+                    setQuery({
+                      ...query,
+                      primarySortBy: "ordersInRange",
+                      primarySortDir: "desc",
+                    });
+                  }}
+                >
+                  <IconArrowsSort
+                    style={{
+                      width: "60%",
+                      height: "60%",
+                      fontWeight: "bold",
+                    }}
+                    stroke={2}
+                    color="#ffffff"
+                  />
+                </ActionIcon>
+              )}
+
+              {query?.primarySortBy === "ordersInRange" &&
+                query?.primarySortDir === "desc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    color="transparent"
+                    size="sm"
+                    onClick={() => {
+                      setIsConfirmedQuery(true);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setQuery({
+                        ...query,
+                        primarySortBy: "ordersInRange",
+                        primarySortDir: "asc",
+                      });
+                    }}
+                  >
+                    <IconSortDescending
+                      style={{ width: "70%", height: "70%" }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+              {query?.primarySortBy === "ordersInRange" &&
+                query?.primarySortDir === "asc" && (
+                  <ActionIcon
+                    variant="filled"
+                    aria-label="Settings"
+                    size="sm"
+                    color="transparent"
+                    onClick={() => {
+                      setIsConfirmedQuery(true);
+                      setPagination({
+                        ...pagination,
+                        currentPage: 1,
+                      });
+                      setQuery({
+                        ...query,
+                        primarySortBy: null,
+                        primarySortDir: null,
+                      });
+                    }}
+                  >
+                    <IconSortAscending
+                      style={{
+                        width: "70%",
+                        height: "70%",
+                        fontWeight: "bold",
+                      }}
+                      stroke={2}
+                      color="#70B1ED"
+                    />
+                  </ActionIcon>
+                )}
+            </Group>
+          );
         },
         Cell: ({ row }) => {
           if (row.id === `Total theo ${activeTab}`) {
@@ -582,12 +1143,42 @@ const SellerboardTable = ({
               backgroundColor: "#EFF0F1",
               flexWrap: "wrap",
               width: "100%",
+              alignItems: "end",
             }}
           >
             <MultiSelect
               placeholder="Store"
               data={AMZ_STORES}
+              label="Store"
+              // styles={{
+              //   root: {
+              //     display: "flex",
+              //     alignItems: "center",
+              //     gap: "10px",
+              //   },
+              //   label: {
+              //     fontSize: "12px",
+              //     fontWeight: "bold",
+              //   },
+              //   input: {
+              //     width: "130px",
+              //     minHeight: "35px",
+              //   },
+              //   inputField: {
+              //     display: "none",
+              //   },
+              // }}
               styles={{
+                root: {
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "start",
+                  gap: "10px",
+                },
+                label: {
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                },
                 input: {
                   width: "130px",
                   minHeight: "35px",
@@ -627,13 +1218,42 @@ const SellerboardTable = ({
                 });
               }}
             />
-            <MultiSelect
+            {/* <MultiSelect
+              label="Channel"
               placeholder="Channel"
               data={FULFILLMENT_CHANNELS}
+              // styles={{
+              //   root: {
+              //     display: "flex",
+              //     alignItems: "center",
+              //     gap: "10px",
+              //   },
+              //   input: {
+              //     width: "130px",
+              //     minHeight: "35px",
+              //   },
+              //   label: {
+              //     fontSize: "12px",
+              //     fontWeight: "bold",
+              //   },
+              //   inputField: {
+              //     display: "none",
+              //   },
+              // }}
               styles={{
+                root: {
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "start",
+                  gap: "10px",
+                },
                 input: {
                   width: "130px",
                   minHeight: "35px",
+                },
+                label: {
+                  fontSize: "12px",
+                  fontWeight: "bold",
                 },
                 inputField: {
                   display: "none",
@@ -672,244 +1292,236 @@ const SellerboardTable = ({
                   fulfillmentChannelValues: [],
                 });
               }}
-            />
-            {activeTab === "Date" && (
-              <DateRangePicker
-                size="sx"
-                // label="Created Date"
-                placeholder="Date"
-                style={{
-                  width: "100px",
-                }}
-                value={query.dateValue}
-                onOk={(value) =>
-                  setQuery({
-                    ...query,
-                    dateValue: value,
-                    startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
-                    endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
-                  })
-                }
-                onClean={() => {
-                  setQuery({
-                    ...query,
-                    dateValue: null,
-                    startCreatedDate: null,
-                    endCreatedDate: null,
-                  });
-                }}
-                onShortcutClick={(shortcut) => {
-                  setQuery({
-                    ...query,
-                    dateValue: shortcut.value,
-                    startCreatedDate: moment(shortcut.value[0]).format(
-                      "YYYY-MM-DD"
-                    ),
-                    endCreatedDate: moment(shortcut.value[1]).format(
-                      "YYYY-MM-DD"
-                    ),
-                  });
-                }}
-              />
-            )}
-            {activeTab === "Week" && (
-              <DateRangePicker
-                size="sx"
-                // label="Created Date"
-                showWeekNumbers
-                hoverRange="week"
-                isoWeek
-                placeholder="Week"
-                style={{
-                  width: "100px",
-                }}
-                value={query.dateValue}
-                onOk={(value) =>
-                  setQuery({
-                    ...query,
-                    dateValue: value,
-                    startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
-                    endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
-                  })
-                }
-                onClean={() => {
-                  setQuery({
-                    ...query,
-                    dateValue: null,
-                    startCreatedDate: null,
-                    endCreatedDate: null,
-                  });
-                }}
-                onShortcutClick={(shortcut, event) => {
-                  setQuery({
-                    ...query,
-                    dateValue: shortcut.value,
-                    startCreatedDate: moment(shortcut.value[0]).format(
-                      "YYYY-MM-DD"
-                    ),
-                    endCreatedDate: moment(shortcut.value[1]).format(
-                      "YYYY-MM-DD"
-                    ),
-                  });
-                }}
-              />
-            )}
-            {activeTab === "Month" && (
-              <DateRangePicker
-                size="sx"
-                // label="Created Date"
-                showMonthNumbers
-                hoverRange="month"
-                isoWeek
-                placeholder="Month"
-                style={{
-                  width: "100px",
-                }}
-                value={query.dateValue}
-                onOk={(value) =>
-                  setQuery({
-                    ...query,
-                    dateValue: value,
-                    startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
-                    endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
-                  })
-                }
-                onClean={() => {
-                  setQuery({
-                    ...query,
-                    dateValue: null,
-                    startCreatedDate: null,
-                    endCreatedDate: null,
-                  });
-                }}
-                onShortcutClick={(shortcut, event) => {
-                  setQuery({
-                    ...query,
-                    dateValue: shortcut.value,
-                    startCreatedDate: moment(shortcut.value[0]).format(
-                      "YYYY-MM-DD"
-                    ),
-                    endCreatedDate: moment(shortcut.value[1]).format(
-                      "YYYY-MM-DD"
-                    ),
-                  });
-                }}
-              />
-            )}
-            {activeTab === "Date" && (
-              <>
-                <DateRangePicker
-                  size="sx"
-                  // label="Sales Date"
-                  placeholder="Sales Date"
-                  style={{
-                    width: "100px",
-                  }}
-                  value={query.salesDateValue}
-                  onOk={(value) => {
-                    setQuery({
-                      ...query,
-                      salesDateValue: value,
-                      startDate: moment(value[0]).format("YYYY-MM-DD"),
-                      endDate: moment(value[1]).format("YYYY-MM-DD"),
-                      minOrders: 1,
-                    });
-                  }}
-                  onOpen={() => {
-                    console.log("open");
-                  }}
-                  onClean={() => {
-                    setQuery({
-                      ...query,
-                      salesDateValue: null,
-                      startDate: null,
-                      endDate: null,
-                      minOrders: "",
-                    });
-                  }}
-                  onShortcutClick={(shortcut) => {
-                    setQuery({
-                      ...query,
-                      salesDateValue: shortcut.value,
-                      startDate: moment(shortcut.value[0]).format("YYYY-MM-DD"),
-                      endDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
-                      minOrders: 1,
-                    });
-                  }}
-                />
-                <TextInput
-                  placeholder="Min Orders"
-                  style={{
-                    width: "90px",
-                  }}
-                  value={query?.minOrders}
-                  onChange={(event) => {
-                    setQuery({
-                      ...query,
-                      minOrders: event.target.value,
-                    });
-                  }}
-                />
-              </>
-            )}
+
+            /> */}
             <Select
-              placeholder="Sorting"
-              data={values(AMZ_SORTING)}
+              data={keys(VALUES)}
+              placeholder="Value"
+              label="Value"
+              // styles={{
+              //   root: {
+              //     display: "flex",
+              //     alignItems: "center",
+              //     gap: "10px",
+              //   },
+              //   input: {
+              //     width: "100px",
+              //   },
+              //   label: {
+              //     fontSize: "12px",
+              //     fontWeight: "bold",
+              //   },
+              // }}
               styles={{
+                root: {
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "start",
+                  gap: "10px",
+                },
                 input: {
-                  width: "150px",
+                  width: "100px",
+                },
+                label: {
+                  fontSize: "12px",
+                  fontWeight: "bold",
                 },
               }}
-              value={query?.sortValue || null}
+              value={CONVERT_NUMBER_TO_STATUS[query.value] || null}
               onChange={(value) => {
-                let primarySortBy = "";
-                let primarySortDir = "";
-                switch (value) {
-                  case AMZ_SORTING.ordersAsc:
-                    primarySortBy = "totalOrders";
-                    primarySortDir = "asc";
-                    break;
-                  case AMZ_SORTING.ordersDesc:
-                    primarySortBy = "totalOrders";
-                    primarySortDir = "desc";
-                    break;
-                  case AMZ_SORTING.saleInRangeAsc:
-                    primarySortBy = "ordersInRange";
-                    primarySortDir = "asc";
-                    break;
-                  case AMZ_SORTING.saleInRangeDesc:
-                    primarySortBy = "ordersInRange";
-                    primarySortDir = "desc";
-                    break;
-                  case AMZ_SORTING.createdDateAsc:
-                    primarySortBy = "createdDate";
-                    primarySortDir = "asc";
-                    break;
-                  case AMZ_SORTING.createdDateDesc:
-                    primarySortBy = "createdDate";
-                    primarySortDir = "desc";
-                    break;
-                  default:
-                    value = null;
-                }
+                setPagination({
+                  ...pagination,
+                  currentPage: 1,
+                });
                 setQuery({
                   ...query,
-                  sortValue: value,
-                  primarySortBy,
-                  primarySortDir,
+                  value: CONVERT_STATUS_TO_NUMBER[value],
                 });
               }}
               clearable
-              searchable
               onClear={() => {
+                setPagination({
+                  ...pagination,
+                  currentPage: 1,
+                });
                 setQuery({
                   ...query,
-                  sortValue: null,
-                  primarySortBy: null,
-                  primarySortDir: null,
+                  value: null,
                 });
               }}
             />
+            {/* {activeTab === "Date" && (
+       
+        )} */}
+            <Group>
+              <TextInput
+                label="List"
+                value={listingDays}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setListingDays(value);
+                  if (value) {
+                    setQuery({
+                      ...query,
+                      listingDays: toNumber(value),
+                    });
+                  }
+                }}
+                // styles={{
+                //   root: {
+                //     display: "flex",
+                //     alignItems: "center",
+                //     gap: "10px",
+                //   },
+                //   input: {
+                //     width: "70px",
+                //   },
+                //   label: {
+                //     fontSize: "12px",
+                //     fontWeight: "bold",
+                //   },
+                // }}
+                styles={{
+                  root: {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "start",
+                    gap: "10px",
+                  },
+                  input: {
+                    width: "70px",
+                  },
+                  label: {
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                  },
+                }}
+              />
+              <TextInput
+                label="Ads"
+                value={adDaysNum}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setAdDaysNum(value);
+                  if (value) {
+                    setQuery({
+                      ...query,
+                      adDays: toNumber(value),
+                    });
+                  }
+                }}
+                // styles={{
+                //   root: {
+                //     display: "flex",
+                //     alignItems: "center",
+                //     gap: "10px",
+                //   },
+                //   input: {
+                //     width: "70px",
+                //   },
+                //   label: {
+                //     fontSize: "12px",
+                //     fontWeight: "bold",
+                //   },
+                // }}
+                styles={{
+                  root: {
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "start",
+                    gap: "10px",
+                  },
+                  input: {
+                    width: "70px",
+                  },
+                  label: {
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                  },
+                }}
+              />
+            </Group>
+            {/* {activeTab === "Week" && (
+          <DateRangePicker
+            size="sx"
+            // label="Created Date"
+            showWeekNumbers
+            hoverRange="week"
+            isoWeek
+            placeholder="Week"
+            style={{
+              width: "100px",
+            }}
+            value={query.dateValue}
+            onOk={(value) =>
+              setQuery({
+                ...query,
+                dateValue: value,
+                startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
+                endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
+              })
+            }
+            onClean={() => {
+              setQuery({
+                ...query,
+                dateValue: null,
+                startCreatedDate: null,
+                endCreatedDate: null,
+              });
+            }}
+            onShortcutClick={(shortcut, event) => {
+              setQuery({
+                ...query,
+                dateValue: shortcut.value,
+                startCreatedDate: moment(shortcut.value[0]).format(
+                  "YYYY-MM-DD"
+                ),
+                endCreatedDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
+              });
+            }}
+          />
+        )}
+        {activeTab === "Month" && (
+          <DateRangePicker
+            size="sx"
+            // label="Created Date"
+            showMonthNumbers
+            hoverRange="month"
+            isoWeek
+            placeholder="Month"
+            style={{
+              width: "100px",
+            }}
+            value={query.dateValue}
+            onOk={(value) =>
+              setQuery({
+                ...query,
+                dateValue: value,
+                startCreatedDate: moment(value[0]).format("YYYY-MM-DD"),
+                endCreatedDate: moment(value[1]).format("YYYY-MM-DD"),
+              })
+            }
+            onClean={() => {
+              setQuery({
+                ...query,
+                dateValue: null,
+                startCreatedDate: null,
+                endCreatedDate: null,
+              });
+            }}
+            onShortcutClick={(shortcut, event) => {
+              setQuery({
+                ...query,
+                dateValue: shortcut.value,
+                startCreatedDate: moment(shortcut.value[0]).format(
+                  "YYYY-MM-DD"
+                ),
+                endCreatedDate: moment(shortcut.value[1]).format("YYYY-MM-DD"),
+              });
+            }}
+          />
+        )} */}
+
             <Button
               loading={loading}
               onClick={() => {
@@ -930,6 +1542,8 @@ const SellerboardTable = ({
                   ...pagination,
                   currentPage: 1,
                 });
+                setListingDays("");
+                setAdDaysNum("");
                 setQuery({
                   stores: null,
                   fulfillmentChannel: null,
@@ -947,6 +1561,8 @@ const SellerboardTable = ({
                   startCreatedDate: null,
                   endCreatedDate: null,
                   minOrders: "",
+                  listingDays: "",
+                  adDays: "",
                 });
               }}
             >
@@ -962,6 +1578,9 @@ const SellerboardTable = ({
         cursor: "pointer",
       },
     }),
+    mantinePaperProps: {
+      style: { "--mrt-row-hover-background-color": "#E1EAFF" },
+    },
     onSortingChange: setSorting,
     enableColumnResizing: false,
     enableSorting: true,
