@@ -1,6 +1,10 @@
 import { Badge } from "@mantine/core";
 
-const VideoLink = ({ href }) => {
+const Link = ({ href }) => {
+  if (!href) {
+    return "(Empty)";
+  }
+
   return (
     <a
       style={{
@@ -10,13 +14,11 @@ const VideoLink = ({ href }) => {
       href={href}
       rel="noreferrer"
     >
-      {href ? (
-        <Badge color="blue" variant="filled">
-          <u>Link</u>
-        </Badge>
-      ) : null}
+      <Badge color="blue" variant="filled">
+        <u>Link</u>
+      </Badge>
     </a>
   );
 };
 
-export default VideoLink;
+export default Link;

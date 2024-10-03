@@ -20,8 +20,8 @@ import useTable from "./useTable";
 import formatDate from "../../../utils/formatDate";
 import classes from "./index.module.css";
 import EditLink from "../EditLink";
-import VideoLink from "../VideoLink";
 import AppSelect from "../../../components/AppSelect";
+import Link from "../../../components/Link";
 
 const VideoTable = ({ query, setQuery }) => {
   const {
@@ -160,7 +160,7 @@ const VideoTable = ({ query, setQuery }) => {
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         enableSorting: false,
         Cell(record) {
-          return <VideoLink href={record.row.original.videoLink} />;
+          return <Link href={record.row.original.videoLink} />;
         },
         Edit({ row }) {
           return (

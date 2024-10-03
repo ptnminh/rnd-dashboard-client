@@ -18,6 +18,7 @@ import useTable from "./useTable";
 
 import formatDate from "../../../utils/formatDate";
 import classes from "./index.module.css";
+import Link from "../../../components/Link";
 
 const SampleTable = ({ query, setQuery }) => {
   const {
@@ -88,8 +89,8 @@ const SampleTable = ({ query, setQuery }) => {
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         enableSorting: false,
-        Cell() {
-          return "<link file in - NAS>";
+        Cell({ row }) {
+          return <Link href={row.original.videoFileIn} />;
         },
       },
       {
