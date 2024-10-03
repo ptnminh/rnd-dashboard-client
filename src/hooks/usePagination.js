@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation } from "react-router";
 
 const usePagination = () => {
@@ -14,10 +14,6 @@ const usePagination = () => {
   const handleChangePage = (page = 1) => {
     setPage(page);
   };
-
-  useEffect(() => {
-    if (!totalPages) setPage(1);
-  }, [totalPages]);
 
   return {
     pagination: {

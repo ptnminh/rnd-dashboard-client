@@ -4,13 +4,18 @@ import { campaignServices } from "../../../services";
 import { CONVERT_STATUS_TO_NUMBER } from "../../../utils";
 import formatDate from "../../../utils/formatDate";
 import { showNotification } from "../../../utils/index";
-import useGetSampleList from "./useGetSampleList";
+import useGetSampleList from "../../../hooks/useGetSampleList";
+
+const defaultFilters = {
+  videoStatus: [2],
+};
 
 const useTable = ({ query, setQuery }) => {
   const { users } = useGetUser();
 
   const { data, pagination, handleChangePage, refetch } = useGetSampleList({
     filters: query,
+    defaultFilters,
   });
 
   const [searchSKU, setSearchSKU] = useState("");
@@ -58,8 +63,8 @@ const useTable = ({ query, setQuery }) => {
       rndTeam: null,
       rndName: null,
       rndId: null,
-      status: null,
-      statusValue: null,
+      status: [2],
+      statusValue: "Undone",
     });
     setSearchSKU("");
   };

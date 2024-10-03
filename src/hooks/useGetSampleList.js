@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import apiClient from "../../../services/axiosClient";
+import apiClient from "../services/axiosClient";
+import removeNullKeys from "../utils/removeNullKeys";
 import usePagination from "./usePagination";
 
-const useGetSampleList = ({ filters = {} }) => {
+const useGetSampleList = ({ filters = {}, defaultFilters = {} }) => {
   const { pagination, handleChangePage, setTotalPages } = usePagination();
 
   const [data, setData] = useState({});
@@ -13,18 +14,26 @@ const useGetSampleList = ({ filters = {} }) => {
     try {
       setLoading(true);
 
+      const filter = removeNullKeys({
+        videoStatus: filters?.status,
+        rnd: filters?.rndId,
+        rndTeam: filters?.rndTeam,
+        value: filters.value,
+        startDate: filters.startDate,
+        endDate: filters.endDate,
+        sku: filters.sku,
+      });
+
       const queryParams = {
         page: pagination.page,
-        filter: JSON.stringify({
-          videoStatus: filters?.status,
-          rnd: filters?.rndId,
-          rndTeam: filters?.rndTeam,
-          value: filters.value,
-          startDate: filters.startDate,
-          endDate: filters.endDate,
-          sku: filters.sku,
-        }),
       };
+
+      if (Object.keys(filter).length > 0) {
+        queryParams["filter"] = JSON.stringify(filter);
+      } else {
+        // load default filters
+        queryParams["filter"] = JSON.stringify(defaultFilters);
+      }
 
       const result = await apiClient.get("/briefs/video", {
         params: queryParams,
@@ -41,7 +50,6 @@ const useGetSampleList = ({ filters = {} }) => {
       setLoading(false);
     }
   }, [
-    pagination.page,
     filters?.status,
     filters?.rndId,
     filters?.rndTeam,
@@ -49,14 +57,14 @@ const useGetSampleList = ({ filters = {} }) => {
     filters.startDate,
     filters.endDate,
     filters.sku,
+    pagination.page,
     setTotalPages,
+    defaultFilters,
   ]);
 
   useEffect(() => {
     getData();
   }, [pagination.page, pagination.totalPages, filters, getData]);
-
-  console.log("pagination", pagination);
 
   return {
     pagination,
