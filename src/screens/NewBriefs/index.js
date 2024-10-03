@@ -154,6 +154,7 @@ const generateTextPreview = (type, layout) => {
     case BRIEF_TYPES[7]:
       return BRIEF_TYPES[7];
     case BRIEF_TYPES[8]:
+      return BRIEF_TYPES[8];
     default:
       return "";
   }
