@@ -268,7 +268,7 @@ const Sidebar = ({ className, onClose, openedToggle, toggle }) => {
             scrollbars="y"
             scrollbarSize={4}
             scrollHideDelay={1000}
-            style={{ height: "80%" }}
+            style={{ height: "95%" }}
           >
             <div className={styles.menu}>
               {map(filteredNavigation, (x, index) =>
