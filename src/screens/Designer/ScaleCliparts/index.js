@@ -31,6 +31,8 @@ import { STATUS } from "../../../constant";
 import { useState } from "react";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
+import moment from "moment-timezone";
+import useStopWatch from "../../../hooks/useStopWatch";
 
 const ScaleClipart = ({
   close,
@@ -43,6 +45,7 @@ const ScaleClipart = ({
   setTrigger,
   setDesignerNote,
   designerNote,
+  setSelectedSKU,
 }) => {
   console.log("selectedSKU", selectedSKU);
   const [loading, setLoading] = useState(false);
@@ -58,12 +61,37 @@ const ScaleClipart = ({
       },
     });
     if (updateNoteResponse) {
-      close()
+      close();
       setTrigger(true);
       showNotification("Thành công", "Cập nhật Note thành công", "green");
     }
     setLoading(false);
   };
+  const handleUpdateStartTime = async () => {
+    setLoading(true);
+    const designStartedAt = moment().utc().format();
+    const updateStartTimeResponse = await rndServices.updateBriefDesign({
+      uid: selectedSKU.uid,
+      data: {
+        designStartedAt,
+      },
+    });
+    if (updateStartTimeResponse) {
+      setSelectedSKU({
+        ...selectedSKU,
+        designInfo: {
+          ...selectedSKU.designInfo,
+          startedAt: designStartedAt,
+        },
+      });
+      setTrigger(true);
+    }
+    setLoading(false);
+  };
+  const elapsedTime = useStopWatch(
+    selectedSKU?.designInfo?.startedAt,
+    selectedSKU?.designInfo?.doneAt
+  );
   return (
     <Modal
       opened={opened}
@@ -85,9 +113,28 @@ const ScaleClipart = ({
           margin: "none",
           marginInlineStart: "unset",
         },
+        content: {
+          position: "relative",
+        },
       }}
       title={selectedSKU?.sku}
     >
+      <Button
+        style={{
+          position: "absolute",
+          top: "10px",
+          left: "10px",
+          zIndex: 1000,
+        }}
+        loading={loading}
+        color="red"
+        onClick={() => {
+          handleUpdateStartTime();
+        }}
+        disabled={selectedSKU?.designInfo?.startedAt}
+      >
+        {selectedSKU?.designInfo?.startedAt ? elapsedTime : "Start"}
+      </Button>
       <LoadingOverlay
         visible={loadingUpdateDesignLink}
         zIndex={1000}
@@ -295,31 +342,31 @@ const ScaleClipart = ({
             )}
             {(selectedSKU?.designLinkRef?.designLink ||
               selectedSKU?.designLinkRef) && (
-                <List.Item>
-                  Link Design (NAS):{" "}
-                  <a
-                    style={{
-                      display: "inline-block",
-                      width: "100px",
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      textDecoration: "none",
-                      color: "#228be6",
-                      verticalAlign: "middle",
-                    }}
-                    href={
-                      selectedSKU?.designLinkRef ||
-                      selectedSKU?.productLine?.designLink
-                    }
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {selectedSKU?.designLinkRef ||
-                      selectedSKU?.productLine?.designLink}
-                  </a>
-                </List.Item>
-              )}
+              <List.Item>
+                Link Design (NAS):{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "100px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={
+                    selectedSKU?.designLinkRef ||
+                    selectedSKU?.productLine?.designLink
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {selectedSKU?.designLinkRef ||
+                    selectedSKU?.productLine?.designLink}
+                </a>
+              </List.Item>
+            )}
           </List>
         </Grid.Col>
         <Grid.Col

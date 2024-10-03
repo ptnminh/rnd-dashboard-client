@@ -9,10 +9,6 @@ import {
   Flex,
   TextInput,
   Button,
-  ScrollArea,
-  Card,
-  Group,
-  Text,
 } from "@mantine/core";
 import {
   CONVERT_NUMBER_TO_STATUS,
@@ -29,6 +25,8 @@ import { BRIEF_TYPES, STATUS } from "../../../constant";
 import { useState } from "react";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
+import moment from "moment-timezone";
+import useStopWatch from "../../../hooks/useStopWatch";
 
 const Optimized = ({
   close,
@@ -41,6 +39,7 @@ const Optimized = ({
   setTrigger,
   setDesignerNote,
   designerNote,
+  setSelectedSKU,
 }) => {
   let disabled = false;
   switch (selectedSKU?.briefType) {
@@ -82,6 +81,31 @@ const Optimized = ({
     }
     setLoading(false);
   };
+  const handleUpdateStartTime = async () => {
+    setLoading(true);
+    const designStartedAt = moment().utc().format();
+    const updateStartTimeResponse = await rndServices.updateBriefDesign({
+      uid: selectedSKU.uid,
+      data: {
+        designStartedAt,
+      },
+    });
+    if (updateStartTimeResponse) {
+      setSelectedSKU({
+        ...selectedSKU,
+        designInfo: {
+          ...selectedSKU.designInfo,
+          startedAt: designStartedAt,
+        },
+      });
+      setTrigger(true);
+    }
+    setLoading(false);
+  };
+  const elapsedTime = useStopWatch(
+    selectedSKU?.designInfo?.startedAt,
+    selectedSKU?.designInfo?.doneAt
+  );
   return (
     <Modal
       opened={opened}
@@ -103,9 +127,28 @@ const Optimized = ({
           margin: "none",
           marginInlineStart: "unset",
         },
+        content: {
+          position: "relative",
+        },
       }}
       title={selectedSKU?.sku}
     >
+      <Button
+        style={{
+          position: "absolute",
+          top: "10px",
+          left: "10px",
+          zIndex: 1000,
+        }}
+        loading={loading}
+        color="red"
+        onClick={() => {
+          handleUpdateStartTime();
+        }}
+        disabled={selectedSKU?.designInfo?.startedAt}
+      >
+        {selectedSKU?.designInfo?.startedAt ? elapsedTime : "Start"}
+      </Button>
       <LoadingOverlay
         visible={loadingUpdateDesignLink}
         zIndex={1000}

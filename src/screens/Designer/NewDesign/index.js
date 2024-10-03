@@ -491,23 +491,27 @@ const NewDesign = ({
   };
   const handleUpdateStartTime = async () => {
     setLoading(true);
-    const startTime = moment().valueOf();
+    const designStartedAt = moment().utc().format();
     const updateStartTimeResponse = await rndServices.updateBriefDesign({
       uid: selectedSKU.uid,
       data: {
-        startTime,
+        designStartedAt,
       },
     });
     if (updateStartTimeResponse) {
       setSelectedSKU({
         ...selectedSKU,
-        startTime,
+        designInfo: {
+          ...selectedSKU.designInfo,
+          startedAt: designStartedAt,
+        },
       });
+      setTrigger(true);
     }
     setLoading(false);
   };
   const elapsedTime = useStopWatch(
-    selectedSKU?.designInfo?.startAt,
+    selectedSKU?.designInfo?.startedAt,
     selectedSKU?.designInfo?.doneAt
   );
   return (
@@ -549,9 +553,9 @@ const NewDesign = ({
         onClick={() => {
           handleUpdateStartTime();
         }}
-        disabled={selectedSKU?.designInfo?.startAt}
+        disabled={selectedSKU?.designInfo?.startedAt}
       >
-        {selectedSKU?.designInfo?.startAt ? elapsedTime : "Start"}
+        {selectedSKU?.designInfo?.startedAt ? elapsedTime : "Start"}
       </Button>
       <LoadingOverlay
         visible={loadingUpdateDesignLink}

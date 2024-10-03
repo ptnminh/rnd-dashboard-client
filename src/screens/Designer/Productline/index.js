@@ -13,9 +13,9 @@ import {
   Card,
   Group,
   Text,
-  CopyButton,
 } from "@mantine/core";
 import {
+  CONVERT_BRIEF_TYPE_TO_OBJECT_NAME,
   CONVERT_NUMBER_TO_STATUS,
   getEditorStateAsString,
   getStringAsEditorState,
@@ -23,21 +23,17 @@ import {
 import {
   IconCircleCheck,
   IconArrowBigRightLinesFilled,
-  IconCopyCheckFilled,
-  IconCopy,
   IconExclamationMark,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
-import styles from "./ScaleNiche.module.sass";
-import { isEmpty, map } from "lodash";
-import { STATUS } from "../../../constant";
+import { map } from "lodash";
+import { BRIEF_TYPES, STATUS } from "../../../constant";
 import { useState } from "react";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 import moment from "moment-timezone";
 import useStopWatch from "../../../hooks/useStopWatch";
-
-const ScaleNiche = ({
+const ProductLine = ({
   close,
   selectedSKU,
   linkDesign,
@@ -46,8 +42,8 @@ const ScaleNiche = ({
   handleUpdateLinkDesign,
   opened,
   setTrigger,
-  designerNote,
   setDesignerNote,
+  designerNote,
   setSelectedSKU,
 }) => {
   const [loading, setLoading] = useState(false);
@@ -104,7 +100,7 @@ const ScaleNiche = ({
         blur: 3,
       }}
       radius="md"
-      size="80%"
+      size="1000px"
       styles={{
         title: {
           fontSize: "21px",
@@ -180,11 +176,12 @@ const ScaleNiche = ({
                 textAlign: "center",
               }}
             >
-              Scale Niche
+              {selectedSKU?.briefType}
             </Grid.Col>
             <Grid.Col span={4}></Grid.Col>
           </Grid>
         </Grid.Col>
+
         <Grid.Col
           span={5}
           style={{
@@ -243,7 +240,7 @@ const ScaleNiche = ({
               fontSize: "14px",
             }}
           >
-            • RnD: {selectedSKU?.rnd.name}
+            • RnD: {selectedSKU?.rnd?.name}
           </div>
           <div
             style={{
@@ -254,7 +251,7 @@ const ScaleNiche = ({
               fontSize: "14px",
             }}
           >
-            • Designer:{selectedSKU?.designer.name}
+            • Designer:{selectedSKU?.designer?.name}
           </div>
         </Grid.Col>
         <Grid.Col span={5}>
@@ -297,9 +294,9 @@ const ScaleNiche = ({
               </ThemeIcon>
             }
           >
-            {selectedSKU?.productLine?.refLink && (
+            {selectedSKU?.linkProductRef && (
               <List.Item>
-                Link Product Base (Library):{" "}
+                Link Product:{" "}
                 <a
                   style={{
                     display: "inline-block",
@@ -311,11 +308,11 @@ const ScaleNiche = ({
                     color: "#228be6",
                     verticalAlign: "middle",
                   }}
-                  href={selectedSKU?.productLine?.refLink}
+                  href={selectedSKU?.linkProductRef}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  {selectedSKU?.productLine?.refLink}
+                  {selectedSKU?.linkProductRef}
                 </a>
               </List.Item>
             )}
@@ -326,7 +323,7 @@ const ScaleNiche = ({
                 <a
                   style={{
                     display: "inline-block",
-                    width: "120px",
+                    width: "230px",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
@@ -349,7 +346,7 @@ const ScaleNiche = ({
           </List>
         </Grid.Col>
         <Grid.Col
-          span={1}
+          span={2}
           style={{
             display: "flex",
             justifyContent: "center",
@@ -358,162 +355,98 @@ const ScaleNiche = ({
         >
           <IconArrowBigRightLinesFilled size={56} color="#228be6" />
         </Grid.Col>
-        <Grid.Col span={6}>
+        <Grid.Col span={5}>
           <div
             style={{
               display: "flex",
               justifyContent: "center",
-              padding: "5px",
+              padding: "10px",
               fontSize: "18px",
               alignItems: "center",
             }}
           >
-            SCALE
+            Scale
           </div>
-          {!isEmpty(selectedSKU?.cliparts) && (
-            <ScrollArea offsetScrollbars="y" h={350}>
-              <Flex wrap={true} gap={15} direction="column">
-                {map(selectedSKU?.cliparts, (clipart) => (
-                  <Card shadow="sm" padding="lg" radius="md" withBorder>
-                    <Card.Section
-                      style={{
-                        padding: "5px",
-                      }}
-                    >
-                      <Grid>
-                        <Grid.Col span={3}>
-                          <Image
-                            src={
-                              clipart.image || "/images/content/not_found_2.jpg"
-                            }
-                            h="100px"
-                            w="100%"
-                            alt="Norway"
-                            style={{
-                              objectFit: "contain",
-                            }}
-                          />
-                        </Grid.Col>
-                        <Grid.Col
-                          span={9}
-                          style={{
-                            display: "flex",
-                          }}
-                        >
-                          <Group>
-                            <Text fw={500}>{clipart?.name}</Text>
-                            <List
-                              spacing="lg"
-                              size="sm"
-                              center
-                              icon={
-                                <ThemeIcon color="teal" size={24} radius="xl">
-                                  <IconCircleCheck
-                                    style={{ width: rem(16), height: rem(16) }}
-                                  />
-                                </ThemeIcon>
-                              }
-                            >
-                              {clipart.refLink && (
-                                <List.Item>
-                                  Link Clipart:{" "}
-                                  <a
-                                    style={{
-                                      display: "inline-block",
-                                      width: "230px",
-                                      whiteSpace: "nowrap",
-                                      overflow: "hidden",
-                                      textOverflow: "ellipsis",
-                                      textDecoration: "none",
-                                      color: "#228be6",
-                                      verticalAlign: "middle",
-                                    }}
-                                    href={clipart.refLink}
-                                    target="_blank"
-                                  >
-                                    {clipart.refLink}
-                                  </a>
-                                </List.Item>
-                              )}
-                            </List>
-                          </Group>
-                        </Grid.Col>
-                      </Grid>
-                    </Card.Section>
-                  </Card>
-                ))}
-              </Flex>
-            </ScrollArea>
-          )}
-          <Card
-            shadow="sm"
-            padding="sm"
-            style={{
-              cursor: "pointer",
-              position: "relative",
-              marginTop: "20px",
-            }}
-          >
-            <Card.Section>
+          {selectedSKU?.briefType === BRIEF_TYPES[0] ||
+          selectedSKU?.briefType === BRIEF_TYPES[1] ||
+          (selectedSKU?.briefType === BRIEF_TYPES[2] &&
+            selectedSKU?.clipart.name) ? (
+            <>
+              <Image
+                radius="md"
+                src={
+                  selectedSKU[
+                    CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
+                  ]?.image || "/images/content/not_found_2.jpg"
+                }
+                height={200}
+                fit="contain"
+              />
               <div
                 style={{
-                  cursor: "pointer",
-                  width: "100%",
-                  height: "200px",
+                  display: "flex",
+                  justifyContent: "center",
                   padding: "10px",
-                  position: "relative",
+                  fontSize: "18px",
+                  alignItems: "center",
+                  marginTop: "10px",
                 }}
               >
-                {selectedSKU?.niche?.quote}
-                {true && (
-                  <>
-                    <div
-                      style={{
-                        padding: "5px",
-                        position: "absolute",
-                        bottom: "10px",
-                        right: "13px",
-                        borderRadius: "50%",
-                        zIndex: 2,
-                      }}
-                    >
-                      <CopyButton value={selectedSKU?.niche?.quote} color>
-                        {({ copied, copy }) => (
-                          <Button color="#62D256" onClick={copy}>
-                            {copied ? (
-                              <IconCopyCheckFilled color="#ffffff" />
-                            ) : (
-                              <IconCopy color="#ffffff" />
-                            )}
-                          </Button>
-                        )}
-                      </CopyButton>
-                    </div>
-                    <div
-                      style={{
-                        position: "absolute",
-                        top: "9px",
-                        right: "0",
-                        height: "94%",
-                        width: "99%",
-                        cursor: "pointer",
-                        padding: "10px",
-                        borderRadius: "10px",
-                        zIndex: 1,
-                      }}
-                    ></div>
-                  </>
-                )}
+                {
+                  selectedSKU[
+                    CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
+                  ]?.name
+                }
               </div>
-            </Card.Section>
-          </Card>
+            </>
+          ) : null}
+          <List
+            spacing="lg"
+            size="sm"
+            center
+            icon={
+              <ThemeIcon color="teal" size={24} radius="xl">
+                <IconCircleCheck style={{ width: rem(16), height: rem(16) }} />
+              </ThemeIcon>
+            }
+          >
+            {selectedSKU[
+              CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
+            ]?.refLink && (
+              <List.Item>
+                Link Mockup:{" "}
+                <a
+                  style={{
+                    display: "inline-block",
+                    width: "230px",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    textDecoration: "none",
+                    color: "#228be6",
+                    verticalAlign: "middle",
+                  }}
+                  href={
+                    selectedSKU[
+                      CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
+                    ]?.refLink
+                  }
+                  target="_blank"
+                >
+                  {
+                    selectedSKU[
+                      CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[selectedSKU?.briefType]
+                    ]?.refLink
+                  }
+                </a>
+              </List.Item>
+            )}
+          </List>
         </Grid.Col>
-
         <Grid.Col span={12}>
           <Editor
             state={designerNote}
             onChange={setDesignerNote}
-            classEditor={styles.editor}
             label="Designer Note"
             readOnly={selectedSKU?.status === STATUS.DESIGNED}
             button={selectedSKU?.status !== STATUS.DESIGNED}
@@ -551,4 +484,4 @@ const ScaleNiche = ({
   );
 };
 
-export default ScaleNiche;
+export default ProductLine;

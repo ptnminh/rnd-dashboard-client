@@ -382,7 +382,8 @@ const EPMScreens = () => {
       {selectedSKU &&
         (selectedSKU?.briefType === BRIEF_TYPES[6] ||
           selectedSKU?.briefType === BRIEF_TYPES[7] ||
-          selectedSKU?.briefType === BRIEF_TYPES[8]) && (
+          selectedSKU?.briefType === BRIEF_TYPES[8]) &&
+        opened && (
           <Optimized
             opened={opened}
             close={close}
