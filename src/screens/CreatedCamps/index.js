@@ -134,6 +134,7 @@ const CreatedCampsScreen = () => {
           querySampleCampaigns={querySampleCampaigns}
           setQuerySampleCampaigns={setQuerySampleCampaigns}
           sampleCampaigns={sampleCampaigns}
+          fetchCampaigns={fetchCampaigns}
         />
       </Card>
       <Pagination

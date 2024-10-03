@@ -18,8 +18,9 @@ import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
 } from "../../../utils";
-import { rndServices } from "../../../services";
+import { campaignServices, rndServices } from "../../../services";
 import { modals } from "@mantine/modals";
+import { showNotification } from "../../../utils/index";
 
 const CampaignsTable = ({
   campaigns,
@@ -33,6 +34,7 @@ const CampaignsTable = ({
   accounts,
   campsPayload,
   sampleCampaigns,
+  fetchCampaigns,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(campaigns || []);
@@ -220,29 +222,36 @@ const CampaignsTable = ({
         header: "ACTIONS",
         enableSorting: false,
         Cell: (record) => {
+          const row = record?.row.original;
+          const isRequestedVideo = row.briefInfo?.videoStatus;
+
           return (
             <div>
-              <Button
-                onClick={() => {
-                  modals.openConfirmModal({
-                    title: "Please confirm your action",
-                    children: (
-                      <Text size="sm">
-                        This action is so important that you are required to
-                        confirm it with a modal. Please click one of these
-                        buttons to proceed.
-                      </Text>
-                    ),
-                    labels: { confirm: "Confirm", cancel: "Cancel" },
-                    onConfirm: () => handleCreateVideo(record.row.original),
-                  });
-                }}
-                variant="filled"
-                color="green"
-                size="sx"
-              >
-                Request Video
-              </Button>
+              {!isRequestedVideo ? (
+                <Button
+                  onClick={() => {
+                    modals.openConfirmModal({
+                      title: "Please confirm your action",
+                      children: (
+                        <Text size="sm">
+                          This action is so important that you are required to
+                          confirm it with a modal. Please click one of these
+                          buttons to proceed.
+                        </Text>
+                      ),
+                      labels: { confirm: "Confirm", cancel: "Cancel" },
+                      onConfirm: () => handleCreateVideo(record.row.original),
+                    });
+                  }}
+                  variant="filled"
+                  color="green"
+                  size="sx"
+                >
+                  Request Video
+                </Button>
+              ) : (
+                <Text>Requested video</Text>
+              )}
             </div>
           );
         },
@@ -503,8 +512,12 @@ const CampaignsTable = ({
     onSortingChange: setSorting,
   });
 
-  const handleCreateVideo = (row) => {
-    console.log(row);
+  const handleCreateVideo = async (row) => {
+    const result = await campaignServices.requestVideo(row.briefId);
+    if (result.success) {
+      showNotification("Thành công", "Request video thành công", "green");
+      fetchCampaigns();
+    }
   };
 
   return (

@@ -156,4 +156,34 @@ export const campaignServices = {
       return false;
     }
   },
+  requestVideo: async (id) => {
+    try {
+      const response = await apiClient.put(`/briefs/${id}/video`, {
+        videoStatus: 1,
+      });
+      const { data: result } = response;
+      if (result?.success === false) {
+        if (result?.code === 403) {
+          showNotification(
+            "Thất bại",
+            "Bạn không có quyền thực hiện hành động này",
+            "red"
+          );
+        }
+        return false;
+      }
+      return result;
+    } catch (error) {
+      const code = error?.response?.data?.code;
+      if (code === 403) {
+        showNotification(
+          "Thất bại",
+          "Bạn không có quyền thực hiện hành động này",
+          "red"
+        );
+      }
+      console.log("Error at requestVideo:", error);
+      return false;
+    }
+  },
 };

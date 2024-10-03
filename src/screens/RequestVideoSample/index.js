@@ -7,8 +7,6 @@ import { useState } from "react";
 const SamplePage = () => {
   const [query, setQuery] = useState({});
 
-  console.log("query", query);
-
   return (
     <Card
       className={styles.card}
