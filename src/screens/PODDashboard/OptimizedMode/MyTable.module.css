@@ -32,6 +32,36 @@
   align-items: center !important;
   justify-content: center !important;
 }
+
+.head-cells-optimized-info {
+  font-weight: bold;
+  color: #000000;
+  width: 100%;
+  padding: 0;
+  background-color: #FEEAD2;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.head-cells-optimized-info>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.head-cells-optimized-info-light-color {
+  font-weight: bold;
+  color: #000000;
+  width: 100%;
+  padding: 0;
+  background-color: #E1EAFF;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.head-cells-optimized-info-light-color>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
 .highlight {
   font-weight: bold;
   color: #ffffff;
@@ -73,6 +103,12 @@
 }
 .body-cells-op-team {
   background-color: #E1EAFF;
+  vertical-align: middle !important;
+  text-align: center !important;
+}
+
+.body-cells-optimized-info {
+  background-color: #ffffff;
   vertical-align: middle !important;
   text-align: center !important;
 }

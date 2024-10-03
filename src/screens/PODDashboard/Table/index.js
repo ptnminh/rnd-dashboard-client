@@ -11,6 +11,7 @@ import {
   Group,
   Select,
   ActionIcon,
+  Checkbox,
 } from "@mantine/core";
 import {
   find,
@@ -51,7 +52,7 @@ const moveOverrideColorToStart = (array) => {
     return 0;
   });
 };
-const SellerboardTable = ({
+const PODTableBoard = ({
   tableData,
   query,
   loading,
@@ -214,6 +215,56 @@ const SellerboardTable = ({
   // UseMemo to construct final columns array
   const columns = useMemo(
     () => [
+      {
+        accessorKey: "checkbox",
+        header: "",
+        size: 50,
+        maxSize: 50,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableHeadCellProps: ({ row }) => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["checkbox-body-cells"],
+            rowSpan: row.id === `Total theo ${activeTab}` ? 3 : 1, // Row span for Total theo ${activeTab} row
+          };
+        },
+        Cell: ({ row }) => {
+          const { uid } = row.original;
+          const foundData = find(data, { uid });
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          return (
+            <Checkbox
+              size="lg"
+              checked={foundData?.isChecked}
+              onChange={() => {
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
+                      isChecked: !item.isChecked,
+                    };
+                  }
+                  return item;
+                });
+                setTableData(newData);
+                handleUpdatePODDashboard(uid, {
+                  isChecked: !foundData?.isChecked,
+                });
+              }}
+            />
+          );
+        },
+      },
       {
         accessorKey: "product",
         header: "Product",
@@ -854,11 +905,11 @@ const SellerboardTable = ({
                       optimized: newFollow,
                       ...(newFollow === 1
                         ? {
-                          overrideColor: true,
-                        }
+                            overrideColor: true,
+                          }
                         : {
-                          overrideColor: false,
-                        }),
+                            overrideColor: false,
+                          }),
                     };
                   }
                   return item;
@@ -1077,4 +1128,4 @@ const SellerboardTable = ({
   return !isEmpty(tableData) ? <MantineReactTable table={table} /> : null;
 };
 
-export default SellerboardTable;
+export default PODTableBoard;
