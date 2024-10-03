@@ -812,6 +812,12 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        price: OPTIMIZED_INFO_STATUS?.PRICE?.NOT_CHECKED,
+                      },
+                    });
                   }}
                 />
               );
@@ -841,6 +847,12 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        price: OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED,
+                      },
+                    });
                   }}
                 />
               );
@@ -940,6 +952,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        seedingPost:
+                          OPTIMIZED_INFO_STATUS?.SEEDING_POST?.NOT_CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -970,6 +989,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        seedingPost:
+                          OPTIMIZED_INFO_STATUS?.SEEDING_POST?.CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1069,6 +1095,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        reviewStore:
+                          OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.NOT_CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1099,6 +1132,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        reviewStore:
+                          OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1196,6 +1236,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        custom:
+                          OPTIMIZED_INFO_STATUS?.CUSTOM?.NOT_CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1225,6 +1272,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        custom:
+                          OPTIMIZED_INFO_STATUS?.CUSTOM?.CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1325,6 +1379,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        targetAndBudget:
+                          OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET?.NOT_CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1355,6 +1416,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        targetAndBudget:
+                          OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET?.CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1454,6 +1522,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        requestVideo:
+                          OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.NOT_CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1484,6 +1559,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        requestVideo:
+                          OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1583,6 +1665,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        ascAndAPS:
+                          OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.NOT_CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1613,6 +1702,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        ascAndAPS:
+                          OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1712,6 +1808,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        strategy:
+                          OPTIMIZED_INFO_STATUS?.STRATEGY?.NOT_CHECKED,
+                      }
+                    });
                   }}
                 />
               );
@@ -1741,6 +1844,13 @@ const OptimizedTableMode = ({
                       return item;
                     });
                     setTableData(newData);
+                    handleUpdatePODDashboard(uid, {
+                      optimizedInfo: {
+                        ...payload.optimizedInfo,
+                        strategy:
+                          OPTIMIZED_INFO_STATUS?.STRATEGY?.CHECKED,
+                      }
+                    });
                   }}
                 />
               );
