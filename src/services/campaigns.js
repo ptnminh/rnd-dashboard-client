@@ -156,11 +156,9 @@ export const campaignServices = {
       return false;
     }
   },
-  requestVideo: async (id) => {
+  updateVideoBrief: async (id, data) => {
     try {
-      const response = await apiClient.put(`/briefs/${id}/video`, {
-        videoStatus: 1,
-      });
+      const response = await apiClient.put(`/briefs/${id}/video`, data);
       const { data: result } = response;
       if (result?.success === false) {
         if (result?.code === 403) {

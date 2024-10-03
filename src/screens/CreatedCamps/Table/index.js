@@ -513,7 +513,9 @@ const CampaignsTable = ({
   });
 
   const handleCreateVideo = async (row) => {
-    const result = await campaignServices.requestVideo(row.briefId);
+    const result = await campaignServices.updateVideoBrief(row.briefId, {
+      videoStatus: 1,
+    });
     if (result.success) {
       showNotification("Thành công", "Request video thành công", "green");
       fetchCampaigns();

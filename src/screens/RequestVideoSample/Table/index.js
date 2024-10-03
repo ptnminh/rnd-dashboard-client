@@ -1,87 +1,60 @@
-import { Button, Flex, Image, Select, TextInput } from "@mantine/core";
+import {
+  Button,
+  Flex,
+  Image,
+  Pagination,
+  Select,
+  TextInput,
+} from "@mantine/core";
 import { IconFilterOff, IconSearch } from "@tabler/icons-react";
 import { filter, find, keys, map } from "lodash";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import { DateRangePicker } from "rsuite";
-import { CONVERT_STATUS_TO_NUMBER } from "../../../utils";
+import {
+  CONVERT_NUMBER_TO_STATUS,
+  CONVERT_STATUS_TO_NUMBER,
+} from "../../../utils";
 import useTable from "./useTable";
 
+import formatDate from "../../../utils/formatDate";
 import classes from "./index.module.css";
-import { useState } from "react";
 
 const SampleTable = ({ query, setQuery }) => {
   const {
+    data,
     users,
     searchSKU,
-    handleChangeStatus,
-    handleClearStatus,
+    pagination,
     clearFilters,
-    handleChangeSKU,
-    handleSubmitSKU,
     handleChangeDate,
-    handleClearSizeValue,
+    handleChangePage,
     handleChangeSizeValue,
+    handleChangeSKU,
+    handleChangeStatus,
     handleChangeTeam,
+    handleClearSizeValue,
+    handleClearStatus,
     handleClearTeam,
+    handleSubmitSKU,
+    handleUpdateSupplier,
+    handleDoneSample,
+    handleIncompleteSample,
   } = useTable({ query, setQuery });
-
-  const [data, setData] = useState([
-    {
-      id: 1,
-      date: "19/08/2024",
-      sku: "ABC_123",
-      design: "",
-      fileIn: "https://localhost:3000",
-      done: "",
-      screener: "UID",
-      time: "1h",
-      value: "Big",
-    },
-    {
-      id: 2,
-      date: "19/08/2024",
-      sku: "ABC_123",
-      design: "",
-      fileIn: "https://localhost:3000",
-      done: "",
-      screener: "BF",
-      time: "3h",
-      value: "Big",
-    },
-    {
-      id: 3,
-      date: "19/08/2024",
-      sku: "ABC_123",
-      design: "",
-      fileIn: "https://localhost:3000",
-      done: true,
-      screener: "BF",
-      time: "3h",
-      value: "Big",
-    },
-    {
-      id: 4,
-      date: "19/08/2024",
-      sku: "ABC_123",
-      design: "",
-      fileIn: "https://localhost:3000",
-      done: true,
-      screener: "UID",
-      time: "3h",
-      value: "Big",
-    },
-  ]);
 
   const table = useMantineReactTable({
     mantineTableHeadCellProps: { className: classes["head-cells"] },
     mantineTableProps: { striped: "even" },
     columns: [
       {
-        accessorKey: "date",
+        accessorKey: "createdAt",
         header: "DATE",
         size: 120,
         enableEditing: false,
+        enableSorting: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        Cell(row) {
+          return formatDate(row.renderedCellValue);
+        },
       },
       {
         accessorKey: "sku",
@@ -92,17 +65,17 @@ const SampleTable = ({ query, setQuery }) => {
         enableSorting: false,
       },
       {
-        accessorKey: "design",
+        accessorKey: "designInfo",
         header: "DESIGN",
         size: 120,
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         enableSorting: false,
-        Cell() {
+        Cell(row) {
           return (
             <Image
               radius="md"
-              src="/images/content/not_found_2.jpg"
+              src={row.renderedCellValue.thumbLink}
               height={100}
               fit="contain"
             />
@@ -110,12 +83,14 @@ const SampleTable = ({ query, setQuery }) => {
         },
       },
       {
-        accessorKey: "fileIn",
         header: "FILE IN",
         size: 120,
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         enableSorting: false,
+        Cell() {
+          return "<link file in - NAS>";
+        },
       },
       {
         accessorKey: "value",
@@ -125,18 +100,22 @@ const SampleTable = ({ query, setQuery }) => {
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["SKU"] },
         enableSorting: false,
+        Cell(record) {
+          return CONVERT_NUMBER_TO_STATUS[record.row.original.value.rnd];
+        },
       },
       {
-        accessorKey: "screener",
         header: "Sup/UID quay",
         size: 120,
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         enableSorting: false,
         Cell(record) {
+          const row = record.row.original;
           return (
             <Select
-              defaultValue={record.row.original.screener}
+              defaultValue={row.videoSupplier}
+              onChange={(value) => handleUpdateSupplier(row.uid, value)}
               placeholder="Pick value"
               data={["UID", "", "BF", "KM"]}
             />
@@ -144,32 +123,21 @@ const SampleTable = ({ query, setQuery }) => {
         },
       },
       {
-        accessorKey: "done",
         header: "DONE",
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         enableSorting: false,
         Cell({ row }) {
-          const value = row.original;
-          const isUID = value.screener === "UID";
-          const isDone = value.done;
+          const isDone = row.original.videoStatus === 2;
+          const isUID = row.original.videoSupplier === "UID";
 
           return (
             <Button
               onClick={() => {
-                const index = data.findIndex((it) => it.id === row.original.id);
-                if (index >= 0) {
-                  const cloneRow = {
-                    ...data[index],
-                  };
-
-                  cloneRow.done = !cloneRow.done;
-
-                  setData([
-                    ...data.slice(0, index),
-                    cloneRow,
-                    ...data.slice(index + 1),
-                  ]);
+                if (isDone) {
+                  handleIncompleteSample(row.original.uid);
+                } else {
+                  handleDoneSample(row.original.uid);
                 }
               }}
               color="green"
@@ -187,9 +155,12 @@ const SampleTable = ({ query, setQuery }) => {
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         enableSorting: false,
+        Cell(record) {
+          return record.row.original.designInfo.time;
+        },
       },
     ],
-    data,
+    data: data?.data || [],
     editDisplayMode: "cell",
     enableEditing: true,
     enablePagination: false,
@@ -248,7 +219,7 @@ const SampleTable = ({ query, setQuery }) => {
               size="sx"
               placeholder="Date"
               style={{
-                width: "100px",
+                width: "200px",
               }}
               value={query.dateValue}
               onOk={(value) => handleChangeDate(value, value[0], value[1])}
@@ -331,7 +302,23 @@ const SampleTable = ({ query, setQuery }) => {
     },
   });
 
-  return <MantineReactTable table={table} />;
+  return (
+    <>
+      <MantineReactTable table={table} />
+      <Flex justify="flex-end">
+        {pagination.totalPages && (
+          <Pagination
+            total={pagination.totalPages}
+            value={pagination.page}
+            onChange={handleChangePage}
+            color="pink"
+            size="md"
+            style={{ marginTop: "20px", marginLeft: "auto" }}
+          />
+        )}
+      </Flex>
+    </>
+  );
 };
 
 export default SampleTable;

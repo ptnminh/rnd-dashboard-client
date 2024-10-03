@@ -1,11 +1,14 @@
-import Card from "../../components/Card";
-import Table from "./Table";
-import styles from "./RequestVideo.module.sass";
 import cn from "classnames";
 import { useState } from "react";
+import Card from "../../components/Card";
+import styles from "./RequestVideo.module.sass";
+import Table from "./Table";
 
 const SamplePage = () => {
-  const [query, setQuery] = useState({});
+  const [query, setQuery] = useState({
+    status: [2],
+    statusValue: "Done",
+  });
 
   return (
     <Card

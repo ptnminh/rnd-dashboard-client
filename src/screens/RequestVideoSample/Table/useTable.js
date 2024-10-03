@@ -1,11 +1,19 @@
-import moment from "moment-timezone";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { campaignServices } from "../../../services";
 import { CONVERT_STATUS_TO_NUMBER } from "../../../utils";
-import { rndServices } from "../../../services";
+import formatDate from "../../../utils/formatDate";
+import { showNotification } from "../../../utils/index";
+import useGetSampleList from "./useGetSampleList";
+import useGetUser from "./useGetUser";
 
 const useTable = ({ query, setQuery }) => {
+  const { users } = useGetUser();
+
+  const { data, pagination, handleChangePage, refetch } = useGetSampleList({
+    filters: query,
+  });
+
   const [searchSKU, setSearchSKU] = useState("");
-  const [users, setUsers] = useState([]);
 
   const handleChangeSKU = (e) => {
     setSearchSKU(e.target.value);
@@ -16,15 +24,27 @@ const useTable = ({ query, setQuery }) => {
       ...query,
       sku: searchSKU,
     });
+    handleChangePage();
   };
 
   const handleChangeDate = (dateValue, startDate, endDate) => {
+    if (!startDate) {
+      setQuery({
+        ...query,
+        startDate: "",
+        endDate: "",
+        dateValue: null,
+      });
+      return;
+    }
+
     setQuery({
       ...query,
       dateValue,
-      startDate: moment(startDate).format("YYYY-MM-DD"),
-      endDate: moment(endDate).format("YYYY-MM-DD"),
+      startDate: formatDate(startDate),
+      endDate: formatDate(endDate),
     });
+    handleChangePage();
   };
 
   const clearFilters = () => {
@@ -50,6 +70,7 @@ const useTable = ({ query, setQuery }) => {
       value: CONVERT_STATUS_TO_NUMBER[value],
       valueName: value,
     });
+    handleChangePage();
   };
 
   const handleClearSizeValue = () => {
@@ -58,10 +79,12 @@ const useTable = ({ query, setQuery }) => {
       value: null,
       valueName: null,
     });
+    handleChangePage();
   };
 
   const handleChangeTeam = (value) => {
     setQuery({ ...query, rndTeam: value });
+    handleChangePage();
   };
 
   const handleClearTeam = () => {
@@ -69,6 +92,7 @@ const useTable = ({ query, setQuery }) => {
       ...query,
       rndTeam: null,
     });
+    handleChangePage();
   };
 
   const handleChangeStatus = (value) => {
@@ -77,6 +101,7 @@ const useTable = ({ query, setQuery }) => {
       status: value === "Done" ? [2] : [1],
       statusValue: value,
     });
+    handleChangePage();
   };
 
   const handleClearStatus = () => {
@@ -85,22 +110,44 @@ const useTable = ({ query, setQuery }) => {
       status: [1, 2],
       statusValue: null,
     });
+    handleChangePage();
   };
 
-  const fetchUsers = async () => {
-    const { data } = await rndServices.getUsers({
-      limit: -1,
+  const handleUpdateSupplier = async (briefId, videoSupplier) => {
+    const result = await campaignServices.updateVideoBrief(briefId, {
+      videoSupplier,
     });
-    setUsers(data);
+    if (result.success) {
+      showNotification("Thành công", "Update Supplier thành công", "green");
+      refetch();
+    }
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const handleDoneSample = async (briefId) => {
+    const result = await campaignServices.updateVideoBrief(briefId, {
+      videoStatus: 2,
+    });
+    if (result.success) {
+      showNotification("Thành công", "Update status thành công", "green");
+      refetch();
+    }
+  };
+
+  const handleIncompleteSample = async (briefId) => {
+    const result = await campaignServices.updateVideoBrief(briefId, {
+      videoStatus: 1,
+    });
+    if (result.success) {
+      showNotification("Thành công", "Update status thành công", "green");
+      refetch();
+    }
+  };
 
   return {
+    data,
     users,
     searchSKU,
+    pagination,
     clearFilters,
     handleChangeSKU,
     handleSubmitSKU,
@@ -111,6 +158,10 @@ const useTable = ({ query, setQuery }) => {
     handleClearTeam,
     handleChangeStatus,
     handleClearStatus,
+    handleChangePage,
+    handleUpdateSupplier,
+    handleDoneSample,
+    handleIncompleteSample,
   };
 };
 
