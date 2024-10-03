@@ -118,7 +118,8 @@ const SampleTable = ({ query, setQuery }) => {
               defaultValue={row.videoSupplier}
               onChange={(value) => handleUpdateSupplier(row.uid, value)}
               placeholder="Pick value"
-              data={["UID", "", "BF", "KM"]}
+              data={["UID", "BF", "KM"]}
+              allowDeselect={false}
             />
           );
         },
