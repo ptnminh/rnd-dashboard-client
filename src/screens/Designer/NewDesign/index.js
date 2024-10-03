@@ -17,7 +17,6 @@ import {
 import {
   CONVERT_NUMBER_TO_STATUS,
   getEditorStateAsString,
-  getStringAsEditorState,
 } from "../../../utils";
 import {
   IconCircleCheck,
@@ -32,6 +31,8 @@ import { STATUS } from "../../../constant";
 import { useState } from "react";
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
+import moment from "moment-timezone";
+import useStopWatch from "../../../hooks/useStopWatch";
 const GridWithClipArt = ({ selectedSKU }) => {
   return (
     <>
@@ -459,6 +460,7 @@ const GridWithNoClipArt = ({ selectedSKU }) => {
 const NewDesign = ({
   close,
   selectedSKU,
+  setSelectedSKU,
   linkDesign,
   loadingUpdateDesignLink,
   setLinkDesign,
@@ -487,6 +489,27 @@ const NewDesign = ({
     }
     setLoading(false);
   };
+  const handleUpdateStartTime = async () => {
+    setLoading(true);
+    const startTime = moment().valueOf();
+    const updateStartTimeResponse = await rndServices.updateBriefDesign({
+      uid: selectedSKU.uid,
+      data: {
+        startTime,
+      },
+    });
+    if (updateStartTimeResponse) {
+      setSelectedSKU({
+        ...selectedSKU,
+        startTime,
+      });
+    }
+    setLoading(false);
+  };
+  const elapsedTime = useStopWatch(
+    selectedSKU?.designInfo?.startAt,
+    selectedSKU?.designInfo?.doneAt
+  );
   return (
     <Modal
       opened={opened}
@@ -508,9 +531,28 @@ const NewDesign = ({
           margin: "none",
           marginInlineStart: "unset",
         },
+        content: {
+          position: "relative",
+        },
       }}
       title={selectedSKU?.sku}
     >
+      <Button
+        style={{
+          position: "absolute",
+          top: "10px",
+          left: "10px",
+          zIndex: 1000,
+        }}
+        loading={loading}
+        color="red"
+        onClick={() => {
+          handleUpdateStartTime();
+        }}
+        disabled={selectedSKU?.designInfo?.startAt}
+      >
+        {selectedSKU?.designInfo?.startAt ? elapsedTime : "Start"}
+      </Button>
       <LoadingOverlay
         visible={loadingUpdateDesignLink}
         zIndex={1000}

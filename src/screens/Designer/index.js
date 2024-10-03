@@ -871,6 +871,7 @@ const DesignerScreens = () => {
         <NewDesign
           opened={opened}
           close={close}
+          setSelectedSKU={setSelectedSKU}
           selectedSKU={selectedSKU}
           linkDesign={linkDesign}
           loadingUpdateDesignLink={loadingUpdateDesignLink}

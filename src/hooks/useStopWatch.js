@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import moment from "moment";
 
-const useStopWatch = (startTime, isStop = false) => {
+const useStopWatch = (startTime, endTime = null) => {
   const [time, setTime] = useState("00:00");
 
   useEffect(() => {
     const startTimestamp = moment(startTime).valueOf(); // Convert Moment.js timestamp to JavaScript timestamp
+    const endTimestamp = endTime ? moment(endTime).valueOf() : null; // Convert endTime to JavaScript timestamp if provided
 
     const calculateTime = () => {
-      const currentTime = moment().valueOf(); // Get current time using Moment.js
+      const currentTime = endTimestamp || moment().valueOf(); // Use endTimestamp if provided, otherwise use current time
       const diff = currentTime - startTimestamp;
       const hours = Math.floor(diff / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -19,13 +20,13 @@ const useStopWatch = (startTime, isStop = false) => {
       );
     };
 
-    if (isStop) {
+    if (endTimestamp) {
       calculateTime();
     } else {
       const interval = setInterval(calculateTime, 1000);
       return () => clearInterval(interval);
     }
-  }, [startTime, isStop]);
+  }, [startTime, endTime]);
 
   return time;
 };
