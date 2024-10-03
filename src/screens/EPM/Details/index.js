@@ -476,7 +476,7 @@ const BriefsTable = ({
                   return;
                 } else {
                   rndServices
-                    .updateBriefDesign({
+                    .updateBriefListing({
                       uid,
                       data: {
                         linkProduct: value,

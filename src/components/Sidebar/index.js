@@ -21,7 +21,12 @@ import {
   ScrollArea,
   Tooltip,
 } from "@mantine/core";
-import { IconLogout, IconBrandSamsungpass, IconArrowBarRight, IconArrowBarLeft } from "@tabler/icons-react";
+import {
+  IconLogout,
+  IconBrandSamsungpass,
+  IconArrowBarRight,
+  IconArrowBarLeft,
+} from "@tabler/icons-react";
 import { useAuth0 } from "@auth0/auth0-react";
 import { useDisclosure } from "@mantine/hooks";
 import { NAVIGATION, PATH_NAMES } from "../../Routes";
@@ -188,41 +193,77 @@ const Sidebar = ({ className, onClose, openedToggle, toggle }) => {
       <Box
         className={cn(styles.sidebar, className, { [styles.active]: visible })}
         style={{
-          ...(openedToggle ? {
-            width: "290px",
-            padding: "16px"
-          } : {
-            width: "150px",
-            padding: "12px"
-          })
+          ...(openedToggle
+            ? {
+                width: "290px",
+                padding: "16px",
+              }
+            : {
+                width: "50px",
+                padding: "12px",
+              }),
         }}
       >
         <button className={styles.close} onClick={onClose}>
           <Icon name="close" size="24" />
         </button>
-        <Group align="start" justify="space-between" style={{
-          ...(openedToggle ? {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "start",
-          } : {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "start",
-          })
-        }}>
-          <div>
-            <Link className={styles.logo} to="/" onClick={onClose}>
-              <Logo />
-            </Link>
-          </div>
-          {
-            openedToggle ? <IconArrowBarLeft style={{ width: '20px', height: '20px', cursor: "pointer", marginTop: "8px" }} onClick={toggle} stroke={1.5} /> : <IconArrowBarRight style={{ width: '20px', height: '20px', cursor: "pointer", marginTop: "8px" }} onClick={toggle} stroke={1.5} />
-          }
+
+        <Group
+          align="start"
+          justify="space-between"
+          style={{
+            ...(openedToggle
+              ? {
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "start",
+                }
+              : {
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "start",
+                }),
+          }}
+        >
+          {openedToggle && (
+            <div>
+              <Link className={styles.logo} to="/" onClick={onClose}>
+                <Logo />
+              </Link>
+            </div>
+          )}
+
+          {openedToggle ? (
+            <IconArrowBarLeft
+              style={{
+                width: "20px",
+                height: "20px",
+                cursor: "pointer",
+                marginTop: "8px",
+              }}
+              onClick={toggle}
+              stroke={1.5}
+            />
+          ) : (
+            <IconArrowBarRight
+              style={{
+                width: "20px",
+                height: "20px",
+                cursor: "pointer",
+                marginTop: "8px",
+              }}
+              onClick={toggle}
+              stroke={1.5}
+            />
+          )}
         </Group>
-        <Collapse in={openedToggle} style={{
-          height: "800px !important",
-        }} h={800}>
+        <Collapse
+          in={openedToggle}
+          style={{
+            height: "800px !important",
+          }}
+          h={800}
+        >
           <ScrollArea
             scrollbars="y"
             scrollbarSize={4}
@@ -258,7 +299,6 @@ const Sidebar = ({ className, onClose, openedToggle, toggle }) => {
               )}
             </div>
           </ScrollArea>
-
 
           <div
             style={{
@@ -319,12 +359,14 @@ const Sidebar = ({ className, onClose, openedToggle, toggle }) => {
               </Tooltip>
             </Group>
           </div>
-          <button className={styles.toggle} onClick={() => setVisible(!visible)}>
+          <button
+            className={styles.toggle}
+            onClick={() => setVisible(!visible)}
+          >
             <Icon name="arrow-right" size="24" />
             <Icon name="close" size="24" />
           </button>
         </Collapse>
-
       </Box>
 
       <Modal

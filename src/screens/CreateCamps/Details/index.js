@@ -23,6 +23,7 @@ import {
   map,
   omit,
   toNumber,
+  uniq,
 } from "lodash";
 import {
   IconSearch,
@@ -289,7 +290,7 @@ const BriefsTable = ({
             "";
           return (
             <Autocomplete
-              data={map(accounts, "name")}
+              data={compact(uniq(map(accounts, "name")))}
               placeholder="FB Account"
               rightSection={
                 accountValue && (
@@ -446,14 +447,18 @@ const BriefsTable = ({
                     }
                     return {
                       group: campaign?.accountInfo?.name,
-                      items: map(campaign?.campaigns, "campaignName"),
+                      items: uniq(
+                        compact(map(campaign?.campaigns, "campaignName"))
+                      ),
                     };
                   })
                 ) ||
                 map(sampleCampaigns, (campaign) => {
                   return {
                     group: campaign?.accountInfo?.name,
-                    items: map(campaign?.campaigns, "campaignName"),
+                    items: uniq(
+                      compact(map(campaign?.campaigns, "campaignName"))
+                    ),
                   };
                 })
               }
