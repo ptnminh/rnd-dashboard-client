@@ -99,7 +99,7 @@ const OptimizedTableMode = ({
                   }
                   return item;
                 });
-                setData(newData);
+                setTableData(newData);
                 handleUpdatePODDashboard(uid, {
                   isChecked: !foundData?.isChecked,
                 });
