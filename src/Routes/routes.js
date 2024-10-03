@@ -188,23 +188,23 @@ export const PATH_NAMES = {
         url: "/dashboard/chartjs",
       },
       QUOTA_SETTING: {
-        title: "1. Dashboard - Quota",
+        title: "4. Dashboard - Quota",
         url: "/dashboard/sales",
       },
       SETTING: {
-        title: "2. Setting",
+        title: "5. Setting",
         url: "/dashboard/default-setting",
       },
       AMZ_SELLER_BOARD: {
-        title: "3. AMZ Seller Board",
+        title: "2. AMZ-Dashboard",
         url: "/dashboard/amz-seller-board",
       },
       POD_RANKING: {
-        title: "4. Ranking",
+        title: "3. Ranking",
         url: "/dashboard/pod-ranking",
       },
       POD_AMZ: {
-        title: "5. POD",
+        title: "1. POD-Dashboard",
         url: "/dashboard/pod",
       },
     },
@@ -513,13 +513,8 @@ export const NAVIGATION = [
     permissions: ["read:dashboard"],
     dropdown: [
       {
-        title: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.title,
-        url: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.url,
-        permissions: ["read:dashboard"],
-      },
-      {
-        title: PATH_NAMES.DASHBOARD.children.SETTING.title,
-        url: PATH_NAMES.DASHBOARD.children.SETTING.url,
+        title: PATH_NAMES.DASHBOARD.children.POD_AMZ.title,
+        url: PATH_NAMES.DASHBOARD.children.POD_AMZ.url,
         permissions: ["read:dashboard"],
       },
       {
@@ -533,8 +528,13 @@ export const NAVIGATION = [
         permissions: ["read:dashboard"],
       },
       {
-        title: PATH_NAMES.DASHBOARD.children.POD_AMZ.title,
-        url: PATH_NAMES.DASHBOARD.children.POD_AMZ.url,
+        title: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.title,
+        url: PATH_NAMES.DASHBOARD.children.QUOTA_SETTING.url,
+        permissions: ["read:dashboard"],
+      },
+      {
+        title: PATH_NAMES.DASHBOARD.children.SETTING.title,
+        url: PATH_NAMES.DASHBOARD.children.SETTING.url,
         permissions: ["read:dashboard"],
       },
     ],
