@@ -41,24 +41,22 @@ import RequestVideoScreenPage from "./screens/RequestVideoScreen";
 function App() {
   return (
     <Routes>
-      <Route>
-        <Route
-          path="/"
-          element={
-            <Page title="Board">
-              <ComingSoon />
-            </Page>
-          }
-        />
-        <Route
-          path="/rnd"
-          element={
-            <Page title="Board">
-              <NewBriefs />
-            </Page>
-          }
-        />
-      </Route>
+      <Route
+        path="/"
+        element={
+          <Page title="Board">
+            <ComingSoon />
+          </Page>
+        }
+      />
+      <Route
+        path="/rnd"
+        element={
+          <Page title="Board">
+            <NewBriefs />
+          </Page>
+        }
+      />
       <Route
         path="/rnd/product-line"
         element={
