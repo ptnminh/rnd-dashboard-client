@@ -1,19 +1,19 @@
 import cn from "classnames";
-import { useState } from "react";
 import Card from "../../components/Card";
-import styles from "./RequestVideo.module.sass";
+import styles from "./RequestVideoScreen.module.sass";
 import Table from "./Table";
+import { useState } from "react";
 
-const SamplePage = () => {
+const RequestVideoScreenPage = () => {
   const [query, setQuery] = useState({
-    status: [1],
+    status: [2],
     statusValue: "Undone",
   });
 
   return (
     <Card
       className={styles.card}
-      title="REQUEST VIDEO SAMPLE"
+      title="VIDEO"
       classTitle={cn("title-purple", styles.title)}
       classCardHead={cn(styles.head)}
     >
@@ -22,4 +22,4 @@ const SamplePage = () => {
   );
 };
 
-export default SamplePage;
+export default RequestVideoScreenPage;

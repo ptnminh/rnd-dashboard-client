@@ -36,6 +36,7 @@ import RankingPODShopifyProducts from "./screens/Ranking";
 import PODDashboard from "./screens/PODDashboard";
 import RequestVideoSample from "./screens/RequestVideoSample";
 import CreatedPost from "./screens/CreatedPost";
+import RequestVideoScreenPage from "./screens/RequestVideoScreen";
 
 function App() {
   return (
@@ -386,6 +387,14 @@ function App() {
         element={
           <Page>
             <RequestVideoSample />
+          </Page>
+        }
+      />
+      <Route
+        path="/request-video/video"
+        element={
+          <Page>
+            <RequestVideoScreenPage />
           </Page>
         }
       />

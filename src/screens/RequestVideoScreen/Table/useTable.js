@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import useGetUser from "../../../hooks/useGetUser";
 import { campaignServices } from "../../../services";
 import { CONVERT_STATUS_TO_NUMBER } from "../../../utils";
 import formatDate from "../../../utils/formatDate";
 import { showNotification } from "../../../utils/index";
 import useGetSampleList from "./useGetSampleList";
-import useGetUser from "../../../hooks/useGetUser";
 
 const useTable = ({ query, setQuery }) => {
   const { users } = useGetUser();
@@ -98,7 +98,7 @@ const useTable = ({ query, setQuery }) => {
   const handleChangeStatus = (value) => {
     setQuery({
       ...query,
-      status: value === "Done" ? [2] : [1],
+      status: value === "Done" ? [3] : [2],
       statusValue: value,
     });
     handleChangePage();
@@ -107,25 +107,15 @@ const useTable = ({ query, setQuery }) => {
   const handleClearStatus = () => {
     setQuery({
       ...query,
-      status: [1, 2],
+      status: [3, 2],
       statusValue: null,
     });
     handleChangePage();
   };
 
-  const handleUpdateSupplier = async (briefId, videoSupplier) => {
-    const result = await campaignServices.updateVideoBrief(briefId, {
-      videoSupplier,
-    });
-    if (result.success) {
-      showNotification("Thành công", "Update Supplier thành công", "green");
-      refetch();
-    }
-  };
-
   const handleDoneSample = async (briefId) => {
     const result = await campaignServices.updateVideoBrief(briefId, {
-      videoStatus: 2,
+      videoStatus: 3,
     });
     if (result.success) {
       showNotification("Thành công", "Update status thành công", "green");
@@ -135,7 +125,7 @@ const useTable = ({ query, setQuery }) => {
 
   const handleIncompleteSample = async (briefId) => {
     const result = await campaignServices.updateVideoBrief(briefId, {
-      videoStatus: 1,
+      videoStatus: 2,
     });
     if (result.success) {
       showNotification("Thành công", "Update status thành công", "green");
@@ -143,25 +133,65 @@ const useTable = ({ query, setQuery }) => {
     }
   };
 
+  const handleUpdateDoneScene = async (briefId, isDoneSource) => {
+    const result = await campaignServices.updateVideoBrief(briefId, {
+      isDoneSource,
+    });
+    if (result.success) {
+      showNotification("Thành công", "Update status thành công", "green");
+      refetch();
+    }
+  };
+
+  const handleUpdateLinkVideo = async (briefId, videoLink) => {
+    const result = await campaignServices.updateVideoBrief(briefId, {
+      videoLink,
+    });
+    if (result.success) {
+      showNotification("Thành công", "Update status thành công", "green");
+      refetch();
+    }
+  };
+
+  const handleUpdateVideoEditor = async (briefId, videoEditorId) => {
+    const result = await campaignServices.updateVideoBrief(briefId, {
+      videoEditorId,
+    });
+    if (result.success) {
+      showNotification("Thành công", "Update status thành công", "green");
+      refetch();
+    }
+  };
+
+  const listUserOptions = useMemo(() => {
+    return users.map((user) => ({
+      value: user.uid,
+      label: user.name,
+    }));
+  }, [users]);
+
   return {
     data,
     users,
     searchSKU,
     pagination,
+    listUserOptions,
     clearFilters,
-    handleChangeSKU,
-    handleSubmitSKU,
     handleChangeDate,
-    handleClearSizeValue,
-    handleChangeSizeValue,
-    handleChangeTeam,
-    handleClearTeam,
-    handleChangeStatus,
-    handleClearStatus,
     handleChangePage,
-    handleUpdateSupplier,
+    handleChangeSizeValue,
+    handleChangeSKU,
+    handleChangeStatus,
+    handleChangeTeam,
+    handleClearSizeValue,
+    handleClearStatus,
+    handleClearTeam,
     handleDoneSample,
     handleIncompleteSample,
+    handleSubmitSKU,
+    handleUpdateDoneScene,
+    handleUpdateLinkVideo,
+    handleUpdateVideoEditor,
   };
 };
 

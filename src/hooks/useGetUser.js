@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { rndServices } from "../../../services";
+import { rndServices } from "../services";
 
 const useGetUser = () => {
   const [users, setUsers] = useState([]);
