@@ -1,6 +1,6 @@
 import { TextInput } from "@mantine/core";
-import { showNotification } from "../../utils/index";
 import { useEffect, useRef } from "react";
+import { showNotification } from "../utils/index";
 
 const EditLink = ({
   value,

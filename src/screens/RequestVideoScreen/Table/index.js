@@ -19,9 +19,9 @@ import useTable from "./useTable";
 
 import formatDate from "../../../utils/formatDate";
 import classes from "./index.module.css";
-import EditLink from "../EditLink";
 import AppSelect from "../../../components/AppSelect";
 import Link from "../../../components/Link";
+import EditLink from "../../../components/EditLink";
 
 const VideoTable = ({ query, setQuery }) => {
   const {
@@ -351,7 +351,6 @@ const VideoTable = ({ query, setQuery }) => {
     },
     mantineTableBodyCellProps: ({ row, table, cell }) => ({
       onDoubleClick: () => {
-        console.log("cell", cell.column.id);
         if (cell && cell.column.id === "linkVideo") {
           table.setEditingCell(cell);
         }

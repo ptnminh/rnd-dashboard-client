@@ -13,11 +13,10 @@ const defaultFilters = {
 const useTable = ({ query, setQuery }) => {
   const { users } = useGetUser();
 
-  const { data, pagination, handleChangePage, refetch, loading } =
-    useGetSampleList({
-      filters: query,
-      defaultFilters,
-    });
+  const { data, pagination, handleChangePage, refetch } = useGetSampleList({
+    filters: query,
+    defaultFilters,
+  });
 
   const [searchSKU, setSearchSKU] = useState("");
 
@@ -109,8 +108,6 @@ const useTable = ({ query, setQuery }) => {
     });
     handleChangePage();
   };
-
-  console.log("page", pagination, loading);
 
   const handleClearStatus = () => {
     setQuery({
