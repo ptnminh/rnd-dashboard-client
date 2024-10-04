@@ -29,14 +29,14 @@ import ProductLineReadyToLaunch from "./screens/ProductLineReadyToLaunch";
 import ScreenshotTask from "./screens/ScreenShotTask";
 import Mockup from "./screens/Mockup";
 import ComingSoon from "./screens/ComingSoon";
-import Dashboards from "./screens/Dashboards";
-import DashboardChartJS from "./screens/Dashboards/chart";
 import DashboardSetting from "./screens/DashboardSetting";
 import ProductivityDashboard from "./screens/ProductivityDashboard";
 import Sellerboard from "./screens/Sellerboard";
 import RankingPODShopifyProducts from "./screens/Ranking";
 import PODDashboard from "./screens/PODDashboard";
+import RequestVideoSample from "./screens/RequestVideoSample";
 import CreatedPost from "./screens/CreatedPost";
+import RequestVideoScreenPage from "./screens/RequestVideoScreen";
 
 function App() {
   return (
@@ -377,6 +377,22 @@ function App() {
         element={
           <Page title="MKT">
             <PODDashboard />
+          </Page>
+        }
+      />
+      <Route
+        path="/request-video/sample"
+        element={
+          <Page>
+            <RequestVideoSample />
+          </Page>
+        }
+      />
+      <Route
+        path="/request-video/video"
+        element={
+          <Page>
+            <RequestVideoScreenPage />
           </Page>
         }
       />

@@ -1,6 +1,14 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
-import { Badge, Button, Flex, Image, Select, TextInput } from "@mantine/core";
+import {
+  Badge,
+  Button,
+  Flex,
+  Image,
+  Select,
+  TextInput,
+  Text,
+} from "@mantine/core";
 import { ceil, keys } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
@@ -10,7 +18,9 @@ import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
 } from "../../../utils";
-import { rndServices } from "../../../services";
+import { campaignServices, rndServices } from "../../../services";
+import { modals } from "@mantine/modals";
+import { showNotification } from "../../../utils/index";
 
 const CampaignsTable = ({
   campaigns,
@@ -24,6 +34,7 @@ const CampaignsTable = ({
   accounts,
   campsPayload,
   sampleCampaigns,
+  fetchCampaigns,
 }) => {
   const [validationErrors, setValidationErrors] = useState({});
   const [data, setData] = useState(campaigns || []);
@@ -205,6 +216,45 @@ const CampaignsTable = ({
         enableSorting: true,
         size: 100,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+      },
+      {
+        accessorKey: "actions",
+        header: "ACTIONS",
+        enableSorting: false,
+        Cell: (record) => {
+          const row = record?.row.original;
+          const isRequestedVideo = row.briefInfo?.videoStatus;
+
+          return (
+            <div>
+              {!isRequestedVideo ? (
+                <Button
+                  onClick={() => {
+                    modals.openConfirmModal({
+                      title: "Please confirm your action",
+                      children: (
+                        <Text size="sm">
+                          This action is so important that you are required to
+                          confirm it with a modal. Please click one of these
+                          buttons to proceed.
+                        </Text>
+                      ),
+                      labels: { confirm: "Confirm", cancel: "Cancel" },
+                      onConfirm: () => handleCreateVideo(record.row.original),
+                    });
+                  }}
+                  variant="filled"
+                  color="green"
+                  size="sx"
+                >
+                  Request Video
+                </Button>
+              ) : (
+                <Text>Requested video</Text>
+              )}
+            </div>
+          );
+        },
       },
     ],
     [validationErrors, accounts, sampleCampaigns, campaigns, campsPayload]
@@ -461,6 +511,16 @@ const CampaignsTable = ({
     }),
     onSortingChange: setSorting,
   });
+
+  const handleCreateVideo = async (row) => {
+    const result = await campaignServices.updateVideoBrief(row.briefId, {
+      videoStatus: 1,
+    });
+    if (result.success) {
+      showNotification("Thành công", "Request video thành công", "green");
+      fetchCampaigns();
+    }
+  };
 
   return (
     <>
