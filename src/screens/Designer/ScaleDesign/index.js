@@ -224,6 +224,9 @@ const ScaleDesign = ({
             }
             height={200}
             fit="contain"
+            onClick={() => {
+              window.open(selectedSKU?.productLine?.image, "_blank");
+            }}
           />
           <div
             style={{
@@ -300,6 +303,9 @@ const ScaleDesign = ({
             }
             height={200}
             fit="contain"
+            onClick={() => {
+              window.open(selectedSKU?.skuInfo?.image, "_blank");
+            }}
           />
           <div
             style={{

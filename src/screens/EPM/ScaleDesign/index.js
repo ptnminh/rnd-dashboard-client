@@ -207,6 +207,11 @@ const ScaleDesign = ({
             }
             height={200}
             fit="contain"
+            onClick={() => {
+              if (selectedSKU?.skuInfo?.image) {
+                window.open(selectedSKU?.skuInfo?.image, "_blank");
+              }
+            }}
           />
           <div
             style={{
@@ -283,6 +288,11 @@ const ScaleDesign = ({
             }
             height={200}
             fit="contain"
+            onClick={() => {
+              if (selectedSKU?.designInfo?.thumbLink) {
+                window.open(selectedSKU?.designInfo?.thumbLink, "_blank");
+              }
+            }}
           />
           <div
             style={{

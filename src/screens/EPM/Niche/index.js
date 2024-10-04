@@ -205,6 +205,11 @@ const Niche = ({
             src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
             height={200}
             fit="contain"
+            onClick={() => {
+              if (selectedSKU?.imageRef) {
+                window.open(selectedSKU?.imageRef, "_blank");
+              }
+            }}
           />
           <div
             style={{
@@ -281,6 +286,11 @@ const Niche = ({
             }
             height={200}
             fit="contain"
+            onClick={() => {
+              if (selectedSKU?.designInfo?.thumbLink) {
+                window.open(selectedSKU?.designInfo?.thumbLink, "_blank");
+              }
+            }}
           />
           <div
             style={{

@@ -208,6 +208,11 @@ const MixMatch = ({
             }
             height={200}
             fit="contain"
+            onClick={() => {
+              if (selectedSKU?.productLine?.image) {
+                window.open(selectedSKU?.productLine?.image, "_blank");
+              }
+            }}
           />
           <div
             style={{
@@ -262,6 +267,11 @@ const MixMatch = ({
             }
             height={200}
             fit="contain"
+            onClick={() => {
+              if (selectedSKU?.designInfo?.thumbLink) {
+                window.open(selectedSKU?.designInfo?.thumbLink, "_blank");
+              }
+            }}
           />
           <div
             style={{

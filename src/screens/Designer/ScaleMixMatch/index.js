@@ -230,6 +230,9 @@ const ScaleMixMatch = ({
               }
               height={200}
               fit="contain"
+              onClick={() => {
+                window.open(selectedSKU?.productLine?.image, "_blank");
+              }}
             />
             <div
               style={{
@@ -333,6 +336,9 @@ const ScaleMixMatch = ({
               src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
               height={200}
               fit="contain"
+              onClick={() => {
+                window.open(selectedSKU?.imageRef, "_blank");
+              }}
             />
             <div
               style={{
@@ -426,6 +432,9 @@ const ScaleMixMatch = ({
                             alt="Norway"
                             style={{
                               objectFit: "contain",
+                            }}
+                            onClick={() => {
+                              window.open(clipart.image, "_blank");
                             }}
                           />
                         </Grid.Col>

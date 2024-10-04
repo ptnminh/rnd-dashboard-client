@@ -634,6 +634,15 @@ const DesignerScreens = () => {
                           ]
                         ]?.image || "/images/content/not_found_2.jpg"
                       }
+                      onClick={() => {
+                        window.open(
+                          selectedSKU[
+                            CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
+                              selectedSKU?.briefType
+                            ]
+                          ]?.image
+                        );
+                      }}
                       height={200}
                       fit="contain"
                     />

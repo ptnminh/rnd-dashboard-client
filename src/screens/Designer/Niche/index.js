@@ -227,6 +227,9 @@ const ScaleNiche = ({
             src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
             height={200}
             fit="contain"
+            onClick={() => {
+              window.open(selectedSKU?.imageRef, "_blank");
+            }}
           />
           <div
             style={{
@@ -344,6 +347,9 @@ const ScaleNiche = ({
                             alt="Norway"
                             style={{
                               objectFit: "contain",
+                            }}
+                            onClick={() => {
+                              window.open(clipart?.image, "_blank");
                             }}
                           />
                         </Grid.Col>

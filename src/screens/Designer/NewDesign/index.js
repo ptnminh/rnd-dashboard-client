@@ -17,7 +17,6 @@ import {
 import {
   CONVERT_NUMBER_TO_STATUS,
   getEditorStateAsString,
-  getStringAsEditorState,
 } from "../../../utils";
 import {
   IconCircleCheck,
@@ -54,6 +53,9 @@ const GridWithClipArt = ({ selectedSKU }) => {
           }
           height={200}
           fit="contain"
+          onClick={() => {
+            window.open(selectedSKU?.productLine?.image, "_blank");
+          }}
         />
         <div
           style={{
@@ -155,6 +157,9 @@ const GridWithClipArt = ({ selectedSKU }) => {
           src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
           height={200}
           fit="contain"
+          onClick={() => {
+            window.open(selectedSKU?.imageRef, "_blank");
+          }}
         />
         <div
           style={{
@@ -246,6 +251,9 @@ const GridWithClipArt = ({ selectedSKU }) => {
                         style={{
                           objectFit: "contain",
                         }}
+                        onClick={() => {
+                          window.open(clipart.image, "_blank");
+                        }}
                       />
                     </Grid.Col>
                     <Grid.Col
@@ -331,6 +339,9 @@ const GridWithNoClipArt = ({ selectedSKU }) => {
           }
           height={200}
           fit="contain"
+          onClick={() => {
+            window.open(selectedSKU?.productLine?.image, "_blank");
+          }}
         />
         <div
           style={{
@@ -405,6 +416,9 @@ const GridWithNoClipArt = ({ selectedSKU }) => {
           src={selectedSKU?.imageRef || "/images/content/not_found_2.jpg"}
           height={200}
           fit="contain"
+          onClick={() => {
+            window.open(selectedSKU?.imageRef, "_blank");
+          }}
         />
         <div
           style={{
