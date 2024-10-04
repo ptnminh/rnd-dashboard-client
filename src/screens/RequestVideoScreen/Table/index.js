@@ -190,7 +190,7 @@ const VideoTable = ({ query, setQuery }) => {
                 }
               }}
               color="green"
-              variant={isDone ? "filled" : "default"}
+              variant={isDone ? "default" : "filled"}
             >
               DONE
             </Button>
