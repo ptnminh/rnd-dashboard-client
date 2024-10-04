@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import {
   Text,
@@ -13,6 +13,9 @@ import {
   Select,
   TextInput,
   ActionIcon,
+  Affix,
+  Transition,
+  rem,
 } from "@mantine/core";
 import {
   find,
@@ -35,15 +38,14 @@ import {
   IconSortDescending,
   IconSortAscending,
   IconArrowsSort,
+  IconArrowUp,
 } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import {
   AMZ_DASHBOARD_STATUS,
-  AMZ_SORTING,
   AMZ_STORES,
   CONVERT_NUMBER_TO_AMZ_DASHBOARD_STATUS,
   CONVERT_STATUS_TO_AMZ_DASHBOARD_NUMBER,
-  FULFILLMENT_CHANNELS,
 } from "../../../constant";
 import moment from "moment-timezone";
 import {
@@ -1125,6 +1127,14 @@ const SellerboardTable = ({
     [customColumns, data, summaryRow]
   );
 
+  const tableContainerRef = useRef(null); // Create a ref for the scrollable container
+
+  // Function to scroll to the top of the table container
+  const scrollToTop = () => {
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
   const table = useMantineReactTable({
     columns,
     data: tableDataWithSummary,
@@ -1660,14 +1670,34 @@ const SellerboardTable = ({
     },
     mantineTableContainerProps: {
       style: {
-        maxHeight: "500px",
+        maxHeight: "66vh", // 70% of the viewport height
       },
+      ref: tableContainerRef, // Attach ref to the scrollable container
     },
     enableStickyHeader: true,
     enableStickyFooter: true,
   });
 
-  return !isEmpty(tableData) ? <MantineReactTable table={table} /> : null;
+  return !isEmpty(tableData) ? (
+    <div>
+      <MantineReactTable table={table} />
+      <Affix position={{ bottom: 20, right: 20 }}>
+        <Transition mounted={true}>
+          {(transitionStyles) => (
+            <Button
+              leftSection={
+                <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
+              }
+              style={transitionStyles}
+              onClick={scrollToTop} // Call the scroll function on click
+            >
+              Scroll to top
+            </Button>
+          )}
+        </Transition>
+      </Affix>
+    </div>
+  ) : null;
 };
 
 export default SellerboardTable;

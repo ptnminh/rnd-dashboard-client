@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import {
   Text,
@@ -12,6 +12,9 @@ import {
   Select,
   ActionIcon,
   Checkbox,
+  Affix,
+  Transition,
+  rem,
 } from "@mantine/core";
 import { find, values, isEmpty } from "lodash";
 
@@ -20,9 +23,9 @@ import {
   IconSortAscending,
   IconSortDescending,
   IconArrowsSort,
+  IconArrowUp,
 } from "@tabler/icons-react";
 import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
-import LazyLoad from "react-lazyload";
 import {
   CONVERT_NUMBER_TO_POD_DASHBOARD_STATUS,
   POD_DASHBOARD_STATUS,
@@ -1887,6 +1890,15 @@ const OptimizedTableMode = ({
     [data]
   );
 
+  const tableContainerRef = useRef(null); // Create a ref for the scrollable container
+
+  // Function to scroll to the top of the table container
+  const scrollToTop = () => {
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   const table = useMantineReactTable({
     columns,
     data,
@@ -1980,12 +1992,32 @@ const OptimizedTableMode = ({
     enableStickyFooter: true,
     mantineTableContainerProps: {
       style: {
-        maxHeight: "550px",
+        maxHeight: "66vh", // 70% of the viewport height,
       },
+      ref: tableContainerRef, // Attach ref to the scrollable container
     },
   });
 
-  return !isEmpty(tableData) ? <MantineReactTable table={table} /> : null;
+  return !isEmpty(tableData) ? (
+    <div>
+      <MantineReactTable table={table} />
+      <Affix position={{ bottom: 20, right: 20 }}>
+        <Transition mounted={true}>
+          {(transitionStyles) => (
+            <Button
+              leftSection={
+                <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
+              }
+              style={transitionStyles}
+              onClick={scrollToTop} // Call the scroll function on click
+            >
+              Scroll to top
+            </Button>
+          )}
+        </Transition>
+      </Affix>
+    </div>
+  ) : null;
 };
 
 export default OptimizedTableMode;
