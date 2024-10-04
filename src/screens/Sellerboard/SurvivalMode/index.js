@@ -519,7 +519,7 @@ const SurvivalModeTable = ({
     enableStickyFooter: true,
     mantineTableContainerProps: {
       style: {
-        maxHeight: "66vh", // 70% of the viewport height
+        maxHeight: "65vh", // 70% of the viewport height
       },
       ref: tableContainerRef, // Attach ref to the scrollable container
     },
