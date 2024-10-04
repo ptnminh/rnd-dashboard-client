@@ -1,4 +1,5 @@
 import {
+  Badge,
   Button,
   Flex,
   Image,
@@ -101,8 +102,31 @@ const SampleTable = ({ query, setQuery }) => {
         mantineTableBodyCellProps: { className: classes["body-cells"] },
         mantineTableHeadCellProps: { className: classes["SKU"] },
         enableSorting: false,
-        Cell(record) {
-          return CONVERT_NUMBER_TO_STATUS[record.row.original.value.rnd];
+        Cell: ({ row }) => {
+          let color = null;
+          switch (row?.original?.value?.rnd) {
+            case 1:
+              color = "#cfcfcf";
+              break;
+            case 2:
+              color = "yellow";
+              break;
+            case 3:
+              color = "green";
+              break;
+            case 4:
+              color = "#38761C";
+              break;
+            default:
+              break;
+          }
+          return color ? (
+            <Badge color={color} variant="filled">
+              {CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}
+            </Badge>
+          ) : (
+            <span>{CONVERT_NUMBER_TO_STATUS[row?.original?.value?.rnd]}</span>
+          );
         },
       },
       {
@@ -110,6 +134,7 @@ const SampleTable = ({ query, setQuery }) => {
         size: 120,
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["edit-header"] },
         enableSorting: false,
         Cell(record) {
           const row = record.row.original;
@@ -128,6 +153,7 @@ const SampleTable = ({ query, setQuery }) => {
         header: "DONE",
         enableEditing: false,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["edit-header"] },
         enableSorting: false,
         Cell({ row }) {
           const isDone = row.original.videoStatus === 2;
@@ -243,44 +269,6 @@ const SampleTable = ({ query, setQuery }) => {
               value={query?.valueName}
               onChange={(value) => handleChangeSizeValue(value)}
               onClear={handleClearSizeValue}
-            />
-            <Select
-              clearable
-              placeholder="Team"
-              data={["BD1", "BD2", "BD3", "AMZ"]}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={query?.rndTeam}
-              onChange={handleChangeTeam}
-              onClear={handleClearTeam}
-            />
-            <Select
-              placeholder="RND"
-              data={map(filter(users, { position: "rnd" }), "name") || []}
-              styles={{
-                input: {
-                  width: "100px",
-                },
-              }}
-              value={query?.rndName}
-              onChange={(value) =>
-                setQuery({
-                  ...query,
-                  rndName: find(users, { name: value })?.name,
-                  rndId: find(users, { name: value })?.uid,
-                })
-              }
-              clearable
-              onClear={() => {
-                setQuery({
-                  ...query,
-                  rndName: null,
-                  rndId: null,
-                });
-              }}
             />
             <Select
               clearable
