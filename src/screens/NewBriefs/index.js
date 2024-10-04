@@ -357,8 +357,11 @@ const generateScaleMixMatch = ({
   return tables;
 };
 
-const generateOptimizedSKU = ({ SKU }) => {
+const generateOptimizedSKU = ({ SKU, rndId }) => {
   if (isEmpty(SKU)) return [];
+  const skuAccumulators = SKU?.skuAccumulators || [];
+  const currentRnDAccumulator =
+    find(skuAccumulators, { rndId: rndId })?.accumulator || 500;
   return [
     {
       No: 1,
@@ -368,6 +371,7 @@ const generateOptimizedSKU = ({ SKU }) => {
       uid: SKU?.uid,
       skuPrefix: SKU?.skuPrefix,
       uniqueId: `${SKU?.uid}`,
+      nextAccumulator: currentRnDAccumulator + 1,
     },
   ];
 };
