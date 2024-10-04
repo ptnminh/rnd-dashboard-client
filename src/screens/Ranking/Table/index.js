@@ -1044,9 +1044,6 @@ const RankingTable = ({
     enableStickyHeader: true,
     enableStickyFooter: true,
     mantineTableContainerProps: {
-      style: {
-        maxHeight: "66vh",
-      },
       ref: tableContainerRef, // Attach ref to the scrollable container
     },
   });
