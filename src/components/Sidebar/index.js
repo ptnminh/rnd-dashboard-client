@@ -307,7 +307,7 @@ const Sidebar = ({ className, onClose, openedToggle, toggle }) => {
               bottom: "-16px",
               cursor: "pointer",
               width: "290px",
-              padding: "24px",
+              padding: "20px",
             }}
           >
             <Group

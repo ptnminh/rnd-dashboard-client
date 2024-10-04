@@ -1123,6 +1123,9 @@ const PODTableBoard = ({
         </Button>
       );
     },
+    enableStickyHeader: true,
+    enableStickyFooter: true,
+    mantineTableContainerProps: { sx: { maxHeight: "500px" } },
   });
 
   return !isEmpty(tableData) ? <MantineReactTable table={table} /> : null;
