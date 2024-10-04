@@ -112,7 +112,7 @@ export const PATH_NAMES = {
     },
   },
   MKT: {
-    title: "6. MKT",
+    title: "7. MKT",
     children: {
       LIST_SKU: {
         title: "1. List SKU",
@@ -172,11 +172,11 @@ export const PATH_NAMES = {
     },
   },
   USER: {
-    title: "7. User",
+    title: "8. User",
     url: "/users",
   },
   DASHBOARD: {
-    title: "8. Dashboard",
+    title: "9. Dashboard",
     url: "/dashboard",
     children: {
       RECHARTS: {

@@ -11,6 +11,7 @@ import {
   Group,
   MultiSelect,
   Select,
+  TextInput,
 } from "@mantine/core";
 import { find, map, flatten, uniq } from "lodash";
 import { IconFilterOff } from "@tabler/icons-react";
@@ -345,6 +346,19 @@ const SurvivalModeTable = ({
     ],
     [customColumns, data]
   );
+  const Label = (props) => {
+    return (
+      <label
+        style={{
+          display: "block",
+          marginTop: 10,
+          fontSize: "12px",
+          fontWeight: "bold",
+        }}
+        {...props}
+      />
+    );
+  };
 
   const table = useMantineReactTable({
     columns,
@@ -388,6 +402,7 @@ const SurvivalModeTable = ({
           >
             <DateRangePicker
               size="sx"
+              label="Created Date"
               placeholder="Created Date"
               style={{
                 width: "200px",
@@ -421,6 +436,7 @@ const SurvivalModeTable = ({
                 });
               }}
             />
+
             <Button
               loading={loading}
               onClick={() => {

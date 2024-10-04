@@ -239,6 +239,7 @@ const PODDashboard = () => {
 
   const [listingDays, setListingDays] = useState("");
   const [adDaysNum, setAdDaysNum] = useState("30");
+  const [sku, setSku] = useState("");
 
   const [scroll, scrollTo] = useWindowScroll();
   const handleSubmitSKUOptimized = async () => {
@@ -592,7 +593,7 @@ const PODDashboard = () => {
                           }}
                         >
                           <Grid.Col
-                            span={8}
+                            span={10}
                             style={{
                               borderRadius: "10px",
                               width: "100%",
@@ -615,6 +616,51 @@ const PODDashboard = () => {
                                   display: "flex",
                                 }}
                               >
+                                <TextInput
+                                  label="SKU"
+                                  value={sku}
+                                  onChange={(event) => {
+                                    const value = event.target.value;
+                                    setSku(value);
+                                    if (!value) {
+                                      setPagination({
+                                        ...pagination,
+                                        currentPage: 1,
+                                      });
+                                      setQuery({
+                                        ...query,
+                                        sku: null,
+                                      });
+                                    }
+                                  }}
+                                  onKeyDown={(event) => {
+                                    const value = event.target.value;
+                                    if (event.key === "Enter" && value) {
+                                      setPagination({
+                                        ...pagination,
+                                        currentPage: 1,
+                                      });
+                                      setQuery({
+                                        ...query,
+                                        sku: value,
+                                      });
+                                    }
+                                  }}
+                                  styles={{
+                                    root: {
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "10px",
+                                    },
+                                    input: {
+                                      width: "80px",
+                                    },
+                                    label: {
+                                      fontSize: "12px",
+                                      fontWeight: "bold",
+                                    },
+                                  }}
+                                />
                                 <Select
                                   data={["BD1", "BD2", "BD3"]}
                                   placeholder="TEAM"
@@ -826,7 +872,7 @@ const PODDashboard = () => {
                               </Group>
                             </Flex>
                           </Grid.Col>
-                          <Grid.Col span={4}>
+                          <Grid.Col span={2}>
                             <Radio.Group
                               value={query.view}
                               label="SHOW DATA"

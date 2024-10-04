@@ -1146,6 +1146,32 @@ const SellerboardTable = ({
               alignItems: "end",
             }}
           >
+            <TextInput
+              label="SKU"
+              value={query?.sku || ""}
+              onChange={(event) => {
+                const value = event.target.value;
+                setQuery({
+                  ...query,
+                  sku: value,
+                });
+              }}
+              styles={{
+                root: {
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "start",
+                  gap: "10px",
+                },
+                input: {
+                  width: "100px",
+                },
+                label: {
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                },
+              }}
+            />
             <MultiSelect
               placeholder="Store"
               data={AMZ_STORES}
