@@ -653,7 +653,7 @@ const PODDashboard = () => {
                                       gap: "10px",
                                     },
                                     input: {
-                                      width: "80px",
+                                      width: "130px",
                                     },
                                     label: {
                                       fontSize: "12px",
@@ -727,30 +727,6 @@ const PODDashboard = () => {
                                     },
                                   }}
                                 />
-                              </Group>
-                              <Group>
-                                <Switch
-                                  checked={query?.minLifetimeOrders}
-                                  labelPosition="left"
-                                  label="Thỏa Optimized"
-                                  onChange={() => {
-                                    setPagination({
-                                      ...pagination,
-                                      currentPage: 1,
-                                    });
-                                    setQuery({
-                                      ...query,
-                                      minLifetimeOrders:
-                                        !query.minLifetimeOrders ? 3 : false,
-                                    });
-                                  }}
-                                  styles={{
-                                    label: {
-                                      fontSize: "14px",
-                                      fontWeight: "bold",
-                                    },
-                                  }}
-                                />
                                 <Switch
                                   checked={query?.isChecked}
                                   labelPosition="left"
@@ -779,6 +755,31 @@ const PODDashboard = () => {
                                     },
                                   }}
                                 />
+                              </Group>
+                              <Group>
+                                <Switch
+                                  checked={query?.minLifetimeOrders}
+                                  labelPosition="left"
+                                  label="Thỏa Optimized"
+                                  onChange={() => {
+                                    setPagination({
+                                      ...pagination,
+                                      currentPage: 1,
+                                    });
+                                    setQuery({
+                                      ...query,
+                                      minLifetimeOrders:
+                                        !query.minLifetimeOrders ? 3 : false,
+                                    });
+                                  }}
+                                  styles={{
+                                    label: {
+                                      fontSize: "14px",
+                                      fontWeight: "bold",
+                                    },
+                                  }}
+                                />
+
                                 <TextInput
                                   label="List"
                                   value={listingDays}
@@ -872,7 +873,13 @@ const PODDashboard = () => {
                               </Group>
                             </Flex>
                           </Grid.Col>
-                          <Grid.Col span={2}>
+                          <Grid.Col
+                            span={2}
+                            style={{
+                              padding: 0,
+                              marginLeft: 5,
+                            }}
+                          >
                             <Radio.Group
                               value={query.view}
                               label="SHOW DATA"
@@ -893,7 +900,7 @@ const PODDashboard = () => {
                                 label: {
                                   fontSize: "14px",
                                   fontWeight: "bold",
-                                  marginRight: "10px",
+                                  marginRight: "5px",
                                 },
                               }}
                             >

@@ -507,20 +507,18 @@ const SellerboardTable = ({
               <Grid>
                 <Grid.Col span={6}>
                   <Tooltip label={url}>
-                    <LazyLoad height={100} once={true}>
-                      <Image
-                        src={image || "/images/content/not_found_2.jpg"}
-                        width="100%"
-                        height="100%"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          window.open(url, "_blank");
-                        }}
-                        fit="contain"
-                      />
-                    </LazyLoad>
+                    <Image
+                      src={image || "/images/content/not_found_2.jpg"}
+                      width="100%"
+                      height="100%"
+                      style={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        window.open(url, "_blank");
+                      }}
+                      fit="contain"
+                    />
                   </Tooltip>
                 </Grid.Col>
                 <Grid.Col span={6}>
@@ -621,8 +619,8 @@ const SellerboardTable = ({
       },
       {
         accessorKey: "createdDate",
-        size: 150,
-        maxSize: 150,
+        size: 100,
+        maxSize: 100,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -641,106 +639,130 @@ const SellerboardTable = ({
         Header: () => {
           return (
             <Group gap={5}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "bold",
-                }}
-              >
-                Lifetime Order
-              </Text>
-              {(!query?.primarySortBy ||
-                query?.primarySortBy === "ordersInRange" ||
-                query?.primarySortBy === "createdDate" ||
-                query?.primarySortBy === "testDate") && (
-                <ActionIcon
-                  aria-label="Settings"
-                  variant="default"
+              <Grid>
+                <Grid.Col
+                  span={8}
                   style={{
-                    background: "none",
-                    border: "none",
-                  }}
-                  onClick={() => {
-                    setIsConfirmedQuery(true);
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                    setQuery({
-                      ...query,
-                      primarySortBy: "totalOrders",
-                      primarySortDir: "desc",
-                    });
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <IconArrowsSort
+                  <Text
                     style={{
-                      width: "60%",
-                      height: "60%",
+                      fontSize: 14,
                       fontWeight: "bold",
-                    }}
-                    stroke={2}
-                    color="#ffffff"
-                  />
-                </ActionIcon>
-              )}
-
-              {query?.primarySortBy === "totalOrders" &&
-                query?.primarySortDir === "desc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    onClick={() => {
-                      setIsConfirmedQuery(true);
-                      setPagination({
-                        ...pagination,
-                        currentPage: 1,
-                      });
-                      setQuery({
-                        ...query,
-                        primarySortBy: "totalOrders",
-                        primarySortDir: "asc",
-                      });
+                      textAlign: "center",
+                      width: "100%",
+                      wordBreak: "break-word", // Break long words
+                      whiteSpace: "normal", // Allow text to wrap
+                      overflowWrap: "break-word", // Break long words
                     }}
                   >
-                    <IconSortDescending
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
-              {query?.primarySortBy === "totalOrders" &&
-                query?.primarySortDir === "asc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    onClick={() => {
-                      setIsConfirmedQuery(true);
-                      setPagination({
-                        ...pagination,
-                        currentPage: 1,
-                      });
-                      setQuery({
-                        ...query,
-                        primarySortBy: null,
-                        primarySortDir: null,
-                      });
-                    }}
-                  >
-                    <IconSortAscending
+                    Lifetime Order
+                  </Text>
+                </Grid.Col>
+                <Grid.Col
+                  span={4}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  {(!query?.primarySortBy ||
+                    query?.primarySortBy === "ordersInRange" ||
+                    query?.primarySortBy === "createdDate" ||
+                    query?.primarySortBy === "testDate") && (
+                    <ActionIcon
+                      aria-label="Settings"
+                      variant="default"
                       style={{
-                        width: "70%",
-                        height: "70%",
-                        fontWeight: "bold",
+                        background: "none",
+                        border: "none",
                       }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
+                      onClick={() => {
+                        setIsConfirmedQuery(true);
+                        setPagination({
+                          ...pagination,
+                          currentPage: 1,
+                        });
+                        setQuery({
+                          ...query,
+                          primarySortBy: "totalOrders",
+                          primarySortDir: "desc",
+                        });
+                      }}
+                    >
+                      <IconArrowsSort
+                        style={{
+                          width: "60%",
+                          height: "60%",
+                          fontWeight: "bold",
+                        }}
+                        stroke={2}
+                        color="#ffffff"
+                      />
+                    </ActionIcon>
+                  )}
+
+                  {query?.primarySortBy === "totalOrders" &&
+                    query?.primarySortDir === "desc" && (
+                      <ActionIcon
+                        variant="filled"
+                        aria-label="Settings"
+                        color="transparent"
+                        onClick={() => {
+                          setIsConfirmedQuery(true);
+                          setPagination({
+                            ...pagination,
+                            currentPage: 1,
+                          });
+                          setQuery({
+                            ...query,
+                            primarySortBy: "totalOrders",
+                            primarySortDir: "asc",
+                          });
+                        }}
+                      >
+                        <IconSortDescending
+                          style={{ width: "70%", height: "70%" }}
+                          stroke={2}
+                          color="#70B1ED"
+                        />
+                      </ActionIcon>
+                    )}
+                  {query?.primarySortBy === "totalOrders" &&
+                    query?.primarySortDir === "asc" && (
+                      <ActionIcon
+                        variant="filled"
+                        aria-label="Settings"
+                        color="transparent"
+                        onClick={() => {
+                          setIsConfirmedQuery(true);
+                          setPagination({
+                            ...pagination,
+                            currentPage: 1,
+                          });
+                          setQuery({
+                            ...query,
+                            primarySortBy: null,
+                            primarySortDir: null,
+                          });
+                        }}
+                      >
+                        <IconSortAscending
+                          style={{
+                            width: "70%",
+                            height: "70%",
+                            fontWeight: "bold",
+                          }}
+                          stroke={2}
+                          color="#70B1ED"
+                        />
+                      </ActionIcon>
+                    )}
+                </Grid.Col>
+              </Grid>
             </Group>
           );
         },
@@ -1636,6 +1658,13 @@ const SellerboardTable = ({
         </Button>
       );
     },
+    mantineTableContainerProps: {
+      style: {
+        maxHeight: "500px",
+      },
+    },
+    enableStickyHeader: true,
+    enableStickyFooter: true,
   });
 
   return !isEmpty(tableData) ? <MantineReactTable table={table} /> : null;

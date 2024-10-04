@@ -451,21 +451,19 @@ const RankingTable = ({
                     padding: "0",
                   }}
                 >
-                  <LazyLoad height={50} once={true}>
-                    <Image
-                      src={image || "/images/content/not_found_2.jpg"}
-                      width="100%"
-                      height="100%"
-                      style={{
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        setSelectedProduct(row.original);
-                        openPreviewImage();
-                      }}
-                      fit="contain"
-                    />
-                  </LazyLoad>
+                  <Image
+                    src={image || "/images/content/not_found_2.jpg"}
+                    width="100%"
+                    height="100%"
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setSelectedProduct(row.original);
+                      openPreviewImage();
+                    }}
+                    fit="contain"
+                  />
                 </Grid.Col>
                 <Grid.Col span={6}>
                   <Grid>
@@ -1030,6 +1028,14 @@ const RankingTable = ({
           Load More
         </Button>
       );
+    },
+    enableStickyHeader: true,
+    enableStickyFooter: true,
+    mantineTableContainerProps: {
+      style: {
+        maxHeight: "550px",
+        overflowY: "auto", // Ensure the container is scrollable
+      },
     },
   });
 

@@ -173,20 +173,18 @@ const SurvivalModeTable = ({
               <Grid>
                 <Grid.Col span={4}>
                   <Tooltip label={url}>
-                    <LazyLoad height={50} once={true}>
-                      <Image
-                        src={image || "/images/content/not_found_2.jpg"}
-                        width="100%"
-                        height="50px"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          window.open(url, "_blank");
-                        }}
-                        fit="contain"
-                      />
-                    </LazyLoad>
+                    <Image
+                      src={image || "/images/content/not_found_2.jpg"}
+                      width="100%"
+                      height="50px"
+                      style={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        window.open(url, "_blank");
+                      }}
+                      fit="contain"
+                    />
                   </Tooltip>
                 </Grid.Col>
                 <Grid.Col span={8}>
@@ -511,6 +509,13 @@ const SurvivalModeTable = ({
           Load More
         </Button>
       );
+    },
+    enableStickyHeader: true,
+    enableStickyFooter: true,
+    mantineTableContainerProps: {
+      style: {
+        maxHeight: "550px",
+      },
     },
   });
 

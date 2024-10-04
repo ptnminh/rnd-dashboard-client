@@ -360,20 +360,18 @@ const OptimizedTableMode = ({
                   }}
                 >
                   <Tooltip label={productLink}>
-                    <LazyLoad height={200} once={true}>
-                      <Image
-                        src={imageLink || "/images/content/not_found_2.jpg"}
-                        width="100%"
-                        height="100%"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          window.open(productLink, "_blank");
-                        }}
-                        fit="contain"
-                      />
-                    </LazyLoad>
+                    <Image
+                      src={imageLink || "/images/content/not_found_2.jpg"}
+                      width="100%"
+                      height="100%"
+                      style={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        window.open(productLink, "_blank");
+                      }}
+                      fit="contain"
+                    />
                   </Tooltip>
                 </Grid.Col>
                 <Grid.Col span={6}>
@@ -463,8 +461,8 @@ const OptimizedTableMode = ({
       },
       {
         accessorKey: "createdDate",
-        size: 150,
-        maxSize: 150,
+        size: 100,
+        maxSize: 100,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -483,91 +481,120 @@ const OptimizedTableMode = ({
         Header: () => {
           return (
             <Group gap={5}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "bold",
-                }}
-              >
-                Lifetime Order
-              </Text>
-              {(!query?.sortBy || query?.sortBy !== "totalOrdersLifetime") && (
-                <ActionIcon
-                  aria-label="Settings"
-                  variant="default"
-                  size="sm"
+              <Grid>
+                <Grid.Col
+                  span={8}
                   style={{
-                    background: "none",
-                    border: "none",
-                  }}
-                  onClick={() => {
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                    setQuery({
-                      ...query,
-                      sortBy: "totalOrdersLifetime",
-                      sortDir: "desc",
-                    });
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <IconArrowsSort
-                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
-                    stroke={2}
-                    color="#ffffff"
-                  />
-                </ActionIcon>
-              )}
-
-              {query?.sortBy === "totalOrdersLifetime" &&
-                query?.sortDir === "desc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    size="sm"
-                    onClick={() => {
-                      setQuery({
-                        ...query,
-                        sortBy: "totalOrdersLifetime",
-                        sortDir: "asc",
-                      });
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      width: "100%",
+                      wordBreak: "break-word", // Break long words
+                      whiteSpace: "normal", // Allow text to wrap
+                      overflowWrap: "break-word", // Break long words
                     }}
                   >
-                    <IconSortDescending
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
-              {query?.sortBy === "totalOrdersLifetime" &&
-                query?.sortDir === "asc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    size="sm"
-                    color="transparent"
-                    onClick={() => {
-                      setQuery({
-                        ...query,
-                        sortBy: null,
-                        sortDir: null,
-                      });
-                    }}
-                  >
-                    <IconSortAscending
+                    Lifetime Order
+                  </Text>
+                </Grid.Col>
+                <Grid.Col
+                  span={4}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  {(!query?.sortBy ||
+                    query?.sortBy !== "totalOrdersLifetime") && (
+                    <ActionIcon
+                      aria-label="Settings"
+                      variant="default"
+                      size="sm"
                       style={{
-                        width: "70%",
-                        height: "70%",
-                        fontWeight: "bold",
+                        background: "none",
+                        border: "none",
                       }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
+                      onClick={() => {
+                        setPagination({
+                          ...pagination,
+                          currentPage: 1,
+                        });
+                        setQuery({
+                          ...query,
+                          sortBy: "totalOrdersLifetime",
+                          sortDir: "desc",
+                        });
+                      }}
+                    >
+                      <IconArrowsSort
+                        style={{
+                          width: "60%",
+                          height: "60%",
+                          fontWeight: "bold",
+                        }}
+                        stroke={2}
+                        color="#ffffff"
+                      />
+                    </ActionIcon>
+                  )}
+
+                  {query?.sortBy === "totalOrdersLifetime" &&
+                    query?.sortDir === "desc" && (
+                      <ActionIcon
+                        variant="filled"
+                        aria-label="Settings"
+                        color="transparent"
+                        size="sm"
+                        onClick={() => {
+                          setQuery({
+                            ...query,
+                            sortBy: "totalOrdersLifetime",
+                            sortDir: "asc",
+                          });
+                        }}
+                      >
+                        <IconSortDescending
+                          style={{ width: "70%", height: "70%" }}
+                          stroke={2}
+                          color="#70B1ED"
+                        />
+                      </ActionIcon>
+                    )}
+                  {query?.sortBy === "totalOrdersLifetime" &&
+                    query?.sortDir === "asc" && (
+                      <ActionIcon
+                        variant="filled"
+                        aria-label="Settings"
+                        size="sm"
+                        color="transparent"
+                        onClick={() => {
+                          setQuery({
+                            ...query,
+                            sortBy: null,
+                            sortDir: null,
+                          });
+                        }}
+                      >
+                        <IconSortAscending
+                          style={{
+                            width: "70%",
+                            height: "70%",
+                            fontWeight: "bold",
+                          }}
+                          stroke={2}
+                          color="#70B1ED"
+                        />
+                      </ActionIcon>
+                    )}
+                </Grid.Col>
+              </Grid>
             </Group>
           );
         },
@@ -957,7 +984,7 @@ const OptimizedTableMode = ({
                         ...payload.optimizedInfo,
                         seedingPost:
                           OPTIMIZED_INFO_STATUS?.SEEDING_POST?.NOT_CHECKED,
-                      }
+                      },
                     });
                   }}
                 />
@@ -994,7 +1021,7 @@ const OptimizedTableMode = ({
                         ...payload.optimizedInfo,
                         seedingPost:
                           OPTIMIZED_INFO_STATUS?.SEEDING_POST?.CHECKED,
-                      }
+                      },
                     });
                   }}
                 />
@@ -1100,7 +1127,7 @@ const OptimizedTableMode = ({
                         ...payload.optimizedInfo,
                         reviewStore:
                           OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.NOT_CHECKED,
-                      }
+                      },
                     });
                   }}
                 />
@@ -1137,7 +1164,7 @@ const OptimizedTableMode = ({
                         ...payload.optimizedInfo,
                         reviewStore:
                           OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.CHECKED,
-                      }
+                      },
                     });
                   }}
                 />
@@ -1239,9 +1266,8 @@ const OptimizedTableMode = ({
                     handleUpdatePODDashboard(uid, {
                       optimizedInfo: {
                         ...payload.optimizedInfo,
-                        custom:
-                          OPTIMIZED_INFO_STATUS?.CUSTOM?.NOT_CHECKED,
-                      }
+                        custom: OPTIMIZED_INFO_STATUS?.CUSTOM?.NOT_CHECKED,
+                      },
                     });
                   }}
                 />
@@ -1275,9 +1301,8 @@ const OptimizedTableMode = ({
                     handleUpdatePODDashboard(uid, {
                       optimizedInfo: {
                         ...payload.optimizedInfo,
-                        custom:
-                          OPTIMIZED_INFO_STATUS?.CUSTOM?.CHECKED,
-                      }
+                        custom: OPTIMIZED_INFO_STATUS?.CUSTOM?.CHECKED,
+                      },
                     });
                   }}
                 />
@@ -1384,7 +1409,7 @@ const OptimizedTableMode = ({
                         ...payload.optimizedInfo,
                         targetAndBudget:
                           OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET?.NOT_CHECKED,
-                      }
+                      },
                     });
                   }}
                 />
@@ -1421,7 +1446,7 @@ const OptimizedTableMode = ({
                         ...payload.optimizedInfo,
                         targetAndBudget:
                           OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET?.CHECKED,
-                      }
+                      },
                     });
                   }}
                 />
@@ -1527,7 +1552,7 @@ const OptimizedTableMode = ({
                         ...payload.optimizedInfo,
                         requestVideo:
                           OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.NOT_CHECKED,
-                      }
+                      },
                     });
                   }}
                 />
@@ -1564,7 +1589,7 @@ const OptimizedTableMode = ({
                         ...payload.optimizedInfo,
                         requestVideo:
                           OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.CHECKED,
-                      }
+                      },
                     });
                   }}
                 />
@@ -1670,7 +1695,7 @@ const OptimizedTableMode = ({
                         ...payload.optimizedInfo,
                         ascAndAPS:
                           OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.NOT_CHECKED,
-                      }
+                      },
                     });
                   }}
                 />
@@ -1705,9 +1730,8 @@ const OptimizedTableMode = ({
                     handleUpdatePODDashboard(uid, {
                       optimizedInfo: {
                         ...payload.optimizedInfo,
-                        ascAndAPS:
-                          OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.CHECKED,
-                      }
+                        ascAndAPS: OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.CHECKED,
+                      },
                     });
                   }}
                 />
@@ -1811,9 +1835,8 @@ const OptimizedTableMode = ({
                     handleUpdatePODDashboard(uid, {
                       optimizedInfo: {
                         ...payload.optimizedInfo,
-                        strategy:
-                          OPTIMIZED_INFO_STATUS?.STRATEGY?.NOT_CHECKED,
-                      }
+                        strategy: OPTIMIZED_INFO_STATUS?.STRATEGY?.NOT_CHECKED,
+                      },
                     });
                   }}
                 />
@@ -1847,9 +1870,8 @@ const OptimizedTableMode = ({
                     handleUpdatePODDashboard(uid, {
                       optimizedInfo: {
                         ...payload.optimizedInfo,
-                        strategy:
-                          OPTIMIZED_INFO_STATUS?.STRATEGY?.CHECKED,
-                      }
+                        strategy: OPTIMIZED_INFO_STATUS?.STRATEGY?.CHECKED,
+                      },
                     });
                   }}
                 />
@@ -1953,6 +1975,13 @@ const OptimizedTableMode = ({
           Load More
         </Button>
       );
+    },
+    enableStickyHeader: true,
+    enableStickyFooter: true,
+    mantineTableContainerProps: {
+      style: {
+        maxHeight: "550px",
+      },
     },
   });
 
