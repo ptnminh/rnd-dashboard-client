@@ -1992,7 +1992,7 @@ const OptimizedTableMode = ({
     enableStickyFooter: true,
     mantineTableContainerProps: {
       style: {
-        maxHeight: "66vh", // 70% of the viewport height,
+        maxHeight: "65.5vh",
       },
       ref: tableContainerRef, // Attach ref to the scrollable container
     },

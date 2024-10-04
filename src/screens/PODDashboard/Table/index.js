@@ -1162,7 +1162,7 @@ const PODTableBoard = ({
     enableStickyFooter: true,
     mantineTableContainerProps: {
       style: {
-        maxHeight: "68vh",
+        maxHeight: "65.5vh",
       },
       ref: tableContainerRef, // Attach ref to the scrollable container
     },
