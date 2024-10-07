@@ -12,14 +12,13 @@ import {
 import { modals } from "@mantine/modals";
 import Checkbox from "../../../components/Checkbox";
 
-import { filter, find, includes, isEmpty, keys, map, set } from "lodash";
+import { filter, find, includes, map } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
 import {
   IconCheck,
   IconX,
-  IconDeviceFloppy,
   IconBan,
 } from "@tabler/icons-react";
 import {
