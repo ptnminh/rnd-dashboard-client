@@ -15,9 +15,8 @@ const useStopWatch = (startTime, endTime = null) => {
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
       setTime(
-        `${hours < 10 ? `0${hours}` : hours}:${
-          minutes < 10 ? `0${minutes}` : minutes
-        }:${seconds < 10 ? `0${seconds}` : seconds}`
+        `${hours < 10 ? `0${hours}` : hours}:${minutes < 10 ? `0${minutes}` : minutes
+        }`
       );
     };
 
