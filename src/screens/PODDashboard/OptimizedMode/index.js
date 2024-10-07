@@ -656,16 +656,16 @@ const OptimizedTableMode = ({
             }}>
               <Text color={
                 orders?.isEligible ? "#3c7c36" : ""
-              } fw="bold" size="sm">Orders: {orders.value || 0}</Text>
+              } fw="bold" size="sm">Orders: {orders?.value || 0}</Text>
               <Text color={
                 cpc?.isEligible ? "#3c7c36" : ""
-              } fw="bold" size="sm">CPC: {cpc.value || 0}</Text>
+              } fw="bold" size="sm">CPC: {cpc?.value || 0}</Text>
               <Text color={
                 cpm?.isEligible ? "#3c7c36" : ""
-              } fw="bold" size="sm">CPM: {cpm.value || 0}</Text>
+              } fw="bold" size="sm">CPM: {cpm?.value || 0}</Text>
               <Text color={
                 adsRev?.isEligible ? "#3c7c36" : ""
-              } fw="bold" size="sm" >AdsRev: {adsRev.value || 0}</Text>
+              } fw="bold" size="sm" >AdsRev: {adsRev?.value || 0}</Text>
             </Group>
           )
         },
