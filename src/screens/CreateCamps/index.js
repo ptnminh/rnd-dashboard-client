@@ -3,7 +3,7 @@ import styles from "./CreateCamps.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Details from "./Details";
-import { filter, map, mapKeys, toLower, toNumber } from "lodash";
+import { filter, map, mapKeys, toLower, toNumber, uniqBy } from "lodash";
 import { useDisclosure } from "@mantine/hooks";
 import { IconCircleCheck } from "@tabler/icons-react";
 import {
@@ -34,6 +34,25 @@ import Clipart from "./Clipart";
 import Niche from "./Niche";
 import { accountServices } from "../../services/accounts";
 import PreviewCamps from "./PreviewCamps";
+const removeDuplicateCampaigns = (data) => {
+  const seenCampaignNames = new Set();
+
+  return data.map((item) => {
+    const uniqueCampaigns = item.campaigns.filter((campaign) => {
+      if (seenCampaignNames.has(campaign.campaignName)) {
+        return false;
+      } else {
+        seenCampaignNames.add(campaign.campaignName);
+        return true;
+      }
+    });
+
+    return {
+      ...item,
+      campaigns: uniqueCampaigns,
+    };
+  });
+};
 
 const CreateCampsScreen = () => {
   const navigate = useNavigate();
@@ -156,7 +175,8 @@ const CreateCampsScreen = () => {
       page,
       limit: -1,
     });
-    setSampleCampaigns(data);
+
+    setSampleCampaigns(removeDuplicateCampaigns(data));
   };
   const fetchAccounts = async () => {
     const { data } = await accountServices.fetchAllAccounts({
@@ -399,9 +419,9 @@ const CreateCampsScreen = () => {
                         href={
                           selectedSKU?.briefType === BRIEF_TYPES[5]
                             ? `https://${selectedSKU.designLinkRef.replace(
-                                /^(https?:\/\/)?/,
-                                ""
-                              )}`
+                              /^(https?:\/\/)?/,
+                              ""
+                            )}`
                             : selectedSKU?.designLinkRef
                         }
                         target="_blank"
@@ -513,7 +533,7 @@ const CreateCampsScreen = () => {
                   }
                 >
                   {selectedSKU?.briefType === BRIEF_TYPES[4] ||
-                  selectedSKU?.briefType === BRIEF_TYPES[5] ? (
+                    selectedSKU?.briefType === BRIEF_TYPES[5] ? (
                     <List.Item>
                       Product Base: {""}
                       <span>
@@ -531,7 +551,7 @@ const CreateCampsScreen = () => {
                         {
                           selectedSKU?.[
                             CONVERT_BRIEF_TYPE_TO_OBJECT_NAME[
-                              selectedSKU?.briefType
+                            selectedSKU?.briefType
                             ]
                           ]?.name
                         }
