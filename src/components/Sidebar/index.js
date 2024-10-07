@@ -304,10 +304,10 @@ const Sidebar = ({ className, onClose, openedToggle, toggle }) => {
             style={{
               position: "fixed",
               left: 0,
-              bottom: "10px",
+              bottom: "-16px",
               cursor: "pointer",
               width: "290px",
-              padding: "24px",
+              padding: "20px",
             }}
           >
             <Group

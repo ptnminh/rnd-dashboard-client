@@ -112,7 +112,7 @@ export const PATH_NAMES = {
     },
   },
   MKT: {
-    title: "6. MKT",
+    title: "7. MKT",
     children: {
       LIST_SKU: {
         title: "1. List SKU",
@@ -172,11 +172,11 @@ export const PATH_NAMES = {
     },
   },
   USER: {
-    title: "7. User",
+    title: "8. User",
     url: "/users",
   },
   DASHBOARD: {
-    title: "8. Dashboard",
+    title: "9. Dashboard",
     url: "/dashboard",
     children: {
       RECHARTS: {
@@ -206,6 +206,20 @@ export const PATH_NAMES = {
       POD_AMZ: {
         title: "1. POD-Dashboard",
         url: "/dashboard/pod",
+      },
+    },
+  },
+  VIDEO: {
+    title: "6. Request Video",
+    url: "/video",
+    children: {
+      SAMPLE: {
+        title: "1. Sample",
+        url: "/request-video/sample",
+      },
+      VIDEO: {
+        title: "2. Video",
+        url: "/request-video/video",
       },
     },
   },
@@ -410,6 +424,29 @@ export const NAVIGATION = [
       //   arrowDown: true,
       //   permissions: ["read:epm_setting"],
       // },
+    ],
+  },
+  {
+    title: PATH_NAMES.VIDEO.title,
+    icon: "diamond",
+    isParent: true,
+    pathname: "/video",
+    arrowDown: true,
+    permissions: ["read:video"],
+    turnOffActive: true,
+    dropdown: [
+      {
+        title: PATH_NAMES.VIDEO.children.SAMPLE.title,
+        url: PATH_NAMES.VIDEO.children.SAMPLE.url,
+        arrowDown: true,
+        permissions: ["read:video"],
+      },
+      {
+        title: PATH_NAMES.VIDEO.children.VIDEO.title,
+        url: PATH_NAMES.VIDEO.children.VIDEO.url,
+        arrowDown: true,
+        permissions: ["read:video"],
+      },
     ],
   },
   {

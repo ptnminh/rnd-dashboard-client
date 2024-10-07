@@ -47,6 +47,7 @@ import ScaleMixMatch from "./ScaleMixMatch";
 import ScaleClipart from "./ScaleCliparts";
 import ScaleNiche from "./Niche";
 import ModalEditNoteEPM from "./ModalEditNoteEPM";
+import Optimized from "./Optimized";
 
 const DesignerScreens = () => {
   const navigate = useNavigate();
@@ -203,12 +204,34 @@ const DesignerScreens = () => {
       setLoadingUpdateDesignLink(false);
       return;
     }
+    let realStatus = null;
+    switch (selectedSKU?.briefType) {
+      case BRIEF_TYPES[6]:
+        if (selectedSKU?.status === STATUS.BRIEF_CREATED) {
+          realStatus = STATUS.OPTIMIZED_LISTING_DESIGNED;
+        }
+        break;
+      case BRIEF_TYPES[7]:
+        if (selectedSKU?.status === STATUS.BRIEF_CREATED) {
+          realStatus = STATUS.OPTIMIZED_ADS_DESIGNED;
+        }
+        break;
+      case BRIEF_TYPES[8]:
+        if (selectedSKU?.status === STATUS.BRIEF_CREATED) {
+          realStatus = STATUS.DESIGNED;
+        }
+        break;
+      default:
+        realStatus = null;
+        break;
+    }
     if (linkDesign) {
       const updateResponse = await rndServices.updateBriefDesign({
         uid,
         data: {
           linkDesign,
           status: STATUS.DESIGNED,
+          ...(realStatus && { status: realStatus }),
         },
       });
       if (updateResponse) {
@@ -358,7 +381,10 @@ const DesignerScreens = () => {
         selectedSKU?.briefType !== BRIEF_TYPES[2] &&
         selectedSKU?.briefType !== BRIEF_TYPES[3] &&
         selectedSKU?.briefType !== BRIEF_TYPES[4] &&
-        selectedSKU?.briefType !== BRIEF_TYPES[5] && (
+        selectedSKU?.briefType !== BRIEF_TYPES[5] &&
+        selectedSKU?.briefType !== BRIEF_TYPES[6] &&
+        selectedSKU?.briefType !== BRIEF_TYPES[7] &&
+        selectedSKU?.briefType !== BRIEF_TYPES[8] && (
           <Modal
             opened={opened}
             onClose={close}
@@ -892,6 +918,24 @@ const DesignerScreens = () => {
           setDesignerNote={setDesignerNote}
         />
       )}
+      {opened &&
+        selectedSKU &&
+        (selectedSKU?.briefType === BRIEF_TYPES[6] ||
+          selectedSKU?.briefType === BRIEF_TYPES[7] ||
+          selectedSKU?.briefType === BRIEF_TYPES[8]) && (
+          <Optimized
+            opened={opened}
+            close={close}
+            selectedSKU={selectedSKU}
+            linkDesign={linkDesign}
+            loadingUpdateDesignLink={loadingUpdateDesignLink}
+            setLinkDesign={setLinkDesign}
+            handleUpdateLinkDesign={handleUpdateLinkDesign}
+            setTrigger={setTrigger}
+            designerNote={designerNote}
+            setDesignerNote={setDesignerNote}
+          />
+        )}
       {selectedSKU && openedNoteForEPM && (
         <ModalEditNoteEPM
           opened={openedNoteForEPM}

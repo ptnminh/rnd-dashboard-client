@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import {
   Text,
@@ -11,17 +11,17 @@ import {
   Group,
   MultiSelect,
   Select,
+  TextInput,
+  Affix,
+  Transition,
+  rem,
 } from "@mantine/core";
 import { find, map, flatten, uniq } from "lodash";
 import { IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 
-import {
-  CONVERT_NUMBER_TO_STATUS,
-  CONVERT_STATUS_TO_NUMBER,
-} from "../../../utils";
-import { IconCalendarWeek, IconTarget } from "@tabler/icons-react";
-import LazyLoad from "react-lazyload";
+import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
+import { IconCalendarWeek, IconTarget, IconArrowUp } from "@tabler/icons-react";
 import moment from "moment-timezone";
 import { DateRangePicker } from "rsuite";
 
@@ -172,20 +172,18 @@ const SurvivalModeTable = ({
               <Grid>
                 <Grid.Col span={4}>
                   <Tooltip label={url}>
-                    <LazyLoad height={50} once={true}>
-                      <Image
-                        src={image || "/images/content/not_found_2.jpg"}
-                        width="100%"
-                        height="50px"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          window.open(url, "_blank");
-                        }}
-                        fit="contain"
-                      />
-                    </LazyLoad>
+                    <Image
+                      src={image || "/images/content/not_found_2.jpg"}
+                      width="100%"
+                      height="50px"
+                      style={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        window.open(url, "_blank");
+                      }}
+                      fit="contain"
+                    />
                   </Tooltip>
                 </Grid.Col>
                 <Grid.Col span={8}>
@@ -345,7 +343,27 @@ const SurvivalModeTable = ({
     ],
     [customColumns, data]
   );
+  const Label = (props) => {
+    return (
+      <label
+        style={{
+          display: "block",
+          marginTop: 10,
+          fontSize: "12px",
+          fontWeight: "bold",
+        }}
+        {...props}
+      />
+    );
+  };
+  const tableContainerRef = useRef(null); // Create a ref for the scrollable container
 
+  // Function to scroll to the top of the table container
+  const scrollToTop = () => {
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
   const table = useMantineReactTable({
     columns,
     data,
@@ -421,6 +439,7 @@ const SurvivalModeTable = ({
                 });
               }}
             />
+
             <Button
               loading={loading}
               onClick={() => {
@@ -496,6 +515,11 @@ const SurvivalModeTable = ({
         </Button>
       );
     },
+    enableStickyHeader: true,
+    enableStickyFooter: true,
+    mantineTableContainerProps: {
+      ref: tableContainerRef, // Attach ref to the scrollable container
+    },
   });
 
   return (
@@ -507,6 +531,21 @@ const SurvivalModeTable = ({
       }}
     >
       <MantineReactTable table={table} />
+      <Affix position={{ bottom: 20, right: 20 }}>
+        <Transition mounted={true}>
+          {(transitionStyles) => (
+            <Button
+              leftSection={
+                <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
+              }
+              style={transitionStyles}
+              onClick={scrollToTop} // Call the scroll function on click
+            >
+              Scroll to top
+            </Button>
+          )}
+        </Transition>
+      </Affix>
     </div>
   );
 };

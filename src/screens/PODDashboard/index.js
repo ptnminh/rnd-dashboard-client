@@ -22,15 +22,19 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { dashboardServices } from "../../services";
 import Table from "./Table";
 import {
+  filter,
+  find,
   includes,
   isEmpty,
   keys,
   map,
+  mapValues,
   omit,
   orderBy,
   toLower,
   toNumber,
   uniq,
+  values,
 } from "lodash";
 import moment from "moment-timezone";
 import { useWindowScroll } from "@mantine/hooks";
@@ -40,6 +44,8 @@ import {
   CONVERT_STATUS_TO_NUMBER,
   VALUES,
 } from "../../utils";
+import OptimizedTableMode from "./OptimizedMode";
+import { OPTIMIZED_INFO_STATUS_NUMBER } from "./OptimizedMode/optimizedInfoStatus";
 
 const TABS_VIEW = {
   Date: "Date",
@@ -57,6 +63,7 @@ const TARGET_DATES = {
 const TARGET_DATA = {
   ORDERS: "Orders",
   PROFIT: "Profit",
+  OPTIMIZED: "optimized",
 };
 
 const moveIdsToStart = (array, ids) => {
@@ -81,6 +88,7 @@ const PODDashboard = () => {
   const [isLoadmore, setIsLoadmore] = useState(false);
   const [saleMetrics, setSaleMetrics] = useState([]);
   const initialPage = parseInt(queryParams.get("page") || "1", 10);
+  const [loadingUpdateOptimized, setLoadingUpdateOptimized] = useState(false);
   const [pagination, setPagination] = useState({
     currentPage: initialPage,
     totalPages: 1,
@@ -231,8 +239,51 @@ const PODDashboard = () => {
 
   const [listingDays, setListingDays] = useState("");
   const [adDaysNum, setAdDaysNum] = useState("30");
+  const [sku, setSku] = useState("");
 
   const [scroll, scrollTo] = useWindowScroll();
+  const handleSubmitSKUOptimized = async () => {
+    setLoadingUpdateOptimized(true);
+    const filterValidPayloads = map(
+      filter(saleMetrics, (x) => {
+        return includes(
+          values(x.optimizedInfo),
+          OPTIMIZED_INFO_STATUS_NUMBER?.CHECKED
+        );
+      }),
+      (metric) => {
+        return {
+          uid: metric.uid,
+          optimizedInfo: mapValues(metric?.optimizedInfo, (value) =>
+            value === OPTIMIZED_INFO_STATUS_NUMBER?.CHECKED
+              ? OPTIMIZED_INFO_STATUS_NUMBER?.DONE
+              : value
+          ),
+        };
+      }
+    );
+    if (!isEmpty(filterValidPayloads)) {
+      await dashboardServices.handleUpdatePODDashboardOptimizedInfo({
+        payloads: filterValidPayloads,
+      });
+    }
+    setSaleMetrics((prev) => {
+      return map(prev, (x) => {
+        const foundValidPayload = find(
+          filterValidPayloads,
+          (payload) => payload.uid === x.uid
+        );
+        if (foundValidPayload) {
+          return {
+            ...x,
+            optimizedInfo: foundValidPayload?.optimizedInfo,
+          };
+        }
+        return x;
+      });
+    });
+    setLoadingUpdateOptimized(false);
+  };
   return (
     <>
       <div>
@@ -241,6 +292,42 @@ const PODDashboard = () => {
           title="POD Dashboard"
           classTitle={cn("title-purple", styles.title)}
           classCardHead={cn(styles.head, { [styles.hidden]: visible })}
+          head={
+            <Group>
+              <Switch
+                checked={query?.view === TARGET_DATA.OPTIMIZED}
+                label="Mode - Optimize"
+                onChange={() => {
+                  setPagination({
+                    ...pagination,
+                    currentPage: 1,
+                  });
+                  setQuery({
+                    ...query,
+                    view:
+                      query?.view === TARGET_DATA.OPTIMIZED
+                        ? TARGET_DATA.ORDERS
+                        : TARGET_DATA.OPTIMIZED,
+                  });
+                }}
+                styles={{
+                  label: {
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                  },
+                }}
+              />
+              {query?.view === TARGET_DATA.OPTIMIZED && (
+                <Button
+                  color="green"
+                  onClick={handleSubmitSKUOptimized}
+                  loading={loadingUpdateOptimized}
+                >
+                  Đã báo đội ngũ
+                </Button>
+              )}
+            </Group>
+          }
         >
           <Grid
             style={{
@@ -298,6 +385,7 @@ const PODDashboard = () => {
                         >
                           <Tabs.Tab
                             value={TABS_VIEW.Date}
+                            disabled={query?.view === TARGET_DATA.OPTIMIZED}
                             styles={{
                               ...(activeTab === TABS_VIEW.Date && {
                                 tab: {
@@ -312,6 +400,7 @@ const PODDashboard = () => {
                             {TABS_VIEW.Date}
                           </Tabs.Tab>
                           <Tabs.Tab
+                            disabled={query?.view === TARGET_DATA.OPTIMIZED}
                             value={TABS_VIEW.Week}
                             styles={{
                               ...(activeTab === TABS_VIEW.Week && {
@@ -327,6 +416,7 @@ const PODDashboard = () => {
                             {TABS_VIEW.Week}
                           </Tabs.Tab>
                           <Tabs.Tab
+                            disabled={query?.view === TARGET_DATA.OPTIMIZED}
                             value={TABS_VIEW.Month}
                             styles={{
                               ...(activeTab === TABS_VIEW.Month && {
@@ -403,6 +493,9 @@ const PODDashboard = () => {
                                 }}
                               >
                                 <Radio
+                                  disabled={
+                                    query?.view === TARGET_DATA.OPTIMIZED
+                                  }
                                   styles={{
                                     input: {
                                       borderRadius: "50%",
@@ -412,6 +505,9 @@ const PODDashboard = () => {
                                   label={TARGET_DATES.ONE_DAY}
                                 />
                                 <Radio
+                                  disabled={
+                                    query?.view === TARGET_DATA.OPTIMIZED
+                                  }
                                   styles={{
                                     input: {
                                       borderRadius: "50%",
@@ -421,6 +517,9 @@ const PODDashboard = () => {
                                   label={TARGET_DATES.THREE_DAYS}
                                 />
                                 <Radio
+                                  disabled={
+                                    query?.view === TARGET_DATA.OPTIMIZED
+                                  }
                                   styles={{
                                     input: {
                                       borderRadius: "50%",
@@ -442,48 +541,50 @@ const PODDashboard = () => {
                             marginRight: "2px",
                             padding: "10px",
                             display: "flex",
-                            justifyContent: "end",
+                            justifyContent: "space-between",
                           }}
                         >
-                          <Text
-                            style={{
-                              marginRight: "10px",
-                              fontWeight: "bold",
-                              fontSize: "14px",
-                            }}
-                          >
-                            All SKU
-                          </Text>
-                          <Switch
-                            checked={query?.toggleTest}
-                            label="SKU Test"
-                            onChange={() => {
-                              setPagination({
-                                ...pagination,
-                                currentPage: 1,
-                              });
-                              if (query?.toggleTest) {
-                                setAdDaysNum("");
-                              } else {
-                                setAdDaysNum("30");
-                              }
-                              setQuery({
-                                ...query,
-                                toggleTest: !query.toggleTest,
-                                ...(query?.toggleTest
-                                  ? { adDays: null }
-                                  : {
-                                      adDays: 30,
-                                    }),
-                              });
-                            }}
-                            styles={{
-                              label: {
-                                fontSize: "14px",
+                          <Group>
+                            <Text
+                              style={{
+                                marginRight: "10px",
                                 fontWeight: "bold",
-                              },
-                            }}
-                          />
+                                fontSize: "14px",
+                              }}
+                            >
+                              All SKU
+                            </Text>
+                            <Switch
+                              checked={query?.toggleTest}
+                              label="SKU Test"
+                              onChange={() => {
+                                setPagination({
+                                  ...pagination,
+                                  currentPage: 1,
+                                });
+                                if (query?.toggleTest) {
+                                  setAdDaysNum("");
+                                } else {
+                                  setAdDaysNum("30");
+                                }
+                                setQuery({
+                                  ...query,
+                                  toggleTest: !query.toggleTest,
+                                  ...(query?.toggleTest
+                                    ? { adDays: null }
+                                    : {
+                                        adDays: 30,
+                                      }),
+                                });
+                              }}
+                              styles={{
+                                label: {
+                                  fontSize: "14px",
+                                  fontWeight: "bold",
+                                },
+                              }}
+                            />
+                          </Group>
                         </Grid.Col>
                         <Grid.Col
                           span={12}
@@ -492,7 +593,7 @@ const PODDashboard = () => {
                           }}
                         >
                           <Grid.Col
-                            span={8}
+                            span={10}
                             style={{
                               borderRadius: "10px",
                               width: "100%",
@@ -515,6 +616,51 @@ const PODDashboard = () => {
                                   display: "flex",
                                 }}
                               >
+                                <TextInput
+                                  label="SKU"
+                                  value={sku}
+                                  onChange={(event) => {
+                                    const value = event.target.value;
+                                    setSku(value);
+                                    if (!value) {
+                                      setPagination({
+                                        ...pagination,
+                                        currentPage: 1,
+                                      });
+                                      setQuery({
+                                        ...query,
+                                        sku: null,
+                                      });
+                                    }
+                                  }}
+                                  onKeyDown={(event) => {
+                                    const value = event.target.value;
+                                    if (event.key === "Enter" && value) {
+                                      setPagination({
+                                        ...pagination,
+                                        currentPage: 1,
+                                      });
+                                      setQuery({
+                                        ...query,
+                                        sku: value,
+                                      });
+                                    }
+                                  }}
+                                  styles={{
+                                    root: {
+                                      display: "flex",
+                                      alignItems: "center",
+                                      gap: "10px",
+                                    },
+                                    input: {
+                                      width: "130px",
+                                    },
+                                    label: {
+                                      fontSize: "12px",
+                                      fontWeight: "bold",
+                                    },
+                                  }}
+                                />
                                 <Select
                                   data={["BD1", "BD2", "BD3"]}
                                   placeholder="TEAM"
@@ -581,8 +727,59 @@ const PODDashboard = () => {
                                     },
                                   }}
                                 />
+                                <Switch
+                                  checked={query?.isChecked}
+                                  labelPosition="left"
+                                  label="Picked"
+                                  onChange={() => {
+                                    setPagination({
+                                      ...pagination,
+                                      currentPage: 1,
+                                    });
+                                    setQuery({
+                                      ...query,
+                                      isChecked: !query.isChecked,
+                                    });
+                                  }}
+                                  styles={{
+                                    root: {
+                                      display: "flex",
+                                      justifyContent: "end",
+                                      alignItems: "center",
+                                      height: "100%",
+                                    },
+                                    label: {
+                                      fontSize: "14px",
+                                      fontWeight: "bold",
+                                      marginRight: "10px",
+                                    },
+                                  }}
+                                />
                               </Group>
                               <Group>
+                                <Switch
+                                  checked={query?.minLifetimeOrders}
+                                  labelPosition="left"
+                                  label="Thỏa Optimized"
+                                  onChange={() => {
+                                    setPagination({
+                                      ...pagination,
+                                      currentPage: 1,
+                                    });
+                                    setQuery({
+                                      ...query,
+                                      minLifetimeOrders:
+                                        !query.minLifetimeOrders ? 3 : false,
+                                    });
+                                  }}
+                                  styles={{
+                                    label: {
+                                      fontSize: "14px",
+                                      fontWeight: "bold",
+                                    },
+                                  }}
+                                />
+
                                 <TextInput
                                   label="List"
                                   value={listingDays}
@@ -676,7 +873,13 @@ const PODDashboard = () => {
                               </Group>
                             </Flex>
                           </Grid.Col>
-                          <Grid.Col span={4}>
+                          <Grid.Col
+                            span={2}
+                            style={{
+                              padding: 0,
+                              marginLeft: 5,
+                            }}
+                          >
                             <Radio.Group
                               value={query.view}
                               label="SHOW DATA"
@@ -697,7 +900,7 @@ const PODDashboard = () => {
                                 label: {
                                   fontSize: "14px",
                                   fontWeight: "bold",
-                                  marginRight: "10px",
+                                  marginRight: "5px",
                                 },
                               }}
                             >
@@ -738,30 +941,32 @@ const PODDashboard = () => {
                   </div>
                 </Tabs.List>
                 <Tabs.Panel value={TABS_VIEW.Date}>
-                  {activeTab === TABS_VIEW.Date && !isEmpty(saleMetrics) && (
-                    <Table
-                      className={styles.Table}
-                      tableData={map(saleMetrics, (row) => {
-                        return {
-                          ...row,
-                          data: row?.sales,
-                        };
-                      })}
-                      setTableData={setSaleMetrics}
-                      query={query}
-                      setQuery={setQuery}
-                      loading={loadingFetchSaleMetrics}
-                      setTrigger={setTrigger}
-                      setSorting={setSorting}
-                      sorting={sorting}
-                      activeTab={activeTab}
-                      setPagination={setPagination}
-                      pagination={pagination}
-                      setIsLoadmore={setIsLoadmore}
-                      overridePODMetrics={overridePODMetrics}
-                      setOverridePODMetrics={setOverridePODMetrics}
-                    />
-                  )}
+                  {query?.view !== TARGET_DATA?.OPTIMIZED &&
+                    activeTab === TABS_VIEW.Date &&
+                    !isEmpty(saleMetrics) && (
+                      <Table
+                        className={styles.Table}
+                        tableData={map(saleMetrics, (row) => {
+                          return {
+                            ...row,
+                            data: row?.sales,
+                          };
+                        })}
+                        setTableData={setSaleMetrics}
+                        query={query}
+                        setQuery={setQuery}
+                        loading={loadingFetchSaleMetrics}
+                        setTrigger={setTrigger}
+                        setSorting={setSorting}
+                        sorting={sorting}
+                        activeTab={activeTab}
+                        setPagination={setPagination}
+                        pagination={pagination}
+                        setIsLoadmore={setIsLoadmore}
+                        overridePODMetrics={overridePODMetrics}
+                        setOverridePODMetrics={setOverridePODMetrics}
+                      />
+                    )}
                   {loadingFetchSaleMetrics && (
                     <div
                       style={{
@@ -778,27 +983,29 @@ const PODDashboard = () => {
                   )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Week}>
-                  {activeTab === TABS_VIEW.Week && !isEmpty(saleMetrics) && (
-                    <Table
-                      className={styles.Table}
-                      tableData={map(saleMetrics, (row) => {
-                        return {
-                          ...row,
-                          data: row?.sales || [],
-                        };
-                      })}
-                      query={query}
-                      setQuery={setQuery}
-                      loading={loadingFetchSaleMetrics}
-                      setTrigger={setTrigger}
-                      setSorting={setSorting}
-                      sorting={sorting}
-                      activeTab={activeTab}
-                      setPagination={setPagination}
-                      pagination={pagination}
-                      setIsLoadmore={setIsLoadmore}
-                    />
-                  )}
+                  {query?.view !== TARGET_DATA?.OPTIMIZED &&
+                    activeTab === TABS_VIEW.Week &&
+                    !isEmpty(saleMetrics) && (
+                      <Table
+                        className={styles.Table}
+                        tableData={map(saleMetrics, (row) => {
+                          return {
+                            ...row,
+                            data: row?.sales || [],
+                          };
+                        })}
+                        query={query}
+                        setQuery={setQuery}
+                        loading={loadingFetchSaleMetrics}
+                        setTrigger={setTrigger}
+                        setSorting={setSorting}
+                        sorting={sorting}
+                        activeTab={activeTab}
+                        setPagination={setPagination}
+                        pagination={pagination}
+                        setIsLoadmore={setIsLoadmore}
+                      />
+                    )}
                   {loadingFetchSaleMetrics && (
                     <div
                       style={{
@@ -815,27 +1022,29 @@ const PODDashboard = () => {
                   )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Month}>
-                  {activeTab === TABS_VIEW.Month && !isEmpty(saleMetrics) && (
-                    <Table
-                      className={styles.Table}
-                      tableData={map(saleMetrics, (row) => {
-                        return {
-                          ...row,
-                          data: row?.sales || [],
-                        };
-                      })}
-                      query={query}
-                      setQuery={setQuery}
-                      loading={loadingFetchSaleMetrics}
-                      setTrigger={setTrigger}
-                      setSorting={setSorting}
-                      sorting={sorting}
-                      activeTab={activeTab}
-                      setPagination={setPagination}
-                      pagination={pagination}
-                      setIsLoadmore={setIsLoadmore}
-                    />
-                  )}
+                  {query?.view !== TARGET_DATA?.OPTIMIZED &&
+                    activeTab === TABS_VIEW.Month &&
+                    !isEmpty(saleMetrics) && (
+                      <Table
+                        className={styles.Table}
+                        tableData={map(saleMetrics, (row) => {
+                          return {
+                            ...row,
+                            data: row?.sales || [],
+                          };
+                        })}
+                        query={query}
+                        setQuery={setQuery}
+                        loading={loadingFetchSaleMetrics}
+                        setTrigger={setTrigger}
+                        setSorting={setSorting}
+                        sorting={sorting}
+                        activeTab={activeTab}
+                        setPagination={setPagination}
+                        pagination={pagination}
+                        setIsLoadmore={setIsLoadmore}
+                      />
+                    )}
                   {loadingFetchSaleMetrics && (
                     <div
                       style={{
@@ -853,24 +1062,50 @@ const PODDashboard = () => {
                 </Tabs.Panel>
               </Tabs>
             </Grid.Col>
+            <Grid.Col span={12}>
+              {query?.view === TARGET_DATA?.OPTIMIZED &&
+                !isEmpty(saleMetrics) && (
+                  <OptimizedTableMode
+                    className={styles.Table}
+                    tableData={map(saleMetrics, (row) => {
+                      return {
+                        ...row,
+                        data: row?.sales,
+                      };
+                    })}
+                    setTableData={setSaleMetrics}
+                    query={query}
+                    setQuery={setQuery}
+                    loading={loadingFetchSaleMetrics}
+                    setTrigger={setTrigger}
+                    setSorting={setSorting}
+                    sorting={sorting}
+                    activeTab={activeTab}
+                    setPagination={setPagination}
+                    pagination={pagination}
+                    setIsLoadmore={setIsLoadmore}
+                    loadingUpdateOptimized={loadingUpdateOptimized}
+                    handleSubmitSKUOptimized={handleSubmitSKUOptimized}
+                  />
+                )}
+              {loadingFetchSaleMetrics && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                    marginTop: "20px",
+                  }}
+                >
+                  <Loader size={30} />
+                </div>
+              )}
+            </Grid.Col>
           </Grid>
         </Card>
       </div>
-      <Affix position={{ bottom: 20, right: 20 }}>
-        <Transition transition="slide-up" mounted={scroll.y > 0}>
-          {(transitionStyles) => (
-            <Button
-              leftSection={
-                <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
-              }
-              style={transitionStyles}
-              onClick={() => scrollTo({ y: 0 })}
-            >
-              Scroll to top
-            </Button>
-          )}
-        </Transition>
-      </Affix>
     </>
   );
 };

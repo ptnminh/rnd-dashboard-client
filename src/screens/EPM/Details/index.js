@@ -12,7 +12,7 @@ import {
 import { modals } from "@mantine/modals";
 import Checkbox from "../../../components/Checkbox";
 
-import { filter, find, includes, isEmpty, keys, map } from "lodash";
+import { filter, find, includes, isEmpty, map } from "lodash";
 import { IconSearch, IconFilterOff } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import { DateRangePicker } from "rsuite";
@@ -23,6 +23,7 @@ import {
   IconBan,
 } from "@tabler/icons-react";
 import {
+  BRIEF_TYPES,
   CHOOSE_BRIEF_TYPES,
   LOCAL_STORAGE_KEY,
   MEMBER_POSITIONS,
@@ -67,11 +68,12 @@ const BriefsTable = ({
     setData(briefs);
     setPayloads(briefs);
   }, [briefs]);
-  const handleUpdateStatus = async ({ uid, status }) => {
+  const handleUpdateStatus = async ({ uid, status, realStatus }) => {
     await rndServices.updateBriefListing({
       uid,
       data: {
         status: status === 2 ? 3 : 2,
+        ...(realStatus && { status: realStatus }),
       },
     });
     setTrigger(true);
@@ -523,20 +525,56 @@ const BriefsTable = ({
           return (
             <Button
               variant="filled"
-              color={foundBrief?.status === 3 ? "red" : "green"}
-              leftSection={
-                foundBrief?.status === 3 ? <IconBan /> : <IconCheck />
+              color={
+                [STATUS.LISTED, STATUS.OPTIMIZED_LISTING_EPM].includes(
+                  foundBrief?.status
+                )
+                  ? "red"
+                  : "green"
               }
-              disabled={foundBrief.status === 2 && !foundBrief?.linkProduct}
+              leftSection={
+                [STATUS.LISTED, STATUS.OPTIMIZED_LISTING_EPM].includes(
+                  foundBrief?.status
+                ) ? (
+                  <IconBan />
+                ) : (
+                  <IconCheck />
+                )
+              }
+              disabled={
+                (foundBrief.status === STATUS.DESIGNED ||
+                  foundBrief.status === STATUS.OPTIMIZED_LISTING_DESIGNED) &&
+                !foundBrief?.linkProduct
+              }
               onClick={() => {
+                let realStatus = null;
+                switch (foundBrief?.briefType) {
+                  case BRIEF_TYPES[6]:
+                    if (
+                      foundBrief?.status === STATUS.OPTIMIZED_LISTING_DESIGNED
+                    ) {
+                      realStatus = STATUS.OPTIMIZED_LISTING_EPM;
+                    } else {
+                      realStatus = STATUS.OPTIMIZED_LISTING_DESIGNED;
+                    }
+                    break;
+                  default:
+                    realStatus = null;
+                    break;
+                }
                 openUpdateStatusConfirmModal({
                   uid,
                   status: foundBrief?.status,
                   sku: foundBrief?.sku,
+                  realStatus,
                 });
               }}
             >
-              {foundBrief?.status === 3 ? "Undone" : "Done"}
+              {[STATUS.LISTED, STATUS.OPTIMIZED_LISTING_EPM].includes(
+                foundBrief?.status
+              )
+                ? "Undone"
+                : "Done"}
             </Button>
           );
         },
@@ -602,7 +640,7 @@ const BriefsTable = ({
     });
 
   // CONFIRM UPDATE STATUS
-  const openUpdateStatusConfirmModal = ({ uid, status, sku }) =>
+  const openUpdateStatusConfirmModal = ({ uid, status, sku, realStatus }) =>
     modals.openConfirmModal({
       title: "Confirm Modal",
       centered: true,
@@ -613,6 +651,7 @@ const BriefsTable = ({
         handleUpdateStatus({
           uid,
           status,
+          realStatus,
         }),
     });
 
@@ -919,13 +958,13 @@ const BriefsTable = ({
                 if (!value) {
                   setQuery({
                     ...query,
-                    status: [2, 3],
+                    status: [2, 3, 12, 13],
                     statusValue: null,
                   });
                 } else {
                   setQuery({
                     ...query,
-                    status: value === "Done" ? [3] : [2],
+                    status: value === "Done" ? [3, 13] : [2, 12],
                     statusValue: value,
                   });
                 }
@@ -934,7 +973,7 @@ const BriefsTable = ({
               onClear={() => {
                 setQuery({
                   ...query,
-                  status: [2, 3],
+                  status: [2, 3, 12, 13],
                   statusValue: null,
                 });
               }}
@@ -951,7 +990,7 @@ const BriefsTable = ({
                   rnd: null,
                   epm: null,
                   designer: null,
-                  status: [2, 3],
+                  status: [2, 3, 13],
                   sizeValue: null,
                   rndName: null,
                   designerName: null,

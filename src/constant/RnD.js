@@ -9,6 +9,9 @@ export const BRIEF_TYPES = [
   "New - Phủ Market",
   "Scale - Design",
   "New - Mix Match",
+  "Optimized Listing",
+  "Optimized Ads",
+  "Optimized Full Flow",
 ];
 export const CHOOSE_BRIEF_TYPES = [
   "Scale - Product Line",
@@ -17,6 +20,9 @@ export const CHOOSE_BRIEF_TYPES = [
   "Scale - Niche",
   "New - Phủ Market",
   "New - Mix Match",
+  "Optimized Listing",
+  "Optimized Ads",
+  "Optimized Full Flow",
 ];
 export const BRIEF_VALUES = ["Small", "Medium", "Big", "Super Big"];
 export const RND_SIZES = ["Small", "Small+", "Medium", "Big"];

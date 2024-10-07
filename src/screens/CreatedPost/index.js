@@ -44,7 +44,7 @@ const CreatedPost = ({
   setTriggerFetchBrief,
 }) => {
   const [query, setQuery] = useState({
-    status: [3],
+    status: [3, 22],
     postStatus: ["unfulfilled", "partial"],
     view: "mkt",
   });
@@ -319,7 +319,7 @@ const CreatedPost = ({
       rndTeam: null,
       rnd: null,
       designer: null,
-      status: [3],
+      status: [3, 22],
       sizeValue: null,
       rndName: null,
       designerName: null,
@@ -616,7 +616,7 @@ const CreatedPost = ({
                         rndTeam: null,
                         rnd: null,
                         designer: null,
-                        status: [3],
+                        status: [3, 22],
                         valueName: null,
                         value: null,
                         rndName: null,
@@ -891,7 +891,7 @@ const CreatedPost = ({
                         rndTeam: null,
                         rnd: null,
                         designer: null,
-                        status: [3],
+                        status: [3, 22],
                         sizeValue: null,
                         rndName: null,
                         designerName: null,

@@ -110,6 +110,32 @@ const FilterNormalModeHeader = ({
           alignItems: "end",
         }}
       >
+        <TextInput
+          label="SKU"
+          value={query?.sku || ""}
+          onChange={(event) => {
+            const value = event.target.value;
+            setQuery({
+              ...query,
+              sku: value,
+            });
+          }}
+          styles={{
+            root: {
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "start",
+              gap: "10px",
+            },
+            input: {
+              width: "100px",
+            },
+            label: {
+              fontSize: "12px",
+              fontWeight: "bold",
+            },
+          }}
+        />
         <MultiSelect
           placeholder="Store"
           data={AMZ_STORES}
@@ -1408,21 +1434,6 @@ const Sellerboard = () => {
           </Grid>
         </Card>
       </div>
-      <Affix position={{ bottom: 20, right: 20 }}>
-        <Transition transition="slide-up" mounted={scroll.y > 0}>
-          {(transitionStyles) => (
-            <Button
-              leftSection={
-                <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
-              }
-              style={transitionStyles}
-              onClick={() => scrollTo({ y: 0 })}
-            >
-              Scroll to top
-            </Button>
-          )}
-        </Transition>
-      </Affix>
     </>
   );
 };

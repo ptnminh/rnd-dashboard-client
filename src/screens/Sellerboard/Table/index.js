@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import {
   Text,
@@ -13,6 +13,9 @@ import {
   Select,
   TextInput,
   ActionIcon,
+  Affix,
+  Transition,
+  rem,
 } from "@mantine/core";
 import {
   find,
@@ -35,15 +38,14 @@ import {
   IconSortDescending,
   IconSortAscending,
   IconArrowsSort,
+  IconArrowUp,
 } from "@tabler/icons-react";
 import classes from "./MyTable.module.css";
 import {
   AMZ_DASHBOARD_STATUS,
-  AMZ_SORTING,
   AMZ_STORES,
   CONVERT_NUMBER_TO_AMZ_DASHBOARD_STATUS,
   CONVERT_STATUS_TO_AMZ_DASHBOARD_NUMBER,
-  FULFILLMENT_CHANNELS,
 } from "../../../constant";
 import moment from "moment-timezone";
 import {
@@ -507,20 +509,18 @@ const SellerboardTable = ({
               <Grid>
                 <Grid.Col span={6}>
                   <Tooltip label={url}>
-                    <LazyLoad height={100} once={true}>
-                      <Image
-                        src={image || "/images/content/not_found_2.jpg"}
-                        width="100%"
-                        height="100%"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          window.open(url, "_blank");
-                        }}
-                        fit="contain"
-                      />
-                    </LazyLoad>
+                    <Image
+                      src={image || "/images/content/not_found_2.jpg"}
+                      width="100%"
+                      height="100%"
+                      style={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        window.open(url, "_blank");
+                      }}
+                      fit="contain"
+                    />
                   </Tooltip>
                 </Grid.Col>
                 <Grid.Col span={6}>
@@ -621,8 +621,8 @@ const SellerboardTable = ({
       },
       {
         accessorKey: "createdDate",
-        size: 150,
-        maxSize: 150,
+        size: 100,
+        maxSize: 100,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -641,106 +641,130 @@ const SellerboardTable = ({
         Header: () => {
           return (
             <Group gap={5}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "bold",
-                }}
-              >
-                Lifetime Order
-              </Text>
-              {(!query?.primarySortBy ||
-                query?.primarySortBy === "ordersInRange" ||
-                query?.primarySortBy === "createdDate" ||
-                query?.primarySortBy === "testDate") && (
-                <ActionIcon
-                  aria-label="Settings"
-                  variant="default"
+              <Grid>
+                <Grid.Col
+                  span={8}
                   style={{
-                    background: "none",
-                    border: "none",
-                  }}
-                  onClick={() => {
-                    setIsConfirmedQuery(true);
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                    setQuery({
-                      ...query,
-                      primarySortBy: "totalOrders",
-                      primarySortDir: "desc",
-                    });
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <IconArrowsSort
+                  <Text
                     style={{
-                      width: "60%",
-                      height: "60%",
+                      fontSize: 14,
                       fontWeight: "bold",
-                    }}
-                    stroke={2}
-                    color="#ffffff"
-                  />
-                </ActionIcon>
-              )}
-
-              {query?.primarySortBy === "totalOrders" &&
-                query?.primarySortDir === "desc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    onClick={() => {
-                      setIsConfirmedQuery(true);
-                      setPagination({
-                        ...pagination,
-                        currentPage: 1,
-                      });
-                      setQuery({
-                        ...query,
-                        primarySortBy: "totalOrders",
-                        primarySortDir: "asc",
-                      });
+                      textAlign: "center",
+                      width: "100%",
+                      wordBreak: "break-word", // Break long words
+                      whiteSpace: "normal", // Allow text to wrap
+                      overflowWrap: "break-word", // Break long words
                     }}
                   >
-                    <IconSortDescending
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
-              {query?.primarySortBy === "totalOrders" &&
-                query?.primarySortDir === "asc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    onClick={() => {
-                      setIsConfirmedQuery(true);
-                      setPagination({
-                        ...pagination,
-                        currentPage: 1,
-                      });
-                      setQuery({
-                        ...query,
-                        primarySortBy: null,
-                        primarySortDir: null,
-                      });
-                    }}
-                  >
-                    <IconSortAscending
+                    Lifetime Order
+                  </Text>
+                </Grid.Col>
+                <Grid.Col
+                  span={4}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  {(!query?.primarySortBy ||
+                    query?.primarySortBy === "ordersInRange" ||
+                    query?.primarySortBy === "createdDate" ||
+                    query?.primarySortBy === "testDate") && (
+                    <ActionIcon
+                      aria-label="Settings"
+                      variant="default"
                       style={{
-                        width: "70%",
-                        height: "70%",
-                        fontWeight: "bold",
+                        background: "none",
+                        border: "none",
                       }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
+                      onClick={() => {
+                        setIsConfirmedQuery(true);
+                        setPagination({
+                          ...pagination,
+                          currentPage: 1,
+                        });
+                        setQuery({
+                          ...query,
+                          primarySortBy: "totalOrders",
+                          primarySortDir: "desc",
+                        });
+                      }}
+                    >
+                      <IconArrowsSort
+                        style={{
+                          width: "60%",
+                          height: "60%",
+                          fontWeight: "bold",
+                        }}
+                        stroke={2}
+                        color="#ffffff"
+                      />
+                    </ActionIcon>
+                  )}
+
+                  {query?.primarySortBy === "totalOrders" &&
+                    query?.primarySortDir === "desc" && (
+                      <ActionIcon
+                        variant="filled"
+                        aria-label="Settings"
+                        color="transparent"
+                        onClick={() => {
+                          setIsConfirmedQuery(true);
+                          setPagination({
+                            ...pagination,
+                            currentPage: 1,
+                          });
+                          setQuery({
+                            ...query,
+                            primarySortBy: "totalOrders",
+                            primarySortDir: "asc",
+                          });
+                        }}
+                      >
+                        <IconSortDescending
+                          style={{ width: "70%", height: "70%" }}
+                          stroke={2}
+                          color="#70B1ED"
+                        />
+                      </ActionIcon>
+                    )}
+                  {query?.primarySortBy === "totalOrders" &&
+                    query?.primarySortDir === "asc" && (
+                      <ActionIcon
+                        variant="filled"
+                        aria-label="Settings"
+                        color="transparent"
+                        onClick={() => {
+                          setIsConfirmedQuery(true);
+                          setPagination({
+                            ...pagination,
+                            currentPage: 1,
+                          });
+                          setQuery({
+                            ...query,
+                            primarySortBy: null,
+                            primarySortDir: null,
+                          });
+                        }}
+                      >
+                        <IconSortAscending
+                          style={{
+                            width: "70%",
+                            height: "70%",
+                            fontWeight: "bold",
+                          }}
+                          stroke={2}
+                          color="#70B1ED"
+                        />
+                      </ActionIcon>
+                    )}
+                </Grid.Col>
+              </Grid>
             </Group>
           );
         },
@@ -1103,6 +1127,14 @@ const SellerboardTable = ({
     [customColumns, data, summaryRow]
   );
 
+  const tableContainerRef = useRef(null); // Create a ref for the scrollable container
+
+  // Function to scroll to the top of the table container
+  const scrollToTop = () => {
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
   const table = useMantineReactTable({
     columns,
     data: tableDataWithSummary,
@@ -1146,6 +1178,32 @@ const SellerboardTable = ({
               alignItems: "end",
             }}
           >
+            <TextInput
+              label="SKU"
+              value={query?.sku || ""}
+              onChange={(event) => {
+                const value = event.target.value;
+                setQuery({
+                  ...query,
+                  sku: value,
+                });
+              }}
+              styles={{
+                root: {
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "start",
+                  gap: "10px",
+                },
+                input: {
+                  width: "100px",
+                },
+                label: {
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                },
+              }}
+            />
             <MultiSelect
               placeholder="Store"
               data={AMZ_STORES}
@@ -1610,9 +1668,33 @@ const SellerboardTable = ({
         </Button>
       );
     },
+    mantineTableContainerProps: {
+      ref: tableContainerRef, // Attach ref to the scrollable container
+    },
+    enableStickyHeader: true,
+    enableStickyFooter: true,
   });
 
-  return !isEmpty(tableData) ? <MantineReactTable table={table} /> : null;
+  return !isEmpty(tableData) ? (
+    <div>
+      <MantineReactTable table={table} />
+      <Affix position={{ bottom: 20, right: 20 }}>
+        <Transition mounted={true}>
+          {(transitionStyles) => (
+            <Button
+              leftSection={
+                <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
+              }
+              style={transitionStyles}
+              onClick={scrollToTop} // Call the scroll function on click
+            >
+              Scroll to top
+            </Button>
+          )}
+        </Transition>
+      </Affix>
+    </div>
+  ) : null;
 };
 
 export default SellerboardTable;

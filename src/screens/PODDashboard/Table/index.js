@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import {
   Text,
@@ -11,6 +11,10 @@ import {
   Group,
   Select,
   ActionIcon,
+  Checkbox,
+  Affix,
+  Transition,
+  rem,
 } from "@mantine/core";
 import {
   find,
@@ -30,9 +34,9 @@ import {
   IconSortAscending,
   IconSortDescending,
   IconArrowsSort,
+  IconArrowUp,
 } from "@tabler/icons-react";
 import { CONVERT_NUMBER_TO_STATUS } from "../../../utils";
-import LazyLoad from "react-lazyload";
 import {
   CONVERT_NUMBER_TO_POD_DASHBOARD_STATUS,
   CONVERT_STATUS_TO_POD_DASHBOARD_NUMBER,
@@ -51,7 +55,7 @@ const moveOverrideColorToStart = (array) => {
     return 0;
   });
 };
-const SellerboardTable = ({
+const PODTableBoard = ({
   tableData,
   query,
   loading,
@@ -214,6 +218,56 @@ const SellerboardTable = ({
   // UseMemo to construct final columns array
   const columns = useMemo(
     () => [
+      {
+        accessorKey: "checkbox",
+        header: "",
+        size: 50,
+        maxSize: 50,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableHeadCellProps: ({ row }) => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["checkbox-body-cells"],
+            rowSpan: row.id === `Total theo ${activeTab}` ? 3 : 1, // Row span for Total theo ${activeTab} row
+          };
+        },
+        Cell: ({ row }) => {
+          const { uid } = row.original;
+          const foundData = find(data, { uid });
+          if (row.id === `Total theo ${activeTab}`) {
+            return null;
+          }
+          return (
+            <Checkbox
+              size="lg"
+              checked={foundData?.isChecked}
+              onChange={() => {
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
+                      isChecked: !item.isChecked,
+                    };
+                  }
+                  return item;
+                });
+                setTableData(newData);
+                handleUpdatePODDashboard(uid, {
+                  isChecked: !foundData?.isChecked,
+                });
+              }}
+            />
+          );
+        },
+      },
       {
         accessorKey: "product",
         header: "Product",
@@ -466,20 +520,18 @@ const SellerboardTable = ({
                   }}
                 >
                   <Tooltip label={productLink}>
-                    <LazyLoad height={200} once={true}>
-                      <Image
-                        src={imageLink || "/images/content/not_found_2.jpg"}
-                        width="100%"
-                        height="100%"
-                        style={{
-                          cursor: "pointer",
-                        }}
-                        onClick={() => {
-                          window.open(productLink, "_blank");
-                        }}
-                        fit="contain"
-                      />
-                    </LazyLoad>
+                    <Image
+                      src={imageLink || "/images/content/not_found_2.jpg"}
+                      width="100%"
+                      height="100%"
+                      style={{
+                        cursor: "pointer",
+                      }}
+                      onClick={() => {
+                        window.open(productLink, "_blank");
+                      }}
+                      fit="contain"
+                    />
                   </Tooltip>
                 </Grid.Col>
                 <Grid.Col span={6}>
@@ -569,8 +621,8 @@ const SellerboardTable = ({
       },
       {
         accessorKey: "createdDate",
-        size: 150,
-        maxSize: 150,
+        size: 100,
+        maxSize: 100,
         enableEditing: false,
         enableSorting: false,
         mantineTableBodyCellProps: ({ row }) => {
@@ -589,91 +641,120 @@ const SellerboardTable = ({
         Header: () => {
           return (
             <Group gap={5}>
-              <Text
-                style={{
-                  fontSize: 14,
-                  fontWeight: "bold",
-                }}
-              >
-                Lifetime Order
-              </Text>
-              {(!query?.sortBy || query?.sortBy !== "totalOrdersLifetime") && (
-                <ActionIcon
-                  aria-label="Settings"
-                  variant="default"
-                  size="sm"
+              <Grid>
+                <Grid.Col
+                  span={8}
                   style={{
-                    background: "none",
-                    border: "none",
-                  }}
-                  onClick={() => {
-                    setPagination({
-                      ...pagination,
-                      currentPage: 1,
-                    });
-                    setQuery({
-                      ...query,
-                      sortBy: "totalOrdersLifetime",
-                      sortDir: "desc",
-                    });
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                   }}
                 >
-                  <IconArrowsSort
-                    style={{ width: "60%", height: "60%", fontWeight: "bold" }}
-                    stroke={2}
-                    color="#ffffff"
-                  />
-                </ActionIcon>
-              )}
-
-              {query?.sortBy === "totalOrdersLifetime" &&
-                query?.sortDir === "desc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    color="transparent"
-                    size="sm"
-                    onClick={() => {
-                      setQuery({
-                        ...query,
-                        sortBy: "totalOrdersLifetime",
-                        sortDir: "asc",
-                      });
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      width: "100%",
+                      wordBreak: "break-word", // Break long words
+                      whiteSpace: "normal", // Allow text to wrap
+                      overflowWrap: "break-word", // Break long words
                     }}
                   >
-                    <IconSortDescending
-                      style={{ width: "70%", height: "70%" }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
-              {query?.sortBy === "totalOrdersLifetime" &&
-                query?.sortDir === "asc" && (
-                  <ActionIcon
-                    variant="filled"
-                    aria-label="Settings"
-                    size="sm"
-                    color="transparent"
-                    onClick={() => {
-                      setQuery({
-                        ...query,
-                        sortBy: null,
-                        sortDir: null,
-                      });
-                    }}
-                  >
-                    <IconSortAscending
+                    Lifetime Order
+                  </Text>
+                </Grid.Col>
+                <Grid.Col
+                  span={4}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  {(!query?.sortBy ||
+                    query?.sortBy !== "totalOrdersLifetime") && (
+                    <ActionIcon
+                      aria-label="Settings"
+                      variant="default"
+                      size="sm"
                       style={{
-                        width: "70%",
-                        height: "70%",
-                        fontWeight: "bold",
+                        background: "none",
+                        border: "none",
                       }}
-                      stroke={2}
-                      color="#70B1ED"
-                    />
-                  </ActionIcon>
-                )}
+                      onClick={() => {
+                        setPagination({
+                          ...pagination,
+                          currentPage: 1,
+                        });
+                        setQuery({
+                          ...query,
+                          sortBy: "totalOrdersLifetime",
+                          sortDir: "desc",
+                        });
+                      }}
+                    >
+                      <IconArrowsSort
+                        style={{
+                          width: "60%",
+                          height: "60%",
+                          fontWeight: "bold",
+                        }}
+                        stroke={2}
+                        color="#ffffff"
+                      />
+                    </ActionIcon>
+                  )}
+
+                  {query?.sortBy === "totalOrdersLifetime" &&
+                    query?.sortDir === "desc" && (
+                      <ActionIcon
+                        variant="filled"
+                        aria-label="Settings"
+                        color="transparent"
+                        size="sm"
+                        onClick={() => {
+                          setQuery({
+                            ...query,
+                            sortBy: "totalOrdersLifetime",
+                            sortDir: "asc",
+                          });
+                        }}
+                      >
+                        <IconSortDescending
+                          style={{ width: "70%", height: "70%" }}
+                          stroke={2}
+                          color="#70B1ED"
+                        />
+                      </ActionIcon>
+                    )}
+                  {query?.sortBy === "totalOrdersLifetime" &&
+                    query?.sortDir === "asc" && (
+                      <ActionIcon
+                        variant="filled"
+                        aria-label="Settings"
+                        size="sm"
+                        color="transparent"
+                        onClick={() => {
+                          setQuery({
+                            ...query,
+                            sortBy: null,
+                            sortDir: null,
+                          });
+                        }}
+                      >
+                        <IconSortAscending
+                          style={{
+                            width: "70%",
+                            height: "70%",
+                            fontWeight: "bold",
+                          }}
+                          stroke={2}
+                          color="#70B1ED"
+                        />
+                      </ActionIcon>
+                    )}
+                </Grid.Col>
+              </Grid>
             </Group>
           );
         },
@@ -854,11 +935,11 @@ const SellerboardTable = ({
                       optimized: newFollow,
                       ...(newFollow === 1
                         ? {
-                          overrideColor: true,
-                        }
+                            overrideColor: true,
+                          }
                         : {
-                          overrideColor: false,
-                        }),
+                            overrideColor: false,
+                          }),
                     };
                   }
                   return item;
@@ -1013,6 +1094,14 @@ const SellerboardTable = ({
     ],
     [customColumns, data, summaryRow]
   );
+  const tableContainerRef = useRef(null); // Create a ref for the scrollable container
+
+  // Function to scroll to the top of the table container
+  const scrollToTop = () => {
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
 
   const table = useMantineReactTable({
     columns,
@@ -1026,9 +1115,6 @@ const SellerboardTable = ({
     enableTopToolbar: false,
     enableColumnActions: false,
     mantineTableHeadCellProps: { className: classes["head-cells"] },
-    mantineTableProps: {
-      className: classes["disable-hover"],
-    },
     enableDensityToggle: false,
     state: {
       showProgressBars: loading,
@@ -1072,9 +1158,33 @@ const SellerboardTable = ({
         </Button>
       );
     },
+    enableStickyHeader: true,
+    enableStickyFooter: true,
+    mantineTableContainerProps: {
+      ref: tableContainerRef, // Attach ref to the scrollable container
+    },
   });
 
-  return !isEmpty(tableData) ? <MantineReactTable table={table} /> : null;
+  return !isEmpty(tableData) ? (
+    <div>
+      <MantineReactTable table={table} />
+      <Affix position={{ bottom: 20, right: 20 }}>
+        <Transition mounted={true}>
+          {(transitionStyles) => (
+            <Button
+              leftSection={
+                <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
+              }
+              style={transitionStyles}
+              onClick={scrollToTop} // Call the scroll function on click
+            >
+              Scroll to top
+            </Button>
+          )}
+        </Transition>
+      </Affix>
+    </div>
+  ) : null;
 };
 
-export default SellerboardTable;
+export default PODTableBoard;

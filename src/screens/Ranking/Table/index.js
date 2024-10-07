@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { MantineReactTable, useMantineReactTable } from "mantine-react-table";
 import {
   Text,
@@ -10,6 +10,9 @@ import {
   Select,
   Group,
   ActionIcon,
+  Affix,
+  Transition,
+  rem,
 } from "@mantine/core";
 import {
   find,
@@ -42,6 +45,7 @@ import {
   IconSortAscending,
   IconArrowsSort,
   IconSortDescending,
+  IconArrowUp,
 } from "@tabler/icons-react";
 import moment from "moment-timezone";
 import {
@@ -50,6 +54,7 @@ import {
   RANKING_STATUS,
   RND_SIZES,
 } from "../../../constant";
+import { useWindowScroll } from "@mantine/hooks";
 
 const TARGET_MODES = {
   ORDERS: "Orders",
@@ -451,21 +456,19 @@ const RankingTable = ({
                     padding: "0",
                   }}
                 >
-                  <LazyLoad height={50} once={true}>
-                    <Image
-                      src={image || "/images/content/not_found_2.jpg"}
-                      width="100%"
-                      height="100%"
-                      style={{
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        setSelectedProduct(row.original);
-                        openPreviewImage();
-                      }}
-                      fit="contain"
-                    />
-                  </LazyLoad>
+                  <Image
+                    src={image || "/images/content/not_found_2.jpg"}
+                    width="100%"
+                    height="100%"
+                    style={{
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setSelectedProduct(row.original);
+                      openPreviewImage();
+                    }}
+                    fit="contain"
+                  />
                 </Grid.Col>
                 <Grid.Col span={6}>
                   <Grid>
@@ -957,7 +960,14 @@ const RankingTable = ({
     // Combine base columns and custom columns, ensuring custom columns are always sorted
     return [...baseColumns, ...customColumns];
   }, [customColumns, data, summaryRow]);
+  const tableContainerRef = useRef(null); // Create a ref for the scrollable container
 
+  // Function to scroll to the top of the table container
+  const scrollToTop = () => {
+    if (tableContainerRef.current) {
+      tableContainerRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
   const table = useMantineReactTable({
     columns,
     data: tableDataWithSummary,
@@ -1031,10 +1041,32 @@ const RankingTable = ({
         </Button>
       );
     },
+    enableStickyHeader: true,
+    enableStickyFooter: true,
+    mantineTableContainerProps: {
+      ref: tableContainerRef, // Attach ref to the scrollable container
+    },
   });
 
   return !isEmpty(tableData) && !isEmpty(customColumns) ? (
-    <MantineReactTable table={table} />
+    <div>
+      <MantineReactTable table={table} />
+      <Affix position={{ bottom: 20, right: 20 }}>
+        <Transition mounted={true}>
+          {(transitionStyles) => (
+            <Button
+              leftSection={
+                <IconArrowUp style={{ width: rem(16), height: rem(16) }} />
+              }
+              style={transitionStyles}
+              onClick={scrollToTop} // Call the scroll function on click
+            >
+              Scroll to top
+            </Button>
+          )}
+        </Transition>
+      </Affix>
+    </div>
   ) : null;
 };
 

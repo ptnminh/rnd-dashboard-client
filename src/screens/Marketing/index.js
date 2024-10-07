@@ -53,7 +53,7 @@ export const CreateWaitingPosts = () => {
   });
   const [query, setQuery] = useState({
     statusValue: "Undone",
-    status: [3],
+    status: [3, 22],
     postStatus: ["partial", "unfulfilled"],
   });
   const [sorting, setSorting] = useState([]);

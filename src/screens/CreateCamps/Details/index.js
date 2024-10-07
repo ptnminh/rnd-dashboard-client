@@ -727,7 +727,7 @@ const BriefsTable = ({
                   rnd: null,
                   epm: null,
                   designer: null,
-                  status: [3],
+                  status: [3, 22],
                   postStatus: ["fulfilled", "partial"],
                   campaignStatus: ["unfulfilled", "partial"],
                   sizeValue: null,

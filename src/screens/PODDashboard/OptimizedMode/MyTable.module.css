@@ -1,0 +1,216 @@
+/* Example CSS Module */
+.head-cells {
+  font-weight: bold;
+  color: #000000;
+  width: 100%;
+  padding: 0;
+  background-color: #e1eaff;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+/* Add this CSS rule to hide the first row of <th> (table headers) */
+.head-cells thead tr:first-child {
+  display: none;
+}
+
+.head-cells>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+.head-cells-op-team {
+  font-weight: bold;
+  color: #ffffff;
+  width: 100%;
+  padding: 0;
+  background-color: #3751D7;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.head-cells-op-team>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.head-cells-optimized-info {
+  font-weight: bold;
+  color: #000000;
+  width: 100%;
+  padding: 0;
+  background-color: #FEEAD2;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.head-cells-optimized-info>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.head-cells-optimized-info-light-color {
+  font-weight: bold;
+  color: #000000;
+  width: 100%;
+  padding: 0;
+  background-color: #E1EAFF;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.head-cells-optimized-info-light-color>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+.highlight {
+  font-weight: bold;
+  color: #ffffff;
+  width: 100%;
+  padding: 0;
+  background-color: #A2E09C;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.highlight>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.highlight-follow-row {
+  font-weight: bold;
+  color: #ffffff;
+  width: 100%;
+  padding: 0;
+  background-color: #f1edb9;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.highlight-follow-row >div {
+  height: 100%;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+
+.SKU {
+  background-color: #3751d7;
+  color: #ffffff;
+  width: 100%;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+.body-cells-op-team {
+  background-color: #E1EAFF;
+  vertical-align: middle !important;
+  text-align: center !important;
+}
+
+.body-cells-optimized-info {
+  background-color: #ffffff;
+  vertical-align: middle !important;
+  text-align: center !important;
+}
+
+.edit-header {
+  background-color: #646A72;
+  color: #ffffff;
+  width: 100%;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.edit-header>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.SKU>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.body-cells {
+  vertical-align: middle !important;
+  text-align: center !important;
+}
+
+.linkDesign {
+  background-color: #d9f5d6;
+  width: 100%;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.linkDesign>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.remove {
+  background-color: #fde2e2;
+  width: 100%;
+  height: 70px;
+  border-right: 1px solid #d1d6e3;
+}
+
+.remove>div {
+  align-items: center !important;
+  justify-content: center !important;
+}
+.checkbox-body-cells {
+  background-color: #E1EAFF;
+  vertical-align: middle !important;
+  text-align: center !important;
+  border-right: 1px solid #d1d6e3;
+}
+
+/* Target an internal MRT class already defined */
+.toolbar {
+
+  /* Use :global() to make sure this className does not get hashed */
+  :global(.mrt-toolbar-internal-buttons) {
+    gap: 0.5rem;
+  }
+}
+
+/* Disable hover effect for rows in the table with the 'disable-hover' class */
+.disable-hover tbody tr:hover {
+  background-color: transparent !important;
+}
+
+.summary-row {
+  text-align: center;
+  background-color: #f5f5f5;
+  color: #000000;
+  width: 100%;
+ 
+}
+.bottom-toolbar {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+.bottom-toolbar > div {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+/* Define MRT CSS variables in your CSS */
+.root {
+
+  /* You can account for both light and dark mode with the Mantine mixins */
+  @mixin dark {
+    --mrt-base-background-color: rgb(33, 24, 44);
+  }
+
+  @mixin light {
+    --mrt-base-background-color: rgb(244, 233, 255);
+  }
+
+  /* It's also best to redefine all of the other MRT CSS variables that derive from --mrt-base-background-color */
+  /* ... */
+}
