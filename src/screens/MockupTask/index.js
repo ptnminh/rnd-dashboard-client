@@ -9,7 +9,6 @@ import { Flex, Grid, Modal, Pagination, TextInput } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
 import {
-  artistServices,
   productlineService,
   rndServices,
 } from "../../services";
