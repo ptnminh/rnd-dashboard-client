@@ -269,12 +269,12 @@ export const dashboardServices = {
       return false;
     }
   },
-  fetchPODSKUMetrics: async ({ query, page, limit, sorting }) => {
+  fetchPODSKUMetrics: async ({ query, page, limit, sorting, ignoreEmptyKeys = [] }) => {
     try {
       let url = `/sku-reports?page=${page}&pageSize=${limit}`;
       const queryKeys = keys(query);
       const transformedQuery = filter(queryKeys, (key) => query[key]);
-      const emptyKeys = filter(queryKeys, (key) => !query[key]);
+      const emptyKeys = filter(queryKeys, (key) => !query[key] && !ignoreEmptyKeys.includes(key));
       let queryParams = {};
       let sortingParams = {};
       if (!isEmpty(transformedQuery)) {

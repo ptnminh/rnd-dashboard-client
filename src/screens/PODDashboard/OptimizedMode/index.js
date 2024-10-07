@@ -32,7 +32,7 @@ import {
 } from "../../../constant/common";
 import { dashboardServices } from "../../../services";
 import moment from "moment-timezone";
-import { OPTIMIZED_INFO_STATUS } from "./optimizedInfoStatus";
+import { OPTIMIZED_INFO_NUMBER_TO_STATUS, OPTIMIZED_INFO_STATUS, OPTIMIZED_INFO_STATUS_TO_NUMBER } from "./optimizedInfoStatus";
 
 const OptimizedTableMode = ({
   tableData,
@@ -516,37 +516,37 @@ const OptimizedTableMode = ({
                 >
                   {(!query?.sortBy ||
                     query?.sortBy !== "totalOrdersLifetime") && (
-                    <ActionIcon
-                      aria-label="Settings"
-                      variant="default"
-                      size="sm"
-                      style={{
-                        background: "none",
-                        border: "none",
-                      }}
-                      onClick={() => {
-                        setPagination({
-                          ...pagination,
-                          currentPage: 1,
-                        });
-                        setQuery({
-                          ...query,
-                          sortBy: "totalOrdersLifetime",
-                          sortDir: "desc",
-                        });
-                      }}
-                    >
-                      <IconArrowsSort
+                      <ActionIcon
+                        aria-label="Settings"
+                        variant="default"
+                        size="sm"
                         style={{
-                          width: "60%",
-                          height: "60%",
-                          fontWeight: "bold",
+                          background: "none",
+                          border: "none",
                         }}
-                        stroke={2}
-                        color="#ffffff"
-                      />
-                    </ActionIcon>
-                  )}
+                        onClick={() => {
+                          setPagination({
+                            ...pagination,
+                            currentPage: 1,
+                          });
+                          setQuery({
+                            ...query,
+                            sortBy: "totalOrdersLifetime",
+                            sortDir: "desc",
+                          });
+                        }}
+                      >
+                        <IconArrowsSort
+                          style={{
+                            width: "60%",
+                            height: "60%",
+                            fontWeight: "bold",
+                          }}
+                          stroke={2}
+                          color="#ffffff"
+                        />
+                      </ActionIcon>
+                    )}
 
                   {query?.sortBy === "totalOrdersLifetime" &&
                     query?.sortDir === "desc" && (
@@ -622,6 +622,52 @@ const OptimizedTableMode = ({
               </Text>
             </Group>
           );
+        },
+      },
+      {
+        accessorKey: "metrics",
+        header: "Chỉ số",
+        size: 120,
+        maxSize: 120,
+        enableEditing: false,
+        enableSorting: false,
+        mantineTableBodyCellProps: ({ row }) => {
+          return {
+            className:
+              row.id === `Total theo ${activeTab}`
+                ? classes["summary-row"]
+                : classes["body-cells-op-team"],
+          };
+        },
+        mantineTableHeadCellProps: () => {
+          return {
+            className: classes["head-cells-op-team"],
+          };
+        },
+        Cell: ({ row }) => {
+          const { metric = {} } = row.original;
+          const { orders, cpc, cpm, adsRev } = metric
+          return (
+            <Group style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "start",
+              alignItems: "start",
+            }}>
+              <Text color={
+                orders?.isEligible ? "#3c7c36" : ""
+              } fw="bold" size="sm">Orders: {orders.value || 0}</Text>
+              <Text color={
+                cpc?.isEligible ? "#3c7c36" : ""
+              } fw="bold" size="sm">CPC: {cpc.value || 0}</Text>
+              <Text color={
+                cpm?.isEligible ? "#3c7c36" : ""
+              } fw="bold" size="sm">CPM: {cpm.value || 0}</Text>
+              <Text color={
+                adsRev?.isEligible ? "#3c7c36" : ""
+              } fw="bold" size="sm" >AdsRev: {adsRev.value || 0}</Text>
+            </Group>
+          )
         },
       },
       {
@@ -813,84 +859,46 @@ const OptimizedTableMode = ({
           const { optimizedInfo } = payload || {};
           const price =
             optimizedInfo?.price || OPTIMIZED_INFO_STATUS?.PRICE?.NOT_CHECKED;
-          switch (price) {
-            case OPTIMIZED_INFO_STATUS?.PRICE?.DONE: {
-              return <Button disabled={true}>DONE</Button>;
-            }
-            case OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={true}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            price: OPTIMIZED_INFO_STATUS?.PRICE?.NOT_CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
+          return (
+            <Select
+              size="xs"
+              styles={{
+                input: {
+                  ...(price === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                    backgroundColor: "green",
+                    color: "#ffffff"
+                  },
+                  ...(price === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    backgroundColor: "yellow",
+                    color: "#000000"
+                  },
+                }
+              }}
+              data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
+              value={OPTIMIZED_INFO_NUMBER_TO_STATUS[price] || null}
+              onChange={(value) => {
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
                       optimizedInfo: {
-                        ...payload.optimizedInfo,
-                        price: OPTIMIZED_INFO_STATUS?.PRICE?.NOT_CHECKED,
+                        ...item.optimizedInfo,
+                        price: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
-                    });
-                  }}
-                />
-              );
-            }
-            case OPTIMIZED_INFO_STATUS?.PRICE?.NOT_CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={false}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            price: OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
-                      optimizedInfo: {
-                        ...payload.optimizedInfo,
-                        price: OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED,
-                      },
-                    });
-                  }}
-                />
-              );
-            }
-            default: {
-              return null;
-            }
-          }
+                    };
+                  }
+                  return item;
+                });
+                setTableData(newData);
+                handleUpdatePODDashboard(uid, {
+                  optimizedInfo: {
+                    ...payload.optimizedInfo,
+                    price: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                  },
+                });
+              }}
+            />
+          );
         },
       },
       {
@@ -949,91 +957,51 @@ const OptimizedTableMode = ({
           const uid = row.original.uid;
           const payload = find(data, { uid });
           const { optimizedInfo } = payload || {};
-          const price =
+          const status =
             optimizedInfo?.seedingPost ||
             OPTIMIZED_INFO_STATUS?.SEEDING_POST?.NOT_CHECKED;
-          switch (price) {
-            case OPTIMIZED_INFO_STATUS?.SEEDING_POST?.DONE: {
-              return <Button disabled={true}>DONE</Button>;
-            }
-            case OPTIMIZED_INFO_STATUS?.SEEDING_POST?.CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={true}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            seedingPost:
-                              OPTIMIZED_INFO_STATUS?.SEEDING_POST?.NOT_CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
+          return (
+            <Select
+              size="xs"
+              styles={{
+                input: {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                    backgroundColor: "green",
+                    color: "#ffffff"
+                  },
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    backgroundColor: "yellow",
+                    color: "#000000"
+                  },
+                }
+              }}
+              data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
+              value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
+              onChange={(value) => {
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
                       optimizedInfo: {
-                        ...payload.optimizedInfo,
+                        ...item.optimizedInfo,
                         seedingPost:
-                          OPTIMIZED_INFO_STATUS?.SEEDING_POST?.NOT_CHECKED,
+                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
-                    });
-                  }}
-                />
-              );
-            }
-            case OPTIMIZED_INFO_STATUS?.SEEDING_POST?.NOT_CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={false}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            seedingPost:
-                              OPTIMIZED_INFO_STATUS?.SEEDING_POST?.CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
-                      optimizedInfo: {
-                        ...payload.optimizedInfo,
-                        seedingPost:
-                          OPTIMIZED_INFO_STATUS?.SEEDING_POST?.CHECKED,
-                      },
-                    });
-                  }}
-                />
-              );
-            }
-            default: {
-              return null;
-            }
-          }
+                    };
+                  }
+                  return item;
+                });
+                setTableData(newData);
+                handleUpdatePODDashboard(uid, {
+                  optimizedInfo: {
+                    ...payload.optimizedInfo,
+                    seedingPost:
+                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                  },
+                });
+              }}
+            />
+          );
         },
       },
       {
@@ -1092,91 +1060,51 @@ const OptimizedTableMode = ({
           const uid = row.original.uid;
           const payload = find(data, { uid });
           const { optimizedInfo } = payload || {};
-          const price =
+          const status =
             optimizedInfo?.reviewStore ||
             OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.NOT_CHECKED;
-          switch (price) {
-            case OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.DONE: {
-              return <Button disabled={true}>DONE</Button>;
-            }
-            case OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={true}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            reviewStore:
-                              OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.NOT_CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
+          return (
+            <Select
+              size="xs"
+              styles={{
+                input: {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                    backgroundColor: "green",
+                    color: "#ffffff"
+                  },
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    backgroundColor: "yellow",
+                    color: "#000000"
+                  },
+                }
+              }}
+              data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
+              value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
+              onChange={(value) => {
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
                       optimizedInfo: {
-                        ...payload.optimizedInfo,
+                        ...item.optimizedInfo,
                         reviewStore:
-                          OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.NOT_CHECKED,
+                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
-                    });
-                  }}
-                />
-              );
-            }
-            case OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.NOT_CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={false}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            reviewStore:
-                              OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
-                      optimizedInfo: {
-                        ...payload.optimizedInfo,
-                        reviewStore:
-                          OPTIMIZED_INFO_STATUS?.REVIEW_STORE?.CHECKED,
-                      },
-                    });
-                  }}
-                />
-              );
-            }
-            default: {
-              return null;
-            }
-          }
+                    };
+                  }
+                  return item;
+                });
+                setTableData(newData);
+                handleUpdatePODDashboard(uid, {
+                  optimizedInfo: {
+                    ...payload.optimizedInfo,
+                    reviewStore:
+                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                  },
+                });
+              }}
+            />
+          );
         },
       },
       {
@@ -1235,86 +1163,50 @@ const OptimizedTableMode = ({
           const uid = row.original.uid;
           const payload = find(data, { uid });
           const { optimizedInfo } = payload || {};
-          const price =
+          const status =
             optimizedInfo?.custom || OPTIMIZED_INFO_STATUS?.CUSTOM?.NOT_CHECKED;
-          switch (price) {
-            case OPTIMIZED_INFO_STATUS?.CUSTOM?.DONE: {
-              return <Button disabled={true}>DONE</Button>;
-            }
-            case OPTIMIZED_INFO_STATUS?.CUSTOM?.CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={true}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            custom: OPTIMIZED_INFO_STATUS?.CUSTOM?.NOT_CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
+          return (
+            <Select
+              size="xs"
+              styles={{
+                input: {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                    backgroundColor: "green",
+                    color: "#ffffff"
+                  },
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    backgroundColor: "yellow",
+                    color: "#000000"
+                  },
+                }
+              }}
+              data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
+              value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
+              onChange={(value) => {
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
                       optimizedInfo: {
-                        ...payload.optimizedInfo,
-                        custom: OPTIMIZED_INFO_STATUS?.CUSTOM?.NOT_CHECKED,
+                        ...item.optimizedInfo,
+                        custom:
+                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
-                    });
-                  }}
-                />
-              );
-            }
-            case OPTIMIZED_INFO_STATUS?.CUSTOM?.NOT_CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={false}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            custom: OPTIMIZED_INFO_STATUS?.CUSTOM?.CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
-                      optimizedInfo: {
-                        ...payload.optimizedInfo,
-                        custom: OPTIMIZED_INFO_STATUS?.CUSTOM?.CHECKED,
-                      },
-                    });
-                  }}
-                />
-              );
-            }
-            default: {
-              return null;
-            }
-          }
+                    };
+                  }
+                  return item;
+                });
+                setTableData(newData);
+                handleUpdatePODDashboard(uid, {
+                  optimizedInfo: {
+                    ...payload.optimizedInfo,
+                    custom:
+                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                  },
+                });
+              }}
+            />
+          );
         },
       },
       {
@@ -1373,92 +1265,51 @@ const OptimizedTableMode = ({
           const uid = row.original.uid;
           const payload = find(data, { uid });
           const { optimizedInfo } = payload || {};
-          const price =
+          const status =
             optimizedInfo?.targetAndBudget ||
             OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET?.NOT_CHECKED;
-          switch (price) {
-            case OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET?.DONE: {
-              return <Button disabled={true}>DONE</Button>;
-            }
-            case OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET?.CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={true}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            targetAndBudget:
-                              OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET
-                                ?.NOT_CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
+          return (
+            <Select
+              size="xs"
+              styles={{
+                input: {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                    backgroundColor: "green",
+                    color: "#ffffff"
+                  },
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    backgroundColor: "yellow",
+                    color: "#000000"
+                  },
+                }
+              }}
+              data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
+              value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
+              onChange={(value) => {
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
                       optimizedInfo: {
-                        ...payload.optimizedInfo,
+                        ...item.optimizedInfo,
                         targetAndBudget:
-                          OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET?.NOT_CHECKED,
+                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
-                    });
-                  }}
-                />
-              );
-            }
-            case OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET?.NOT_CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={false}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            targetAndBudget:
-                              OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET?.CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
-                      optimizedInfo: {
-                        ...payload.optimizedInfo,
-                        targetAndBudget:
-                          OPTIMIZED_INFO_STATUS?.TARGET_AND_BUDGET?.CHECKED,
-                      },
-                    });
-                  }}
-                />
-              );
-            }
-            default: {
-              return null;
-            }
-          }
+                    };
+                  }
+                  return item;
+                });
+                setTableData(newData);
+                handleUpdatePODDashboard(uid, {
+                  optimizedInfo: {
+                    ...payload.optimizedInfo,
+                    targetAndBudget:
+                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                  },
+                });
+              }}
+            />
+          );
         },
       },
       {
@@ -1517,91 +1368,51 @@ const OptimizedTableMode = ({
           const uid = row.original.uid;
           const payload = find(data, { uid });
           const { optimizedInfo } = payload || {};
-          const price =
+          const status =
             optimizedInfo?.requestVideo ||
             OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.NOT_CHECKED;
-          switch (price) {
-            case OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.DONE: {
-              return <Button disabled={true}>DONE</Button>;
-            }
-            case OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={true}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            requestVideo:
-                              OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.NOT_CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
+          return (
+            <Select
+              size="xs"
+              styles={{
+                input: {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                    backgroundColor: "green",
+                    color: "#ffffff"
+                  },
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    backgroundColor: "yellow",
+                    color: "#000000"
+                  },
+                }
+              }}
+              data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
+              value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
+              onChange={(value) => {
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
                       optimizedInfo: {
-                        ...payload.optimizedInfo,
+                        ...item.optimizedInfo,
                         requestVideo:
-                          OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.NOT_CHECKED,
+                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
-                    });
-                  }}
-                />
-              );
-            }
-            case OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.NOT_CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={false}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            requestVideo:
-                              OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
-                      optimizedInfo: {
-                        ...payload.optimizedInfo,
-                        requestVideo:
-                          OPTIMIZED_INFO_STATUS?.REQUEST_VIDEO?.CHECKED,
-                      },
-                    });
-                  }}
-                />
-              );
-            }
-            default: {
-              return null;
-            }
-          }
+                    };
+                  }
+                  return item;
+                });
+                setTableData(newData);
+                handleUpdatePODDashboard(uid, {
+                  optimizedInfo: {
+                    ...payload.optimizedInfo,
+                    requestVideo:
+                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                  },
+                });
+              }}
+            />
+          );
         },
       },
       {
@@ -1660,90 +1471,51 @@ const OptimizedTableMode = ({
           const uid = row.original.uid;
           const payload = find(data, { uid });
           const { optimizedInfo } = payload || {};
-          const price =
+          const status =
             optimizedInfo?.ascAndAPS ||
             OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.NOT_CHECKED;
-          switch (price) {
-            case OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.DONE: {
-              return <Button disabled={true}>DONE</Button>;
-            }
-            case OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={true}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            ascAndAPS:
-                              OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.NOT_CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
+          return (
+            <Select
+              size="xs"
+              styles={{
+                input: {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                    backgroundColor: "green",
+                    color: "#ffffff"
+                  },
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    backgroundColor: "yellow",
+                    color: "#000000"
+                  },
+                }
+              }}
+              data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
+              value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
+              onChange={(value) => {
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
                       optimizedInfo: {
-                        ...payload.optimizedInfo,
+                        ...item.optimizedInfo,
                         ascAndAPS:
-                          OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.NOT_CHECKED,
+                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
-                    });
-                  }}
-                />
-              );
-            }
-            case OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.NOT_CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={false}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            ascAndAPS:
-                              OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
-                      optimizedInfo: {
-                        ...payload.optimizedInfo,
-                        ascAndAPS: OPTIMIZED_INFO_STATUS?.ASC_AND_APS?.CHECKED,
-                      },
-                    });
-                  }}
-                />
-              );
-            }
-            default: {
-              return null;
-            }
-          }
+                    };
+                  }
+                  return item;
+                });
+                setTableData(newData);
+                handleUpdatePODDashboard(uid, {
+                  optimizedInfo: {
+                    ...payload.optimizedInfo,
+                    ascAndAPS:
+                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                  },
+                });
+              }}
+            />
+          );
         },
       },
       {
@@ -1802,88 +1574,51 @@ const OptimizedTableMode = ({
           const uid = row.original.uid;
           const payload = find(data, { uid });
           const { optimizedInfo } = payload || {};
-          const price =
+          const status =
             optimizedInfo?.strategy ||
             OPTIMIZED_INFO_STATUS?.STRATEGY?.NOT_CHECKED;
-          switch (price) {
-            case OPTIMIZED_INFO_STATUS?.STRATEGY?.DONE: {
-              return <Button disabled={true}>DONE</Button>;
-            }
-            case OPTIMIZED_INFO_STATUS?.STRATEGY?.CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={true}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            strategy:
-                              OPTIMIZED_INFO_STATUS?.STRATEGY?.NOT_CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
+          return (
+            <Select
+              size="xs"
+              styles={{
+                input: {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                    backgroundColor: "green",
+                    color: "#ffffff"
+                  },
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    backgroundColor: "yellow",
+                    color: "#000000"
+                  },
+                }
+              }}
+              data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
+              value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
+              onChange={(value) => {
+                const newData = data.map((item) => {
+                  if (item.uid === uid) {
+                    return {
+                      ...item,
                       optimizedInfo: {
-                        ...payload.optimizedInfo,
-                        strategy: OPTIMIZED_INFO_STATUS?.STRATEGY?.NOT_CHECKED,
+                        ...item.optimizedInfo,
+                        strategy:
+                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
-                    });
-                  }}
-                />
-              );
-            }
-            case OPTIMIZED_INFO_STATUS?.STRATEGY?.NOT_CHECKED: {
-              return (
-                <Checkbox
-                  size="lg"
-                  styles={{
-                    body: {
-                      display: "flex",
-                      justifyContent: "center",
-                    },
-                  }}
-                  checked={false}
-                  onChange={() => {
-                    const newData = data.map((item) => {
-                      if (item.uid === uid) {
-                        return {
-                          ...item,
-                          optimizedInfo: {
-                            ...item.optimizedInfo,
-                            strategy: OPTIMIZED_INFO_STATUS?.STRATEGY?.CHECKED,
-                          },
-                        };
-                      }
-                      return item;
-                    });
-                    setTableData(newData);
-                    handleUpdatePODDashboard(uid, {
-                      optimizedInfo: {
-                        ...payload.optimizedInfo,
-                        strategy: OPTIMIZED_INFO_STATUS?.STRATEGY?.CHECKED,
-                      },
-                    });
-                  }}
-                />
-              );
-            }
-            default: {
-              return null;
-            }
-          }
+                    };
+                  }
+                  return item;
+                });
+                setTableData(newData);
+                handleUpdatePODDashboard(uid, {
+                  optimizedInfo: {
+                    ...payload.optimizedInfo,
+                    strategy:
+                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                  },
+                });
+              }}
+            />
+          );
         },
       },
     ],

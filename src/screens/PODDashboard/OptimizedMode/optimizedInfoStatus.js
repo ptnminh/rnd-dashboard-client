@@ -46,3 +46,12 @@ export const OPTIMIZED_INFO_STATUS_NUMBER = {
   CHECKED: 2,
   NOT_CHECKED: 1,
 };
+export const OPTIMIZED_INFO_NUMBER_TO_STATUS = {
+  3: "Done",
+  2: "Optimize",
+}
+
+export const OPTIMIZED_INFO_STATUS_TO_NUMBER = {
+  Done: 3,
+  Optimize: 2,
+}

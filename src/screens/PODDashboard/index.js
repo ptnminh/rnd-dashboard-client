@@ -122,6 +122,7 @@ const PODDashboard = () => {
       query: omit(query, ["targetDate"]),
       limit: 50,
       sorting,
+      ignoreEmptyKeys: ["matchAll"]
     });
     const { data, metadata } = response;
     if (!isEmpty(data)) {
@@ -241,7 +242,6 @@ const PODDashboard = () => {
   const [adDaysNum, setAdDaysNum] = useState("30");
   const [sku, setSku] = useState("");
 
-  const [scroll, scrollTo] = useWindowScroll();
   const handleSubmitSKUOptimized = async () => {
     setLoadingUpdateOptimized(true);
     const filterValidPayloads = map(
@@ -317,7 +317,7 @@ const PODDashboard = () => {
                   },
                 }}
               />
-              {query?.view === TARGET_DATA.OPTIMIZED && (
+              {/* {query?.view === TARGET_DATA.OPTIMIZED && (
                 <Button
                   color="green"
                   onClick={handleSubmitSKUOptimized}
@@ -325,7 +325,7 @@ const PODDashboard = () => {
                 >
                   Đã báo đội ngũ
                 </Button>
-              )}
+              )} */}
             </Group>
           }
         >
@@ -573,8 +573,8 @@ const PODDashboard = () => {
                                   ...(query?.toggleTest
                                     ? { adDays: null }
                                     : {
-                                        adDays: 30,
-                                      }),
+                                      adDays: 30,
+                                    }),
                                 });
                               }}
                               styles={{
@@ -757,6 +757,43 @@ const PODDashboard = () => {
                                 />
                               </Group>
                               <Group>
+                                {
+                                  query?.minLifetimeOrders && (
+                                    <Radio.Group
+                                      name="favoriteFramework"
+                                      label="Điều kiện"
+                                      value={query?.queryMatchAll}
+                                      onChange={(value) => {
+                                        setPagination({
+                                          ...pagination,
+                                          currentPage: 1,
+                                        });
+                                        setQuery({
+                                          ...query,
+                                          matchAll: value === "all" ? true : false,
+                                          queryMatchAll: value
+                                        });
+                                      }}
+                                      styles={{
+                                        root: {
+                                          display: "flex",
+                                          justifyContent: "space-between",
+                                          alignItems: "center",
+                                        },
+                                        label: {
+                                          fontSize: "14px",
+                                          fontWeight: "bold",
+                                          marginRight: "10px",
+                                        },
+                                      }}
+                                    >
+                                      <Group>
+                                        <Radio value="all" label="All" />
+                                        <Radio value="any" label="Any" />
+                                      </Group>
+                                    </Radio.Group>
+                                  )
+                                }
                                 <Switch
                                   checked={query?.minLifetimeOrders}
                                   labelPosition="left"
@@ -770,6 +807,8 @@ const PODDashboard = () => {
                                       ...query,
                                       minLifetimeOrders:
                                         !query.minLifetimeOrders ? 3 : false,
+                                      matchAll: !query.minLifetimeOrders ? true : false,
+                                      queryMatchAll: !query.minLifetimeOrders ? "all" : null
                                     });
                                   }}
                                   styles={{
@@ -779,6 +818,8 @@ const PODDashboard = () => {
                                     },
                                   }}
                                 />
+
+
 
                                 <TextInput
                                   label="List"
