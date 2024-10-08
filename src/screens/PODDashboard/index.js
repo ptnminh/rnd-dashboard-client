@@ -30,15 +30,13 @@ import {
   map,
   mapValues,
   omit,
-  orderBy,
   toLower,
   toNumber,
   uniq,
   values,
 } from "lodash";
 import moment from "moment-timezone";
-import { useWindowScroll } from "@mantine/hooks";
-import { IconArrowUp } from "@tabler/icons-react";
+
 import {
   CONVERT_NUMBER_TO_STATUS,
   CONVERT_STATUS_TO_NUMBER,
@@ -1009,20 +1007,6 @@ const PODDashboard = () => {
                         setOverridePODMetrics={setOverridePODMetrics}
                       />
                     )}
-                  {loadingFetchSaleMetrics && (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        width: "100%",
-                        height: "100%",
-                        marginTop: "20px",
-                      }}
-                    >
-                      <Loader size={30} />
-                    </div>
-                  )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Week}>
                   {query?.view !== TARGET_DATA?.OPTIMIZED &&
@@ -1049,20 +1033,6 @@ const PODDashboard = () => {
                         setIsLoadmore={setIsLoadmore}
                       />
                     )}
-                  {loadingFetchSaleMetrics && (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        width: "100%",
-                        height: "100%",
-                        marginTop: "20px",
-                      }}
-                    >
-                      <Loader size={30} />
-                    </div>
-                  )}
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Month}>
                   {query?.view !== TARGET_DATA?.OPTIMIZED &&
@@ -1089,20 +1059,6 @@ const PODDashboard = () => {
                         setIsLoadmore={setIsLoadmore}
                       />
                     )}
-                  {loadingFetchSaleMetrics && (
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        width: "100%",
-                        height: "100%",
-                        marginTop: "20px",
-                      }}
-                    >
-                      <Loader size={30} />
-                    </div>
-                  )}
                 </Tabs.Panel>
               </Tabs>
             </Grid.Col>
