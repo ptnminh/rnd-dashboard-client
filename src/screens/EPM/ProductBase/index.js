@@ -21,8 +21,12 @@ import {
   IconExclamationMark,
 } from "@tabler/icons-react";
 import Editor from "../../../components/Editor";
-import { isEmpty, join, map } from "lodash";
+import { isEmpty, map } from "lodash";
 import { STATUS } from "../../../constant";
+import { useState } from "react";
+import moment from "moment-timezone";
+import { rndServices } from "../../../services";
+import useStopWatch from "../../../hooks/useStopWatch";
 
 const ProductBase = ({
   close,
@@ -32,7 +36,36 @@ const ProductBase = ({
   setLinkProduct,
   handleUpdateLinkProduct,
   opened,
+  setSelectedSKU,
+  fetchBriefs,
 }) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleUpdateStartTime = async () => {
+    setLoading(true);
+    const epmStartedAt = moment().utc().format();
+    const updateStartTimeResponse = await rndServices.updateBriefListing({
+      uid: selectedSKU.uid,
+      data: {
+        epmStartedAt,
+      },
+    });
+    if (updateStartTimeResponse) {
+      setSelectedSKU({
+        ...selectedSKU,
+        productInfo: {
+          ...selectedSKU.productInfo,
+          startedAt: epmStartedAt,
+        },
+      });
+      fetchBriefs();
+    }
+    setLoading(false);
+  };
+  const elapsedTime = useStopWatch(
+    selectedSKU?.productInfo?.startedAt,
+    selectedSKU?.productInfo?.doneAt
+  );
   return (
     <Modal
       opened={opened}
@@ -54,9 +87,28 @@ const ProductBase = ({
           margin: "none",
           marginInlineStart: "unset",
         },
+        content: {
+          position: "relative",
+        },
       }}
       title={selectedSKU?.sku}
     >
+      <Button
+        style={{
+          position: "absolute",
+          top: "10px",
+          left: "10px",
+          zIndex: 1000,
+        }}
+        loading={loading}
+        color="red"
+        onClick={() => {
+          handleUpdateStartTime();
+        }}
+        disabled={selectedSKU?.productInfo?.startedAt}
+      >
+        {selectedSKU?.productInfo?.startedAt ? elapsedTime : "Start"}
+      </Button>
       <LoadingOverlay
         visible={loadingUpdateProductLink}
         zIndex={1000}

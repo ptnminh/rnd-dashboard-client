@@ -53,8 +53,8 @@ const Clipart = ({
     if (updateStartTimeResponse) {
       setSelectedSKU({
         ...selectedSKU,
-        epmInfo: {
-          ...selectedSKU.designInfo,
+        productInfo: {
+          ...selectedSKU.productInfo,
           startedAt: epmStartedAt,
         },
       });
@@ -63,8 +63,8 @@ const Clipart = ({
     setLoading(false);
   };
   const elapsedTime = useStopWatch(
-    selectedSKU?.epmInfo?.startedAt,
-    selectedSKU?.epmInfo?.doneAt
+    selectedSKU?.productInfo?.startedAt,
+    selectedSKU?.productInfo?.doneAt
   );
   return (
     <Modal
@@ -105,9 +105,9 @@ const Clipart = ({
         onClick={() => {
           handleUpdateStartTime();
         }}
-        disabled={selectedSKU?.designInfo?.startedAt}
+        disabled={selectedSKU?.productInfo?.startedAt}
       >
-        {selectedSKU?.designInfo?.startedAt ? elapsedTime : "Start"}
+        {selectedSKU?.productInfo?.startedAt ? elapsedTime : "Start"}
       </Button>
       <LoadingOverlay
         visible={loadingUpdateProductLink}

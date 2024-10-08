@@ -3,36 +3,15 @@ import styles from "./TemplateKW.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Table from "./Details";
-import { isEmpty, map } from "lodash";
+import { map } from "lodash";
 
 import { useDisclosure } from "@mantine/hooks";
-import { IconCircleCheck, IconExclamationMark } from "@tabler/icons-react";
-import {
-  Modal,
-  Pagination,
-  Grid,
-  Image,
-  List,
-  ThemeIcon,
-  rem,
-  Flex,
-  TextInput,
-  Button,
-  LoadingOverlay,
-  HoverCard,
-  Switch,
-} from "@mantine/core";
+import { Pagination, Grid, Flex, Switch } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
-import Editor from "../../components/Editor";
-import {
-  CONVERT_BRIEF_TYPE_TO_OBJECT_NAME,
-  CONVERT_NUMBER_TO_STATUS,
-  getStringAsEditorState,
-} from "../../utils";
+
 import { rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
-import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
 import { BRIEF_TYPES, STATUS } from "../../constant";
 import NewDesign from "./NewDesign";
 import Clipart from "./Clipart";
@@ -322,6 +301,8 @@ const EPMScreens = () => {
           loadingUpdateProductLink={loadingUpdateProductLink}
           setLinkProduct={setLinkProduct}
           handleUpdateLinkProduct={handleUpdateLinkProduct}
+          setSelectedSKU={setSelectedSKU}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[1] && (
@@ -333,6 +314,8 @@ const EPMScreens = () => {
           loadingUpdateProductLink={loadingUpdateProductLink}
           setLinkProduct={setLinkProduct}
           handleUpdateLinkProduct={handleUpdateLinkProduct}
+          setSelectedSKU={setSelectedSKU}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[2] && (
@@ -344,6 +327,8 @@ const EPMScreens = () => {
           loadingUpdateProductLink={loadingUpdateProductLink}
           setLinkProduct={setLinkProduct}
           handleUpdateLinkProduct={handleUpdateLinkProduct}
+          setSelectedSKU={setSelectedSKU}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[3] && (
@@ -355,6 +340,8 @@ const EPMScreens = () => {
           loadingUpdateProductLink={loadingUpdateProductLink}
           setLinkProduct={setLinkProduct}
           handleUpdateLinkProduct={handleUpdateLinkProduct}
+          setSelectedSKU={setSelectedSKU}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[4] && (
@@ -366,6 +353,8 @@ const EPMScreens = () => {
           loadingUpdateProductLink={loadingUpdateProductLink}
           setLinkProduct={setLinkProduct}
           handleUpdateLinkProduct={handleUpdateLinkProduct}
+          setSelectedSKU={setSelectedSKU}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[5] && (
@@ -377,6 +366,8 @@ const EPMScreens = () => {
           loadingUpdateProductLink={loadingUpdateProductLink}
           setLinkProduct={setLinkProduct}
           handleUpdateLinkProduct={handleUpdateLinkProduct}
+          setSelectedSKU={setSelectedSKU}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {selectedSKU &&
@@ -392,6 +383,8 @@ const EPMScreens = () => {
             loadingUpdateProductLink={loadingUpdateProductLink}
             setLinkProduct={setLinkProduct}
             handleUpdateLinkProduct={handleUpdateLinkProduct}
+            setSelectedSKU={setSelectedSKU}
+            fetchBriefs={fetchBriefs}
           />
         )}
     </>

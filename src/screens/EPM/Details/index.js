@@ -37,6 +37,7 @@ import {
 import { rndServices } from "../../../services";
 import { showNotification } from "../../../utils/index";
 import { useLocalStorage } from "../../../hooks";
+import useStopWatch from "../../../hooks/useStopWatch";
 
 const BriefsTable = ({
   briefs,
@@ -587,6 +588,34 @@ const BriefsTable = ({
         enableEditing: false,
         size: 50,
         mantineTableBodyCellProps: { className: classes["body-cells"] },
+      },
+      {
+        accessorKey: "stopwatch",
+        header: "Bộ đếm",
+        size: 100,
+        enableSorting: false,
+        mantineTableBodyCellProps: { className: classes["body-cells"] },
+        mantineTableHeadCellProps: { className: classes["head-cells"] },
+        Cell: ({ row }) => {
+          const uid = row?.original?.uid;
+          const foundBrief = find(payloads, { uid });
+          const elapsedTime = useStopWatch(
+            foundBrief?.productInfo?.startedAt,
+            foundBrief?.productInfo?.doneAt
+          );
+          return foundBrief?.productInfo?.startedAt ? (
+            <Button
+              variant="filled"
+              color="blue"
+              disabled={true}
+              style={{
+                color: "#000000",
+              }}
+            >
+              {elapsedTime}
+            </Button>
+          ) : null;
+        },
       },
       {
         accessorKey: "remove",
