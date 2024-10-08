@@ -3,7 +3,7 @@ import styles from "./TemplateKW.module.sass";
 import cn from "classnames";
 import Card from "../../components/Card";
 import Table from "./Details";
-import { map } from "lodash";
+import { isEmpty, map } from "lodash";
 
 import { useDisclosure } from "@mantine/hooks";
 import { Pagination, Grid, Flex, Switch } from "@mantine/core";
@@ -262,27 +262,29 @@ const EPMScreens = () => {
             </Flex>
           </Grid.Col>
         </Grid>
-        <Table
-          className={styles.details}
-          onClose={() => setVisible(false)}
-          briefs={briefs}
-          query={query}
-          setQuery={setQuery}
-          setSelectedSKU={setSelectedSKU}
-          openModal={open}
-          users={users}
-          setUpdateBrief={setUpdateBrief}
-          updateBrief={updateBrief}
-          setEditingCell={setEditingCell}
-          editingCell={editingCell}
-          loadingFetchBrief={loadingFetchBrief}
-          setLoadingFetchBrief={setLoadingFetchBrief}
-          setTrigger={setTrigger}
-          setLinkProduct={setLinkProduct}
-          setSorting={setSorting}
-          sorting={sorting}
-          metadata={metadata}
-        />
+        {!opened && (
+          <Table
+            className={styles.details}
+            onClose={() => setVisible(false)}
+            briefs={briefs}
+            query={query}
+            setQuery={setQuery}
+            setSelectedSKU={setSelectedSKU}
+            openModal={open}
+            users={users}
+            setUpdateBrief={setUpdateBrief}
+            updateBrief={updateBrief}
+            setEditingCell={setEditingCell}
+            editingCell={editingCell}
+            loadingFetchBrief={loadingFetchBrief}
+            setLoadingFetchBrief={setLoadingFetchBrief}
+            setTrigger={setTrigger}
+            setLinkProduct={setLinkProduct}
+            setSorting={setSorting}
+            sorting={sorting}
+            metadata={metadata}
+          />
+        )}
       </Card>
       <Pagination
         total={pagination.totalPages}

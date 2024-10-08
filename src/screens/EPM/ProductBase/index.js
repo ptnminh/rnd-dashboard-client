@@ -69,7 +69,10 @@ const ProductBase = ({
   return (
     <Modal
       opened={opened}
-      onClose={close}
+      onClose={() => {
+        fetchBriefs();
+        close();
+      }}
       transitionProps={{ transition: "fade", duration: 200 }}
       overlayProps={{
         backgroundOpacity: 0.55,

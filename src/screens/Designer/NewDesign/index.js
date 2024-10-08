@@ -466,9 +466,9 @@ const NewDesign = ({
   setLinkDesign,
   handleUpdateLinkDesign,
   opened,
-  setTrigger,
   setDesignerNote,
   designerNote,
+  fetchBriefs,
 }) => {
   const [loading, setLoading] = useState(false);
   const handleUpdateNote = async () => {
@@ -484,7 +484,7 @@ const NewDesign = ({
     });
     if (updateNoteResponse) {
       close();
-      setTrigger(true);
+      fetchBriefs();
       showNotification("Thành công", "Cập nhật Note thành công", "green");
     }
     setLoading(false);
@@ -506,7 +506,7 @@ const NewDesign = ({
           startedAt: designStartedAt,
         },
       });
-      setTrigger(true);
+      fetchBriefs();
     }
     setLoading(false);
   };
@@ -517,7 +517,10 @@ const NewDesign = ({
   return (
     <Modal
       opened={opened}
-      onClose={close}
+      onClose={() => {
+        fetchBriefs();
+        close();
+      }}
       transitionProps={{ transition: "fade", duration: 200 }}
       overlayProps={{
         backgroundOpacity: 0.55,

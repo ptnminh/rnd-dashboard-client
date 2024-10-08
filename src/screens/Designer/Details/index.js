@@ -38,7 +38,7 @@ import { showNotification } from "../../../utils/index";
 import { useLocalStorage } from "../../../hooks";
 import useStopWatch from "../../../hooks/useStopWatch";
 
-const KeywordTable = ({
+const DesignerTable = ({
   briefs,
   query,
   setQuery,
@@ -216,14 +216,14 @@ const KeywordTable = ({
               size="xs"
               placeholder="Value"
               allowDeselect={false}
-              disabled={foundBrief.status === STATUS.DESIGNED}
+              disabled={foundBrief?.status === STATUS.DESIGNED}
               data={["Small", "Medium", "Big", "Super Big"]}
               styles={{
                 input: {
                   width: "100%",
                 },
               }}
-              value={CONVERT_NUMBER_TO_STATUS[foundBrief.value?.rnd]}
+              value={CONVERT_NUMBER_TO_STATUS[foundBrief?.value?.rnd]}
               onChange={(value) => {
                 setPayloads((prev) => {
                   const newPayloads = map(prev, (x) => {
@@ -244,7 +244,7 @@ const KeywordTable = ({
                   uid,
                   data: {
                     value: {
-                      ...foundBrief.value,
+                      ...foundBrief?.value,
                       rnd: CONVERT_STATUS_TO_NUMBER[value],
                     },
                   },
@@ -360,7 +360,7 @@ const KeywordTable = ({
               data={["BD1", "BD2", "BD3", "AMZ"]}
               allowDeselect={false}
               size="xs"
-              value={foundBrief.rndTeam}
+              value={foundBrief?.rndTeam}
               onChange={(value) => {
                 setPayloads((prev) => {
                   const newPayloads = map(prev, (x) => {
@@ -490,7 +490,7 @@ const KeywordTable = ({
 
           return (
             <TextInput
-              value={foundBrief.linkDesign}
+              value={foundBrief?.linkDesign}
               onChange={(e) => {
                 const value = e.target.value;
                 setPayloads((prev) => {
@@ -561,7 +561,7 @@ const KeywordTable = ({
               target="_blank"
               href={foundBrief?.linkDesign}
             >
-              {foundBrief.linkDesign ? (
+              {foundBrief?.linkDesign ? (
                 <Badge color="blue" variant="filled">
                   {" "}
                   <u>Link</u>{" "}
@@ -629,7 +629,7 @@ const KeywordTable = ({
                   <IconCheck />
                 )
               }
-              disabled={foundBrief.status === 1 && !foundBrief?.linkDesign}
+              disabled={foundBrief?.status === 1 && !foundBrief?.linkDesign}
               onClick={() => {
                 let realStatus = null;
                 switch (foundBrief?.briefType) {
@@ -707,13 +707,13 @@ const KeywordTable = ({
               color="blue"
               disabled={true}
               style={{
-                color: "#000000"
+                color: "#000000",
               }}
             >
               {elapsedTime}
             </Button>
           ) : null;
-        }
+        },
       },
       {
         accessorKey: "remove",
@@ -787,8 +787,8 @@ const KeywordTable = ({
     setTrigger(true);
   };
 
-  const [batch, setBatch] = useState("");
-  const [searchSKU, setSearchSKU] = useState("");
+  const [batch, setBatch] = useState(query?.batch || "");
+  const [searchSKU, setSearchSKU] = useState(query?.sku || "");
 
   const table = useMantineReactTable({
     columns,
@@ -1156,4 +1156,4 @@ const KeywordTable = ({
   return <MantineReactTable table={table} />;
 };
 
-export default KeywordTable;
+export default DesignerTable;

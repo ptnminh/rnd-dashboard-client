@@ -6,40 +6,13 @@ import Table from "./Details";
 import { map } from "lodash";
 
 import { useDisclosure } from "@mantine/hooks";
-import {
-  IconCircleCheck,
-  IconCopy,
-  IconCopyCheckFilled,
-  IconExclamationMark,
-} from "@tabler/icons-react";
-import {
-  Modal,
-  Pagination,
-  Grid,
-  Image,
-  List,
-  ThemeIcon,
-  rem,
-  Flex,
-  TextInput,
-  Button,
-  LoadingOverlay,
-  Card as MantineCard,
-  CopyButton,
-  Switch,
-} from "@mantine/core";
+
+import { Pagination, Grid, Flex, Switch } from "@mantine/core";
 import { useLocation, useNavigate } from "react-router-dom";
 import moment from "moment-timezone";
-import Editor from "../../components/Editor";
-import {
-  CONVERT_BRIEF_TYPE_TO_OBJECT_NAME,
-  CONVERT_NUMBER_TO_STATUS,
-  getEditorStateAsString,
-  getStringAsEditorState,
-} from "../../utils";
+import { getEditorStateAsString, getStringAsEditorState } from "../../utils";
 import { rndServices } from "../../services";
 import { showNotification } from "../../utils/index";
-import { IconArrowBigRightLinesFilled } from "@tabler/icons-react";
 import { BRIEF_TYPES, STATUS } from "../../constant";
 import NewDesign from "./NewDesign";
 import ScaleDesign from "./ScaleDesign";
@@ -346,28 +319,30 @@ const DesignerScreens = () => {
             </Flex>
           </Grid.Col>
         </Grid>
-        <Table
-          className={styles.details}
-          onClose={() => setVisible(false)}
-          briefs={briefs}
-          query={query}
-          setQuery={setQuery}
-          setSelectedSKU={setSelectedSKU}
-          openModal={open}
-          users={users}
-          setUpdateBrief={setUpdateBrief}
-          updateBrief={updateBrief}
-          setEditingCell={setEditingCell}
-          editingCell={editingCell}
-          loadingFetchBrief={loadingFetchBrief}
-          setLoadingFetchBrief={setLoadingFetchBrief}
-          setTrigger={setTrigger}
-          setLinkDesign={setLinkDesign}
-          setSorting={setSorting}
-          sorting={sorting}
-          metadata={metadata}
-          openNoteForEPM={openNoteForEPM}
-        />
+        {!opened && (
+          <Table
+            className={styles.details}
+            onClose={() => setVisible(false)}
+            briefs={briefs}
+            query={query}
+            setQuery={setQuery}
+            setSelectedSKU={setSelectedSKU}
+            openModal={open}
+            users={users}
+            setUpdateBrief={setUpdateBrief}
+            updateBrief={updateBrief}
+            setEditingCell={setEditingCell}
+            editingCell={editingCell}
+            loadingFetchBrief={loadingFetchBrief}
+            setLoadingFetchBrief={setLoadingFetchBrief}
+            setTrigger={setTrigger}
+            setLinkDesign={setLinkDesign}
+            setSorting={setSorting}
+            sorting={sorting}
+            metadata={metadata}
+            openNoteForEPM={openNoteForEPM}
+          />
+        )}
       </Card>
       <Pagination
         total={pagination.totalPages}
@@ -390,6 +365,7 @@ const DesignerScreens = () => {
           setTrigger={setTrigger}
           designerNote={designerNote}
           setDesignerNote={setDesignerNote}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[1] && (
@@ -405,6 +381,7 @@ const DesignerScreens = () => {
           setTrigger={setTrigger}
           designerNote={designerNote}
           setDesignerNote={setDesignerNote}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[2] && (
@@ -420,6 +397,7 @@ const DesignerScreens = () => {
           setTrigger={setTrigger}
           designerNote={designerNote}
           setDesignerNote={setDesignerNote}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[3] && (
@@ -435,6 +413,7 @@ const DesignerScreens = () => {
           setTrigger={setTrigger}
           designerNote={designerNote}
           setDesignerNote={setDesignerNote}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[4] && (
@@ -450,6 +429,7 @@ const DesignerScreens = () => {
           setTrigger={setTrigger}
           designerNote={designerNote}
           setDesignerNote={setDesignerNote}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {opened && selectedSKU && selectedSKU?.briefType === BRIEF_TYPES[5] && (
@@ -465,6 +445,7 @@ const DesignerScreens = () => {
           setTrigger={setTrigger}
           designerNote={designerNote}
           setDesignerNote={setDesignerNote}
+          fetchBriefs={fetchBriefs}
         />
       )}
       {opened &&
@@ -484,6 +465,7 @@ const DesignerScreens = () => {
             setTrigger={setTrigger}
             designerNote={designerNote}
             setDesignerNote={setDesignerNote}
+            fetchBriefs={fetchBriefs}
           />
         )}
       {selectedSKU && openedNoteForEPM && (

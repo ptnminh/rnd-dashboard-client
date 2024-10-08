@@ -45,10 +45,10 @@ const ScaleNiche = ({
   setLinkDesign,
   handleUpdateLinkDesign,
   opened,
-  setTrigger,
   designerNote,
   setDesignerNote,
   setSelectedSKU,
+  fetchBriefs,
 }) => {
   const [loading, setLoading] = useState(false);
   const handleUpdateNote = async () => {
@@ -64,7 +64,7 @@ const ScaleNiche = ({
     });
     if (updateNoteResponse) {
       close();
-      setTrigger(true);
+      fetchBriefs();
       showNotification("Thành công", "Cập nhật Note thành công", "green");
     }
     setLoading(false);
@@ -86,7 +86,7 @@ const ScaleNiche = ({
           startedAt: designStartedAt,
         },
       });
-      setTrigger(true);
+      fetchBriefs();
     }
     setLoading(false);
   };
@@ -97,7 +97,10 @@ const ScaleNiche = ({
   return (
     <Modal
       opened={opened}
-      onClose={close}
+      onClose={() => {
+        fetchBriefs();
+        close();
+      }}
       transitionProps={{ transition: "fade", duration: 200 }}
       overlayProps={{
         backgroundOpacity: 0.55,

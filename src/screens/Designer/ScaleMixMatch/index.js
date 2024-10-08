@@ -43,10 +43,10 @@ const ScaleMixMatch = ({
   setLinkDesign,
   handleUpdateLinkDesign,
   opened,
-  setTrigger,
   setDesignerNote,
   designerNote,
   setSelectedSKU,
+  fetchBriefs,
 }) => {
   const [loading, setLoading] = useState(false);
   const handleUpdateNote = async () => {
@@ -62,7 +62,7 @@ const ScaleMixMatch = ({
     });
     if (updateNoteResponse) {
       close();
-      setTrigger(true);
+      fetchBriefs();
       showNotification("Thành công", "Cập nhật Note thành công", "green");
     }
     setLoading(false);
@@ -84,7 +84,7 @@ const ScaleMixMatch = ({
           startedAt: designStartedAt,
         },
       });
-      setTrigger(true);
+      fetchBriefs();
     }
     setLoading(false);
   };
@@ -95,8 +95,10 @@ const ScaleMixMatch = ({
   return (
     <Modal
       opened={opened}
-      onClose={close}
-      transitionProps={{ transition: "fade", duration: 200 }}
+      onClose={() => {
+        fetchBriefs();
+        close();
+      }}      transitionProps={{ transition: "fade", duration: 200 }}
       overlayProps={{
         backgroundOpacity: 0.55,
         blur: 3,

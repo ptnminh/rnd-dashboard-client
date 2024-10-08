@@ -42,10 +42,10 @@ const ScaleClipart = ({
   setLinkDesign,
   handleUpdateLinkDesign,
   opened,
-  setTrigger,
   setDesignerNote,
   designerNote,
   setSelectedSKU,
+  fetchBriefs,
 }) => {
   console.log("selectedSKU", selectedSKU);
   const [loading, setLoading] = useState(false);
@@ -62,7 +62,7 @@ const ScaleClipart = ({
     });
     if (updateNoteResponse) {
       close();
-      setTrigger(true);
+      fetchBriefs();
       showNotification("Thành công", "Cập nhật Note thành công", "green");
     }
     setLoading(false);
@@ -84,7 +84,7 @@ const ScaleClipart = ({
           startedAt: designStartedAt,
         },
       });
-      setTrigger(true);
+      fetchBriefs();
     }
     setLoading(false);
   };
@@ -95,7 +95,10 @@ const ScaleClipart = ({
   return (
     <Modal
       opened={opened}
-      onClose={close}
+      onClose={() => {
+        fetchBriefs();
+        close();
+      }}
       transitionProps={{ transition: "fade", duration: 200 }}
       overlayProps={{
         backgroundOpacity: 0.55,

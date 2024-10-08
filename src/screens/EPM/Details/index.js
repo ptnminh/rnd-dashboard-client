@@ -225,7 +225,7 @@ const BriefsTable = ({
                   width: "100%",
                 },
               }}
-              value={CONVERT_NUMBER_TO_STATUS[foundBrief.value?.rnd]}
+              value={CONVERT_NUMBER_TO_STATUS[foundBrief?.value?.rnd]}
               onChange={(value) => {
                 setPayloads((prev) => {
                   const newPayloads = map(prev, (x) => {
@@ -246,7 +246,7 @@ const BriefsTable = ({
                   uid,
                   data: {
                     value: {
-                      ...foundBrief.value,
+                      ...foundBrief?.value,
                       rnd: CONVERT_STATUS_TO_NUMBER[value],
                     },
                   },
@@ -543,8 +543,8 @@ const BriefsTable = ({
                 )
               }
               disabled={
-                (foundBrief.status === STATUS.DESIGNED ||
-                  foundBrief.status === STATUS.OPTIMIZED_LISTING_DESIGNED) &&
+                (foundBrief?.status === STATUS.DESIGNED ||
+                  foundBrief?.status === STATUS.OPTIMIZED_LISTING_DESIGNED) &&
                 !foundBrief?.linkProduct
               }
               onClick={() => {
