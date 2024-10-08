@@ -115,12 +115,13 @@ const PODDashboard = () => {
   const [loadingFetchSaleMetrics, setLoadingFetchSaleMetrics] = useState(true);
   const fetchSaleMetrics = async (page) => {
     setLoadingFetchSaleMetrics(true);
+    // if minLifetimeOrders is null -> remove matchAll from query
     const response = await dashboardServices.fetchPODSKUMetrics({
       page,
       query: omit(query, ["targetDate", "minLifetimeOrders"]),
       limit: 50,
       sorting,
-      ignoreEmptyKeys: ["matchAll"],
+      ignoreEmptyKeys: !query?.minLifetimeOrders ? [] : ["matchAll"],
     });
     const { data, metadata } = response;
     if (!isEmpty(data)) {
