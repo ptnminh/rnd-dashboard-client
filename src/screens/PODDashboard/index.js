@@ -297,17 +297,16 @@ const PODDashboard = () => {
               <Switch
                 checked={query?.view === TARGET_DATA.OPTIMIZED}
                 label="Mode - Optimize"
-                onChange={() => {
+                onChange={(event) => {
+                  const checked = event.target.checked;
                   setPagination({
                     ...pagination,
                     currentPage: 1,
                   });
+                  setSaleMetrics([]);
                   setQuery({
                     ...query,
-                    view:
-                      query?.view === TARGET_DATA.OPTIMIZED
-                        ? TARGET_DATA.ORDERS
-                        : TARGET_DATA.OPTIMIZED,
+                    view: checked ? TARGET_DATA.OPTIMIZED : TARGET_DATA.ORDERS,
                   });
                 }}
                 styles={{
