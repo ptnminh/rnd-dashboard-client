@@ -718,10 +718,10 @@ const OptimizedTableMode = ({
               color = "#cfcfcf";
               break;
             case 2:
-              color = "yellow";
+              color = "#fab005";
               break;
             case 3:
-              color = "green";
+              color = "#40c057";
               break;
             case 4:
               color = "#38761C";
@@ -763,10 +763,10 @@ const OptimizedTableMode = ({
           const size = row.original.size || 2;
           switch (size) {
             case 1:
-              color = "green";
+              color = "#40c057";
               break;
             case 2:
-              color = "yellow";
+              color = "#fab005";
               break;
             case 3:
               color = "red";
@@ -885,12 +885,12 @@ const OptimizedTableMode = ({
               styles={{
                 input: {
                   ...(price === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
-                    backgroundColor: "green",
+                    backgroundColor: "#40c057",
                     color: "#ffffff",
                   }),
                   ...(price === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
-                    backgroundColor: "yellow",
-                    color: "#000000",
+                    backgroundColor: "#fab005",
+                    color: "#ffffff",
                   }),
                 },
               }}
@@ -986,12 +986,12 @@ const OptimizedTableMode = ({
               styles={{
                 input: {
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
-                    backgroundColor: "green",
+                    backgroundColor: "#40c057",
                     color: "#ffffff",
                   }),
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
-                    backgroundColor: "yellow",
-                    color: "#000000",
+                    backgroundColor: "#fab005",
+                    color: "#ffffff",
                   }),
                 },
               }}
@@ -1087,12 +1087,12 @@ const OptimizedTableMode = ({
               styles={{
                 input: {
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
-                    backgroundColor: "green",
+                    backgroundColor: "#40c057",
                     color: "#ffffff",
                   }),
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
-                    backgroundColor: "yellow",
-                    color: "#000000",
+                    backgroundColor: "#fab005",
+                    color: "#ffffff",
                   }),
                 },
               }}
@@ -1187,12 +1187,12 @@ const OptimizedTableMode = ({
               styles={{
                 input: {
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
-                    backgroundColor: "green",
+                    backgroundColor: "#40c057",
                     color: "#ffffff",
                   }),
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
-                    backgroundColor: "yellow",
-                    color: "#000000",
+                    backgroundColor: "#fab005",
+                    color: "#ffffff",
                   }),
                 },
               }}
@@ -1288,12 +1288,12 @@ const OptimizedTableMode = ({
               styles={{
                 input: {
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
-                    backgroundColor: "green",
+                    backgroundColor: "#40c057",
                     color: "#ffffff",
                   }),
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
-                    backgroundColor: "yellow",
-                    color: "#000000",
+                    backgroundColor: "#fab005",
+                    color: "#ffffff",
                   }),
                 },
               }}
@@ -1389,12 +1389,12 @@ const OptimizedTableMode = ({
               styles={{
                 input: {
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
-                    backgroundColor: "green",
+                    backgroundColor: "#40c057",
                     color: "#ffffff",
                   }),
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
-                    backgroundColor: "yellow",
-                    color: "#000000",
+                    backgroundColor: "#fab005",
+                    color: "#ffffff",
                   }),
                 },
               }}
@@ -1490,12 +1490,12 @@ const OptimizedTableMode = ({
               styles={{
                 input: {
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
-                    backgroundColor: "green",
+                    backgroundColor: "#40c057",
                     color: "#ffffff",
                   }),
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
-                    backgroundColor: "yellow",
-                    color: "#000000",
+                    backgroundColor: "#fab005",
+                    color: "#ffffff",
                   }),
                 },
               }}
@@ -1591,12 +1591,12 @@ const OptimizedTableMode = ({
               styles={{
                 input: {
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
-                    backgroundColor: "green",
+                    backgroundColor: "#40c057",
                     color: "#ffffff",
                   }),
                   ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
-                    backgroundColor: "yellow",
-                    color: "#000000",
+                    backgroundColor: "#fab005",
+                    color: "#ffffff",
                   }),
                 },
               }}
@@ -1699,7 +1699,7 @@ const OptimizedTableMode = ({
     //         }}
     //       >
     //         <Button
-    //           color="green"
+    //           color="#40c057"
     //           onClick={handleSubmitSKUOptimized}
     //           loading={loadingUpdateOptimized}
     //         >
