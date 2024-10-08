@@ -32,7 +32,11 @@ import {
 } from "../../../constant/common";
 import { dashboardServices } from "../../../services";
 import moment from "moment-timezone";
-import { OPTIMIZED_INFO_NUMBER_TO_STATUS, OPTIMIZED_INFO_STATUS, OPTIMIZED_INFO_STATUS_TO_NUMBER } from "./optimizedInfoStatus";
+import {
+  OPTIMIZED_INFO_NUMBER_TO_STATUS,
+  OPTIMIZED_INFO_STATUS,
+  OPTIMIZED_INFO_STATUS_TO_NUMBER,
+} from "./optimizedInfoStatus";
 
 const OptimizedTableMode = ({
   tableData,
@@ -46,8 +50,6 @@ const OptimizedTableMode = ({
   pagination,
   setIsLoadmore,
   setTableData,
-  loadingUpdateOptimized,
-  handleSubmitSKUOptimized,
 }) => {
   const handleUpdatePODDashboard = async (id, data) => {
     await dashboardServices.handleUpdatePODDashboard({ id, data });
@@ -516,37 +518,37 @@ const OptimizedTableMode = ({
                 >
                   {(!query?.sortBy ||
                     query?.sortBy !== "totalOrdersLifetime") && (
-                      <ActionIcon
-                        aria-label="Settings"
-                        variant="default"
-                        size="sm"
+                    <ActionIcon
+                      aria-label="Settings"
+                      variant="default"
+                      size="sm"
+                      style={{
+                        background: "none",
+                        border: "none",
+                      }}
+                      onClick={() => {
+                        setPagination({
+                          ...pagination,
+                          currentPage: 1,
+                        });
+                        setQuery({
+                          ...query,
+                          sortBy: "totalOrdersLifetime",
+                          sortDir: "desc",
+                        });
+                      }}
+                    >
+                      <IconArrowsSort
                         style={{
-                          background: "none",
-                          border: "none",
+                          width: "60%",
+                          height: "60%",
+                          fontWeight: "bold",
                         }}
-                        onClick={() => {
-                          setPagination({
-                            ...pagination,
-                            currentPage: 1,
-                          });
-                          setQuery({
-                            ...query,
-                            sortBy: "totalOrdersLifetime",
-                            sortDir: "desc",
-                          });
-                        }}
-                      >
-                        <IconArrowsSort
-                          style={{
-                            width: "60%",
-                            height: "60%",
-                            fontWeight: "bold",
-                          }}
-                          stroke={2}
-                          color="#ffffff"
-                        />
-                      </ActionIcon>
-                    )}
+                        stroke={2}
+                        color="#ffffff"
+                      />
+                    </ActionIcon>
+                  )}
 
                   {query?.sortBy === "totalOrdersLifetime" &&
                     query?.sortDir === "desc" && (
@@ -646,28 +648,46 @@ const OptimizedTableMode = ({
         },
         Cell: ({ row }) => {
           const { metric = {} } = row.original;
-          const { orders, cpc, cpm, adsRev } = metric
+          const { orders, cpc, cpm, adsRev } = metric;
           return (
-            <Group style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "start",
-              alignItems: "start",
-            }}>
-              <Text color={
-                orders?.isEligible ? "#3c7c36" : ""
-              } fw="bold" size="sm">Orders: {orders?.value || 0}</Text>
-              <Text color={
-                cpc?.isEligible ? "#3c7c36" : ""
-              } fw="bold" size="sm">CPC: {cpc?.value || 0}</Text>
-              <Text color={
-                cpm?.isEligible ? "#3c7c36" : ""
-              } fw="bold" size="sm">CPM: {cpm?.value || 0}</Text>
-              <Text color={
-                adsRev?.isEligible ? "#3c7c36" : ""
-              } fw="bold" size="sm" >AdsRev: {adsRev?.value || 0}</Text>
+            <Group
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "start",
+                alignItems: "start",
+              }}
+            >
+              <Text
+                color={orders?.isEligible ? "#3c7c36" : ""}
+                fw="bold"
+                size="sm"
+              >
+                Orders: {orders?.value || 0}
+              </Text>
+              <Text
+                color={cpc?.isEligible ? "#3c7c36" : ""}
+                fw="bold"
+                size="sm"
+              >
+                CPC: {cpc?.value || 0}
+              </Text>
+              <Text
+                color={cpm?.isEligible ? "#3c7c36" : ""}
+                fw="bold"
+                size="sm"
+              >
+                CPM: {cpm?.value || 0}
+              </Text>
+              <Text
+                color={adsRev?.isEligible ? "#3c7c36" : ""}
+                fw="bold"
+                size="sm"
+              >
+                AdsRev: {adsRev?.value || 0}
+              </Text>
             </Group>
-          )
+          );
         },
       },
       {
@@ -864,15 +884,15 @@ const OptimizedTableMode = ({
               size="xs"
               styles={{
                 input: {
-                  ...(price === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                  ...(price === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
                     backgroundColor: "green",
-                    color: "#ffffff"
-                  },
-                  ...(price === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    color: "#ffffff",
+                  }),
+                  ...(price === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
                     backgroundColor: "yellow",
-                    color: "#000000"
-                  },
-                }
+                    color: "#000000",
+                  }),
+                },
               }}
               data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
               value={OPTIMIZED_INFO_NUMBER_TO_STATUS[price] || null}
@@ -965,15 +985,15 @@ const OptimizedTableMode = ({
               size="xs"
               styles={{
                 input: {
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
                     backgroundColor: "green",
-                    color: "#ffffff"
-                  },
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    color: "#ffffff",
+                  }),
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
                     backgroundColor: "yellow",
-                    color: "#000000"
-                  },
-                }
+                    color: "#000000",
+                  }),
+                },
               }}
               data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
               value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
@@ -984,8 +1004,7 @@ const OptimizedTableMode = ({
                       ...item,
                       optimizedInfo: {
                         ...item.optimizedInfo,
-                        seedingPost:
-                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                        seedingPost: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
                     };
                   }
@@ -995,8 +1014,7 @@ const OptimizedTableMode = ({
                 handleUpdatePODDashboard(uid, {
                   optimizedInfo: {
                     ...payload.optimizedInfo,
-                    seedingPost:
-                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                    seedingPost: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                   },
                 });
               }}
@@ -1068,15 +1086,15 @@ const OptimizedTableMode = ({
               size="xs"
               styles={{
                 input: {
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
                     backgroundColor: "green",
-                    color: "#ffffff"
-                  },
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    color: "#ffffff",
+                  }),
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
                     backgroundColor: "yellow",
-                    color: "#000000"
-                  },
-                }
+                    color: "#000000",
+                  }),
+                },
               }}
               data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
               value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
@@ -1087,8 +1105,7 @@ const OptimizedTableMode = ({
                       ...item,
                       optimizedInfo: {
                         ...item.optimizedInfo,
-                        reviewStore:
-                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                        reviewStore: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
                     };
                   }
@@ -1098,8 +1115,7 @@ const OptimizedTableMode = ({
                 handleUpdatePODDashboard(uid, {
                   optimizedInfo: {
                     ...payload.optimizedInfo,
-                    reviewStore:
-                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                    reviewStore: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                   },
                 });
               }}
@@ -1170,15 +1186,15 @@ const OptimizedTableMode = ({
               size="xs"
               styles={{
                 input: {
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
                     backgroundColor: "green",
-                    color: "#ffffff"
-                  },
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    color: "#ffffff",
+                  }),
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
                     backgroundColor: "yellow",
-                    color: "#000000"
-                  },
-                }
+                    color: "#000000",
+                  }),
+                },
               }}
               data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
               value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
@@ -1189,8 +1205,7 @@ const OptimizedTableMode = ({
                       ...item,
                       optimizedInfo: {
                         ...item.optimizedInfo,
-                        custom:
-                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                        custom: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
                     };
                   }
@@ -1200,8 +1215,7 @@ const OptimizedTableMode = ({
                 handleUpdatePODDashboard(uid, {
                   optimizedInfo: {
                     ...payload.optimizedInfo,
-                    custom:
-                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                    custom: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                   },
                 });
               }}
@@ -1273,15 +1287,15 @@ const OptimizedTableMode = ({
               size="xs"
               styles={{
                 input: {
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
                     backgroundColor: "green",
-                    color: "#ffffff"
-                  },
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    color: "#ffffff",
+                  }),
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
                     backgroundColor: "yellow",
-                    color: "#000000"
-                  },
-                }
+                    color: "#000000",
+                  }),
+                },
               }}
               data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
               value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
@@ -1292,8 +1306,7 @@ const OptimizedTableMode = ({
                       ...item,
                       optimizedInfo: {
                         ...item.optimizedInfo,
-                        targetAndBudget:
-                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                        targetAndBudget: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
                     };
                   }
@@ -1303,8 +1316,7 @@ const OptimizedTableMode = ({
                 handleUpdatePODDashboard(uid, {
                   optimizedInfo: {
                     ...payload.optimizedInfo,
-                    targetAndBudget:
-                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                    targetAndBudget: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                   },
                 });
               }}
@@ -1376,15 +1388,15 @@ const OptimizedTableMode = ({
               size="xs"
               styles={{
                 input: {
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
                     backgroundColor: "green",
-                    color: "#ffffff"
-                  },
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    color: "#ffffff",
+                  }),
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
                     backgroundColor: "yellow",
-                    color: "#000000"
-                  },
-                }
+                    color: "#000000",
+                  }),
+                },
               }}
               data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
               value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
@@ -1395,8 +1407,7 @@ const OptimizedTableMode = ({
                       ...item,
                       optimizedInfo: {
                         ...item.optimizedInfo,
-                        requestVideo:
-                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                        requestVideo: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
                     };
                   }
@@ -1406,8 +1417,7 @@ const OptimizedTableMode = ({
                 handleUpdatePODDashboard(uid, {
                   optimizedInfo: {
                     ...payload.optimizedInfo,
-                    requestVideo:
-                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                    requestVideo: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                   },
                 });
               }}
@@ -1479,15 +1489,15 @@ const OptimizedTableMode = ({
               size="xs"
               styles={{
                 input: {
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
                     backgroundColor: "green",
-                    color: "#ffffff"
-                  },
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    color: "#ffffff",
+                  }),
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
                     backgroundColor: "yellow",
-                    color: "#000000"
-                  },
-                }
+                    color: "#000000",
+                  }),
+                },
               }}
               data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
               value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
@@ -1498,8 +1508,7 @@ const OptimizedTableMode = ({
                       ...item,
                       optimizedInfo: {
                         ...item.optimizedInfo,
-                        ascAndAPS:
-                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                        ascAndAPS: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
                     };
                   }
@@ -1509,8 +1518,7 @@ const OptimizedTableMode = ({
                 handleUpdatePODDashboard(uid, {
                   optimizedInfo: {
                     ...payload.optimizedInfo,
-                    ascAndAPS:
-                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                    ascAndAPS: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                   },
                 });
               }}
@@ -1582,15 +1590,15 @@ const OptimizedTableMode = ({
               size="xs"
               styles={{
                 input: {
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE) && {
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.DONE && {
                     backgroundColor: "green",
-                    color: "#ffffff"
-                  },
-                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED) && {
+                    color: "#ffffff",
+                  }),
+                  ...(status === OPTIMIZED_INFO_STATUS?.PRICE?.CHECKED && {
                     backgroundColor: "yellow",
-                    color: "#000000"
-                  },
-                }
+                    color: "#000000",
+                  }),
+                },
               }}
               data={values(OPTIMIZED_INFO_NUMBER_TO_STATUS)}
               value={OPTIMIZED_INFO_NUMBER_TO_STATUS[status] || null}
@@ -1601,8 +1609,7 @@ const OptimizedTableMode = ({
                       ...item,
                       optimizedInfo: {
                         ...item.optimizedInfo,
-                        strategy:
-                          OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                        strategy: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                       },
                     };
                   }
@@ -1612,8 +1619,7 @@ const OptimizedTableMode = ({
                 handleUpdatePODDashboard(uid, {
                   optimizedInfo: {
                     ...payload.optimizedInfo,
-                    strategy:
-                      OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
+                    strategy: OPTIMIZED_INFO_STATUS_TO_NUMBER[value],
                   },
                 });
               }}

@@ -119,10 +119,10 @@ const PODDashboard = () => {
     setLoadingFetchSaleMetrics(true);
     const response = await dashboardServices.fetchPODSKUMetrics({
       page,
-      query: omit(query, ["targetDate"]),
+      query: omit(query, ["targetDate", "minLifetimeOrders"]),
       limit: 50,
       sorting,
-      ignoreEmptyKeys: ["matchAll"]
+      ignoreEmptyKeys: ["matchAll"],
     });
     const { data, metadata } = response;
     if (!isEmpty(data)) {
@@ -573,8 +573,8 @@ const PODDashboard = () => {
                                   ...(query?.toggleTest
                                     ? { adDays: null }
                                     : {
-                                      adDays: 30,
-                                    }),
+                                        adDays: 30,
+                                      }),
                                 });
                               }}
                               styles={{
@@ -757,43 +757,42 @@ const PODDashboard = () => {
                                 />
                               </Group>
                               <Group>
-                                {
-                                  query?.minLifetimeOrders && (
-                                    <Radio.Group
-                                      name="favoriteFramework"
-                                      label="Điều kiện"
-                                      value={query?.queryMatchAll}
-                                      onChange={(value) => {
-                                        setPagination({
-                                          ...pagination,
-                                          currentPage: 1,
-                                        });
-                                        setQuery({
-                                          ...query,
-                                          matchAll: value === "all" ? true : false,
-                                          queryMatchAll: value
-                                        });
-                                      }}
-                                      styles={{
-                                        root: {
-                                          display: "flex",
-                                          justifyContent: "space-between",
-                                          alignItems: "center",
-                                        },
-                                        label: {
-                                          fontSize: "14px",
-                                          fontWeight: "bold",
-                                          marginRight: "10px",
-                                        },
-                                      }}
-                                    >
-                                      <Group>
-                                        <Radio value="all" label="All" />
-                                        <Radio value="any" label="Any" />
-                                      </Group>
-                                    </Radio.Group>
-                                  )
-                                }
+                                {query?.minLifetimeOrders && (
+                                  <Radio.Group
+                                    name="favoriteFramework"
+                                    label="Điều kiện"
+                                    value={query?.queryMatchAll}
+                                    onChange={(value) => {
+                                      setPagination({
+                                        ...pagination,
+                                        currentPage: 1,
+                                      });
+                                      setQuery({
+                                        ...query,
+                                        matchAll:
+                                          value === "all" ? true : false,
+                                        queryMatchAll: value,
+                                      });
+                                    }}
+                                    styles={{
+                                      root: {
+                                        display: "flex",
+                                        justifyContent: "space-between",
+                                        alignItems: "center",
+                                      },
+                                      label: {
+                                        fontSize: "14px",
+                                        fontWeight: "bold",
+                                        marginRight: "10px",
+                                      },
+                                    }}
+                                  >
+                                    <Group>
+                                      <Radio value="all" label="All" />
+                                      <Radio value="any" label="Any" />
+                                    </Group>
+                                  </Radio.Group>
+                                )}
                                 <Switch
                                   checked={query?.minLifetimeOrders}
                                   labelPosition="left"
@@ -807,8 +806,12 @@ const PODDashboard = () => {
                                       ...query,
                                       minLifetimeOrders:
                                         !query.minLifetimeOrders ? 3 : false,
-                                      matchAll: !query.minLifetimeOrders ? true : false,
-                                      queryMatchAll: !query.minLifetimeOrders ? "all" : null
+                                      matchAll: !query.minLifetimeOrders
+                                        ? true
+                                        : false,
+                                      queryMatchAll: !query.minLifetimeOrders
+                                        ? "all"
+                                        : null,
                                     });
                                   }}
                                   styles={{
@@ -818,8 +821,6 @@ const PODDashboard = () => {
                                     },
                                   }}
                                 />
-
-
 
                                 <TextInput
                                   label="List"
@@ -983,6 +984,7 @@ const PODDashboard = () => {
                 </Tabs.List>
                 <Tabs.Panel value={TABS_VIEW.Date}>
                   {query?.view !== TARGET_DATA?.OPTIMIZED &&
+                    !loadingFetchSaleMetrics &&
                     activeTab === TABS_VIEW.Date &&
                     !isEmpty(saleMetrics) && (
                       <Table
@@ -1025,6 +1027,7 @@ const PODDashboard = () => {
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Week}>
                   {query?.view !== TARGET_DATA?.OPTIMIZED &&
+                    !loadingFetchSaleMetrics &&
                     activeTab === TABS_VIEW.Week &&
                     !isEmpty(saleMetrics) && (
                       <Table
@@ -1064,6 +1067,7 @@ const PODDashboard = () => {
                 </Tabs.Panel>
                 <Tabs.Panel value={TABS_VIEW.Month}>
                   {query?.view !== TARGET_DATA?.OPTIMIZED &&
+                    !loadingFetchSaleMetrics &&
                     activeTab === TABS_VIEW.Month &&
                     !isEmpty(saleMetrics) && (
                       <Table
@@ -1105,6 +1109,7 @@ const PODDashboard = () => {
             </Grid.Col>
             <Grid.Col span={12}>
               {query?.view === TARGET_DATA?.OPTIMIZED &&
+                !loadingFetchSaleMetrics &&
                 !isEmpty(saleMetrics) && (
                   <OptimizedTableMode
                     className={styles.Table}
